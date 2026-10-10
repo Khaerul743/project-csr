@@ -7,7 +7,6 @@ export const userRoleEnum = [
   "CSR_ADMIN",
   "MANAGEMENT",
   "PARTNER_ADMIN",
-  "PARTNER_STAFF",
   "STAGING",
 ] as const;
 export type UserRole = (typeof userRoleEnum)[number];

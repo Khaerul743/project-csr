@@ -10,7 +10,7 @@ Dokumentasi ringkas REST API Project CSR. Didesain modular agar mudah diperluas 
 - **Headers:**
   - `Content-Type: application/json`
   - `Authorization: Bearer <TOKEN>` (untuk route terproteksi)
-- **Roles (RBAC):** `CSR_ADMIN` | `MANAGEMENT` | `PARTNER_ADMIN` | `PARTNER_STAFF` | `STAGING`
+- **Roles (RBAC):** `CSR_ADMIN` | `MANAGEMENT` | `PARTNER_ADMIN` | `STAGING`
 
 ### Format Response
 ```typescript
