@@ -129,7 +129,159 @@ Mengambil informasi profil user yang sedang login.
 
 ---
 
-## 3. Contoh Implementasi RBAC Guard
+## 3. Modul Perusahaan (`/api/companies`)
+
+Modul untuk onboarding perusahaan dan manajemen profil perusahaan.
+
+### 3.1 Buat Profil Perusahaan (Onboarding)
+Mendaftarkan profil perusahaan oleh user dengan role `STAGING`. Setelah sukses, user otomatis dipromosikan menjadi **`MANAGEMENT`** dan mendapatkan access token baru yang sudah memuat `companyId` dan `role: MANAGEMENT`.
+
+- **Method / Path:** `POST /api/companies`
+- **Auth:** Bearer Token (Role: `STAGING`)
+
+**Request Body:**
+```json
+{
+  "name": "PT Sumber Energi Hijau",
+  "description": "Perusahaan energi terbarukan yang fokus pada reboisasi dan lingkungan.",
+  "email": "csr@sumberenergi.co.id",
+  "phone": "+6281234567890",
+  "address": "Jl. Jenderal Sudirman Kav. 52-53",
+  "city": "Jakarta Selatan",
+  "province": "DKI Jakarta",
+  "website": "https://sumberenergi.co.id",
+  "logoUrl": "https://example.com/logo.png"
+}
+```
+
+**Response Sukses (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Company created successfully. You are now MANAGEMENT.",
+  "data": {
+    "company": {
+      "id": "uuid-company",
+      "name": "PT Sumber Energi Hijau",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-10T14:00:00.000Z"
+    },
+    "user": {
+      "id": "uuid-user",
+      "name": "Budi Santoso",
+      "email": "budi@example.com",
+      "role": "MANAGEMENT",
+      "companyId": "uuid-company",
+      "partnerId": null,
+      "status": "ACTIVE"
+    },
+    "accessToken": "eyJhbGciOi..."
+  }
+}
+```
+
+### 3.2 Ambil Profil Perusahaan Saya
+Mengambil data detail perusahaan dari user yang sedang login.
+
+- **Method / Path:** `GET /api/companies/current`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+### 3.3 Update Profil Perusahaan
+Memperbarui data profil perusahaan.
+
+- **Method / Path:** `PUT /api/companies/current` *(atau `PATCH`)*
+- **Auth:** Bearer Token (Role: `MANAGEMENT`)
+
+### 3.4 Daftar Perusahaan (Katalog)
+Melihat daftar perusahaan terdaftar dengan paginasi dan pencarian.
+
+- **Method / Path:** `GET /api/companies?page=1&limit=10&search=energi`
+- **Auth:** Public / Authenticated
+
+### 3.5 Detail Perusahaan Berdasarkan ID
+- **Method / Path:** `GET /api/companies/:id`
+- **Auth:** Public / Authenticated
+
+---
+
+## 4. Modul Mitra CSR / NGO (`/api/partners`)
+
+Modul untuk onboarding mitra pelaksana (yayasan, NGO, komunitas) dan manajemen profil mitra.
+
+### 4.1 Buat Profil Mitra (Onboarding)
+Mendaftarkan profil mitra/NGO oleh user dengan role `STAGING`. Setelah sukses, user otomatis dipromosikan menjadi **`PARTNER_ADMIN`** dan mendapatkan access token baru yang memuat `partnerId` dan `role: PARTNER_ADMIN`.
+
+- **Method / Path:** `POST /api/partners`
+- **Auth:** Bearer Token (Role: `STAGING`)
+
+**Request Body:**
+```json
+{
+  "name": "Yayasan Lindungi Hutan",
+  "description": "Lembaga konservasi hutan dan penanaman mangrove di pesisir Indonesia.",
+  "email": "kontak@lindungi-hutan.org",
+  "phone": "+628987654321",
+  "address": "Jl. Hutan Lestari No. 12",
+  "city": "Semarang",
+  "province": "Jawa Tengah",
+  "website": "https://lindungi-hutan.org",
+  "logoUrl": "https://example.com/partner-logo.png"
+}
+```
+
+**Response Sukses (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Partner created successfully. You are now PARTNER_ADMIN.",
+  "data": {
+    "partner": {
+      "id": "uuid-partner",
+      "name": "Yayasan Lindungi Hutan",
+      "status": "ACTIVE",
+      "createdAt": "2026-10-10T14:00:00.000Z"
+    },
+    "user": {
+      "id": "uuid-user",
+      "name": "Siti Rahma",
+      "email": "siti@example.com",
+      "role": "PARTNER_ADMIN",
+      "companyId": null,
+      "partnerId": "uuid-partner",
+      "status": "ACTIVE"
+    },
+    "accessToken": "eyJhbGciOi..."
+  }
+}
+```
+
+### 4.2 Ambil Profil Mitra Saya
+Mengambil detail mitra milik user yang sedang login.
+
+- **Method / Path:** `GET /api/partners/current`
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+### 4.3 Update Profil Mitra
+Memperbarui profil mitra.
+
+- **Method / Path:** `PUT /api/partners/current` *(atau `PATCH`)*
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+### 4.4 Daftar Mitra (Katalog Pencarian CSR)
+Melihat daftar mitra yang terdaftar untuk keperluan pencarian kolaborasi CSR.
+
+- **Method / Path:** `GET /api/partners?page=1&limit=10&search=hutan`
+- **Auth:** Public / Authenticated
+
+### 4.5 Detail Mitra Berdasarkan ID
+- **Method / Path:** `GET /api/partners/:id`
+- **Auth:** Public / Authenticated
+
+---
+
+## 5. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -151,7 +303,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 4. Ringkasan Status Code
+## 6. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |
@@ -161,5 +313,5 @@ export async function GET(request: Request) {
 | `401` | Unauthorized | Token tidak ada / tidak valid |
 | `403` | Forbidden | Role tidak memiliki hak akses (RBAC) |
 | `404` | Not Found | Data tidak ditemukan |
-| `409` | Conflict | Data duplikat (misal email) |
+| `409` | Conflict | Data duplikat / konflik state role |
 | `500` | Internal Error | Server error |
