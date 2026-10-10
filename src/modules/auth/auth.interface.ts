@@ -1,12 +1,9 @@
-import { User, UserRole, UserStatus } from "@/db/schema/users";
+import { User } from "@/db/schema/users";
 
 export interface RegisterDTO {
   name: string;
   email: string;
   password: string;
-  role?: UserRole;
-  companyId?: string | null;
-  partnerId?: string | null;
 }
 
 export interface LoginDTO {

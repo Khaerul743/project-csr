@@ -27,9 +27,9 @@ export class AuthService {
       name: dto.name,
       email: dto.email,
       password: hashedPassword,
-      role: dto.role ?? "STAGING",
-      companyId: dto.companyId ?? null,
-      partnerId: dto.partnerId ?? null,
+      role: "STAGING",
+      companyId: null,
+      partnerId: null,
       status: "ACTIVE",
     });
 

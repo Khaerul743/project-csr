@@ -26,7 +26,7 @@ Dokumentasi ringkas REST API Project CSR. Didesain modular agar mudah diperluas 
 ## 2. Modul Autentikasi (`/api`)
 
 ### 2.1 Register
-Mendaftarkan akun baru. Field `companyId` & `partnerId` bersifat mutually exclusive (tidak boleh diisi bersamaan).
+Mendaftarkan akun baru. User hanya menginput `username` (atau `name`), `email`, dan `password`. Role setiap user baru secara otomatis diset ke **`STAGING`**.
 
 - **Method / Path:** `POST /api/register` *(alias: `/api/auth/register`)*
 - **Auth:** Public
@@ -34,12 +34,9 @@ Mendaftarkan akun baru. Field `companyId` & `partnerId` bersifat mutually exclus
 **Request Body:**
 ```json
 {
-  "name": "Budi Santoso",
+  "username": "budi_santoso",
   "email": "budi@example.com",
-  "password": "Password123!",
-  "role": "STAGING",          // opsional, default: "STAGING"
-  "companyId": null,          // opsional (UUID)
-  "partnerId": null           // opsional (UUID)
+  "password": "Password123!"
 }
 ```
 

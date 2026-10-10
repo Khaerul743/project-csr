@@ -1,27 +1,29 @@
 import { z } from "zod";
-import { userRoleEnum } from "@/db/schema/users";
 
 export const registerSchema = z
   .object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(150),
+    username: z
+      .string()
+      .min(2, "Username must be at least 2 characters")
+      .max(150)
+      .optional(),
+    name: z
+      .string()
+      .min(2, "Name must be at least 2 characters")
+      .max(150)
+      .optional(),
     email: z.string().email("Invalid email format").max(255),
     password: z.string().min(6, "Password must be at least 6 characters").max(100),
-    role: z.enum(userRoleEnum).optional(),
-    companyId: z.string().uuid("Invalid company ID format").nullable().optional(),
-    partnerId: z.string().uuid("Invalid partner ID format").nullable().optional(),
   })
-  .refine(
-    (data) => {
-      if (data.companyId && data.partnerId) {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "User cannot be linked to both company and partner simultaneously",
-      path: ["partnerId"],
-    }
-  );
+  .refine((data) => Boolean(data.username || data.name), {
+    message: "Username is required",
+    path: ["username"],
+  })
+  .transform((data) => ({
+    name: (data.username ?? data.name)!,
+    email: data.email,
+    password: data.password,
+  }));
 
 export const loginSchema = z.object({
   email: z.string().email("Invalid email format"),
