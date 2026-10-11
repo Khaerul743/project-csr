@@ -2,21 +2,23 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, UserCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Navbar } from "@/components/dashboard/Navbar";
+import { StagingOnboardingView } from "@/components/dashboard/staging/StagingOnboardingView";
+import { RoleDashboardView } from "@/components/dashboard/RoleDashboardView";
 
-interface CurrentUser {
+interface UserProfile {
   id: string;
   name: string;
   email: string;
   role: string;
   status: string;
+  companyId?: string | null;
+  partnerId?: string | null;
 }
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<CurrentUser | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +26,6 @@ export default function DashboardPage() {
     const savedUser = localStorage.getItem("user");
 
     if (!token) {
-      // Jika belum login, redirect ke halaman login
       router.push("/login");
       return;
     }
@@ -33,10 +34,41 @@ export default function DashboardPage() {
       try {
         setUser(JSON.parse(savedUser));
       } catch {
-        // ignore
+        // fallback
       }
     }
-    setIsLoading(false);
+
+    // Ambil data user paling mutakhir dari server
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.status === 401) {
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("user");
+          router.push("/login");
+          return;
+        }
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data) {
+            setUser(json.data);
+            localStorage.setItem("user", JSON.stringify(json.data));
+          }
+        }
+      } catch {
+        // Abaikan jika offline, tetap gunakan data localStorage
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, [router]);
 
   const handleLogout = () => {
@@ -46,67 +78,43 @@ export default function DashboardPage() {
     router.push("/login");
   };
 
+  const handleRoleUpdated = (updatedUser: UserProfile) => {
+    setUser(updatedUser);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 text-sm">
-        Memuat...
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <span>Memuat sesi Anda...</span>
+        </div>
       </div>
     );
   }
 
+  if (!user) {
+    return null;
+  }
+
+  const isStaging = user.role === "STAGING";
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-slate-900">
-      <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-2xl p-8 shadow-sm text-center space-y-6">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Dashboard
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Halaman uji coba mekanisme login & autentikasi
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+      {/* Sticky Top Navbar */}
+      <Navbar user={user} onLogout={handleLogout} />
 
-        {user ? (
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-left space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">Status Login:</span>
-              <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-bold">
-                <UserCheck className="w-4 h-4" />
-                <span>Terautentikasi</span>
-              </div>
-            </div>
-
-            <div className="text-xs text-slate-700">
-              <span className="text-slate-400 block text-[11px]">Nama Pengguna:</span>
-              <span className="font-semibold">{user.name}</span>
-            </div>
-
-            <div className="text-xs text-slate-700">
-              <span className="text-slate-400 block text-[11px]">Email:</span>
-              <span className="font-semibold">{user.email}</span>
-            </div>
-
-            <div className="text-xs text-slate-700 flex items-center justify-between pt-1 border-t border-slate-200">
-              <span className="text-slate-400 text-[11px]">Role:</span>
-              <Badge variant="amber" size="sm">
-                {user.role}
-              </Badge>
-            </div>
-          </div>
+      {/* Main Content Area */}
+      <main className="flex-1">
+        {isStaging ? (
+          <StagingOnboardingView
+            user={user}
+            onRoleUpdated={handleRoleUpdated}
+          />
         ) : (
-          <p className="text-xs text-slate-400">Tidak ada data user lokal.</p>
+          <RoleDashboardView user={user} />
         )}
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          leftIcon={<LogOut className="w-4 h-4" />}
-          className="w-full"
-        >
-          Keluar (Logout)
-        </Button>
-      </div>
+      </main>
     </div>
   );
 }

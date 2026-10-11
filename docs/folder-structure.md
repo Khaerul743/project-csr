@@ -56,9 +56,9 @@ Kumpulan kode utilitas yang digunakan bersama oleh berbagai modul (*cross-cuttin
 - **`utils/`**: Helper pembungkus response (`ApiResponse`), penanganan error global (`ErrorHandler`), dan enkripsi password (`PasswordUtil`).
 
 ### 📁 `src/components/`
-Komponen antarmuka pengguna (Frontend React):
-- **`ui/`**: Komponen dasar yang berdiri sendiri dan dapat dipakai ulang di halaman manapun (*reusable primitives* seperti `Button`, `Input`, `Card`, `Badge`).
+- **`ui/`**: Komponen dasar yang berdiri sendiri dan dapat dipakai ulang di halaman manapun (*reusable primitives* seperti `Button`, `Input`, `Textarea`, `Modal`, `Card`, `Badge`).
 - **`auth/`**: Komponen khusus alur autentikasi (seperti `AuthLayout`, `LoginForm`, `RegisterForm`).
+- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `RoleDashboardView`, dan `staging/` yang memuat `StagingOnboardingView`, `CompanyRegisterModal`, `PartnerRegisterModal`).
 
 ### 📁 `src/db/`
 Pengelolaan basis data menggunakan Drizzle ORM:
