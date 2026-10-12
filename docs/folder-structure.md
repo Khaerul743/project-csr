@@ -66,9 +66,9 @@ Pengelolaan basis data menggunakan Drizzle ORM:
 - **`index.ts`**: Inisialisasi koneksi pool MySQL dan instance client Drizzle.
 
 ### 📁 `src/modules/`
-Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, dan `partners/`:
+Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, dan `invitations/`:
 - **`Controller`**: Menerima request HTTP, memvalidasi guard autentikasi/RBAC, dan memanggil service.
-- **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, promosi role, hashing password).
+- **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password).
 - **`Repository`**: Tempat penulisan query langsung ke database menggunakan Drizzle ORM (termasuk *database transactions*).
 - **`Validation & Interface`**: Skema validasi data request (Zod) dan pendefinisian tipe data/DTO.
 

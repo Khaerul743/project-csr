@@ -16,6 +16,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { InviteMemberModal } from "./InviteMemberModal";
 
 interface RoleDashboardViewProps {
   user: {
@@ -31,6 +32,7 @@ interface RoleDashboardViewProps {
 export function RoleDashboardView({ user }: RoleDashboardViewProps) {
   const [orgData, setOrgData] = useState<any>(null);
   const [isLoadingOrg, setIsLoadingOrg] = useState(false);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrgData = async () => {
@@ -242,25 +244,46 @@ export function RoleDashboardView({ user }: RoleDashboardViewProps) {
         )}
       </div>
 
-      {/* Next Step Information Card */}
+      {/* Next Step Information Card & Team Invite Action */}
       <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-emerald-600" />
             <h3 className="text-sm font-bold text-slate-900">
-              Modul Dashboard Lengkap Sedang Dipersiapkan
+              {isManagement ? "Kelola Anggota Tim Perusahaan" : "Ruang Kerja Kolaborasi Aktif"}
             </h3>
           </div>
           <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
-            Onboarding berhasil! Modul rincian program CSR, kurasi proposal mitra, pelaporan ESG,
-            dan tabel undangan anggota tim akan segera hadir di langkah berikutnya.
+            {isManagement
+              ? "Sebagai manajemen perusahaan, Anda dapat mengundang staf atau rekan kerja internal menjadi CSR Admin untuk membantu operasional harian."
+              : "Akun Anda telah terverifikasi dan siap berkolaborasi dalam inisiatif dampak sosial."}
           </p>
         </div>
 
-        <Badge variant="emerald" size="md">
-          Sistem Siap
-        </Badge>
+        <div className="flex items-center gap-3 shrink-0">
+          {isManagement && (
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => setIsInviteModalOpen(true)}
+              leftIcon={<Users className="w-4 h-4" />}
+            >
+              Undang CSR Admin
+            </Button>
+          )}
+          <Badge variant="emerald" size="md">
+            Sistem Siap
+          </Badge>
+        </div>
       </div>
+
+      {/* Invite Member Modal */}
+      {isManagement && (
+        <InviteMemberModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

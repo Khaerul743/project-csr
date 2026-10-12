@@ -281,7 +281,113 @@ Melihat daftar mitra yang terdaftar untuk keperluan pencarian kolaborasi CSR.
 
 ---
 
-## 5. Contoh Implementasi RBAC Guard
+## 5. Modul Undangan Tim (`/api/invitations`)
+
+Modul untuk manajemen undangan bergabung ke tim perusahaan. Memungkinkan `MANAGEMENT` mengundang anggota tim internal (`CSR_ADMIN`) dan memungkinkan user di tahap `STAGING` menerima undangan untuk langsung bergabung ke workspace perusahaan.
+
+### 5.1 Kirim Undangan Tim
+Mengirim undangan resmi ke email calon anggota tim.
+
+- **Method / Path:** `POST /api/invitations`
+- **Auth:** Bearer Token (Role: `MANAGEMENT`)
+
+**Request Body:**
+```json
+{
+  "email": "staf.csr@perusahaan.co.id",
+  "role": "CSR_ADMIN"
+}
+```
+
+**Response Sukses (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Undangan tim berhasil dikirim",
+  "data": {
+    "id": "uuid-invitation",
+    "companyId": "uuid-company",
+    "email": "staf.csr@perusahaan.co.id",
+    "role": "CSR_ADMIN",
+    "invitedBy": "uuid-user-management",
+    "status": "PENDING",
+    "token": "uuid-token-string",
+    "expiresAt": "2026-10-19T14:00:00.000Z",
+    "createdAt": "2026-10-12T14:00:00.000Z"
+  }
+}
+```
+
+### 5.2 Daftar Undangan Perusahaan
+Melihat riwayat seluruh undangan yang dikirimkan oleh perusahaan yang sedang login.
+
+- **Method / Path:** `GET /api/invitations`
+- **Auth:** Bearer Token (Role: `MANAGEMENT`)
+
+### 5.3 Cek Undangan Masuk Saya (Pending)
+Mengecek apakah email user yang sedang login memiliki undangan bergabung yang masih pending/aktif. Digunakan di Dashboard Staging.
+
+- **Method / Path:** `GET /api/invitations/my-pending`
+- **Auth:** Bearer Token (Role: `STAGING` / Authenticated)
+
+### 5.4 Terima Undangan Tim
+Menerima undangan bergabung. User otomatis dipromosikan menjadi **`CSR_ADMIN`** dan dihubungkan ke perusahaan pengundang (`company_id`). Mengembalikan access token baru.
+
+- **Method / Path:** `POST /api/invitations/accept`
+- **Auth:** Bearer Token (Role: `STAGING`)
+
+**Request Body:**
+```json
+{
+  "invitationId": "uuid-invitation"
+}
+```
+
+**Response Sukses (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Undangan berhasil diterima! Selamat bergabung.",
+  "data": {
+    "user": {
+      "id": "uuid-user",
+      "name": "Ahmad Dani",
+      "email": "staf.csr@perusahaan.co.id",
+      "role": "CSR_ADMIN",
+      "companyId": "uuid-company",
+      "partnerId": null,
+      "status": "ACTIVE"
+    },
+    "organization": {
+      "id": "uuid-company",
+      "name": "PT Sumber Energi Hijau",
+      "type": "COMPANY"
+    },
+    "accessToken": "eyJhbGciOi..."
+  }
+}
+```
+
+### 5.5 Tolak Undangan Tim
+- **Method / Path:** `POST /api/invitations/reject`
+- **Auth:** Bearer Token (Authenticated)
+
+**Request Body:**
+```json
+{
+  "invitationId": "uuid-invitation"
+}
+```
+
+### 5.6 Batalkan Undangan Tim
+- **Method / Path:** `DELETE /api/invitations/:id`
+- **Auth:** Bearer Token (Role: `MANAGEMENT`)
+
+---
+
+## 6. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -303,7 +409,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 6. Ringkasan Status Code
+## 7. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |

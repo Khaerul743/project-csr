@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Building2,
   HeartHandshake,
@@ -12,6 +12,11 @@ import {
   TrendingUp,
   FileCheck,
   Users,
+  Bell,
+  Check,
+  X,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +41,105 @@ export function StagingOnboardingView({
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
 
+  // Undangan Pending
+  const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
+  const [isLoadingInvitations, setIsLoadingInvitations] = useState(true);
+  const [processingId, setProcessingId] = useState<string | null>(null);
+  const [invitationError, setInvitationError] = useState<string | null>(null);
+
+  const fetchPendingInvitations = async () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    try {
+      const res = await fetch("/api/invitations/my-pending", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setPendingInvitations(json.data || []);
+      }
+    } catch {
+      // silent fallback
+    } finally {
+      setIsLoadingInvitations(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPendingInvitations();
+  }, []);
+
+  const handleAcceptInvitation = async (invitationId: string) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    setProcessingId(invitationId);
+    setInvitationError(null);
+
+    try {
+      const res = await fetch("/api/invitations/accept", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ invitationId }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal menerima undangan");
+      }
+
+      // Simpan access token baru dan user baru
+      if (json.data?.accessToken) {
+        localStorage.setItem("accessToken", json.data.accessToken);
+        document.cookie = `token=${json.data.accessToken}; path=/; max-age=86400`;
+      }
+      if (json.data?.user) {
+        localStorage.setItem("user", JSON.stringify(json.data.user));
+      }
+
+      onRoleUpdated(json.data.user);
+    } catch (err: any) {
+      setInvitationError(err.message || "Terjadi kesalahan saat menerima undangan");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleRejectInvitation = async (invitationId: string) => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return;
+
+    setProcessingId(invitationId);
+    setInvitationError(null);
+
+    try {
+      const res = await fetch("/api/invitations/reject", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ invitationId }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal menolak undangan");
+      }
+
+      // Refresh list
+      await fetchPendingInvitations();
+    } catch (err: any) {
+      setInvitationError(err.message || "Terjadi kesalahan saat menolak undangan");
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-10">
       {/* Hero Welcome Header */}
@@ -58,6 +162,68 @@ export function StagingOnboardingView({
           organisasi Anda di bawah ini untuk memulai langkah kolaborasi dampak sosial.
         </p>
       </div>
+
+      {/* Pending Invitations Banner (Jika ada) */}
+      {pendingInvitations.length > 0 && (
+        <div className="space-y-4">
+          {invitationError && (
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-xs text-rose-700">
+              <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+              <span>{invitationError}</span>
+            </div>
+          )}
+
+          {pendingInvitations.map((inv) => (
+            <div
+              key={inv.id}
+              className="p-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden"
+            >
+              <div className="space-y-2 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold flex items-center gap-1.5 backdrop-blur-sm">
+                    <Bell className="w-3 h-3 text-amber-300" />
+                    Undangan Tim Ditemukan!
+                  </span>
+                  <Badge variant="emerald" size="sm" className="bg-emerald-800/80 text-white border-white/20">
+                    Peran: {inv.role}
+                  </Badge>
+                </div>
+
+                <h3 className="text-lg sm:text-xl font-bold tracking-tight">
+                  Bergabung dengan {inv.companyName || "Perusahaan"}
+                </h3>
+                <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed max-w-xl">
+                  {inv.invitedByName ? `${inv.invitedByName} dari ` : ""}
+                  <strong>{inv.companyName || "Perusahaan"}</strong> mengundang Anda untuk bergabung ke dalam tim CSR sebagai <strong>{inv.role}</strong>.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 w-full md:w-auto relative z-10 shrink-0">
+                <Button
+                  variant="outline"
+                  size="md"
+                  disabled={processingId === inv.id}
+                  onClick={() => handleRejectInvitation(inv.id)}
+                  className="bg-transparent text-white border-white/40 hover:bg-white/10 hover:text-white"
+                  leftIcon={<X className="w-4 h-4" />}
+                >
+                  Tolak
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  isLoading={processingId === inv.id}
+                  onClick={() => handleAcceptInvitation(inv.id)}
+                  className="bg-white text-emerald-900 hover:bg-slate-100 shadow-md font-bold"
+                  leftIcon={<Check className="w-4 h-4 text-emerald-600" />}
+                >
+                  Terima Undangan & Masuk
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 2 Main Pathway Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
@@ -197,8 +363,8 @@ export function StagingOnboardingView({
               Bergabung Melalui Undangan Tim?
             </h3>
             <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-              Jika Anda bergabung untuk membantu tim yang sudah ada (sebagai <em>CSR Admin</em> perusahaan atau staf mitra),
-              Anda tidak perlu mendaftarkan organisasi baru. Cek kotak masuk email <strong>{user.email}</strong> untuk tautan undangan resmi dari pimpinan Anda.
+              Jika Anda bergabung untuk membantu tim yang sudah ada (sebagai <em>CSR Admin</em> perusahaan),
+              Anda tidak perlu mendaftarkan organisasi baru. Cek kotak masuk email <strong>{user.email}</strong> atau periksa banner undangan di bagian atas halaman ini jika undangan sudah dikirimkan oleh pimpinan Anda.
             </p>
           </div>
         </div>
