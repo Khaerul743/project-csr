@@ -17,6 +17,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { InviteMemberModal } from "./InviteMemberModal";
+import { CompanyDashboardView } from "./company/CompanyDashboardView";
 
 interface RoleDashboardViewProps {
   user: {
@@ -27,9 +28,10 @@ interface RoleDashboardViewProps {
     companyId?: string | null;
     partnerId?: string | null;
   };
+  onLogout?: () => void;
 }
 
-export function RoleDashboardView({ user }: RoleDashboardViewProps) {
+export function RoleDashboardView({ user, onLogout }: RoleDashboardViewProps) {
   const [orgData, setOrgData] = useState<any>(null);
   const [isLoadingOrg, setIsLoadingOrg] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -71,6 +73,10 @@ export function RoleDashboardView({ user }: RoleDashboardViewProps) {
   const isManagement = user.role === "MANAGEMENT";
   const isCsrAdmin = user.role === "CSR_ADMIN";
   const isPartner = user.role === "PARTNER_ADMIN";
+
+  if (isManagement || isCsrAdmin) {
+    return <CompanyDashboardView user={user} onLogout={onLogout} />;
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">

@@ -409,6 +409,133 @@
       ]
     },
     {
+      "name": "Opportunities",
+      "item": [
+        {
+          "name": "Create Opportunity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Inisiatif Konservasi Mangrove Pesisir 2026\",\n  \"description\": \"Penanaman 10.000 bibit mangrove dan pemberdayaan masyarakat pesisir di Pantai Utara Jawa.\",\n  \"focusArea\": \"LINGKUNGAN\",\n  \"targetCity\": \"Semarang\",\n  \"targetProvince\": \"Jawa Tengah\",\n  \"estimatedBudget\": 250000000,\n  \"startDate\": \"2026-06-01\",\n  \"endDate\": \"2026-12-31\",\n  \"deadline\": \"2026-05-15\",\n  \"status\": \"OPEN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/opportunities",
+              "host": ["{{base_url}}"],
+              "path": ["api", "opportunities"]
+            }
+          }
+        },
+        {
+          "name": "Public Catalog Opportunities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/opportunities?page=1&limit=10&focusArea=LINGKUNGAN",
+              "host": ["{{base_url}}"],
+              "path": ["api", "opportunities"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "focusArea",
+                  "value": "LINGKUNGAN"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Company Opportunities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/opportunities/my-company?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "opportunities", "my-company"]
+            }
+          }
+        },
+        {
+          "name": "Get Opportunity Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/opportunities/paste-opportunity-id-here",
+              "host": ["{{base_url}}"],
+              "path": ["api", "opportunities", "paste-opportunity-id-here"]
+            }
+          }
+        },
+        {
+          "name": "Invite Partner to Opportunity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partnerId\": \"paste-partner-uuid-here\",\n  \"message\": \"Kami mengundang yayasan Anda untuk mengajukan proposal ke inisiatif ini.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/opportunities/paste-opportunity-id-here/invite",
+              "host": ["{{base_url}}"],
+              "path": ["api", "opportunities", "paste-opportunity-id-here", "invite"]
+            }
+          }
+        },
+        {
+          "name": "List Invited Partners for Opportunity",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/opportunities/paste-opportunity-id-here/invite",
+              "host": ["{{base_url}}"],
+              "path": ["api", "opportunities", "paste-opportunity-id-here", "invite"]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Tests & RBAC",
       "item": [
         {

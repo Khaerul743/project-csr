@@ -1,4 +1,4 @@
-import { eq, like, or, count } from "drizzle-orm";
+import { eq, like, or, and, count } from "drizzle-orm";
 import { db } from "@/db";
 import { partners, Partner } from "@/db/schema/partners";
 import { users, User } from "@/db/schema/users";
@@ -69,12 +69,20 @@ export class PartnerRepository {
     const limit = Math.min(50, Math.max(1, query.limit ?? 10));
     const offset = (page - 1) * limit;
 
-    const condition = query.search
-      ? or(
+    const conditions = [];
+    if (query.search) {
+      conditions.push(
+        or(
           like(partners.name, `%${query.search}%`),
           like(partners.city, `%${query.search}%`)
-        )
-      : undefined;
+        )!
+      );
+    }
+    if (query.focusArea) {
+      conditions.push(eq(partners.focusArea, query.focusArea as any));
+    }
+
+    const condition = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [totalResult] = await db
       .select({ count: count() })

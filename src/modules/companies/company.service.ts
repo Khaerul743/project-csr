@@ -54,7 +54,7 @@ export class CompanyService {
     };
   }
 
-  async getCurrentCompany(companyId: string | null): Promise<Company> {
+  async getCurrentCompany(companyId: string | null): Promise<Company & { members: any[] }> {
     if (!companyId) {
       throw new BadRequestError("User is not associated with any company");
     }
@@ -64,7 +64,12 @@ export class CompanyService {
       throw new NotFoundError("Company profile not found");
     }
 
-    return company;
+    const members = await this.companyRepository.findMembers(companyId);
+
+    return {
+      ...company,
+      members,
+    };
   }
 
   async getCompanyById(id: string): Promise<Company> {

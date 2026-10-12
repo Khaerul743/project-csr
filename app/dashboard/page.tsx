@@ -99,22 +99,22 @@ export default function DashboardPage() {
 
   const isStaging = user.role === "STAGING";
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* Sticky Top Navbar */}
-      <Navbar user={user} onLogout={handleLogout} />
+  if (isStaging) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+        {/* Sticky Top Navbar for Onboarding */}
+        <Navbar user={user} onLogout={handleLogout} />
 
-      {/* Main Content Area */}
-      <main className="flex-1">
-        {isStaging ? (
+        {/* Staging Onboarding Hub */}
+        <main className="flex-1">
           <StagingOnboardingView
             user={user}
             onRoleUpdated={handleRoleUpdated}
           />
-        ) : (
-          <RoleDashboardView user={user} />
-        )}
-      </main>
-    </div>
-  );
+        </main>
+      </div>
+    );
+  }
+
+  return <RoleDashboardView user={user} onLogout={handleLogout} />;
 }

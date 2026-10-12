@@ -58,15 +58,15 @@ Kumpulan kode utilitas yang digunakan bersama oleh berbagai modul (*cross-cuttin
 ### 📁 `src/components/`
 - **`ui/`**: Komponen dasar yang berdiri sendiri dan dapat dipakai ulang di halaman manapun (*reusable primitives* seperti `Button`, `Input`, `Textarea`, `Modal`, `Card`, `Badge`).
 - **`auth/`**: Komponen khusus alur autentikasi (seperti `AuthLayout`, `LoginForm`, `RegisterForm`).
-- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `RoleDashboardView`, dan `staging/` yang memuat `StagingOnboardingView`, `CompanyRegisterModal`, `PartnerRegisterModal`).
+- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `Sidebar`, `DashboardHeader`, `RoleDashboardView`, `staging/` untuk alur onboarding staging, dan `company/` untuk workspace dashboard perusahaan meliputi `CompanyDashboardView`, `CreateOpportunityModal`, `EditOpportunityModal`, `InvitePartnerModal`, `OpportunityDetailModal`).
 
 ### 📁 `src/db/`
 Pengelolaan basis data menggunakan Drizzle ORM:
-- **`schema/`**: Definisi skema tabel MySQL secara type-safe (`users.ts`, `companies.ts`, `partners.ts`, `invitations.ts`).
+- **`schema/`**: Definisi skema tabel MySQL secara type-safe (`users.ts`, `companies.ts`, `partners.ts`, `invitations.ts`, `opportunities.ts`, `opportunity-invitations.ts`, `proposals.ts`, `collaborations.ts`, `programs.ts`, `csr-focus-areas.ts`).
 - **`index.ts`**: Inisialisasi koneksi pool MySQL dan instance client Drizzle.
 
 ### 📁 `src/modules/`
-Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, dan `invitations/`:
+Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, `invitations/`, dan `opportunities/`:
 - **`Controller`**: Menerima request HTTP, memvalidasi guard autentikasi/RBAC, dan memanggil service.
 - **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password).
 - **`Repository`**: Tempat penulisan query langsung ke database menggunakan Drizzle ORM (termasuk *database transactions*).

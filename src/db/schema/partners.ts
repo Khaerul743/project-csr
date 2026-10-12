@@ -1,4 +1,5 @@
 import { mysqlTable, varchar, text, mysqlEnum, timestamp } from "drizzle-orm/mysql-core";
+import { csrFocusAreaEnum } from "./csr-focus-areas";
 
 export const partnerStatusEnum = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
 export type PartnerStatus = (typeof partnerStatusEnum)[number];
@@ -16,6 +17,7 @@ export const partners = mysqlTable("partners", {
   province: varchar("province", { length: 100 }),
   website: varchar("website", { length: 255 }),
   logoUrl: text("logo_url"),
+  focusArea: mysqlEnum("focus_area", csrFocusAreaEnum).notNull().default("LAINNYA"),
   status: mysqlEnum("status", partnerStatusEnum).notNull().default("ACTIVE"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

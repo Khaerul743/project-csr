@@ -387,7 +387,88 @@ Menerima undangan bergabung. User otomatis dipromosikan menjadi **`CSR_ADMIN`** 
 
 ---
 
-## 6. Contoh Implementasi RBAC Guard
+## 6. Modul Peluang CSR / Inisiatif (`/api/opportunities`)
+
+Modul untuk manajemen inisiatif CSR yang dibuka oleh perusahaan sebagai peluang kolaborasi bagi para mitra.
+
+### 6.1 Buat Opportunity Baru
+Membuat inisiatif program CSR baru oleh tim perusahaan.
+
+- **Method / Path:** `POST /api/opportunities`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "title": "Inisiatif Konservasi Mangrove Pesisir 2026",
+  "description": "Penanaman 10.000 bibit mangrove dan pemberdayaan ekonomi masyarakat pesisir di Pantai Utara Jawa.",
+  "focusArea": "LINGKUNGAN",
+  "targetCity": "Semarang",
+  "targetProvince": "Jawa Tengah",
+  "estimatedBudget": 250000000,
+  "startDate": "2026-06-01",
+  "endDate": "2026-12-31",
+  "deadline": "2026-05-15",
+  "status": "OPEN"
+}
+```
+
+**Pilihan `focusArea` yang valid:**
+`LINGKUNGAN` | `PENDIDIKAN` | `KESEHATAN` | `PEMBERDAYAAN_EKONOMI` | `INFRASTRUKTUR_SOSIAL` | `TANGGAP_BENCANA` | `LAINNYA`
+
+### 6.2 Katalog Publik Opportunity
+Melihat daftar seluruh peluang CSR yang dibuka dengan filter pencarian dan paginasi.
+
+- **Method / Path:** `GET /api/opportunities?page=1&limit=10&search=mangrove&focusArea=LINGKUNGAN&city=Semarang`
+- **Auth:** Public / Authenticated
+
+### 6.3 Daftar Opportunity Milik Perusahaan Saya
+Melihat seluruh inisiatif yang dibuat oleh perusahaan user yang login (termasuk status `DRAFT`, `OPEN`, `IN_REVIEW`, `CLOSED`).
+
+- **Method / Path:** `GET /api/opportunities/my-company?page=1&limit=10`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+### 6.4 Detail Opportunity
+Mengambil rincian detail suatu inisiatif beserta profil perusahaan pengusul dan statistik proposal masuk.
+
+- **Method / Path:** `GET /api/opportunities/:id`
+- **Auth:** Public / Authenticated
+
+### 6.5 Update Opportunity
+Memperbarui informasi atau status inisiatif.
+
+- **Method / Path:** `PUT /api/opportunities/:id` *(atau `PATCH`)*
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` milik perusahaan terkait)
+
+### 6.6 Hapus Opportunity
+Menghapus inisiatif.
+
+- **Method / Path:** `DELETE /api/opportunities/:id`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` milik perusahaan terkait)
+
+### 6.7 Undang Mitra ke Opportunity (Pitch Invite)
+Perusahaan mengundang mitra terdaftar secara langsung untuk mengajukan proposal ke inisiatif ini.
+
+- **Method / Path:** `POST /api/opportunities/:id/invite`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "partnerId": "uuid-partner",
+  "message": "Halo Yayasan, kami terkesan dengan rekam jejak Anda dan ingin mengundang Anda mengajukan proposal."
+}
+```
+
+### 6.8 Daftar Mitra yang Diundang ke Opportunity
+Melihat daftar mitra yang telah diundang untuk inisiatif ini beserta status responnya (`INVITED`, `ACCEPTED`, `DECLINED`).
+
+- **Method / Path:** `GET /api/opportunities/:id/invite`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+---
+
+## 7. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -409,7 +490,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 7. Ringkasan Status Code
+## 8. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |

@@ -35,4 +35,5 @@ export interface PartnerListQuery {
   page?: number;
   limit?: number;
   search?: string;
+  focusArea?: string;
 }

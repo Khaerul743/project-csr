@@ -50,8 +50,9 @@ export class PartnerController {
       const page = url.searchParams.get("page") ? parseInt(url.searchParams.get("page")!, 10) : 1;
       const limit = url.searchParams.get("limit") ? parseInt(url.searchParams.get("limit")!, 10) : 10;
       const search = url.searchParams.get("search") || undefined;
+      const focusArea = url.searchParams.get("focusArea") || undefined;
 
-      const result = await this.partnerService.getAllPartners({ page, limit, search });
+      const result = await this.partnerService.getAllPartners({ page, limit, search, focusArea });
       return ApiResponse.success(result, "Partners retrieved successfully");
     } catch (error) {
       return ErrorHandler.handle(error);

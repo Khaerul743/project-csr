@@ -10,6 +10,20 @@ export class CompanyRepository {
     return result[0] ?? null;
   }
 
+  async findMembers(companyId: string) {
+    return await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(eq(users.companyId, companyId));
+  }
+
   async findByName(name: string): Promise<Company | null> {
     const result = await db.select().from(companies).where(eq(companies.name, name)).limit(1);
     return result[0] ?? null;
