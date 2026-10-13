@@ -14,6 +14,7 @@ import {
   X,
   ChevronRight,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -23,6 +24,7 @@ export type CompanyNavMenu =
   | "partners"
   | "proposals"
   | "collaborations"
+  | "programs"
   | "team"
   | "profile";
 
@@ -54,6 +56,7 @@ interface SidebarProps {
     team?: number;
     proposals?: number;
     collaborations?: number;
+    programs?: number;
   };
   isOpenMobile: boolean;
   onCloseMobile: () => void;
@@ -109,6 +112,17 @@ export function Sidebar({
           label: "Kolaborasi & MoU",
           icon: FileCheck2,
           count: counts?.collaborations,
+        },
+      ],
+    },
+    {
+      title: "PELAKSANAAN & DAMPAK",
+      items: [
+        {
+          id: "programs" as CompanyNavMenu,
+          label: "Pelaksanaan Program",
+          icon: Activity,
+          count: counts?.programs,
         },
       ],
     },

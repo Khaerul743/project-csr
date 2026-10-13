@@ -658,7 +658,88 @@ Memperbarui rincian negosiasi (anggaran akhir, tanggal kegiatan, dokumen MoU, ca
 
 ---
 
-## 9. Contoh Implementasi RBAC Guard
+## 9. Modul Pelaksanaan Program (Programs & Impact Tracking)
+
+Modul ini mengelola siklus hidup eksekusi program di lapangan setelah kontrak kerja sama (MoU) disahkan, pelaporan realisasi penyerapan anggaran, dan pemantauan jumlah penerima manfaat riil.
+
+### 9.1 Daftar Pelaksanaan Program
+Mengambil daftar program yang sedang dijalankan atau telah selesai, baik dari perspektif perusahaan sponsor maupun mitra pelaksana.
+
+- **Method / Path:** `GET /api/programs?page=1&limit=10&status=IN_PROGRESS&focusArea=LINGKUNGAN&search=mangrove`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` | `PARTNER_ADMIN`)
+- **Query Parameters:**
+  - `page`: Nomor halaman (default: `1`)
+  - `limit`: Jumlah data per halaman (default: `10`, max: `50`)
+  - `status`: Filter status (`PLANNED` | `IN_PROGRESS` | `COMPLETED` | `ON_HOLD` | `CANCELLED`)
+  - `focusArea`: Filter bidang fokus CSR
+  - `search`: Pencarian nama program, mitra, perusahaan, atau kota
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Daftar program pelaksanaan berhasil diambil",
+  "data": {
+    "data": [
+      {
+        "id": "uuid-program",
+        "collaborationId": "uuid-collab",
+        "opportunityId": "uuid-opp",
+        "companyId": "uuid-company",
+        "partnerId": "uuid-partner",
+        "title": "Restorasi 10.000 Mangrove Pesisir",
+        "description": "Program penanaman bibit mangrove dan edukasi masyarakat pesisir...",
+        "focusArea": "LINGKUNGAN",
+        "budget": "48000000.00",
+        "spentBudget": "24000000.00",
+        "targetBeneficiaries": "150 KK Nelayan Pesisir",
+        "actualBeneficiaries": "80 KK Nelayan Pesisir",
+        "targetCity": "Surabaya",
+        "targetProvince": "Jawa Timur",
+        "startDate": "2026-11-01T00:00:00.000Z",
+        "endDate": "2027-04-30T00:00:00.000Z",
+        "status": "IN_PROGRESS",
+        "companyName": "PT Sumber Energi Nusantara",
+        "partnerName": "Yayasan Bahari Lestari",
+        "collaborationMouUrl": "https://drive.google.com/pks-mou-signed.pdf"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "limit": 10
+  }
+}
+```
+
+---
+
+### 9.2 Detail Pelaksanaan Program
+Mengambil data detail pelaksanaan program tertentu beserta relasi mitra, sponsor, dan dokumen legal MoU.
+
+- **Method / Path:** `GET /api/programs/:id`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+---
+
+### 9.3 Pembaruan Realisasi & Status Program
+Memperbarui serapan anggaran, capaian penerima manfaat aktual, tanggal pelaksanaan, serta transisi status program di lapangan.
+
+- **Method / Path:** `PATCH /api/programs/:id`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "spentBudget": 24000000,
+  "actualBeneficiaries": "80 KK Nelayan Pesisir",
+  "status": "IN_PROGRESS" // atau "COMPLETED", "ON_HOLD", dll.
+}
+```
+
+---
+
+## 10. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -680,7 +761,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 10. Ringkasan Status Code
+## 11. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |

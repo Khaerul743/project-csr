@@ -58,7 +58,7 @@ Kumpulan kode utilitas yang digunakan bersama oleh berbagai modul (*cross-cuttin
 ### 📁 `src/components/`
 - **`ui/`**: Komponen dasar yang berdiri sendiri dan dapat dipakai ulang di halaman manapun (*reusable primitives* seperti `Button`, `Input`, `Textarea`, `Modal`, `Card`, `Badge`).
 - **`auth/`**: Komponen khusus alur autentikasi (seperti `AuthLayout`, `LoginForm`, `RegisterForm`).
-- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `Sidebar`, `DashboardHeader`, `RoleDashboardView`, `staging/` untuk alur onboarding staging, `company/` untuk workspace dashboard perusahaan meliputi `CompanyDashboardView`, `CreateOpportunityModal`, `EditOpportunityModal`, `InvitePartnerModal`, `OpportunityDetailModal`, `ReviewProposalModal`, `CollaborationDetailModal`, dan `partner/` untuk workspace dashboard mitra meliputi `PartnerDashboardView`, `PartnerSidebar`, `SubmitProposalModal`, `ProposalDetailModal`, `PartnerOpportunityDetailModal`).
+- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `Sidebar`, `DashboardHeader`, `RoleDashboardView`, `staging/` untuk alur onboarding staging, `company/` untuk workspace dashboard perusahaan meliputi `CompanyDashboardView`, `CreateOpportunityModal`, `EditOpportunityModal`, `InvitePartnerModal`, `OpportunityDetailModal`, `ReviewProposalModal`, `CollaborationDetailModal`, dan `partner/` untuk workspace dashboard mitra meliputi `PartnerDashboardView`, `PartnerSidebar`, `SubmitProposalModal`, `ProposalDetailModal`, `PartnerOpportunityDetailModal`, `PartnerCollaborationDetailModal`).
 
 ### 📁 `src/db/`
 Pengelolaan basis data menggunakan Drizzle ORM:

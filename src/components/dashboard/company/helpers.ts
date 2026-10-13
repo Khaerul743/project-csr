@@ -44,6 +44,17 @@ export const COLLABORATION_STATUS_CONFIG: Record<
   CANCELLED: { label: "Dibatalkan", variant: "rose" },
 };
 
+export const PROGRAM_STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+> = {
+  PLANNED: { label: "Direncanakan", variant: "blue" },
+  IN_PROGRESS: { label: "Sedang Berjalan", variant: "amber" },
+  COMPLETED: { label: "Selesai", variant: "emerald" },
+  ON_HOLD: { label: "Ditunda Sementara", variant: "slate" },
+  CANCELLED: { label: "Dibatalkan", variant: "rose" },
+};
+
 
 
 export function formatRupiah(val: number | string | null | undefined): string {

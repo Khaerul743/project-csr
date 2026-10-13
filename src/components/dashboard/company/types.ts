@@ -162,4 +162,39 @@ export interface CompanyCollaborationItem {
   partnerFocusArea?: string | null;
 }
 
+export interface CompanyProgramItem {
+  id: string;
+  collaborationId: string;
+  opportunityId: string;
+  companyId: string;
+  partnerId: string;
+  title: string;
+  description?: string | null;
+  focusArea: string;
+  budget: string;
+  spentBudget?: string | null;
+  targetBeneficiaries?: string | null;
+  actualBeneficiaries?: string | null;
+  targetCity?: string | null;
+  targetProvince?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  status: "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "ON_HOLD" | "CANCELLED";
+  createdAt: string;
+  updatedAt: string;
+  opportunityTitle?: string | null;
+  opportunityDescription?: string | null;
+  collaborationFinalBudget?: string | null;
+  collaborationMouUrl?: string | null;
+  companyName?: string | null;
+  companyLogo?: string | null;
+  companyCity?: string | null;
+  companyEmail?: string | null;
+  partnerName?: string | null;
+  partnerLogo?: string | null;
+  partnerCity?: string | null;
+  partnerEmail?: string | null;
+  partnerFocusArea?: string | null;
+}
+
 

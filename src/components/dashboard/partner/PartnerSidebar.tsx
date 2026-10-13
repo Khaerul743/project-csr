@@ -13,6 +13,7 @@ import {
   X,
   ChevronRight,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PartnerNavMenu } from "./types";
@@ -44,6 +45,7 @@ interface PartnerSidebarProps {
     invitations?: number;
     proposals?: number;
     collaborations?: number;
+    programs?: number;
   };
   isOpenMobile: boolean;
   onCloseMobile: () => void;
@@ -97,6 +99,17 @@ export function PartnerSidebar({
           label: "Kolaborasi Aktif",
           icon: HeartHandshake,
           count: counts?.collaborations,
+        },
+      ],
+    },
+    {
+      title: "PELAKSANAAN & DAMPAK",
+      items: [
+        {
+          id: "programs",
+          label: "Pelaksanaan Program",
+          icon: Activity,
+          count: counts?.programs,
         },
       ],
     },
