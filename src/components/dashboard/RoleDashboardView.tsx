@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { InviteMemberModal } from "./InviteMemberModal";
 import { CompanyDashboardView } from "./company/CompanyDashboardView";
+import { PartnerDashboardView } from "./partner/PartnerDashboardView";
 
 interface RoleDashboardViewProps {
   user: {
@@ -76,6 +77,10 @@ export function RoleDashboardView({ user, onLogout }: RoleDashboardViewProps) {
 
   if (isManagement || isCsrAdmin) {
     return <CompanyDashboardView user={user} onLogout={onLogout} />;
+  }
+
+  if (isPartner) {
+    return <PartnerDashboardView user={user} onLogout={onLogout} />;
   }
 
   return (

@@ -493,7 +493,131 @@ Mengunggah file gambar (JPG, PNG, WEBP, GIF maks 5MB) dan menyimpannya secara lo
 
 ---
 
-## 7. Contoh Implementasi RBAC Guard
+## 7. Modul Proposal (`/api/proposals`)
+
+Mendukung alur dua arah di mana Mitra Pelaksana (`PARTNER_ADMIN`) dapat mengajukan proposal inisiatif kegiatan ke program CSR perusahaan, dan pihak Perusahaan (`MANAGEMENT`, `CSR_ADMIN`) dapat mereview, menyetujui, atau menolaknya.
+
+### 7.1 Mengajukan Proposal
+Mitra mengajukan proposal teknis beserta estimasi anggaran dan durasi pelaksanaan ke program CSR yang sedang terbuka.
+
+- **Method / Path:** `POST /api/proposals`
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "opportunityId": "uuid-opportunity",
+  "title": "Program Revitalisasi Terumbu Karang Teluk Ambon",
+  "summary": "Implementasi transplantasi 500 bibit terumbu karang bersama masyarakat nelayan pesisir...",
+  "proposedBudget": 45000000,
+  "durationMonths": 6,
+  "targetBeneficiaries": "120 KK Nelayan Pesisir",
+  "documentUrl": "https://drive.google.com/proposal-doc.pdf"
+}
+```
+
+**Response (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Proposal berhasil diajukan kepada perusahaan",
+  "data": {
+    "id": "uuid-proposal",
+    "opportunityId": "uuid-opportunity",
+    "partnerId": "uuid-partner",
+    "submittedBy": "uuid-user",
+    "title": "Program Revitalisasi Terumbu Karang Teluk Ambon",
+    "summary": "...",
+    "proposedBudget": "45000000.00",
+    "durationMonths": 6,
+    "targetBeneficiaries": "120 KK Nelayan Pesisir",
+    "documentUrl": "https://drive.google.com/proposal-doc.pdf",
+    "status": "SUBMITTED",
+    "createdAt": "2026-10-13T10:00:00.000Z",
+    "updatedAt": "2026-10-13T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 7.2 Daftar Proposal Mitra Sendiri
+Mitra melihat seluruh riwayat pengajuan proposal yang pernah dikirimkan beserta status peninjauannya.
+
+- **Method / Path:** `GET /api/proposals/my-partner?page=1&limit=10&status=SUBMITTED`
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+---
+
+### 7.3 Daftar Proposal Masuk Perusahaan
+Perusahaan melihat proposal yang diajukan oleh berbagai mitra pada seluruh atau spesifik inisiatif opportunity milik perusahaan.
+
+- **Method / Path:** `GET /api/proposals/company?page=1&limit=10&opportunityId=uuid`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+---
+
+### 7.4 Detail Proposal
+Melihat informasi komprehensif suatu proposal, profil mitra pengaju, dan data inisiatif terkait.
+
+- **Method / Path:** `GET /api/proposals/:id`
+- **Auth:** Bearer Token (Mitra pemilik proposal atau Perusahaan pemilik opportunity)
+
+---
+
+### 7.5 Review Proposal (Disetujui / Ditolak / Dalam Tinjauan)
+Perusahaan memberikan keputusan atas proposal yang masuk. Jika status disetujui (`ACCEPTED`), sistem secara otomatis menjalankan transaksi atomik untuk mencatatkan entri kontrak kerja sama baru (`collaborations`) berstatus `NEGOTIATION` dan memperbarui status undangan terkait menjadi `ACCEPTED`.
+
+- **Method / Path:** `PATCH /api/proposals/:id/review`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "status": "ACCEPTED", // atau "UNDER_REVIEW" | "REJECTED"
+  "feedback": "Proposal sangat komprehensif dan sesuai dengan target ESG perusahaan tahun ini."
+}
+```
+
+**Response (`200 OK` - jika ACCEPTED):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Proposal berhasil diterima! Kolaborasi baru telah dibentuk.",
+  "data": {
+    "proposal": {
+      "id": "uuid-proposal",
+      "status": "ACCEPTED",
+      "reviewedBy": "uuid-user",
+      "reviewedAt": "2026-10-13T11:00:00.000Z",
+      "feedback": "Proposal sangat komprehensif..."
+    },
+    "collaboration": {
+      "id": "uuid-collab",
+      "opportunityId": "uuid-opp",
+      "proposalId": "uuid-proposal",
+      "companyId": "uuid-company",
+      "partnerId": "uuid-partner",
+      "finalBudget": "45000000.00",
+      "status": "NEGOTIATION"
+    }
+  }
+}
+```
+
+---
+
+### 7.6 Menarik Proposal
+Mitra menarik kembali proposal yang telah diajukan (hanya berlaku jika status masih `SUBMITTED` atau `UNDER_REVIEW`).
+
+- **Method / Path:** `POST /api/proposals/:id/withdraw`
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+---
+
+## 8. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -515,7 +639,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 8. Ringkasan Status Code
+## 9. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |
@@ -527,3 +651,4 @@ export async function GET(request: Request) {
 | `404` | Not Found | Data tidak ditemukan |
 | `409` | Conflict | Data duplikat / konflik state role |
 | `500` | Internal Error | Server error |
+

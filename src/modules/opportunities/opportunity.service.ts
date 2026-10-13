@@ -14,6 +14,7 @@ import {
   OpportunityQueryDTO,
   OpportunityWithDetails,
   OpportunityInvitationWithDetails,
+  PartnerOpportunityInvitation,
 } from "./opportunity.interface";
 import { Opportunity } from "@/db/schema/opportunities";
 import { OpportunityInvitation } from "@/db/schema/opportunity-invitations";
@@ -208,5 +209,38 @@ export class OpportunityService {
     }
 
     return this.opportunityRepository.findInvitationsByOpportunity(opportunityId);
+  }
+
+  async getPartnerInvitations(
+    partnerId: string | null
+  ): Promise<PartnerOpportunityInvitation[]> {
+    if (!partnerId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan organisasi mitra manapun");
+    }
+
+    return this.opportunityRepository.findInvitationsByPartner(partnerId);
+  }
+
+  async respondOpportunityInvitation(
+    invitationId: string,
+    partnerId: string | null,
+    status: "ACCEPTED" | "DECLINED"
+  ): Promise<OpportunityInvitation> {
+    if (!partnerId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan organisasi mitra manapun");
+    }
+
+    const invitation = await this.opportunityRepository.findInvitationById(invitationId);
+    if (!invitation) {
+      throw new NotFoundError("Undangan inisiatif tidak ditemukan");
+    }
+
+    if (invitation.partnerId !== partnerId) {
+      throw new ForBiddenError("Undangan ini bukan ditujukan untuk organisasi Anda");
+    }
+
+    this.logger.info(`Partner ${partnerId} responded ${status} to invitation ${invitationId}`);
+
+    return this.opportunityRepository.updateInvitationStatus(invitationId, status);
   }
 }

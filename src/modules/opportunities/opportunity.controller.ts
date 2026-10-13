@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ApiResponse } from "@/common/utils/api-response";
 import { ErrorHandler } from "@/common/utils/error-handler";
+import { BadRequestError } from "@/common/errors/app-error";
 import { AuthGuard } from "@/common/guards/auth.guard";
 import { OpportunityService } from "./opportunity.service";
 import {
@@ -159,4 +160,41 @@ export class OpportunityController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async getMyInvitations(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["PARTNER_ADMIN"]);
+
+      const result = await this.opportunityService.getPartnerInvitations(authUser.partnerId);
+      return ApiResponse.success(result, "Daftar undangan opportunity berhasil diambil");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async respondInvitation(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["PARTNER_ADMIN"]);
+
+      const body = await request.json();
+      const status = body?.status;
+      if (status !== "ACCEPTED" && status !== "DECLINED") {
+        throw new BadRequestError("Status harus ACCEPTED atau DECLINED");
+      }
+
+      const result = await this.opportunityService.respondOpportunityInvitation(
+        id,
+        authUser.partnerId,
+        status
+      );
+
+      const msg = status === "ACCEPTED" ? "Undangan inisiatif diterima" : "Undangan inisiatif ditolak";
+      return ApiResponse.success(result, msg);
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }
+

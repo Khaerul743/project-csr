@@ -14,6 +14,7 @@ import {
   OpportunityQueryDTO,
   OpportunityWithDetails,
   OpportunityInvitationWithDetails,
+  PartnerOpportunityInvitation,
 } from "./opportunity.interface";
 
 export class OpportunityRepository {
@@ -224,4 +225,74 @@ export class OpportunityRepository {
       invitedByName: r.invitedByName,
     }));
   }
+
+  async findInvitationsByPartner(
+    partnerId: string
+  ): Promise<PartnerOpportunityInvitation[]> {
+    const rows = await db
+      .select({
+        invitation: opportunityInvitations,
+        opportunityTitle: opportunities.title,
+        opportunityDescription: opportunities.description,
+        opportunityStatus: opportunities.status,
+        opportunityFocusArea: opportunities.focusArea,
+        opportunityBudget: opportunities.estimatedBudget,
+        opportunityDeadline: opportunities.deadline,
+        opportunityBanner: opportunities.bannerUrl,
+        companyName: companies.name,
+        companyLogo: companies.logoUrl,
+        companyCity: companies.city,
+        invitedByName: users.name,
+      })
+      .from(opportunityInvitations)
+      .innerJoin(opportunities, eq(opportunityInvitations.opportunityId, opportunities.id))
+      .leftJoin(companies, eq(opportunities.companyId, companies.id))
+      .leftJoin(users, eq(opportunityInvitations.invitedBy, users.id))
+      .where(eq(opportunityInvitations.partnerId, partnerId))
+      .orderBy(desc(opportunityInvitations.createdAt));
+
+    return rows.map((r) => ({
+      ...r.invitation,
+      opportunityTitle: r.opportunityTitle,
+      opportunityDescription: r.opportunityDescription,
+      opportunityStatus: r.opportunityStatus,
+      opportunityFocusArea: r.opportunityFocusArea,
+      opportunityBudget: r.opportunityBudget,
+      opportunityDeadline: r.opportunityDeadline ? r.opportunityDeadline.toISOString() : null,
+      opportunityBanner: r.opportunityBanner,
+      companyName: r.companyName,
+      companyLogo: r.companyLogo,
+      companyCity: r.companyCity,
+      invitedByName: r.invitedByName,
+    }));
+  }
+
+  async findInvitationById(id: string): Promise<OpportunityInvitation | null> {
+    const [invitation] = await db
+      .select()
+      .from(opportunityInvitations)
+      .where(eq(opportunityInvitations.id, id))
+      .limit(1);
+
+    return invitation ?? null;
+  }
+
+  async updateInvitationStatus(
+    id: string,
+    status: "ACCEPTED" | "DECLINED"
+  ): Promise<OpportunityInvitation> {
+    await db
+      .update(opportunityInvitations)
+      .set({ status })
+      .where(eq(opportunityInvitations.id, id));
+
+    const [updated] = await db
+      .select()
+      .from(opportunityInvitations)
+      .where(eq(opportunityInvitations.id, id))
+      .limit(1);
+
+    return updated;
+  }
 }
+

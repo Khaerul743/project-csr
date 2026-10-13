@@ -62,3 +62,18 @@ export interface OpportunityInvitationWithDetails extends OpportunityInvitation 
   partnerFocusArea?: string | null;
   invitedByName?: string | null;
 }
+
+export interface PartnerOpportunityInvitation extends OpportunityInvitation {
+  opportunityTitle?: string | null;
+  opportunityDescription?: string | null;
+  opportunityStatus?: string | null;
+  opportunityFocusArea?: string | null;
+  opportunityBudget?: string | null;
+  opportunityDeadline?: string | null;
+  opportunityBanner?: string | null;
+  companyName?: string | null;
+  companyLogo?: string | null;
+  companyCity?: string | null;
+  invitedByName?: string | null;
+}
+
