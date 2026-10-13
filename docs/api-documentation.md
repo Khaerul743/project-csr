@@ -466,6 +466,31 @@ Melihat daftar mitra yang telah diundang untuk inisiatif ini beserta status resp
 - **Method / Path:** `GET /api/opportunities/:id/invite`
 - **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
 
+### 6.9 Unggah Thumbnail Opportunity
+Mengunggah file gambar (JPG, PNG, WEBP, GIF maks 5MB) dan menyimpannya secara lokal di folder `public/uploads/opportunities/`.
+
+- **Method / Path:** `POST /api/upload`
+- **Auth:** Bearer Token (Authenticated)
+- **Content-Type:** `multipart/form-data`
+
+**Form Data:**
+- `file`: File gambar (binary)
+
+**Response (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Gambar thumbnail berhasil diunggah",
+  "data": {
+    "url": "/uploads/opportunities/opp-1791858000-abcd1234.jpg",
+    "filename": "opp-1791858000-abcd1234.jpg",
+    "size": 1048576,
+    "mimeType": "image/jpeg"
+  }
+}
+```
+
 ---
 
 ## 7. Contoh Implementasi RBAC Guard

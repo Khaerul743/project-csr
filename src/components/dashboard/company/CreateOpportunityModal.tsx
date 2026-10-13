@@ -8,6 +8,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Tag,
+  ImageIcon,
+  Upload,
+  X,
+  Loader2,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -37,9 +41,49 @@ export function CreateOpportunityModal({
   const [deadline, setDeadline] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"OPEN" | "DRAFT">("OPEN");
+  const [bannerUrl, setBannerUrl] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadError(null);
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("Ukuran file gambar maksimal 5MB.");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal mengunggah thumbnail");
+      }
+
+      setBannerUrl(json.data.url);
+    } catch (err: any) {
+      setUploadError(err.message || "Terjadi kesalahan saat mengunggah thumbnail");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +116,7 @@ export function CreateOpportunityModal({
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         deadline: deadline || undefined,
+        bannerUrl: bannerUrl || undefined,
         status,
       };
 
@@ -109,6 +154,8 @@ export function CreateOpportunityModal({
     setDeadline("");
     setDescription("");
     setStatus("OPEN");
+    setBannerUrl("");
+    setUploadError(null);
     setErrorMessage(null);
     onClose();
   };
@@ -137,6 +184,85 @@ export function CreateOpportunityModal({
           onChange={(e) => setTitle(e.target.value)}
           required
         />
+
+        {/* Thumbnail Upload */}
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-slate-700">
+              Thumbnail / Banner Inisiatif
+            </label>
+            <span className="text-[11px] text-slate-400">
+              Opsional • Disimpan di folder lokal
+            </span>
+          </div>
+
+          {uploadError && (
+            <p className="text-xs text-rose-600 font-medium">{uploadError}</p>
+          )}
+
+          {bannerUrl ? (
+            <div className="relative rounded-2xl overflow-hidden border border-slate-200 group bg-slate-900 aspect-video max-h-52 w-full">
+              <img
+                src={bannerUrl}
+                alt="Thumbnail preview"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <label className="px-3 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-800 text-xs font-semibold cursor-pointer shadow-sm transition-all flex items-center gap-1.5">
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Ganti Gambar</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    disabled={isUploadingImage}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setBannerUrl("")}
+                  className="px-3 py-1.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Hapus</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <label className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-50/60 hover:bg-emerald-50/20 flex flex-col items-center justify-center gap-2 group">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileUpload}
+                className="hidden"
+                disabled={isUploadingImage}
+              />
+              {isUploadingImage ? (
+                <div className="flex flex-col items-center gap-2 py-2">
+                  <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                  <span className="text-xs font-semibold text-slate-600">
+                    Mengunggah thumbnail ke server...
+                  </span>
+                </div>
+              ) : (
+                <>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-emerald-700 block">
+                      Pilih atau Unggah Thumbnail dari Komputer
+                    </span>
+                    <span className="text-[11px] text-slate-400 block mt-0.5">
+                      Format PNG, JPG, WEBP • Ukuran maksimal 5MB
+                    </span>
+                  </div>
+                </>
+              )}
+            </label>
+          )}
+        </div>
 
         {/* Focus Area & Budget */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

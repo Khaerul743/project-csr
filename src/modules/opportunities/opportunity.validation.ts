@@ -26,7 +26,7 @@ export const createOpportunitySchema = z.object({
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
   deadline: z.string().optional().nullable(),
-  bannerUrl: z.string().url("URL banner tidak valid").optional().nullable().or(z.literal("")),
+  bannerUrl: z.string().optional().nullable().or(z.literal("")),
   status: z.enum(opportunityStatusEnum).optional().default("OPEN"),
 });
 

@@ -595,17 +595,48 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                       return (
                         <div
                           key={opp.id}
-                          className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-3"
+                          className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-3 overflow-hidden group"
                         >
                           <div className="space-y-2">
-                            <div className="flex items-center justify-between gap-2">
-                              <Badge variant={statusCfg.variant} size="sm" hasDot>
-                                {statusCfg.label}
-                              </Badge>
-                              <Badge variant={focus.variant} size="sm">
-                                {focus.label}
-                              </Badge>
-                            </div>
+                            {opp.bannerUrl ? (
+                              <div
+                                className="relative -mx-5 -mt-5 h-36 overflow-hidden bg-slate-900 cursor-pointer"
+                                onClick={() => setSelectedOppForDetail(opp)}
+                              >
+                                <img
+                                  src={opp.bannerUrl}
+                                  alt={opp.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
+                                <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                                  <Badge
+                                    variant={statusCfg.variant}
+                                    size="sm"
+                                    hasDot
+                                    className="shadow-sm backdrop-blur-md bg-white/95"
+                                  >
+                                    {statusCfg.label}
+                                  </Badge>
+                                  <Badge
+                                    variant={focus.variant}
+                                    size="sm"
+                                    className="shadow-sm backdrop-blur-md bg-white/95"
+                                  >
+                                    {focus.label}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between gap-2">
+                                <Badge variant={statusCfg.variant} size="sm" hasDot>
+                                  {statusCfg.label}
+                                </Badge>
+                                <Badge variant={focus.variant} size="sm">
+                                  {focus.label}
+                                </Badge>
+                              </div>
+                            )}
 
                             <h4
                               onClick={() => setSelectedOppForDetail(opp)}
@@ -741,17 +772,48 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                     return (
                       <div
                         key={opp.id}
-                        className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4"
+                        className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4 overflow-hidden group"
                       >
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <Badge variant={statusCfg.variant} size="sm" hasDot>
-                              {statusCfg.label}
-                            </Badge>
-                            <Badge variant={focus.variant} size="sm">
-                              {focus.label}
-                            </Badge>
-                          </div>
+                          {opp.bannerUrl ? (
+                            <div
+                              className="relative -mx-5 -mt-5 h-44 overflow-hidden bg-slate-900 cursor-pointer"
+                              onClick={() => setSelectedOppForDetail(opp)}
+                            >
+                              <img
+                                src={opp.bannerUrl}
+                                alt={opp.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
+                              <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                                <Badge
+                                  variant={statusCfg.variant}
+                                  size="sm"
+                                  hasDot
+                                  className="shadow-sm backdrop-blur-md bg-white/95"
+                                >
+                                  {statusCfg.label}
+                                </Badge>
+                                <Badge
+                                  variant={focus.variant}
+                                  size="sm"
+                                  className="shadow-sm backdrop-blur-md bg-white/95"
+                                >
+                                  {focus.label}
+                                </Badge>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between gap-2">
+                              <Badge variant={statusCfg.variant} size="sm" hasDot>
+                                {statusCfg.label}
+                              </Badge>
+                              <Badge variant={focus.variant} size="sm">
+                                {focus.label}
+                              </Badge>
+                            </div>
+                          )}
 
                           <h3
                             onClick={() => setSelectedOppForDetail(opp)}

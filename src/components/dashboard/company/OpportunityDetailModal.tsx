@@ -83,6 +83,18 @@ export function OpportunityDetailModal({
       maxWidth="xl"
     >
       <div className="space-y-6">
+        {/* Banner Image */}
+        {opportunity.bannerUrl && (
+          <div className="relative w-full aspect-video max-h-60 rounded-2xl overflow-hidden border border-slate-200/90 shadow-sm bg-slate-900">
+            <img
+              src={opportunity.bannerUrl}
+              alt={opportunity.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/30 via-transparent to-transparent pointer-events-none" />
+          </div>
+        )}
+
         {/* Header Badges */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
