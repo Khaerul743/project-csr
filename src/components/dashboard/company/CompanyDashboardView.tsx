@@ -50,13 +50,16 @@ import {
   OpportunityItem,
   PartnerItem,
   TeamInvitation,
+  CompanyProposalItem,
 } from "./types";
 import {
   FOCUS_AREA_CONFIG,
   STATUS_CONFIG,
+  PROPOSAL_STATUS_CONFIG,
   formatRupiah,
   formatDate,
 } from "./helpers";
+import { ReviewProposalModal } from "./ReviewProposalModal";
 
 interface CompanyDashboardViewProps {
   user: {
@@ -79,18 +82,23 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [opportunities, setOpportunities] = useState<OpportunityItem[]>([]);
   const [partners, setPartners] = useState<PartnerItem[]>([]);
   const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
+  const [proposals, setProposals] = useState<CompanyProposalItem[]>([]);
 
   // Loading states
   const [isLoadingCompany, setIsLoadingCompany] = useState(true);
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true);
   const [isLoadingPartners, setIsLoadingPartners] = useState(false);
   const [isLoadingInvitations, setIsLoadingInvitations] = useState(false);
+  const [isLoadingProposals, setIsLoadingProposals] = useState(false);
 
   // Filters
   const [oppSearch, setOppSearch] = useState("");
   const [oppStatusFilter, setOppStatusFilter] = useState<string>("ALL");
   const [partnerSearch, setPartnerSearch] = useState("");
   const [partnerFocusFilter, setPartnerFocusFilter] = useState<string>("ALL");
+  const [proposalSearch, setProposalSearch] = useState("");
+  const [proposalStatusFilter, setProposalStatusFilter] = useState<string>("ALL");
+  const [proposalOppFilter, setProposalOppFilter] = useState<string>("ALL");
 
   // Modal states
   const [isCreateOppOpen, setIsCreateOppOpen] = useState(false);
@@ -98,6 +106,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [selectedOppForDetail, setSelectedOppForDetail] = useState<OpportunityItem | null>(null);
   const [selectedPartnerForInvite, setSelectedPartnerForInvite] = useState<PartnerItem | null>(null);
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
+  const [selectedProposalForReview, setSelectedProposalForReview] = useState<CompanyProposalItem | null>(null);
   const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const isManagement = user.role === "MANAGEMENT";
@@ -211,11 +220,36 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
     }
   };
 
+  const fetchProposals = async () => {
+    setIsLoadingProposals(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+      const res = await fetch("/api/proposals/company?limit=50", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const list = Array.isArray(json.data)
+          ? json.data
+          : Array.isArray(json.data?.data)
+          ? json.data.data
+          : [];
+        setProposals(list);
+      }
+    } catch {
+      // fallback
+    } finally {
+      setIsLoadingProposals(false);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     fetchCompanyData();
     fetchOpportunities();
     fetchPartners();
+    fetchProposals();
     if (isManagement) {
       fetchInvitations();
     }
@@ -295,14 +329,27 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
     const membersCount = company?.members?.length || 1;
     const pendingInvitesCount = inviteList.filter((i) => i?.status === "PENDING").length;
 
+    const propList = Array.isArray(proposals) ? proposals : [];
+    const submittedProposalsCount = propList.filter((p) => p?.status === "SUBMITTED").length;
+    const underReviewProposalsCount = propList.filter((p) => p?.status === "UNDER_REVIEW").length;
+    const acceptedProposalsCount = propList.filter((p) => p?.status === "ACCEPTED").length;
+    const totalProposalBudget = propList.reduce((acc, curr) => {
+      const num = curr?.proposedBudget ? parseFloat(curr.proposedBudget) : 0;
+      return acc + (isNaN(num) ? 0 : num);
+    }, 0);
+
     return {
       totalOpps,
       activeOpps,
       totalBudget,
       membersCount,
       pendingInvitesCount,
+      submittedProposalsCount,
+      underReviewProposalsCount,
+      acceptedProposalsCount,
+      totalProposalBudget,
     };
-  }, [opportunities, company, invitations]);
+  }, [opportunities, company, invitations, proposals]);
 
   // Filtered Opportunities
   const filteredOpportunities = useMemo(() => {
@@ -320,6 +367,26 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       return matchSearch && matchStatus;
     });
   }, [opportunities, oppSearch, oppStatusFilter]);
+
+  // Filtered Proposals
+  const filteredProposals = useMemo(() => {
+    const list = Array.isArray(proposals) ? proposals : [];
+    return list.filter((p) => {
+      if (!p) return false;
+      const matchSearch =
+        p.title?.toLowerCase().includes(proposalSearch.toLowerCase()) ||
+        (p.partnerName && p.partnerName.toLowerCase().includes(proposalSearch.toLowerCase())) ||
+        (p.opportunityTitle && p.opportunityTitle.toLowerCase().includes(proposalSearch.toLowerCase()));
+
+      const matchStatus =
+        proposalStatusFilter === "ALL" || p.status === proposalStatusFilter;
+
+      const matchOpp =
+        proposalOppFilter === "ALL" || p.opportunityId === proposalOppFilter;
+
+      return matchSearch && matchStatus && matchOpp;
+    });
+  }, [proposals, proposalSearch, proposalStatusFilter, proposalOppFilter]);
 
   // Header Title & Subtitle based on activeMenu
   const headerMeta: Record<CompanyNavMenu, { title: string; subtitle: string }> = {
@@ -365,6 +432,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           opportunities: opportunities.length,
           partners: partners.length,
           team: company?.members?.length,
+          proposals: metrics.submittedProposalsCount,
         }}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
@@ -544,6 +612,38 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Proposal Baru Perlu Ditinjau Banner */}
+              {metrics.submittedProposalsCount > 0 && (
+                <div className="p-6 rounded-3xl bg-blue-50/70 border border-blue-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <Inbox className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
+                        <h4 className="font-extrabold text-blue-950 text-sm">
+                          Ada {metrics.submittedProposalsCount} Proposal Masuk Baru Menunggu Evaluasi!
+                        </h4>
+                      </div>
+                      <p className="text-xs text-blue-800 leading-relaxed max-w-2xl">
+                        Mitra pelaksana telah mengajukan proposal penawaran untuk program CSR Anda. Segera lakukan peninjauan teknis dan anggaran untuk memulai kerja sama.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs shrink-0 shadow-sm"
+                    onClick={() => setActiveMenu("proposals")}
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Buka Proposal Masuk ({metrics.submittedProposalsCount})
+                  </Button>
+                </div>
+              )}
 
               {/* Recent Opportunities Snapshot */}
               <div className="space-y-4">
@@ -1019,52 +1119,242 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: PROPOSALS (PROPOSAL MASUK) - PREVIEW */}
+          {/* VIEW: PROPOSALS (PROPOSAL MASUK) */}
           {/* ============================================================ */}
           {activeMenu === "proposals" && (
             <div className="space-y-6">
-              <div className="p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm text-center max-w-2xl mx-auto space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto">
-                  <Inbox className="w-8 h-8" />
+              {/* Proposal Stat Metrics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-slate-500">Total Proposal Masuk</span>
+                    <div className="text-2xl font-extrabold text-slate-900">{proposals.length}</div>
+                    <span className="text-[11px] text-slate-400 block">Dari seluruh inisiatif</span>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-blue-600">Perlu Ditinjau Segera</span>
+                    <div className="text-2xl font-extrabold text-blue-600">{metrics.submittedProposalsCount}</div>
+                    <span className="text-[11px] text-slate-400 block">Status SUBMITTED</span>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-amber-600">Sedang Dikaji</span>
+                    <div className="text-2xl font-extrabold text-amber-600">{metrics.underReviewProposalsCount}</div>
+                    <span className="text-[11px] text-slate-400 block">Status UNDER_REVIEW</span>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-emerald-600">Proposal Disetujui</span>
+                    <div className="text-2xl font-extrabold text-emerald-600">{metrics.acceptedProposalsCount}</div>
+                    <span className="text-[11px] text-slate-400 block">Menuju Kolaborasi</span>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Filters & Search Controls */}
+              <div className="bg-white p-4 rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                  {/* Search */}
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={proposalSearch}
+                      onChange={(e) => setProposalSearch(e.target.value)}
+                      placeholder="Cari proposal berdasarkan judul, nama mitra, atau inisiatif..."
+                      className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {/* Dropdown Inisiatif Filter */}
+                  <div className="w-full md:w-64">
+                    <select
+                      value={proposalOppFilter}
+                      onChange={(e) => setProposalOppFilter(e.target.value)}
+                      className="w-full px-3 py-2 rounded-2xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    >
+                      <option value="ALL">Semua Inisiatif CSR</option>
+                      {opportunities.map((opp) => (
+                        <option key={opp.id} value={opp.id}>
+                          {opp.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Modul Seleksi & Penilaian Proposal Masuk
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Saat mitra pelaksana mengajukan proposal untuk opportunity yang Anda publikasikan, proposal lengkap beserta rincian Rencana Anggaran Biaya (RAB) dan timeline akan tampil di sini untuk dievaluasi.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-left space-y-2 text-xs">
-                  <span className="font-bold text-slate-700 block">
-                    Tahapan Alur Kerja Proposal:
-                  </span>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center font-bold text-[10px]">1</span>
-                    <span>Mitra submit proposal melalui katalog opportunity</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center font-bold text-[10px]">2</span>
-                    <span>CSR Admin perusahaan mereview dokumen & rencana kegiatan</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600">
-                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[10px]">3</span>
-                    <span>Proposal disetujui (ACCEPTED) $\rightarrow$ Masuk tahap Kolaborasi & MoU</span>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <Button
-                    variant="primary"
-                    size="md"
-                    onClick={() => setActiveMenu("opportunities")}
-                  >
-                    Buka Opportunity Baru Terlebih Dahulu
-                  </Button>
+                {/* Status Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                  {["ALL", "SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "WITHDRAWN"].map((st) => {
+                    const isSelected = proposalStatusFilter === st;
+                    const label =
+                      st === "ALL"
+                        ? "Semua Status"
+                        : (PROPOSAL_STATUS_CONFIG as Record<string, { label: string }>)[st]?.label || st;
+                    return (
+                      <button
+                        key={st}
+                        onClick={() => setProposalStatusFilter(st)}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition shrink-0 ${
+                          isSelected
+                            ? "bg-slate-900 text-white shadow-xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Proposals Cards List */}
+              {isLoadingProposals ? (
+                <div className="py-20 text-center text-slate-400 space-y-2">
+                  <RefreshCw className="w-8 h-8 mx-auto animate-spin text-emerald-600" />
+                  <p className="text-xs">Memuat proposal masuk...</p>
+                </div>
+              ) : filteredProposals.length === 0 ? (
+                <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-3">
+                  <Inbox className="w-12 h-12 text-slate-300 mx-auto" />
+                  <h4 className="font-bold text-slate-700 text-sm">
+                    {proposals.length === 0
+                      ? "Belum Ada Proposal Masuk"
+                      : "Tidak Ada Proposal Sesuai Filter"}
+                  </h4>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                    {proposals.length === 0
+                      ? "Saat mitra pelaksana mengirimkan proposal untuk peluang inisiatif Anda, proposal mereka akan muncul di sini untuk dievaluasi."
+                      : "Coba ubah kata kunci pencarian atau sesuaikan filter status untuk melihat proposal lainnya."}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredProposals.map((prop) => {
+                    const statusCfg = (PROPOSAL_STATUS_CONFIG as Record<string, { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }>)[prop.status] || {
+                      label: prop.status,
+                      variant: "slate" as const,
+                    };
+                    return (
+                      <div
+                        key={prop.id}
+                        className="bg-white rounded-3xl border border-slate-200/90 shadow-xs hover:shadow-md transition p-5 sm:p-6 space-y-4"
+                      >
+                        {/* Top row: Mitra & Status */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            {prop.partnerLogo ? (
+                              <img
+                                src={prop.partnerLogo}
+                                alt={prop.partnerName || "Logo"}
+                                className="w-10 h-10 rounded-2xl object-cover border border-slate-200 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-2xl bg-teal-500/10 text-teal-600 border border-teal-500/20 flex items-center justify-center font-bold text-sm shrink-0">
+                                <HeartHandshake className="w-5 h-5" />
+                              </div>
+                            )}
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-extrabold text-slate-900 text-sm">
+                                  {prop.partnerName || "Mitra Pelaksana"}
+                                </h4>
+                                {prop.partnerCity && (
+                                  <span className="text-[11px] text-slate-400">
+                                    • {prop.partnerCity}
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[11px] text-slate-400">
+                                Diajukan {formatDate(prop.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Badge variant={statusCfg.variant} size="sm" hasDot>
+                              {statusCfg.label}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Title & Opportunity Target */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
+                              Inisiatif:
+                            </span>
+                            <span className="font-bold text-emerald-700 truncate">
+                              {prop.opportunityTitle}
+                            </span>
+                          </div>
+                          <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                            {prop.title}
+                          </h3>
+                          <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                            {prop.summary}
+                          </p>
+                        </div>
+
+                        {/* Metrics Bar */}
+                        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs">
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] text-slate-400 font-medium">Usulan Anggaran</span>
+                            <div className="text-sm font-extrabold text-emerald-600">
+                              {formatRupiah(prop.proposedBudget)}
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] text-slate-400 font-medium">Durasi Pelaksanaan</span>
+                            <div className="text-xs font-bold text-slate-800">
+                              {prop.durationMonths ? `${prop.durationMonths} Bulan` : "Fleksibel"}
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5 max-w-[200px] truncate">
+                            <span className="text-[11px] text-slate-400 font-medium">Penerima Manfaat</span>
+                            <div className="text-xs font-bold text-slate-800 truncate">
+                              {prop.targetBeneficiaries || "-"}
+                            </div>
+                          </div>
+
+                          <div className="pt-1 sm:pt-0">
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              className={
+                                prop.status === "SUBMITTED"
+                                  ? "bg-blue-600 hover:bg-blue-700 text-white text-xs shadow-xs"
+                                  : "bg-emerald-600 hover:bg-emerald-700 text-white text-xs shadow-xs"
+                              }
+                              onClick={() => setSelectedProposalForReview(prop)}
+                              leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />}
+                            >
+                              {prop.status === "SUBMITTED" ? "Evaluasi Proposal" : "Tinjau / Edit Keputusan"}
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Feedback preview if present */}
+                        {prop.feedback && (
+                          <div className="text-xs text-slate-600 italic bg-amber-50/60 p-2.5 rounded-xl border border-amber-200/60">
+                            <span className="font-semibold text-amber-900 not-italic mr-1.5">Catatan Evaluasi:</span>
+                            "{prop.feedback}"
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -1410,6 +1700,16 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           }}
         />
       )}
+
+      <ReviewProposalModal
+        isOpen={!!selectedProposalForReview}
+        proposal={selectedProposalForReview}
+        onClose={() => setSelectedProposalForReview(null)}
+        onSuccess={() => {
+          fetchProposals();
+          fetchOpportunities();
+        }}
+      />
     </div>
   );
 }

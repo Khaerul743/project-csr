@@ -101,7 +101,7 @@ export function Sidebar({
           id: "proposals" as CompanyNavMenu,
           label: "Proposal Masuk",
           icon: Inbox,
-          badge: "Segera",
+          count: counts?.proposals,
         },
         {
           id: "collaborations" as CompanyNavMenu,

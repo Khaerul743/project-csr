@@ -99,3 +99,33 @@ export interface OpportunityInvitationItem {
     logoUrl?: string | null;
   };
 }
+
+export interface CompanyProposalItem {
+  id: string;
+  opportunityId: string;
+  partnerId: string;
+  submittedBy: string;
+  title: string;
+  summary: string;
+  proposedBudget: string;
+  durationMonths?: number | null;
+  targetBeneficiaries?: string | null;
+  documentUrl?: string | null;
+  status: "SUBMITTED" | "UNDER_REVIEW" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  feedback?: string | null;
+  createdAt: string;
+  opportunityTitle?: string | null;
+  opportunityStatus?: string | null;
+  companyId?: string | null;
+  companyName?: string | null;
+  partnerName?: string | null;
+  partnerEmail?: string | null;
+  partnerCity?: string | null;
+  partnerFocusArea?: string | null;
+  partnerLogo?: string | null;
+  submittedByName?: string | null;
+  reviewedByName?: string | null;
+}
+

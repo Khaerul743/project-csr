@@ -24,6 +24,18 @@ export const STATUS_CONFIG: Record<
   CLOSED: { label: "Selesai / Tutup", variant: "rose" },
 };
 
+export const PROPOSAL_STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+> = {
+  SUBMITTED: { label: "Perlu Ditinjau", variant: "blue" },
+  UNDER_REVIEW: { label: "Dalam Tinjauan", variant: "amber" },
+  ACCEPTED: { label: "Disetujui", variant: "emerald" },
+  REJECTED: { label: "Ditolak", variant: "rose" },
+  WITHDRAWN: { label: "Ditarik Mitra", variant: "slate" },
+};
+
+
 export function formatRupiah(val: number | string | null | undefined): string {
   if (val === undefined || val === null || val === "") return "Rp 0";
   const num = typeof val === "string" ? parseFloat(val) : val;
