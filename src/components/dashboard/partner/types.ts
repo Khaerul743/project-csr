@@ -10,6 +10,7 @@ export type PartnerNavMenu =
   | "proposals"
   | "collaborations"
   | "programs"
+  | "analytics"
   | "profile";
 
 export interface PartnerProfile {

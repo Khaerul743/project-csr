@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Activity,
+  BarChart3,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PartnerNavMenu } from "./types";
@@ -110,6 +111,11 @@ export function PartnerSidebar({
           label: "Pelaksanaan Program",
           icon: Activity,
           count: counts?.programs,
+        },
+        {
+          id: "analytics",
+          label: "Laporan & Dampak ESG",
+          icon: BarChart3,
         },
       ],
     },

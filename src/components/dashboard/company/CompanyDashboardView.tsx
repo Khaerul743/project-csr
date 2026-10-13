@@ -67,6 +67,7 @@ import {
 import { ReviewProposalModal } from "./ReviewProposalModal";
 import { CollaborationDetailModal } from "./CollaborationDetailModal";
 import { ProgramDetailModal } from "./ProgramDetailModal";
+import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 
 interface CompanyDashboardViewProps {
   user: {
@@ -555,6 +556,10 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
     programs: {
       title: "Pelaksanaan Program & Monitoring",
       subtitle: "Pantau progres eksekusi program di lapangan, realisasi serapan anggaran, dan capaian penerima manfaat riil",
+    },
+    analytics: {
+      title: "Laporan & Dampak ESG",
+      subtitle: "Analisis akuntabilitas dana CSR, pilar keberlanjutan (E-S-G), dan ekspor laporan resmi",
     },
     team: {
       title: "Anggota Tim & Akses",
@@ -2222,6 +2227,21 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                 </div>
               )}
             </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* VIEW: ANALYTICS (LAPORAN & DAMPAK ESG) */}
+          {/* ============================================================ */}
+          {activeMenu === "analytics" && (
+            <EsgAnalyticsView
+              role="COMPANY"
+              organizationName={company?.name}
+              programs={programs}
+              onOpenProgramDetail={(p) => {
+                const found = programs.find((item) => item.id === p.id);
+                if (found) setSelectedProgramForDetail(found);
+              }}
+            />
           )}
 
           {/* ============================================================ */}

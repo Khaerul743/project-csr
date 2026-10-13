@@ -41,6 +41,7 @@ import { ProposalDetailModal } from "./ProposalDetailModal";
 import { PartnerOpportunityDetailModal } from "./PartnerOpportunityDetailModal";
 import { PartnerCollaborationDetailModal } from "./PartnerCollaborationDetailModal";
 import { PartnerProgramDetailModal } from "./PartnerProgramDetailModal";
+import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import {
   PartnerNavMenu,
   PartnerProfile,
@@ -450,6 +451,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                 {activeMenu === "proposals" && "Pengajuan Proposal"}
                 {activeMenu === "collaborations" && "Kolaborasi & Kontrak MoU"}
                 {activeMenu === "programs" && "Pelaksanaan Program & Monitoring"}
+                {activeMenu === "analytics" && "Laporan & Dampak ESG"}
                 {activeMenu === "profile" && "Profil Lembaga"}
               </span>
             </div>
@@ -1924,6 +1926,21 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                 </div>
               )}
             </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* SUBVIEW: ANALYTICS (LAPORAN & DAMPAK ESG) */}
+          {/* ========================================================================= */}
+          {activeMenu === "analytics" && (
+            <EsgAnalyticsView
+              role="PARTNER"
+              organizationName={partner?.name}
+              programs={programs}
+              onOpenProgramDetail={(p) => {
+                const found = programs.find((item) => item.id === p.id);
+                if (found) setSelectedProgramForDetail(found);
+              }}
+            />
           )}
 
           {/* ========================================================================= */}
