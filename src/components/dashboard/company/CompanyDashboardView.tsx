@@ -51,15 +51,18 @@ import {
   PartnerItem,
   TeamInvitation,
   CompanyProposalItem,
+  CompanyCollaborationItem,
 } from "./types";
 import {
   FOCUS_AREA_CONFIG,
   STATUS_CONFIG,
   PROPOSAL_STATUS_CONFIG,
+  COLLABORATION_STATUS_CONFIG,
   formatRupiah,
   formatDate,
 } from "./helpers";
 import { ReviewProposalModal } from "./ReviewProposalModal";
+import { CollaborationDetailModal } from "./CollaborationDetailModal";
 
 interface CompanyDashboardViewProps {
   user: {
@@ -83,6 +86,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [partners, setPartners] = useState<PartnerItem[]>([]);
   const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
   const [proposals, setProposals] = useState<CompanyProposalItem[]>([]);
+  const [collaborations, setCollaborations] = useState<CompanyCollaborationItem[]>([]);
 
   // Loading states
   const [isLoadingCompany, setIsLoadingCompany] = useState(true);
@@ -90,6 +94,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [isLoadingPartners, setIsLoadingPartners] = useState(false);
   const [isLoadingInvitations, setIsLoadingInvitations] = useState(false);
   const [isLoadingProposals, setIsLoadingProposals] = useState(false);
+  const [isLoadingCollaborations, setIsLoadingCollaborations] = useState(false);
 
   // Filters
   const [oppSearch, setOppSearch] = useState("");
@@ -99,6 +104,8 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [proposalSearch, setProposalSearch] = useState("");
   const [proposalStatusFilter, setProposalStatusFilter] = useState<string>("ALL");
   const [proposalOppFilter, setProposalOppFilter] = useState<string>("ALL");
+  const [collabSearch, setCollabSearch] = useState("");
+  const [collabStatusFilter, setCollabStatusFilter] = useState<string>("ALL");
 
   // Modal states
   const [isCreateOppOpen, setIsCreateOppOpen] = useState(false);
@@ -107,6 +114,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [selectedPartnerForInvite, setSelectedPartnerForInvite] = useState<PartnerItem | null>(null);
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
   const [selectedProposalForReview, setSelectedProposalForReview] = useState<CompanyProposalItem | null>(null);
+  const [selectedCollabForDetail, setSelectedCollabForDetail] = useState<CompanyCollaborationItem | null>(null);
   const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const isManagement = user.role === "MANAGEMENT";
@@ -244,12 +252,37 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
     }
   };
 
+  const fetchCollaborations = async () => {
+    setIsLoadingCollaborations(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+      const res = await fetch("/api/collaborations?limit=50", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const list = Array.isArray(json.data)
+          ? json.data
+          : Array.isArray(json.data?.data)
+          ? json.data.data
+          : [];
+        setCollaborations(list);
+      }
+    } catch {
+      // fallback
+    } finally {
+      setIsLoadingCollaborations(false);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     fetchCompanyData();
     fetchOpportunities();
     fetchPartners();
     fetchProposals();
+    fetchCollaborations();
     if (isManagement) {
       fetchInvitations();
     }
@@ -338,6 +371,16 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       return acc + (isNaN(num) ? 0 : num);
     }, 0);
 
+    const collabList = Array.isArray(collaborations) ? collaborations : [];
+    const negotiatingCollabsCount = collabList.filter((c) => c?.status === "NEGOTIATION").length;
+    const agreedCollabsCount = collabList.filter((c) => c?.status === "AGREED").length;
+    const totalAgreedBudget = collabList
+      .filter((c) => c?.status === "AGREED")
+      .reduce((acc, curr) => {
+        const num = curr?.finalBudget ? parseFloat(curr.finalBudget) : 0;
+        return acc + (isNaN(num) ? 0 : num);
+      }, 0);
+
     return {
       totalOpps,
       activeOpps,
@@ -348,8 +391,11 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       underReviewProposalsCount,
       acceptedProposalsCount,
       totalProposalBudget,
+      negotiatingCollabsCount,
+      agreedCollabsCount,
+      totalAgreedBudget,
     };
-  }, [opportunities, company, invitations, proposals]);
+  }, [opportunities, company, invitations, proposals, collaborations]);
 
   // Filtered Opportunities
   const filteredOpportunities = useMemo(() => {
@@ -387,6 +433,24 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       return matchSearch && matchStatus && matchOpp;
     });
   }, [proposals, proposalSearch, proposalStatusFilter, proposalOppFilter]);
+
+  // Filtered Collaborations
+  const filteredCollaborations = useMemo(() => {
+    const list = Array.isArray(collaborations) ? collaborations : [];
+    return list.filter((c) => {
+      if (!c) return false;
+      const matchSearch =
+        (c.opportunityTitle && c.opportunityTitle.toLowerCase().includes(collabSearch.toLowerCase())) ||
+        (c.partnerName && c.partnerName.toLowerCase().includes(collabSearch.toLowerCase())) ||
+        (c.proposalTitle && c.proposalTitle.toLowerCase().includes(collabSearch.toLowerCase())) ||
+        (c.notes && c.notes.toLowerCase().includes(collabSearch.toLowerCase()));
+
+      const matchStatus =
+        collabStatusFilter === "ALL" || c.status === collabStatusFilter;
+
+      return matchSearch && matchStatus;
+    });
+  }, [collaborations, collabSearch, collabStatusFilter]);
 
   // Header Title & Subtitle based on activeMenu
   const headerMeta: Record<CompanyNavMenu, { title: string; subtitle: string }> = {
@@ -433,6 +497,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           partners: partners.length,
           team: company?.members?.length,
           proposals: metrics.submittedProposalsCount,
+          collaborations: metrics.negotiatingCollabsCount,
         }}
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
@@ -641,6 +706,38 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                     rightIcon={<ArrowRight className="w-4 h-4" />}
                   >
                     Buka Proposal Masuk ({metrics.submittedProposalsCount})
+                  </Button>
+                </div>
+              )}
+
+              {/* Kontrak Kolaborasi Menunggu Negosiasi / MoU Banner */}
+              {metrics.negotiatingCollabsCount > 0 && (
+                <div className="p-6 rounded-3xl bg-amber-50/80 border border-amber-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-3.5">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                      <FileCheck2 className="w-5 h-5" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping" />
+                        <h4 className="font-extrabold text-amber-950 text-sm">
+                          Ada {metrics.negotiatingCollabsCount} Kontrak Kerja Sama Menunggu Finalisasi MoU!
+                        </h4>
+                      </div>
+                      <p className="text-xs text-amber-800 leading-relaxed max-w-2xl">
+                        Proposal mitra yang telah disetujui berada dalam tahap negosiasi anggaran dan penandatanganan dokumen legal MoU sebelum program CSR resmi dimulai.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs shrink-0 shadow-sm"
+                    onClick={() => setActiveMenu("collaborations")}
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Kelola Kontrak ({metrics.negotiatingCollabsCount})
                   </Button>
                 </div>
               )}
@@ -1359,28 +1456,312 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: COLLABORATIONS (KOLABORASI & MOU) - PREVIEW */}
+          {/* VIEW: COLLABORATIONS (KOLABORASI & KONTRAK KERJASAMA MOU) */}
           {/* ============================================================ */}
           {activeMenu === "collaborations" && (
             <div className="space-y-6">
-              <div className="p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm text-center max-w-2xl mx-auto space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
-                  <FileCheck2 className="w-8 h-8" />
-                </div>
+              {/* Top Summary Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-slate-500">Total Kontrak / MoU</span>
+                    <div className="text-2xl font-extrabold text-slate-900">{collaborations.length}</div>
+                    <span className="text-[11px] text-slate-400 block">Dari seluruh proposal diterima</span>
+                  </CardContent>
+                </Card>
 
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Ruang Kolaborasi & Kontrak Perjanjian (MoU)
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Setelah proposal disetujui, perusahaan dan mitra menyepakati anggaran final, klausul kerja sama, dan penandatanganan dokumen MoU sebelum program resmi dieksekusi di lapangan.
-                  </p>
-                </div>
+                <Card className={metrics.negotiatingCollabsCount > 0 ? "border-amber-200 bg-amber-50/20" : ""}>
+                  <CardContent className="p-4 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-amber-600">Tahap Negosiasi</span>
+                      {metrics.negotiatingCollabsCount > 0 && (
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      )}
+                    </div>
+                    <div className="text-2xl font-extrabold text-amber-600">{metrics.negotiatingCollabsCount}</div>
+                    <span className="text-[11px] text-amber-700 font-medium block">Perlu penyepakatan & MoU</span>
+                  </CardContent>
+                </Card>
 
-                <Badge variant="blue" size="md">
-                  Akan aktif otomatis saat proposal mitra diterima
-                </Badge>
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-emerald-600">MoU Disepakati</span>
+                    <div className="text-2xl font-extrabold text-emerald-600">{metrics.agreedCollabsCount}</div>
+                    <span className="text-[11px] text-slate-400 block">Siap / dalam eksekusi program</span>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardContent className="p-4 space-y-1.5">
+                    <span className="text-xs font-semibold text-teal-600">Total Anggaran Disahkan</span>
+                    <div className="text-2xl font-extrabold text-teal-600 truncate">
+                      {formatRupiah(metrics.totalAgreedBudget)}
+                    </div>
+                    <span className="text-[11px] text-slate-400 block">Komitmen CSR definitif</span>
+                  </CardContent>
+                </Card>
               </div>
+
+              {/* Filters & Search Controls */}
+              <div className="bg-white p-4 rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+                  {/* Search */}
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={collabSearch}
+                      onChange={(e) => setCollabSearch(e.target.value)}
+                      placeholder="Cari kolaborasi berdasarkan nama mitra, judul inisiatif, atau proposal..."
+                      className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Status Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                  {[
+                    { key: "ALL", label: `Semua (${collaborations.length})` },
+                    { key: "NEGOTIATION", label: `Tahap Negosiasi (${metrics.negotiatingCollabsCount})` },
+                    { key: "AGREED", label: `MoU Disahkan (${metrics.agreedCollabsCount})` },
+                    { key: "CANCELLED", label: "Dibatalkan" },
+                  ].map((tab) => {
+                    const isSelected = collabStatusFilter === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setCollabStatusFilter(tab.key)}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                          isSelected
+                            ? "bg-slate-900 text-white shadow-xs"
+                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* List Content */}
+              {isLoadingCollaborations ? (
+                <div className="py-20 text-center bg-white rounded-3xl border border-slate-200/80 p-8 space-y-3">
+                  <RefreshCw className="w-6 h-6 text-emerald-600 animate-spin mx-auto" />
+                  <p className="text-xs text-slate-500">Memuat data kontrak kerja sama...</p>
+                </div>
+              ) : filteredCollaborations.length === 0 ? (
+                <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
+                    <HeartHandshake className="w-7 h-7" />
+                  </div>
+                  <div className="max-w-md mx-auto space-y-1">
+                    <h4 className="font-bold text-slate-800 text-base">
+                      {collaborations.length === 0
+                        ? "Belum Ada Kontrak Kolaborasi"
+                        : "Tidak Ada Kolaborasi yang Sesuai"}
+                    </h4>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {collaborations.length === 0
+                        ? "Kontrak kolaborasi terbentuk secara otomatis saat Anda menerima (Accept) proposal mitra pada tab Proposal Masuk. Anda kemudian dapat menyepakati anggaran final, jadwal pelaksanaan, dan mengunggah dokumen MoU."
+                        : "Coba ubah kata kunci pencarian atau ganti filter status di atas."}
+                    </p>
+                  </div>
+                  {collaborations.length === 0 ? (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setActiveMenu("proposals")}
+                      rightIcon={<ArrowRight className="w-4 h-4" />}
+                    >
+                      Buka Tab Proposal Masuk
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCollabSearch("");
+                        setCollabStatusFilter("ALL");
+                      }}
+                    >
+                      Reset Filter
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredCollaborations.map((collab) => {
+                    const statusConfig =
+                      COLLABORATION_STATUS_CONFIG[collab.status] || {
+                        label: collab.status,
+                        variant: "slate",
+                      };
+
+                    return (
+                      <div
+                        key={collab.id}
+                        className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs hover:border-emerald-300 transition-all space-y-4"
+                      >
+                        {/* Header: Partner + Status + Date */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center font-bold text-teal-700 text-sm overflow-hidden shrink-0">
+                              {collab.partnerLogo ? (
+                                <img
+                                  src={collab.partnerLogo}
+                                  alt={collab.partnerName || "Partner"}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                (collab.partnerName || "P").substring(0, 2).toUpperCase()
+                              )}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-extrabold text-slate-900 text-sm">
+                                  {collab.partnerName || "Mitra CSR"}
+                                </h4>
+                                {collab.partnerFocusArea && (
+                                  <Badge
+                                    variant={
+                                      FOCUS_AREA_CONFIG[collab.partnerFocusArea as CsrFocusArea]?.variant || "slate"
+                                    }
+                                    size="sm"
+                                  >
+                                    {FOCUS_AREA_CONFIG[collab.partnerFocusArea as CsrFocusArea]?.label ||
+                                      collab.partnerFocusArea}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
+                                {collab.partnerCity && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="w-3 h-3" />
+                                    {collab.partnerCity}
+                                  </span>
+                                )}
+                                <span>•</span>
+                                <span>Dibuat: {formatDate(collab.createdAt)}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <Badge variant={statusConfig.variant} size="md" hasDot>
+                              {statusConfig.label}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Title & Opportunity Context */}
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
+                              Inisiatif:
+                            </span>
+                            <span className="font-bold text-emerald-700 truncate">
+                              {collab.opportunityTitle || "Inisiatif CSR"}
+                            </span>
+                          </div>
+                          <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                            {collab.proposalTitle || "Program Kerjasama CSR"}
+                          </h3>
+                          {collab.proposalSummary && (
+                            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                              {collab.proposalSummary}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Metrics Bar */}
+                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs">
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] text-slate-400 font-medium">Anggaran Disepakati</span>
+                            <div className="text-sm font-extrabold text-emerald-600">
+                              {formatRupiah(collab.finalBudget || collab.proposedBudget)}
+                            </div>
+                            {collab.finalBudget && collab.proposedBudget && collab.finalBudget !== collab.proposedBudget && (
+                              <span className="text-[10px] text-slate-400 block line-through">
+                                Usulan: {formatRupiah(collab.proposedBudget)}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] text-slate-400 font-medium">Jadwal Pelaksanaan</span>
+                            <div className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-slate-400" />
+                              {collab.startDate && collab.endDate
+                                ? `${formatDate(collab.startDate)} s/d ${formatDate(collab.endDate)}`
+                                : "Belum ditentukan"}
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5 max-w-[200px]">
+                            <span className="text-[11px] text-slate-400 font-medium">Target Penerima Manfaat</span>
+                            <div className="text-xs font-bold text-slate-800 truncate">
+                              {collab.targetBeneficiaries || "-"}
+                            </div>
+                          </div>
+
+                          <div className="space-y-0.5">
+                            <span className="text-[11px] text-slate-400 font-medium block">Dokumen MoU</span>
+                            {collab.mouDocumentUrl ? (
+                              <a
+                                href={collab.mouDocumentUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200"
+                              >
+                                <FileCheck2 className="w-3.5 h-3.5" />
+                                Lihat Dokumen MoU
+                                <ExternalLink className="w-3 h-3 ml-0.5" />
+                              </a>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-medium">
+                                <Clock className="w-3 h-3" /> Belum Terlampir
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="pt-2 sm:pt-0">
+                            {collab.status === "NEGOTIATION" ? (
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                className="bg-amber-600 hover:bg-amber-700 text-white text-xs shadow-xs"
+                                onClick={() => setSelectedCollabForDetail(collab)}
+                                leftIcon={<FileCheck2 className="w-3.5 h-3.5" />}
+                              >
+                                Kelola & Sahkan MoU
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs border-slate-200 hover:border-slate-300"
+                                onClick={() => setSelectedCollabForDetail(collab)}
+                                leftIcon={<Eye className="w-3.5 h-3.5" />}
+                              >
+                                {collab.status === "AGREED" ? "Detail Kesepakatan" : "Lihat Catatan"}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Notes Preview if available */}
+                        {collab.notes && (
+                          <div className="text-xs text-slate-600 italic bg-amber-50/50 p-2.5 rounded-xl border border-amber-200/50 flex items-start gap-2">
+                            <span className="font-semibold text-amber-900 not-italic shrink-0">Catatan Kesepakatan:</span>
+                            <span className="not-italic text-slate-700 line-clamp-2">"{collab.notes}"</span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
@@ -1708,6 +2089,18 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
         onSuccess={() => {
           fetchProposals();
           fetchOpportunities();
+          fetchCollaborations();
+        }}
+      />
+
+      <CollaborationDetailModal
+        isOpen={!!selectedCollabForDetail}
+        collaboration={selectedCollabForDetail}
+        onClose={() => setSelectedCollabForDetail(null)}
+        onSuccess={() => {
+          fetchCollaborations();
+          fetchOpportunities();
+          fetchProposals();
         }}
       />
     </div>

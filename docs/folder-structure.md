@@ -58,7 +58,7 @@ Kumpulan kode utilitas yang digunakan bersama oleh berbagai modul (*cross-cuttin
 ### 📁 `src/components/`
 - **`ui/`**: Komponen dasar yang berdiri sendiri dan dapat dipakai ulang di halaman manapun (*reusable primitives* seperti `Button`, `Input`, `Textarea`, `Modal`, `Card`, `Badge`).
 - **`auth/`**: Komponen khusus alur autentikasi (seperti `AuthLayout`, `LoginForm`, `RegisterForm`).
-- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `Sidebar`, `DashboardHeader`, `RoleDashboardView`, `staging/` untuk alur onboarding staging, `company/` untuk workspace dashboard perusahaan meliputi `CompanyDashboardView`, `CreateOpportunityModal`, `EditOpportunityModal`, `InvitePartnerModal`, `OpportunityDetailModal`, `ReviewProposalModal`, dan `partner/` untuk workspace dashboard mitra meliputi `PartnerDashboardView`, `PartnerSidebar`, `SubmitProposalModal`, `ProposalDetailModal`, `PartnerOpportunityDetailModal`).
+- **`dashboard/`**: Komponen antarmuka dashboard (`Navbar`, `Sidebar`, `DashboardHeader`, `RoleDashboardView`, `staging/` untuk alur onboarding staging, `company/` untuk workspace dashboard perusahaan meliputi `CompanyDashboardView`, `CreateOpportunityModal`, `EditOpportunityModal`, `InvitePartnerModal`, `OpportunityDetailModal`, `ReviewProposalModal`, `CollaborationDetailModal`, dan `partner/` untuk workspace dashboard mitra meliputi `PartnerDashboardView`, `PartnerSidebar`, `SubmitProposalModal`, `ProposalDetailModal`, `PartnerOpportunityDetailModal`).
 
 ### 📁 `src/db/`
 Pengelolaan basis data menggunakan Drizzle ORM:
@@ -66,9 +66,9 @@ Pengelolaan basis data menggunakan Drizzle ORM:
 - **`index.ts`**: Inisialisasi koneksi pool MySQL dan instance client Drizzle.
 
 ### 📁 `src/modules/`
-Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, `invitations/`, `opportunities/`, dan `proposals/`:
+Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, `invitations/`, `opportunities/`, `proposals/`, dan `collaborations/`:
 - **`Controller`**: Menerima request HTTP, memvalidasi guard autentikasi/RBAC, dan memanggil service.
-- **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password, review proposal, inisiasi kolaborasi).
+- **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password, review proposal, inisiasi kolaborasi, finalisasi MoU & pembuatan program otomatis).
 - **`Repository`**: Tempat penulisan query langsung ke database menggunakan Drizzle ORM (termasuk *database transactions*).
 - **`Validation & Interface`**: Skema validasi data request (Zod) dan pendefinisian tipe data/DTO.
 

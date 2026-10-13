@@ -129,3 +129,37 @@ export interface CompanyProposalItem {
   reviewedByName?: string | null;
 }
 
+export interface CompanyCollaborationItem {
+  id: string;
+  opportunityId: string;
+  proposalId: string;
+  companyId: string;
+  partnerId: string;
+  finalBudget?: string | null;
+  targetBeneficiaries?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  mouDocumentUrl?: string | null;
+  notes?: string | null;
+  status: "NEGOTIATION" | "AGREED" | "CANCELLED";
+  agreedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  opportunityTitle?: string | null;
+  opportunityFocusArea?: string | null;
+  opportunityTargetCity?: string | null;
+  proposalTitle?: string | null;
+  proposalSummary?: string | null;
+  proposedBudget?: string | null;
+  companyName?: string | null;
+  companyLogo?: string | null;
+  companyCity?: string | null;
+  companyEmail?: string | null;
+  partnerName?: string | null;
+  partnerLogo?: string | null;
+  partnerCity?: string | null;
+  partnerEmail?: string | null;
+  partnerFocusArea?: string | null;
+}
+
+

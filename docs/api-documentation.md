@@ -617,7 +617,48 @@ Mitra menarik kembali proposal yang telah diajukan (hanya berlaku jika status ma
 
 ---
 
-## 8. Contoh Implementasi RBAC Guard
+## 8. Modul Kolaborasi & Kontrak Kerjasama (`/api/collaborations`)
+
+Mencatat perjanjian kemitraan resmi antara Perusahaan dan Mitra Pelaksana setelah proposal disetujui (`ACCEPTED`). Mengakomodasi fase negosiasi akhir anggaran, penentuan tanggal pelaksanaan, pengunggahan dokumen MoU/PKS resmi, serta inisiasi eksekusi program.
+
+### 8.1 Daftar Kolaborasi
+Mengambil seluruh daftar kolaborasi aktif yang melibatkan organisasi pengguna (baik dari sisi perusahaan maupun mitra).
+
+- **Method / Path:** `GET /api/collaborations?page=1&limit=10&status=NEGOTIATION`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+---
+
+### 8.2 Detail Kolaborasi
+Melihat rincian kesepakatan, profil kedua belah pihak, proposal terkait, dan draf MoU.
+
+- **Method / Path:** `GET /api/collaborations/:id`
+- **Auth:** Bearer Token (Perusahaan atau Mitra yang terlibat)
+
+---
+
+### 8.3 Pembaruan & Pengesahan Kolaborasi (MoU Sign-off)
+Memperbarui rincian negosiasi (anggaran akhir, tanggal kegiatan, dokumen MoU, catatan kesepakatan) dan mengesahkan status kolaborasi menjadi `AGREED`. Ketika status disetujui menjadi `AGREED`, sistem secara otomatis menginisialisasi entri kegiatan pada tabel `programs` berstatus `PLANNED`.
+
+- **Method / Path:** `PATCH /api/collaborations/:id`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "finalBudget": 48000000,
+  "startDate": "2026-11-01T00:00:00.000Z",
+  "endDate": "2027-04-30T00:00:00.000Z",
+  "targetBeneficiaries": "150 KK Nelayan Pesisir & 50 Pemuda",
+  "mouDocumentUrl": "https://drive.google.com/pks-mou-signed.pdf",
+  "notes": "MoU ditandatangani oleh Direktur CSR dan Ketua Yayasan pada 20 Oktober 2026.",
+  "status": "AGREED"
+}
+```
+
+---
+
+## 9. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -639,7 +680,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 9. Ringkasan Status Code
+## 10. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |
@@ -651,4 +692,5 @@ export async function GET(request: Request) {
 | `404` | Not Found | Data tidak ditemukan |
 | `409` | Conflict | Data duplikat / konflik state role |
 | `500` | Internal Error | Server error |
+
 

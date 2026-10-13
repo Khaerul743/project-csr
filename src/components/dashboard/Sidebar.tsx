@@ -53,6 +53,7 @@ interface SidebarProps {
     partners?: number;
     team?: number;
     proposals?: number;
+    collaborations?: number;
   };
   isOpenMobile: boolean;
   onCloseMobile: () => void;
@@ -107,7 +108,7 @@ export function Sidebar({
           id: "collaborations" as CompanyNavMenu,
           label: "Kolaborasi & MoU",
           icon: FileCheck2,
-          badge: "Segera",
+          count: counts?.collaborations,
         },
       ],
     },

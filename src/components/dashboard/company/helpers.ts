@@ -35,6 +35,16 @@ export const PROPOSAL_STATUS_CONFIG: Record<
   WITHDRAWN: { label: "Ditarik Mitra", variant: "slate" },
 };
 
+export const COLLABORATION_STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+> = {
+  NEGOTIATION: { label: "Tahap Negosiasi", variant: "amber" },
+  AGREED: { label: "MoU Disepakati", variant: "emerald" },
+  CANCELLED: { label: "Dibatalkan", variant: "rose" },
+};
+
+
 
 export function formatRupiah(val: number | string | null | undefined): string {
   if (val === undefined || val === null || val === "") return "Rp 0";
