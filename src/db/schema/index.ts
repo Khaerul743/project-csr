@@ -8,3 +8,4 @@ export * from "./opportunity-invitations";
 export * from "./proposals";
 export * from "./collaborations";
 export * from "./programs";
+export * from "./program-activities";

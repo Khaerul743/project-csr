@@ -739,7 +739,134 @@ Memperbarui serapan anggaran, capaian penerima manfaat aktual, tanggal pelaksana
 
 ---
 
-## 10. Contoh Implementasi RBAC Guard
+## 10. Modul Log Aktivitas Lapangan & Bukti Kegiatan (`/api/programs/:id/activities`)
+
+Memungkinkan Mitra Pelaksana mengunggah dokumentasi berkala berupa catatan kegiatan lapangan, tanggal, lokasi, estimasi serapan dana, jumlah penerima manfaat riil, foto dokumentasi (multi-photo), dan dokumen legal/BAST (Berita Acara Serah Terima). Perusahaan CSR dapat memantau linimasa kegiatan secara real-time, melakukan verifikasi (`VERIFIED`), atau meminta revisi (`REVISION_REQUESTED`) dengan catatan konstruktif.
+
+### 10.1 Mengambil Riwayat Log Aktivitas Program
+Mengambil seluruh catatan log aktivitas yang tercatat pada program tertentu, terurut dari yang terbaru.
+
+- **Method / Path:** `GET /api/programs/:id/activities`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Daftar aktivitas kegiatan program berhasil diambil",
+  "data": [
+    {
+      "id": "uuid-activity",
+      "programId": "uuid-program",
+      "submittedBy": "uuid-user",
+      "title": "Penyaluran 2.500 Bibit Mangrove Tahap I & Sosialisasi Warga",
+      "description": "Telah dilaksanakan serah terima bibit dan penanaman bersama 45 warga nelayan di pesisir pantai...",
+      "activityDate": "2026-10-14T00:00:00.000Z",
+      "location": "Desa Morosari, Sayung, Demak",
+      "beneficiariesReached": "45 KK Nelayan & 15 Pemuda Karang Taruna",
+      "fundsSpent": "12500000.00",
+      "mediaUrls": [
+        "/uploads/opportunities/mangrove-activity-1.jpg",
+        "/uploads/opportunities/mangrove-activity-2.jpg"
+      ],
+      "documentUrl": "https://drive.google.com/bast-tahap-1.pdf",
+      "status": "VERIFIED",
+      "companyFeedback": "Dokumentasi sangat lengkap dan serapan anggaran sesuai dengan RAB.",
+      "verifiedBy": "uuid-company-admin",
+      "verifiedAt": "2026-10-14T10:00:00.000Z",
+      "createdAt": "2026-10-14T08:00:00.000Z",
+      "updatedAt": "2026-10-14T10:00:00.000Z",
+      "submitterName": "Khaerul Mitra",
+      "verifierName": "Budi CSR Lead"
+    }
+  ]
+}
+```
+
+---
+
+### 10.2 Mengunggah / Melaporkan Aktivitas Baru
+Mitra pelaksana menambahkan catatan kemajuan lapangan baru beserta foto bukti dan berkas pendukung. Sistem secara otomatis memperbarui status program dari `PLANNED` menjadi `IN_PROGRESS` pada laporan pertama.
+
+- **Method / Path:** `POST /api/programs/:id/activities`
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "title": "Penyaluran 2.500 Bibit Mangrove Tahap I & Sosialisasi Warga",
+  "description": "Telah dilaksanakan serah terima bibit dan penanaman bersama 45 warga nelayan...",
+  "activityDate": "2026-10-14T00:00:00.000Z",
+  "location": "Desa Morosari, Sayung, Demak",
+  "beneficiariesReached": "45 KK Nelayan & 15 Pemuda Karang Taruna",
+  "fundsSpent": 12500000,
+  "mediaUrls": [
+    "/uploads/opportunities/mangrove-activity-1.jpg"
+  ],
+  "documentUrl": "https://drive.google.com/bast-tahap-1.pdf"
+}
+```
+
+**Response (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Log aktivitas lapangan berhasil ditambahkan",
+  "data": {
+    "id": "uuid-activity",
+    "programId": "uuid-program",
+    "status": "SUBMITTED",
+    "title": "Penyaluran 2.500 Bibit Mangrove Tahap I & Sosialisasi Warga",
+    "createdAt": "2026-10-14T08:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 10.3 Verifikasi & Review Aktivitas oleh Perusahaan
+Perusahaan sponsor memvalidasi keabsahan kegiatan lapangan atau meminta revisi jika bukti foto/dokumen belum memadai.
+
+- **Method / Path:** `PATCH /api/programs/:id/activities/:activityId`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "status": "VERIFIED", // atau "REVISION_REQUESTED"
+  "companyFeedback": "Bukti foto lengkap dan BAST telah ditandatangani kepala desa setempat."
+}
+```
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Status verifikasi aktivitas berhasil diperbarui",
+  "data": {
+    "id": "uuid-activity",
+    "status": "VERIFIED",
+    "companyFeedback": "Bukti foto lengkap...",
+    "verifiedBy": "uuid-company-admin",
+    "verifiedAt": "2026-10-14T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 10.4 Menghapus Log Aktivitas
+Mitra pelaksana menghapus log aktivitas yang belum diverifikasi atau draf keliru miliknya.
+
+- **Method / Path:** `DELETE /api/programs/:id/activities/:activityId`
+- **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
+
+---
+
+## 11. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -761,7 +888,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 11. Ringkasan Status Code
+## 12. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |
@@ -773,5 +900,6 @@ export async function GET(request: Request) {
 | `404` | Not Found | Data tidak ditemukan |
 | `409` | Conflict | Data duplikat / konflik state role |
 | `500` | Internal Error | Server error |
+
 
 

@@ -17,6 +17,8 @@ import {
   Sparkles,
   Check,
   Percent,
+  Camera,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +31,7 @@ import {
 } from "./helpers";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
+import { ActivityTimeline } from "../activities/ActivityTimeline";
 
 interface ProgramDetailModalProps {
   isOpen: boolean;
@@ -43,6 +46,7 @@ export function ProgramDetailModal({
   program,
   onSuccess,
 }: ProgramDetailModalProps) {
+  const [activeTab, setActiveTab] = useState<"activities" | "overview">("activities");
   const [status, setStatus] = useState<ProgramStatus>("PLANNED");
   const [spentBudget, setSpentBudget] = useState("");
   const [actualBeneficiaries, setActualBeneficiaries] = useState("");
@@ -53,6 +57,7 @@ export function ProgramDetailModal({
 
   useEffect(() => {
     if (program) {
+      setActiveTab("activities");
       setStatus(program.status);
       setSpentBudget(program.spentBudget ? String(parseFloat(program.spentBudget)) : "0");
       setActualBeneficiaries(program.actualBeneficiaries || "");
@@ -116,7 +121,7 @@ export function ProgramDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex items-start justify-between gap-4 bg-slate-50/50">
           <div className="flex items-center gap-3.5">
@@ -167,8 +172,46 @@ export function ProgramDetailModal({
           </button>
         </div>
 
-        {/* Content Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Tab Navigation */}
+        <div className="px-6 border-b border-slate-100 flex items-center gap-6 bg-slate-50/30">
+          <button
+            type="button"
+            onClick={() => setActiveTab("activities")}
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+              activeTab === "activities"
+                ? "border-teal-600 text-teal-700 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Camera className="w-4 h-4" />
+            Log & Bukti Kegiatan Lapangan
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("overview")}
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+              activeTab === "overview"
+                ? "border-teal-600 text-teal-700 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            Ringkasan & Status Pelaksanaan
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "activities" ? (
+          <div className="flex-1 overflow-y-auto p-6">
+            <ActivityTimeline
+              programId={program.id}
+              programTitle={program.title}
+              role="COMPANY"
+              onActivityChanged={onSuccess}
+            />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           {errorMsg && (
             <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0" />
@@ -372,6 +415,7 @@ export function ProgramDetailModal({
             </Button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
