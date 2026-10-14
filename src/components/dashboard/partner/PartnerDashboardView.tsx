@@ -31,6 +31,7 @@ import {
   FileCheck2,
   Activity,
   TrendingUp,
+  MessageSquare,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ import { PartnerOpportunityDetailModal } from "./PartnerOpportunityDetailModal";
 import { PartnerCollaborationDetailModal } from "./PartnerCollaborationDetailModal";
 import { PartnerProgramDetailModal } from "./PartnerProgramDetailModal";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
+import { ConversationCenterView } from "../conversations/ConversationCenterView";
 import {
   PartnerNavMenu,
   PartnerProfile,
@@ -78,6 +80,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
   // Navigation Menu state
   const [activeMenu, setActiveMenu] = useState<PartnerNavMenu>("overview");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [activeCollaborationChatId, setActiveCollaborationChatId] = useState<string | null>(null);
 
   // Data states
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
@@ -450,6 +453,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                 {activeMenu === "invitations" && "Undangan Masuk"}
                 {activeMenu === "proposals" && "Pengajuan Proposal"}
                 {activeMenu === "collaborations" && "Kolaborasi & Kontrak MoU"}
+                {activeMenu === "conversations" && "Pesan & Negosiasi"}
                 {activeMenu === "programs" && "Pelaksanaan Program & Monitoring"}
                 {activeMenu === "analytics" && "Laporan & Dampak ESG"}
                 {activeMenu === "profile" && "Profil Lembaga"}
@@ -1562,7 +1566,21 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                             )}
                           </div>
 
-                          <div className="pt-2 sm:pt-0">
+                          <div className="pt-2 sm:pt-0 flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="text-xs border-teal-200 text-teal-700 bg-teal-50/60 hover:bg-teal-100/70"
+                              onClick={() => {
+                                setActiveCollaborationChatId(collab.id);
+                                setActiveMenu("conversations");
+                              }}
+                              leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
+                            >
+                              Pesan
+                            </Button>
+
                             {collab.status === "NEGOTIATION" ? (
                               <Button
                                 variant="primary"
@@ -2058,6 +2076,22 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
               </div>
             </div>
           )}
+
+          {/* ========================================================================= */}
+          {/* SUBVIEW: CONVERSATIONS (PESAN & NEGOSIASI) */}
+          {/* ========================================================================= */}
+          {activeMenu === "conversations" && (
+            <div className="space-y-4">
+              <ConversationCenterView
+                userRole="PARTNER_ADMIN"
+                initialCollaborationId={activeCollaborationChatId}
+                onViewCollaborationDetails={(collabId) => {
+                  const found = collaborations.find((c) => c.id === collabId);
+                  if (found) setSelectedCollabForDetail(found);
+                }}
+              />
+            </div>
+          )}
         </main>
       </div>
 
@@ -2098,6 +2132,11 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
         isOpen={Boolean(selectedCollabForDetail)}
         collaboration={selectedCollabForDetail}
         onClose={() => setSelectedCollabForDetail(null)}
+        onOpenChat={(collabId) => {
+          setSelectedCollabForDetail(null);
+          setActiveCollaborationChatId(collabId);
+          setActiveMenu("conversations");
+        }}
         onSuccess={() => {
           fetchCollaborations();
           fetchPrograms();

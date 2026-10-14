@@ -17,6 +17,7 @@ import {
   FileText,
   MapPin,
   Mail,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ interface PartnerCollaborationDetailModalProps {
   onClose: () => void;
   collaboration: PartnerCollaborationItem | null;
   onSuccess: () => void;
+  onOpenChat?: (collaborationId: string) => void;
 }
 
 export function PartnerCollaborationDetailModal({
@@ -41,6 +43,7 @@ export function PartnerCollaborationDetailModal({
   onClose,
   collaboration,
   onSuccess,
+  onOpenChat,
 }: PartnerCollaborationDetailModalProps) {
   const [partnerNote, setPartnerNote] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
@@ -380,9 +383,26 @@ export function PartnerCollaborationDetailModal({
 
         {/* Footer */}
         <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3">
-          <span className="text-[11px] text-slate-400">
-            ID Kontrak: {collaboration.id.substring(0, 8)}...
-          </span>
+          <div className="flex items-center gap-2">
+            {onOpenChat && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100 text-xs"
+                onClick={() => {
+                  onClose();
+                  onOpenChat(collaboration.id);
+                }}
+                leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
+              >
+                Buka Chat Negosiasi
+              </Button>
+            )}
+            <span className="text-[11px] text-slate-400">
+              ID Kontrak: {collaboration.id.substring(0, 8)}...
+            </span>
+          </div>
 
           <Button variant="outline" size="sm" onClick={onClose} className="text-xs">
             Tutup

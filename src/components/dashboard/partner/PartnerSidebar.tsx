@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Activity,
   BarChart3,
+  MessageSquare,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { PartnerNavMenu } from "./types";
@@ -100,6 +101,11 @@ export function PartnerSidebar({
           label: "Kolaborasi Aktif",
           icon: HeartHandshake,
           count: counts?.collaborations,
+        },
+        {
+          id: "conversations",
+          label: "Pesan & Negosiasi",
+          icon: MessageSquare,
         },
       ],
     },

@@ -9,6 +9,7 @@ export type PartnerNavMenu =
   | "invitations"
   | "proposals"
   | "collaborations"
+  | "conversations"
   | "programs"
   | "analytics"
   | "profile";

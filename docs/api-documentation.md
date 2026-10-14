@@ -866,7 +866,117 @@ Mitra pelaksana menghapus log aktivitas yang belum diverifikasi atau draf keliru
 
 ---
 
-## 11. Contoh Implementasi RBAC Guard
+## 11. Modul Percakapan & Negosiasi Kemitraan (`/api/conversations`)
+
+Menyediakan ruang komunikasi dan negosiasi dua arah langsung antara pihak CSR Perusahaan (`CSR_ADMIN`) dan Mitra Pelaksana (`PARTNER_ADMIN`) untuk kemitraan yang proposalnya telah disetujui (`ACCEPTED`). Role `MANAGEMENT` dibatasi untuk menjaga agar komunikasi operasional terfokus pada person-in-charge (PIC) teknis.
+
+### 11.1 Daftar Percakapan Aktif
+Mengambil seluruh daftar ruang diskusi kemitraan yang berhak diakses oleh organisasi pengguna, dilengkapi informasi cuplikan pesan terakhir, waktu, dan jumlah pesan belum dibaca (*unread count*).
+
+- **Method / Path:** `GET /api/conversations`
+- **Auth:** Bearer Token (Role: `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Daftar percakapan berhasil diambil",
+  "data": [
+    {
+      "collaborationId": "uuid-collaboration",
+      "collaborationStatus": "NEGOTIATION",
+      "finalBudget": "48000000.00",
+      "targetBeneficiaries": "150 KK Nelayan",
+      "opportunityTitle": "Restorasi Mangrove Pesisir",
+      "proposalTitle": "Proposal Penanaman Bibit & Edukasi Pesisir",
+      "partnerId": "uuid-partner",
+      "partnerName": "Yayasan Bahari Lestari",
+      "partnerLogo": null,
+      "companyId": "uuid-company",
+      "companyName": "PT Sumber Energi Nusantara",
+      "companyLogo": null,
+      "lastMessage": "Draf MoU revisi pasal 4 sudah kami lampirkan ya pak.",
+      "lastMessageAt": "2026-10-14T14:30:00.000Z",
+      "lastSenderName": "Khaerul Mitra",
+      "unreadCount": 1
+    }
+  ]
+}
+```
+
+---
+
+### 11.2 Riwayat Pesan Percakapan
+Mengambil riwayat obrolan lengkap suatu kolaborasi terurut secara kronologis. Otomatis menandai pesan yang masuk dari pihak lawan sebagai telah dibaca (`isRead = true`).
+
+- **Method / Path:** `GET /api/conversations/:collaborationId/messages`
+- **Auth:** Bearer Token (Role: `CSR_ADMIN` | `PARTNER_ADMIN` yang terdaftar pada kolaborasi ini)
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Riwayat pesan berhasil diambil",
+  "data": [
+    {
+      "id": "uuid-msg",
+      "collaborationId": "uuid-collaboration",
+      "senderId": "uuid-user-partner",
+      "senderName": "Khaerul Mitra",
+      "senderRole": "PARTNER_ADMIN",
+      "content": "Halo tim CSR, berikut draf revisi RAB dan jadwal penanaman.",
+      "attachmentUrl": "/uploads/opportunities/draf-rab-revisi.pdf",
+      "attachmentName": "draf-rab-revisi.pdf",
+      "isRead": true,
+      "createdAt": "2026-10-14T14:30:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### 11.3 Mengirim Pesan Baru & Lampiran
+Mengirimkan pesan teks atau berkas lampiran (RAB, draf MoU, foto pendukung) ke dalam ruang negosiasi kemitraan.
+
+- **Method / Path:** `POST /api/conversations/:collaborationId/messages`
+- **Auth:** Bearer Token (Role: `CSR_ADMIN` | `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "content": "Terima kasih, kami tinjau draf revisi anggarannya sore ini.",
+  "attachmentUrl": null,
+  "attachmentName": null
+}
+```
+
+**Response (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Pesan berhasil dikirim",
+  "data": {
+    "id": "uuid-msg-new",
+    "collaborationId": "uuid-collaboration",
+    "senderId": "uuid-user-company",
+    "senderName": "Budi CSR Admin",
+    "senderRole": "CSR_ADMIN",
+    "content": "Terima kasih, kami tinjau draf revisi anggarannya sore ini.",
+    "attachmentUrl": null,
+    "attachmentName": null,
+    "isRead": false,
+    "createdAt": "2026-10-14T14:35:00.000Z"
+  }
+}
+```
+
+---
+
+## 12. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -888,7 +998,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 12. Ringkasan Status Code
+## 13. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |
@@ -900,6 +1010,7 @@ export async function GET(request: Request) {
 | `404` | Not Found | Data tidak ditemukan |
 | `409` | Conflict | Data duplikat / konflik state role |
 | `500` | Internal Error | Server error |
+
 
 
 

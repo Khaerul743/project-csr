@@ -18,6 +18,7 @@ import {
   Check,
   Ban,
   Clock,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ interface CollaborationDetailModalProps {
   onClose: () => void;
   collaboration: CompanyCollaborationItem | null;
   onSuccess: () => void;
+  onOpenChat?: (collaborationId: string) => void;
 }
 
 export function CollaborationDetailModal({
@@ -36,6 +38,7 @@ export function CollaborationDetailModal({
   onClose,
   collaboration,
   onSuccess,
+  onOpenChat,
 }: CollaborationDetailModalProps) {
   const [finalBudget, setFinalBudget] = useState("");
   const [targetBeneficiaries, setTargetBeneficiaries] = useState("");
@@ -391,7 +394,23 @@ export function CollaborationDetailModal({
 
         {/* Modal Footer Actions */}
         <div className="p-4 px-6 border-t border-slate-100 flex items-center justify-between bg-slate-50">
-          <div>
+          <div className="flex items-center gap-2">
+            {onOpenChat && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-teal-700 border-teal-200 bg-teal-50 hover:bg-teal-100 text-xs"
+                onClick={() => {
+                  onClose();
+                  onOpenChat(collaboration.id);
+                }}
+                leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
+              >
+                Buka Chat Negosiasi
+              </Button>
+            )}
+
             {!isAgreed && !isCancelled && (
               <Button
                 variant="outline"

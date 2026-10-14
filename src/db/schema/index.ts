@@ -9,3 +9,4 @@ export * from "./proposals";
 export * from "./collaborations";
 export * from "./programs";
 export * from "./program-activities";
+export * from "./collaboration-messages";

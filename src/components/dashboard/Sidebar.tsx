@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   Activity,
   BarChart3,
+  MessageSquare,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -25,6 +26,7 @@ export type CompanyNavMenu =
   | "partners"
   | "proposals"
   | "collaborations"
+  | "conversations"
   | "programs"
   | "analytics"
   | "team"
@@ -115,6 +117,15 @@ export function Sidebar({
           icon: FileCheck2,
           count: counts?.collaborations,
         },
+        ...(!isManagement
+          ? [
+              {
+                id: "conversations" as CompanyNavMenu,
+                label: "Pesan & Negosiasi",
+                icon: MessageSquare,
+              },
+            ]
+          : []),
       ],
     },
     {
