@@ -16,6 +16,7 @@ import {
   Check,
   Camera,
   FileText,
+  Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ import {
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
 import { ActivityTimeline } from "../activities/ActivityTimeline";
+import { BeneficiaryReviewsTab } from "../reviews/BeneficiaryReviewsTab";
 
 interface PartnerProgramDetailModalProps {
   isOpen: boolean;
@@ -43,7 +45,7 @@ export function PartnerProgramDetailModal({
   program,
   onSuccess,
 }: PartnerProgramDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<"activities" | "overview">("activities");
+  const [activeTab, setActiveTab] = useState<"activities" | "overview" | "reviews">("activities");
   const [status, setStatus] = useState<ProgramStatus>("PLANNED");
   const [spentBudget, setSpentBudget] = useState("");
   const [actualBeneficiaries, setActualBeneficiaries] = useState("");
@@ -195,6 +197,18 @@ export function PartnerProgramDetailModal({
             <FileText className="w-4 h-4" />
             Ringkasan & Status Pelaksanaan
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("reviews")}
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+              activeTab === "reviews"
+                ? "border-teal-600 text-teal-700 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+            Suara & Ulasan Masyarakat
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -205,6 +219,13 @@ export function PartnerProgramDetailModal({
               programTitle={program.title}
               role="PARTNER"
               onActivityChanged={onSuccess}
+            />
+          </div>
+        ) : activeTab === "reviews" ? (
+          <div className="flex-1 overflow-y-auto p-6">
+            <BeneficiaryReviewsTab
+              programId={program.id}
+              programTitle={program.title}
             />
           </div>
         ) : (

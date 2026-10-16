@@ -976,7 +976,129 @@ Mengirimkan pesan teks atau berkas lampiran (RAB, draf MoU, foto pendukung) ke d
 
 ---
 
-## 12. Contoh Implementasi RBAC Guard
+## 12. Modul Ulasan & Kepuasan Masyarakat (`/api/programs/:id/reviews`)
+
+Menyediakan sistem pengumpulan umpan balik dan penilaian kepuasan masyarakat penerima manfaat CSR secara publik dan bebas friksi (tanpa memerlukan autentikasi login pengguna). Dilengkapi dengan pencegahan spam berbasis IP rate limiting, agregasi statistik rating bintang (1 hingga 5 bintang), serta pemisahan peran pemangku kepentingan.
+
+### 12.1 Mengambil Ulasan & Statistik Program
+Mengambil ringkasan kepuasan program, skor rata-rata, distribusi bintang 1-5, identitas sponsor/mitra, dan daftar testimoni masyarakat.
+
+- **Method / Path:** `GET /api/programs/:id/reviews`
+- **Auth:** Publik / Tidak memerlukan token
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Data ulasan dan kepuasan masyarakat berhasil diambil",
+  "data": {
+    "program": {
+      "id": "uuid-program",
+      "title": "Restorasi 10.000 Mangrove Pesisir",
+      "description": "Program penanaman bibit mangrove dan edukasi masyarakat pesisir...",
+      "focusArea": "LINGKUNGAN",
+      "targetCity": "Surabaya",
+      "targetProvince": "Jawa Timur",
+      "companyName": "PT Sumber Energi Nusantara",
+      "companyLogo": "/uploads/opportunities/company-logo.png",
+      "partnerName": "Yayasan Bahari Lestari",
+      "partnerLogo": "/uploads/opportunities/partner-logo.png",
+      "status": "IN_PROGRESS"
+    },
+    "stats": {
+      "averageRating": 4.8,
+      "totalReviews": 35,
+      "ratingDistribution": {
+        "1": 0,
+        "2": 1,
+        "3": 2,
+        "4": 5,
+        "5": 27
+      }
+    },
+    "reviews": [
+      {
+        "id": "uuid-review-1",
+        "programId": "uuid-program",
+        "reviewerName": "Pak Sutrisno",
+        "reviewerRole": "Penerima Bantuan Langsung",
+        "reviewerCity": "Kel. Morokrembangan, Surabaya",
+        "rating": 5,
+        "comment": "Program ini sangat membantu kelompok nelayan kami. Bibit mangrove berkualitas dan ada pelatihan pemeliharaan berkala.",
+        "photoUrl": "/uploads/reviews/review-172898000-abc.jpg",
+        "createdAt": "2026-10-14T09:15:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 12.2 Mengirimkan Ulasan Masyarakat (Public Submission)
+Masyarakat, warga sekitar, atau tokoh komunitas mengirimkan penilaian rating (1-5), peran/status, masukan/testimoni, dan opsional foto bukti. Hanya dapat dikirimkan jika status program `IN_PROGRESS` atau `COMPLETED`.
+
+- **Method / Path:** `POST /api/programs/:id/reviews`
+- **Auth:** Publik / Tidak memerlukan token
+- **Rate Limit:** Maksimal 1 ulasan per IP setiap 2 menit untuk mencegah spam.
+
+**Request Body:**
+```json
+{
+  "reviewerName": "Ibu Siti Aminah",
+  "reviewerRole": "Warga Sekitar Program",
+  "reviewerCity": "Surabaya",
+  "rating": 5,
+  "comment": "Kegiatan penanaman sangat rapi dan melibatkan pemuda karang taruna. Semoga berkelanjutan ke desa sebelah.",
+  "photoUrl": "/uploads/reviews/review-172898000-xyz.jpg"
+}
+```
+
+**Response (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Terima kasih atas aspirasi dan penilaian Anda! Ulasan berhasil dikirim.",
+  "data": {
+    "id": "uuid-review-new",
+    "programId": "uuid-program",
+    "reviewerName": "Ibu Siti Aminah",
+    "reviewerRole": "Warga Sekitar Program",
+    "rating": 5,
+    "comment": "Kegiatan penanaman sangat rapi...",
+    "createdAt": "2026-10-15T04:20:00.000Z"
+  }
+}
+```
+
+---
+
+### 12.3 Unggah Foto Bukti Ulasan Masyarakat
+Mengunggah berkas foto dokumentasi pendukung testimoni oleh warga (maksimal 5MB, format gambar).
+
+- **Method / Path:** `POST /api/upload/review`
+- **Auth:** Publik (Multipart form-data: `file`)
+
+**Response (`201 Created`):**
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "Foto testimoni berhasil diunggah",
+  "data": {
+    "url": "/uploads/reviews/review-172898000-xyz.jpg",
+    "filename": "review-172898000-xyz.jpg",
+    "size": 154200,
+    "mimeType": "image/jpeg"
+  }
+}
+```
+
+---
+
+## 13. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -998,13 +1120,13 @@ export async function GET(request: Request) {
 
 ---
 
-## 13. Ringkasan Status Code
+## 14. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |
 | `200` | OK | Request berhasil |
 | `201` | Created | Resource baru dibuat |
-| `400` | Bad Request | Validasi input gagal |
+| `400` | Bad Request | Validasi input gagal / status program belum dibuka |
 | `401` | Unauthorized | Token tidak ada / tidak valid |
 | `403` | Forbidden | Role tidak memiliki hak akses (RBAC) |
 | `404` | Not Found | Data tidak ditemukan |

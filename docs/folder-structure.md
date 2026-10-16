@@ -66,17 +66,19 @@ Kumpulan kode utilitas yang digunakan bersama oleh berbagai modul (*cross-cuttin
   - `analytics/`: Modul visualisasi analitik ESG & pelaporan dampak (`EsgAnalyticsView`, `helpers.ts`, `types.ts`) dengan export CSV dan mode cetak resmi
   - `activities/`: Modul Linimasa Aktivitas & Bukti Lapangan (`ActivityTimeline`, `AddActivityModal`, `VerifyActivityModal`, `PhotoLightboxModal`, `types.ts`)
   - `conversations/`: Modul Percakapan & Negosiasi Kemitraan (`ConversationCenterView`, `ConversationList`, `ChatWindow`, `types.ts`)
+  - `reviews/`: Modul Survei & Ulasan Kepuasan Masyarakat (`BeneficiaryReviewsTab`, `ShareReviewModal`)
+- **`public-review/`**: Halaman publik survei lapangan tanpa autentikasi login (`BeneficiaryReviewView.tsx`)
 
 ### 📁 `src/db/`
 Pengelolaan basis data menggunakan Drizzle ORM:
-- **`schema/`**: Definisi skema tabel MySQL secara type-safe (`users.ts`, `companies.ts`, `partners.ts`, `invitations.ts`, `opportunities.ts`, `opportunity-invitations.ts`, `proposals.ts`, `collaborations.ts`, `collaboration-messages.ts`, `programs.ts`, `program-activities.ts`, `csr-focus-areas.ts`).
+- **`schema/`**: Definisi skema tabel MySQL secara type-safe (`users.ts`, `companies.ts`, `partners.ts`, `invitations.ts`, `opportunities.ts`, `opportunity-invitations.ts`, `proposals.ts`, `collaborations.ts`, `collaboration-messages.ts`, `programs.ts`, `program-activities.ts`, `program-reviews.ts`, `csr-focus-areas.ts`).
 - **`index.ts`**: Inisialisasi koneksi pool MySQL dan instance client Drizzle.
 
 ### 📁 `src/modules/`
-Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, `invitations/`, `opportunities/`, `proposals/`, `collaborations/`, `conversations/`, `programs/`, dan `activities/`:
+Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, `invitations/`, `opportunities/`, `proposals/`, `collaborations/`, `conversations/`, `programs/`, `activities/`, dan `reviews/`:
 - **`Controller`**: Menerima request HTTP, memvalidasi guard autentikasi/RBAC, dan memanggil service.
-- **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password, review proposal, inisiasi kolaborasi, finalisasi MoU & pembuatan program otomatis, pembaruan serapan anggaran).
-- **`Repository`**: Tempat penulisan query langsung ke database menggunakan Drizzle ORM (termasuk *database transactions*).
+- **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password, review proposal, inisiasi kolaborasi, finalisasi MoU & pembuatan program otomatis, pembaruan serapan anggaran, survei kepuasan masyarakat & anti-spam rate limiting).
+- **`Repository`**: Tempat penulisan query langsung ke database menggunakan Drizzle ORM (termasuk *database transactions* dan agregasi skor rating).
 - **`Validation & Interface`**: Skema validasi data request (Zod) dan pendefinisian tipe data/DTO.
 
 ---
