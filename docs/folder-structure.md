@@ -63,6 +63,7 @@ Kumpulan kode utilitas yang digunakan bersama oleh berbagai modul (*cross-cuttin
   - `staging/`: Alur onboarding staging organisasi
   - `company/`: Workspace dashboard perusahaan (`CompanyDashboardView`, `CreateOpportunityModal`, `EditOpportunityModal`, `InvitePartnerModal`, `OpportunityDetailModal`, `ReviewProposalModal`, `CollaborationDetailModal`, `ProgramDetailModal`)
   - `partner/`: Workspace dashboard mitra (`PartnerDashboardView`, `PartnerSidebar`, `SubmitProposalModal`, `ProposalDetailModal`, `PartnerOpportunityDetailModal`, `PartnerCollaborationDetailModal`, `PartnerProgramDetailModal`)
+    - `profile/`: Profil Lembaga ala LinkedIn & Pengisian Portofolio (`PartnerFullProfileView`, `EditPartnerProfileModal`)
   - `analytics/`: Modul visualisasi analitik ESG & pelaporan dampak (`EsgAnalyticsView`, `helpers.ts`, `types.ts`) dengan export CSV dan mode cetak resmi
   - `activities/`: Modul Linimasa Aktivitas & Bukti Lapangan (`ActivityTimeline`, `AddActivityModal`, `VerifyActivityModal`, `PhotoLightboxModal`, `types.ts`)
   - `conversations/`: Modul Percakapan & Negosiasi Kemitraan (`ConversationCenterView`, `ConversationList`, `ChatWindow`, `types.ts`)

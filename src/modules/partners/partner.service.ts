@@ -3,7 +3,13 @@ import { AppLogger } from "@/common/logger/app-logger";
 import { JwtService } from "@/common/jwt/jwt.service";
 import { AuthRepository } from "@/modules/auth/auth.repository";
 import { PartnerRepository } from "./partner.repository";
-import { CreatePartnerDTO, UpdatePartnerDTO, PartnerResponseData, PartnerListQuery } from "./partner.interface";
+import {
+  CreatePartnerDTO,
+  UpdatePartnerDTO,
+  PartnerResponseData,
+  PartnerListQuery,
+  PartnerDetailedProfile,
+} from "./partner.interface";
 import { Partner } from "@/db/schema/partners";
 
 export class PartnerService {
@@ -54,7 +60,7 @@ export class PartnerService {
     };
   }
 
-  async getCurrentPartner(partnerId: string | null): Promise<Partner> {
+  async getCurrentPartner(partnerId: string | null): Promise<PartnerDetailedProfile> {
     if (!partnerId) {
       throw new BadRequestError("User is not associated with any partner organization");
     }
@@ -64,15 +70,26 @@ export class PartnerService {
       throw new NotFoundError("Partner profile not found");
     }
 
-    return partner;
+    const metrics = await this.partnerRepository.getMetrics(partnerId);
+
+    return {
+      ...partner,
+      metrics,
+    };
   }
 
-  async getPartnerById(id: string): Promise<Partner> {
+  async getPartnerById(id: string): Promise<PartnerDetailedProfile> {
     const partner = await this.partnerRepository.findById(id);
     if (!partner) {
       throw new NotFoundError("Partner not found");
     }
-    return partner;
+
+    const metrics = await this.partnerRepository.getMetrics(id);
+
+    return {
+      ...partner,
+      metrics,
+    };
   }
 
   async getAllPartners(query: PartnerListQuery) {

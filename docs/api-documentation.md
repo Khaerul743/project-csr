@@ -257,25 +257,109 @@ Mendaftarkan profil mitra/NGO oleh user dengan role `STAGING`. Setelah sukses, u
 }
 ```
 
-### 4.2 Ambil Profil Mitra Saya
-Mengambil detail mitra milik user yang sedang login.
+### 4.2 Ambil Profil Mitra Saya (Comprehensive LinkedIn-style)
+Mengambil detail profil lengkap mitra milik user yang sedang login beserta skor kepuasan warga, jumlah program selesai, dan rekam jejak.
 
 - **Method / Path:** `GET /api/partners/current`
 - **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
 
+**Response Sukses (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Partner profile retrieved successfully",
+  "data": {
+    "partner": {
+      "id": "uuid-partner",
+      "name": "Yayasan Lindungi Hutan",
+      "tagline": "Merestorasi Pesisir Nusantara Melalui Konservasi Mangrove Berkelanjutan",
+      "description": "Lembaga nirlaba konservasi alam yang fokus pada pemulihan ekosistem pesisir...",
+      "organizationType": "YAYASAN",
+      "foundedYear": 2018,
+      "legalNumber": "AHU-0012345.AH.01.04.Tahun 2018",
+      "npwpNumber": "01.234.567.8-012.000",
+      "portfolioDocUrl": "https://example.com/docs/annual-report-2025.pdf",
+      "coverUrl": "https://example.com/cover.jpg",
+      "logoUrl": "https://example.com/logo.png",
+      "email": "kontak@lindungi-hutan.org",
+      "phone": "+6281234567890",
+      "website": "https://lindungi-hutan.org",
+      "instagramUrl": "https://instagram.com/lindungihutan",
+      "linkedinUrl": "https://linkedin.com/company/lindungihutan",
+      "youtubeUrl": "https://youtube.com/@lindungihutan",
+      "pastActivities": [
+        {
+          "id": "act-1",
+          "title": "Restorasi 10.000 Mangrove Pesisir Brebes",
+          "year": "2024",
+          "clientSponsor": "PT Sumber Energi",
+          "beneficiaries": "450 Kepala Keluarga Nelayan",
+          "description": "Program rehabilitasi abrasi laut dengan penanaman bibit Rhizophora mucronata.",
+          "photoUrl": "https://example.com/photos/brebes-mangrove.jpg"
+        }
+      ],
+      "teamMembers": [
+        {
+          "id": "team-1",
+          "name": "dr. Siti Rahma, M.Sc.",
+          "role": "Executive Director & Ahli Ekologi",
+          "photoUrl": "https://example.com/photos/siti.jpg"
+        }
+      ],
+      "metrics": {
+        "completedPrograms": 8,
+        "totalPrograms": 10,
+        "averageRating": 4.9,
+        "totalReviews": 38
+      }
+    }
+  }
+}
+```
+
 ### 4.3 Update Profil Mitra
-Memperbarui profil mitra.
+Memperbarui profil organisasi secara menyeluruh (Branding visual, legalitas, portofolio kegiatan lampau, tim pengurus).
 
 - **Method / Path:** `PUT /api/partners/current` *(atau `PATCH`)*
 - **Auth:** Bearer Token (Role: `PARTNER_ADMIN`)
 
-### 4.4 Daftar Mitra (Katalog Pencarian CSR)
-Melihat daftar mitra yang terdaftar untuk keperluan pencarian kolaborasi CSR.
+**Request Body (Contoh):**
+```json
+{
+  "tagline": "Solusi Nyata Pemberdayaan Masyarakat dan Konservasi Hutan",
+  "organizationType": "YAYASAN",
+  "foundedYear": 2018,
+  "legalNumber": "AHU-0012345.AH.01.04.Tahun 2018",
+  "npwpNumber": "01.234.567.8-012.000",
+  "coverUrl": "https://example.com/cover.jpg",
+  "pastActivities": [
+    {
+      "title": "Restorasi 10.000 Mangrove Pesisir Brebes",
+      "year": "2024",
+      "clientSponsor": "PT Sumber Energi",
+      "beneficiaries": "450 KK",
+      "description": "Penanaman mangrove pelindung abrasi."
+    }
+  ],
+  "teamMembers": [
+    {
+      "name": "dr. Siti Rahma, M.Sc.",
+      "role": "Executive Director"
+    }
+  ]
+}
+```
+
+### 4.4 Daftar Mitra (Katalog Kurasi CSR)
+Melihat daftar mitra yang terdaftar untuk keperluan penelusuran kurasi mitra oleh perusahaan.
 
 - **Method / Path:** `GET /api/partners?page=1&limit=10&search=hutan`
 - **Auth:** Public / Authenticated
 
 ### 4.5 Detail Mitra Berdasarkan ID
+Mengambil profil komprehensif mitra beserta live metrics (suara kepuasan warga, program selesai) untuk evaluasi perusahaan sebelum mengundang pitch / menerima proposal.
+
 - **Method / Path:** `GET /api/partners/:id`
 - **Auth:** Public / Authenticated
 

@@ -70,6 +70,7 @@ import { CollaborationDetailModal } from "./CollaborationDetailModal";
 import { ProgramDetailModal } from "./ProgramDetailModal";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
+import { PartnerFullProfileView } from "../partner/profile/PartnerFullProfileView";
 
 interface CompanyDashboardViewProps {
   user: {
@@ -129,6 +130,8 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [selectedProposalForReview, setSelectedProposalForReview] = useState<CompanyProposalItem | null>(null);
   const [selectedCollabForDetail, setSelectedCollabForDetail] = useState<CompanyCollaborationItem | null>(null);
   const [selectedProgramForDetail, setSelectedProgramForDetail] = useState<CompanyProgramItem | null>(null);
+  const [selectedPartnerForDetail, setSelectedPartnerForDetail] = useState<any | null>(null);
+  const [isLoadingPartnerDetail, setIsLoadingPartnerDetail] = useState(false);
   const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const isManagement = user.role === "MANAGEMENT";
@@ -215,6 +218,26 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       // fallback
     } finally {
       setIsLoadingPartners(false);
+    }
+  };
+
+  const handleViewPartnerDetail = async (partnerItem: PartnerItem) => {
+    setIsLoadingPartnerDetail(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch(`/api/partners/${partnerItem.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setSelectedPartnerForDetail(json.data);
+      } else {
+        setSelectedPartnerForDetail(partnerItem);
+      }
+    } catch {
+      setSelectedPartnerForDetail(partnerItem);
+    } finally {
+      setIsLoadingPartnerDetail(false);
     }
   };
 
@@ -1217,6 +1240,22 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           {/* VIEW: PARTNERS (KURASI MITRA) */}
           {/* ============================================================ */}
           {activeMenu === "partners" && (
+            selectedPartnerForDetail ? (
+              <PartnerFullProfileView
+                partner={selectedPartnerForDetail}
+                isOwner={false}
+                onBack={() => setSelectedPartnerForDetail(null)}
+                onInvitePitch={() => {
+                  const p = selectedPartnerForDetail;
+                  setSelectedPartnerForDetail(null);
+                  setSelectedPartnerForInvite(p);
+                }}
+                onOpenChat={() => {
+                  setSelectedPartnerForDetail(null);
+                  setActiveMenu("conversations");
+                }}
+              />
+            ) : (
             <div className="space-y-6">
               {/* Search & Focus Filter */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1290,12 +1329,20 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                     return (
                       <div
                         key={partner.id}
-                        className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4"
+                        className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4 group"
                       >
                         <div className="space-y-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
-                              {partner.name.substring(0, 2).toUpperCase()}
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0 overflow-hidden">
+                              {partner.logoUrl ? (
+                                <img
+                                  src={partner.logoUrl}
+                                  alt={partner.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                partner.name.substring(0, 2).toUpperCase()
+                              )}
                             </div>
                             <Badge variant={focus.variant} size="sm">
                               {focus.label}
@@ -1303,9 +1350,14 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                           </div>
 
                           <div>
-                            <h4 className="text-base font-bold text-slate-900 leading-snug">
+                            <h4 className="text-base font-bold text-slate-900 leading-snug group-hover:text-teal-700 transition-colors">
                               {partner.name}
                             </h4>
+                            {partner.tagline ? (
+                              <p className="text-xs font-semibold text-teal-700 line-clamp-1 mt-0.5">
+                                {partner.tagline}
+                              </p>
+                            ) : null}
                             {partner.city && (
                               <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
                                 <MapPin className="w-3.5 h-3.5" />
@@ -1316,20 +1368,28 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                             )}
                           </div>
 
-                          <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                             {partner.description || "Organisasi pelaksana program dampak sosial masyarakat."}
                           </p>
                         </div>
 
                         <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <span className="text-[11px] text-slate-400">
-                            {partner.email || "Email terproteksi"}
-                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isLoadingPartnerDetail}
+                            onClick={() => handleViewPartnerDetail(partner)}
+                            leftIcon={<Eye className="w-3.5 h-3.5" />}
+                            className="text-xs font-bold text-slate-700 border-slate-200 hover:bg-slate-50"
+                          >
+                            Lihat Profil
+                          </Button>
                           <Button
                             variant="primary"
                             size="sm"
                             onClick={() => setSelectedPartnerForInvite(partner)}
                             leftIcon={<Send className="w-3.5 h-3.5" />}
+                            className="text-xs font-bold"
                           >
                             Undang Pitch
                           </Button>
@@ -1340,6 +1400,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                 </div>
               )}
             </div>
+            )
           )}
 
           {/* ============================================================ */}

@@ -58,6 +58,7 @@ export interface OpportunityItem {
 export interface PartnerItem {
   id: string;
   name: string;
+  tagline?: string | null;
   description?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -66,6 +67,15 @@ export interface PartnerItem {
   province?: string | null;
   website?: string | null;
   logoUrl?: string | null;
+  coverUrl?: string | null;
+  organizationType?: string | null;
+  foundedYear?: number | null;
+  legalNumber?: string | null;
+  npwpNumber?: string | null;
+  instagramUrl?: string | null;
+  linkedinUrl?: string | null;
+  youtubeUrl?: string | null;
+  portfolioDocUrl?: string | null;
   focusArea: CsrFocusArea;
   status: string;
   createdAt: string;

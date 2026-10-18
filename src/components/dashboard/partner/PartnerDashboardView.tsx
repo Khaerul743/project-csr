@@ -44,6 +44,7 @@ import { PartnerCollaborationDetailModal } from "./PartnerCollaborationDetailMod
 import { PartnerProgramDetailModal } from "./PartnerProgramDetailModal";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
+import { PartnerFullProfileView } from "./profile/PartnerFullProfileView";
 import {
   PartnerNavMenu,
   PartnerProfile,
@@ -1965,116 +1966,13 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* SUBVIEW 6: PROFILE (PROFIL LEMBAGA) */}
           {/* ========================================================================= */}
           {activeMenu === "profile" && partner && (
-            <div className="space-y-6 max-w-4xl">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                  Profil Lembaga Mitra Pelaksana
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Informasi profil ini ditampilkan kepada perusahaan CSR saat mereka meninjau proposal atau mencari mitra
-                </p>
-              </div>
-
-              <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 sm:p-8 space-y-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pb-6 border-b border-slate-100">
-                  <div className="w-20 h-20 rounded-2xl bg-teal-500/10 text-teal-600 border border-teal-500/20 flex items-center justify-center font-extrabold text-2xl shrink-0">
-                    {partner.logoUrl ? (
-                      <img
-                        src={partner.logoUrl}
-                        alt={partner.name}
-                        className="w-full h-full object-cover rounded-2xl"
-                      />
-                    ) : (
-                      partner.name.charAt(0).toUpperCase()
-                    )}
-                  </div>
-
-                  <div className="space-y-1.5 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-xl font-extrabold text-slate-900">{partner.name}</h3>
-                      {partnerFocus && (
-                        <Badge variant={partnerFocus.variant} size="sm">
-                          {partnerFocus.label}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-500">
-                      Terdaftar pada {formatDate(partner.createdAt)} • Status Akun:{" "}
-                      <span className="font-bold text-emerald-600">Aktif</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Deskripsi Lembaga */}
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                    Deskripsi & Rekam Jejak Lembaga
-                  </span>
-                  <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    {partner.description || "Belum ada deskripsi profil lembaga."}
-                  </p>
-                </div>
-
-                {/* Kontak & Lokasi Info Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-400 block">
-                      Wilayah Operasional
-                    </span>
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                      <MapPin className="w-4 h-4 text-rose-500 shrink-0" />
-                      <span>
-                        {partner.city ? `${partner.city}, ${partner.province}` : "-"}
-                      </span>
-                    </div>
-                    {partner.address && (
-                      <p className="text-[11px] text-slate-500 pt-0.5">{partner.address}</p>
-                    )}
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-400 block">
-                      Email Resmi
-                    </span>
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                      <Mail className="w-4 h-4 text-teal-600 shrink-0" />
-                      <span>{partner.email || "-"}</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-400 block">
-                      Nomor Telepon / Hotline
-                    </span>
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                      <Phone className="w-4 h-4 text-teal-600 shrink-0" />
-                      <span>{partner.phone || "-"}</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-400 block">
-                      Website / Media Sosial
-                    </span>
-                    <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                      <Globe className="w-4 h-4 text-teal-600 shrink-0" />
-                      {partner.website ? (
-                        <a
-                          href={partner.website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="hover:underline text-teal-700 truncate"
-                        >
-                          {partner.website}
-                        </a>
-                      ) : (
-                        <span>-</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <PartnerFullProfileView
+              partner={partner}
+              isOwner={true}
+              onProfileUpdated={(updated) => {
+                setPartner(updated);
+              }}
+            />
           )}
 
           {/* ========================================================================= */}
