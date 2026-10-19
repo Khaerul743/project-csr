@@ -10,7 +10,6 @@ import {
   FileCheck2,
   Building2,
   LogOut,
-  Sparkles,
   X,
   ChevronRight,
   ShieldCheck,
@@ -19,6 +18,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { AppLogo } from "@/components/ui/app-logo";
 
 export type CompanyNavMenu =
   | "overview"
@@ -171,19 +171,11 @@ export function Sidebar({
     <div className="flex flex-col h-full bg-slate-900 text-slate-200 border-r border-slate-800 select-none">
       {/* 1. Header & Brand */}
       <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 shrink-0">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div className="min-w-0">
-            <span className="font-extrabold text-white text-base tracking-tight block truncate">
-              CSR Impact Hub
-            </span>
-            <span className="text-[11px] text-emerald-400 font-semibold block truncate">
-              {organizationName || "Workspace Perusahaan"}
-            </span>
-          </div>
-        </div>
+        <AppLogo
+          size="md"
+          theme="dark"
+          subtitle={organizationName || "Workspace Perusahaan"}
+        />
 
         {/* Close button on mobile */}
         <button

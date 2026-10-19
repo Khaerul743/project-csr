@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Sparkles, Building2, Users2, BarChart3, ShieldCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { AppLogo } from "@/components/ui/app-logo";
 
 export interface AuthLayoutProps {
   children: React.ReactNode;
@@ -29,18 +30,13 @@ export function AuthLayout({
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none" />
 
         {/* Brand Header */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-slate-950 font-bold shadow-lg shadow-emerald-500/20">
-            <Sparkles className="w-5 h-5 text-slate-950" />
-          </div>
-          <div>
-            <span className="text-xl font-bold tracking-tight text-white block">
-              CSR Impact Hub
-            </span>
-            <span className="text-xs text-emerald-400 font-medium tracking-wide">
-              KOLABORASI & KEMITRAAN ESG
-            </span>
-          </div>
+        <div className="relative z-10">
+          <AppLogo
+            size="lg"
+            theme="dark"
+            subtitle="KOLABORASI & KEMITRAAN ESG"
+            href="/"
+          />
         </div>
 
         {/* Hero Narrative & Fitur Utama */}
@@ -107,18 +103,13 @@ export function AuthLayout({
       {/* Sisi Kanan: Form Card Area */}
       <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 xl:p-16">
         {/* Mobile Header Branding */}
-        <div className="lg:hidden flex items-center gap-2.5 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shadow-md">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-lg font-bold text-slate-900 block leading-tight">
-              CSR Impact Hub
-            </span>
-            <span className="text-[10px] text-emerald-600 font-semibold tracking-wide">
-              KOLABORASI & KEMITRAAN ESG
-            </span>
-          </div>
+        <div className="lg:hidden mb-8">
+          <AppLogo
+            size="md"
+            theme="light"
+            subtitle="KOLABORASI & KEMITRAAN ESG"
+            href="/"
+          />
         </div>
 
         {/* Card Form Container */}

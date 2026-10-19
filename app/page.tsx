@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { AppLogo } from "@/components/ui/app-logo";
 
 export default function HomePage() {
   return (
@@ -19,19 +20,12 @@ export default function HomePage() {
       {/* Navbar */}
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-600/20">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-lg font-bold tracking-tight text-slate-900 block leading-tight">
-                CSR Impact Hub
-              </span>
-              <span className="text-[10px] text-emerald-600 font-semibold tracking-wider uppercase">
-                Platform Kolaborasi ESG
-              </span>
-            </div>
-          </div>
+          <AppLogo
+            size="md"
+            theme="light"
+            subtitle="Platform Kolaborasi ESG"
+            href="/"
+          />
 
           <div className="flex items-center gap-3">
             <Link href="/login">
@@ -197,10 +191,12 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 text-white">
-            <Sparkles className="w-5 h-5 text-emerald-400" />
-            <span className="font-bold tracking-tight">CSR Impact Hub</span>
-          </div>
+          <AppLogo
+            size="sm"
+            theme="dark"
+            subtitle="Platform Kolaborasi Perusahaan & Mitra CSR"
+            href="/"
+          />
           <p className="text-xs text-slate-500">
             &copy; 2026 CSR Impact Hub. Platform Kolaborasi Perusahaan & Mitra CSR.
           </p>

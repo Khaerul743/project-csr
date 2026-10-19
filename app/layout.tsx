@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "CSR Impact Hub - Platform Kolaborasi Perusahaan & Mitra",
   description:
     "Platform kolaborasi strategis menghubungkan perusahaan dan mitra dalam mengeksekusi proyek CSR dan inisiatif keberlanjutan (ESG) nyata.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

@@ -5,3 +5,4 @@ export * from "./badge";
 export * from "./card";
 export * from "./textarea";
 export * from "./modal";
+export * from "./app-logo";
