@@ -28,6 +28,7 @@ export class ForBiddenError extends AppError {
         super(message, 403, details)
     }
 }
+export { ForBiddenError as ForbiddenError };
 
 export class NotFoundError extends AppError {
     constructor(message: string = "Resource Not Found", details?: unknown) {

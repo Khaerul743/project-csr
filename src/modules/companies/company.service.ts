@@ -3,7 +3,13 @@ import { AppLogger } from "@/common/logger/app-logger";
 import { JwtService } from "@/common/jwt/jwt.service";
 import { AuthRepository } from "@/modules/auth/auth.repository";
 import { CompanyRepository } from "./company.repository";
-import { CreateCompanyDTO, UpdateCompanyDTO, CompanyResponseData, CompanyListQuery } from "./company.interface";
+import {
+  CreateCompanyDTO,
+  UpdateCompanyDTO,
+  CompanyResponseData,
+  CompanyListQuery,
+  CompanyDetailedProfile,
+} from "./company.interface";
 import { Company } from "@/db/schema/companies";
 
 export class CompanyService {
@@ -54,7 +60,7 @@ export class CompanyService {
     };
   }
 
-  async getCurrentCompany(companyId: string | null): Promise<Company & { members: any[] }> {
+  async getCurrentCompany(companyId: string | null): Promise<CompanyDetailedProfile> {
     if (!companyId) {
       throw new BadRequestError("User is not associated with any company");
     }
@@ -64,27 +70,43 @@ export class CompanyService {
       throw new NotFoundError("Company profile not found");
     }
 
-    const members = await this.companyRepository.findMembers(companyId);
+    const [members, metrics, openOpportunities] = await Promise.all([
+      this.companyRepository.findMembers(companyId),
+      this.companyRepository.getMetrics(companyId),
+      this.companyRepository.getOpenOpportunities(companyId),
+    ]);
 
     return {
       ...company,
       members,
+      metrics,
+      openOpportunities,
     };
   }
 
-  async getCompanyById(id: string): Promise<Company> {
+  async getCompanyById(id: string): Promise<CompanyDetailedProfile> {
     const company = await this.companyRepository.findById(id);
     if (!company) {
       throw new NotFoundError("Company not found");
     }
-    return company;
+
+    const [metrics, openOpportunities] = await Promise.all([
+      this.companyRepository.getMetrics(id),
+      this.companyRepository.getOpenOpportunities(id),
+    ]);
+
+    return {
+      ...company,
+      metrics,
+      openOpportunities,
+    };
   }
 
   async getAllCompanies(query: CompanyListQuery) {
     return this.companyRepository.findAll(query);
   }
 
-  async updateCompany(companyId: string | null, dto: UpdateCompanyDTO): Promise<Company> {
+  async updateCompany(companyId: string | null, dto: UpdateCompanyDTO): Promise<CompanyDetailedProfile> {
     if (!companyId) {
       throw new BadRequestError("User is not associated with any company");
     }
@@ -94,6 +116,7 @@ export class CompanyService {
       throw new NotFoundError("Company not found");
     }
 
-    return this.companyRepository.updateCompany(companyId, dto);
+    await this.companyRepository.updateCompany(companyId, dto);
+    return this.getCurrentCompany(companyId);
   }
 }

@@ -11,6 +11,7 @@ import {
   Send,
   Sparkles,
   CheckCircle2,
+  Eye,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface PartnerOpportunityDetailModalProps {
   opportunity: OpportunityItem | null;
   onClose: () => void;
   onApply: (opportunity: OpportunityItem) => void;
+  onViewCompany?: (companyId: string) => void;
 }
 
 export function PartnerOpportunityDetailModal({
@@ -29,6 +31,7 @@ export function PartnerOpportunityDetailModal({
   opportunity,
   onClose,
   onApply,
+  onViewCompany,
 }: PartnerOpportunityDetailModalProps) {
   if (!isOpen || !opportunity) return null;
 
@@ -96,26 +99,44 @@ export function PartnerOpportunityDetailModal({
         {/* Content Body */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
           {/* Sponsoring Company */}
-          <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-            {opportunity.companyLogo ? (
-              <img
-                src={opportunity.companyLogo}
-                alt={opportunity.companyName || "Logo"}
-                className="w-10 h-10 rounded-xl object-cover border border-slate-200"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 border border-teal-500/20 flex items-center justify-center font-bold">
-                <Building2 className="w-5 h-5" />
+          <div className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className="flex items-center gap-3 min-w-0">
+              {opportunity.companyLogo ? (
+                <img
+                  src={opportunity.companyLogo}
+                  alt={opportunity.companyName || "Logo"}
+                  className="w-10 h-10 rounded-xl object-contain bg-white border border-slate-200 shrink-0 p-0.5"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 border border-teal-500/20 flex items-center justify-center font-bold shrink-0">
+                  <Building2 className="w-5 h-5" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
+                  Perusahaan Penyelenggara CSR
+                </span>
+                <h4 className="font-extrabold text-slate-900 text-sm truncate">
+                  {opportunity.companyName || "Perusahaan Mitra"}
+                </h4>
               </div>
-            )}
-            <div>
-              <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block">
-                Perusahaan Penyelenggara CSR
-              </span>
-              <h4 className="font-extrabold text-slate-900 text-sm">
-                {opportunity.companyName || "Perusahaan Mitra"}
-              </h4>
             </div>
+
+            {onViewCompany && opportunity.companyId && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onClose();
+                  onViewCompany(opportunity.companyId);
+                }}
+                leftIcon={<Eye className="w-3.5 h-3.5" />}
+                className="text-xs font-bold shrink-0 border-slate-200 hover:bg-slate-100"
+              >
+                Lihat Profil
+              </Button>
+            )}
           </div>
 
           {/* Title & Description */}

@@ -71,6 +71,7 @@ import { ProgramDetailModal } from "./ProgramDetailModal";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
 import { PartnerFullProfileView } from "../partner/profile/PartnerFullProfileView";
+import { CompanyFullProfileView } from "./profile/CompanyFullProfileView";
 
 interface CompanyDashboardViewProps {
   user: {
@@ -2525,88 +2526,16 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: PROFILE (PROFIL PERUSAHAAN) */}
+          {/* VIEW: PROFILE (PROFIL PERUSAHAAN ALA LINKEDIN) */}
           {/* ============================================================ */}
           {activeMenu === "profile" && (
-            <div className="space-y-6">
-              {company ? (
-                <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 max-w-3xl">
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-bold text-2xl shadow-md shrink-0">
-                      {company.name.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-900 leading-tight">
-                        {company.name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="emerald" size="sm" hasDot>
-                          Terverifikasi Aktif
-                        </Badge>
-                        <span className="text-xs text-slate-400">
-                          {company.city}, {company.province}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                      Deskripsi Profil
-                    </h4>
-                    <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100">
-                      {company.description || "Belum ada deskripsi profil perusahaan."}
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 space-y-1">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <Mail className="w-3.5 h-3.5" />
-                        <span>Email Kontak</span>
-                      </div>
-                      <span className="font-semibold text-slate-800 block">
-                        {company.email || "-"}
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 space-y-1">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <Phone className="w-3.5 h-3.5" />
-                        <span>Nomor Telepon</span>
-                      </div>
-                      <span className="font-semibold text-slate-800 block">
-                        {company.phone || "-"}
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 space-y-1">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span>Alamat Domisili</span>
-                      </div>
-                      <span className="font-semibold text-slate-800 block">
-                        {company.address || "-"}
-                      </span>
-                    </div>
-
-                    <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 space-y-1">
-                      <div className="flex items-center gap-1.5 text-slate-400">
-                        <Globe className="w-3.5 h-3.5" />
-                        <span>Website Resmi</span>
-                      </div>
-                      <span className="font-semibold text-slate-800 block truncate">
-                        {company.website || "-"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-8 text-center text-xs text-slate-400">
-                  Memuat profil perusahaan...
-                </div>
-              )}
-            </div>
+            <CompanyFullProfileView
+              company={company}
+              isOwner={true}
+              onProfileUpdated={(updated) => {
+                setCompany(updated);
+              }}
+            />
           )}
         </main>
       </div>

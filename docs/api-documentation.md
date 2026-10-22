@@ -181,25 +181,116 @@ Mendaftarkan profil perusahaan oleh user dengan role `STAGING`. Setelah sukses, 
 }
 ```
 
-### 3.2 Ambil Profil Perusahaan Saya
-Mengambil data detail perusahaan dari user yang sedang login.
+### 3.2 Ambil Profil Perusahaan Saya (Comprehensive LinkedIn-style)
+Mengambil data detail profil perusahaan dari user yang sedang login beserta seluruh metrik realisasi dana CSR, program selesai, daftar inisiatif aktif, dan data anggota tim internal.
 
 - **Method / Path:** `GET /api/companies/current`
 - **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
 
+**Response Sukses (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Company profile retrieved successfully",
+  "data": {
+    "id": "uuid-company",
+    "name": "PT Sumber Energi Hijau",
+    "tagline": "Mengakselerasi Transisi Energi Bersih & Kemandirian Masyarakat Pesisir",
+    "description": "Perusahaan penyedia solusi energi terbarukan terkemuka di Asia Tenggara...",
+    "csrVision": "Mewujudkan Net-Zero Emission dan kemandirian ekonomi masyarakat lingkar operasional melalui program berbasis ESG.",
+    "industry": "Energi, Minyak & Gas",
+    "companySize": "1.000+ Karyawan (Enterprise / Multinasional)",
+    "foundedYear": 2008,
+    "email": "csr@sumberenergi.co.id",
+    "phone": "+62 21 5551234",
+    "address": "Gedung Energy Tower Lt. 18, Jl. Jend. Sudirman Kav. 52-53",
+    "city": "Jakarta Selatan",
+    "province": "DKI Jakarta",
+    "website": "https://sumberenergi.co.id",
+    "logoUrl": "https://example.com/logo.png",
+    "coverUrl": "https://example.com/cover.jpg",
+    "nibNumber": "9120001234567",
+    "npwpNumber": "01.234.567.8-012.000",
+    "sustainabilityReportUrl": "https://sumberenergi.co.id/reports/sustainability-report-2025.pdf",
+    "linkedinUrl": "https://linkedin.com/company/sumber-energi-hijau",
+    "instagramUrl": "https://instagram.com/sumberenergihijau",
+    "csrLeaders": [
+      {
+        "id": "pic-1",
+        "name": "Rian Anggoro, S.T., M.M.",
+        "role": "Head of Corporate Sustainability & CSR",
+        "email": "rian.anggoro@sumberenergi.co.id",
+        "phone": "+6281234567890",
+        "photoUrl": "https://example.com/photos/rian.jpg"
+      }
+    ],
+    "metrics": {
+      "totalDisbursedBudget": 2500000000,
+      "completedPrograms": 6,
+      "totalPrograms": 8,
+      "totalOpportunities": 5,
+      "totalPartnersEngaged": 4,
+      "averageRating": 4.9,
+      "totalReviews": 52
+    },
+    "openOpportunities": [
+      {
+        "id": "uuid-opp",
+        "title": "Restorasi Ekosistem Mangrove & Edukasi Pesisir Brebes",
+        "focusArea": "LINGKUNGAN",
+        "budget": "350000000",
+        "status": "OPEN"
+      }
+    ],
+    "members": [
+      {
+        "id": "uuid-user",
+        "name": "Budi Santoso",
+        "email": "budi@example.com",
+        "role": "MANAGEMENT"
+      }
+    ]
+  }
+}
+```
+
 ### 3.3 Update Profil Perusahaan
-Memperbarui data profil perusahaan.
+Memperbarui profil korporat (Visual & Branding, Sektor Industri, Visi CSR, Legalitas NIB/NPWP, Sustainability Report PDF, serta PIC CSR).
 
 - **Method / Path:** `PUT /api/companies/current` *(atau `PATCH`)*
 - **Auth:** Bearer Token (Role: `MANAGEMENT`)
 
+**Request Body (Contoh):**
+```json
+{
+  "tagline": "Mengakselerasi Transisi Energi Bersih & Kemandirian Masyarakat Pesisir",
+  "csrVision": "Mewujudkan Net-Zero Emission dan kemandirian ekonomi masyarakat pesisir.",
+  "industry": "Energi, Minyak & Gas",
+  "companySize": "1.000+ Karyawan (Enterprise / Multinasional)",
+  "foundedYear": 2008,
+  "nibNumber": "9120001234567",
+  "npwpNumber": "01.234.567.8-012.000",
+  "sustainabilityReportUrl": "https://sumberenergi.co.id/reports/sustainability-report-2025.pdf",
+  "csrLeaders": [
+    {
+      "name": "Rian Anggoro, S.T., M.M.",
+      "role": "Head of Corporate Sustainability",
+      "email": "rian.anggoro@sumberenergi.co.id"
+    }
+  ]
+}
+```
+
 ### 3.4 Daftar Perusahaan (Katalog)
-Melihat daftar perusahaan terdaftar dengan paginasi dan pencarian.
+Melihat daftar perusahaan terdaftar dengan paginasi dan pencarian (nama, kota, atau industri).
 
 - **Method / Path:** `GET /api/companies?page=1&limit=10&search=energi`
 - **Auth:** Public / Authenticated
 
 ### 3.5 Detail Perusahaan Berdasarkan ID
+Mengambil profil lengkap perusahaan beserta metrik performa dampak dan inisiatif CSR yang sedang dibuka. Sangat berguna untuk evaluasi mitra/NGO sebelum mengajukan proposal kemitraan.
+
 - **Method / Path:** `GET /api/companies/:id`
 - **Auth:** Public / Authenticated
 
@@ -1182,7 +1273,143 @@ Mengunggah berkas foto dokumentasi pendukung testimoni oleh warga (maksimal 5MB,
 
 ---
 
-## 13. Contoh Implementasi RBAC Guard
+## 13. Modul Realisasi Dana Bertahap & Akuntabilitas Pengeluaran (`/api/programs/[id]/...`)
+
+Modul ini memfasilitasi transparansi realisasi dana CSR multi-tahap (termin) antara Perusahaan (`CSR_ADMIN`, `MANAGEMENT`) dan Mitra Pelaksana (`PARTNER_ADMIN`).
+
+### 13.1 Get Program Finances Summary & Logs
+Mengambil ringkasan pagu vs dana disalurkan vs terkonfirmasi vs serapan nota, serta daftar termin dan bukti belanja.
+
+- **Method / Path:** `GET /api/programs/:id/finances`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN` terkait)
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Data keuangan program berhasil diambil",
+  "data": {
+    "summary": {
+      "agreedBudget": 150000000,
+      "totalDisbursed": 100000000,
+      "totalConfirmedReceived": 60000000,
+      "totalPendingConfirmation": 40000000,
+      "totalExpensesReported": 45000000,
+      "totalExpensesVerified": 45000000,
+      "remainingPartnerBalance": 15000000,
+      "unreleasedBudget": 90000000,
+      "absorptionRate": 30.0
+    },
+    "disbursements": [
+      {
+        "id": "disb-1",
+        "programId": "prog-1",
+        "trancheNumber": 1,
+        "trancheName": "Termin 1 (DP Persiapan 40%)",
+        "amount": "60000000.00",
+        "disbursedDate": "2026-10-15T00:00:00.000Z",
+        "transferProofUrl": "/uploads/slip-termin-1.jpg",
+        "bankName": "Bank Mandiri",
+        "bankAccountNumber": "1234567890",
+        "bankAccountHolder": "Yayasan Bina Lingkungan",
+        "status": "CONFIRMED",
+        "confirmedAt": "2026-10-16T10:00:00.000Z",
+        "confirmedByName": "Mitra Pelaksana",
+        "confirmedNotes": "Dana telah masuk di rekening yayasan."
+      }
+    ],
+    "expenses": [
+      {
+        "id": "exp-1",
+        "programId": "prog-1",
+        "disbursementId": "disb-1",
+        "category": "BAHAN_DAN_MATERIAL",
+        "title": "Pengadaan 5.000 Bibit Mangrove Rhizophora",
+        "description": "Kwitansi no 042/TANI/X/2026",
+        "amount": "25000000.00",
+        "expenseDate": "2026-10-18T00:00:00.000Z",
+        "receiptUrl": "/uploads/nota-bibit.jpg",
+        "verificationStatus": "VERIFIED",
+        "verifiedByName": "CSR Manager",
+        "verifiedAt": "2026-10-19T08:00:00.000Z",
+        "verificationNotes": "Nota sah dan stempel toko terverifikasi."
+      }
+    ]
+  }
+}
+```
+
+### 13.2 Salurkan Dana Termin Baru (Company)
+Perusahaan menyalurkan dana termin bertahap beserta slip bukti transfer bank.
+
+- **Method / Path:** `POST /api/programs/:id/disbursements`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`)
+
+**Request Body:**
+```json
+{
+  "trancheNumber": 2,
+  "trancheName": "Termin 2 (Pelaksanaan Lapangan 40%)",
+  "amount": 60000000,
+  "bankName": "Bank Central Asia (BCA)",
+  "bankAccountNumber": "987654321",
+  "bankAccountHolder": "Yayasan Bina Lingkungan",
+  "disbursedDate": "2026-10-20",
+  "transferProofUrl": "/uploads/transfer-termin-2.jpg",
+  "notes": "Pencairan tahap kedua untuk penanaman bibit"
+}
+```
+
+### 13.3 Konfirmasi Penerimaan Dana Termin (Partner)
+Mitra memverifikasi masuknya dana ke rekening yayasan. Setelah dikonfirmasi, dana resmi masuk kas kelolaan program.
+
+- **Method / Path:** `POST /api/programs/:id/disbursements/:disbursementId/confirm`
+- **Auth:** Bearer Token (`PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "confirmedNotes": "Dana Rp 60.000.000 telah masuk mutasi rekening operasional per tgl 20 Okt."
+}
+```
+
+### 13.4 Catat Pengeluaran & Bukti Nota (Partner)
+Mitra mencatat belanja riil program CSR disertai foto bukti nota/kwitansi.
+
+- **Method / Path:** `POST /api/programs/:id/expenses`
+- **Auth:** Bearer Token (`PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "disbursementId": "disb-1",
+  "category": "LOGISTIK_DAN_TRANSPORTASI",
+  "title": "Sewa Perahu & Logistik Angkut Bibit",
+  "description": "Invoice Nelayan Bahari No. 12/X/2026",
+  "amount": 5000000,
+  "expenseDate": "2026-10-20",
+  "receiptUrl": "/uploads/nota-perahu.jpg"
+}
+```
+
+### 13.5 Verifikasi Nota Pengeluaran (Company)
+Perusahaan memeriksa keabsahan nota belanja fisik.
+
+- **Method / Path:** `POST /api/programs/:id/expenses/:expenseId/verify`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`)
+
+**Request Body:**
+```json
+{
+  "verificationStatus": "VERIFIED",
+  "verificationNotes": "Nota terverifikasi stempel basah penyedia jasa."
+}
+```
+
+---
+
+## 14. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -1204,7 +1431,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 14. Ringkasan Status Code
+## 15. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |

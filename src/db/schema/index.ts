@@ -11,3 +11,5 @@ export * from "./programs";
 export * from "./program-activities";
 export * from "./collaboration-messages";
 export * from "./program-reviews";
+export * from "./program-disbursements";
+export * from "./program-expenses";

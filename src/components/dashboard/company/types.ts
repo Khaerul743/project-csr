@@ -13,7 +13,12 @@ export interface CompanyMember {
 export interface CompanyProfile {
   id: string;
   name: string;
+  tagline?: string | null;
   description?: string | null;
+  csrVision?: string | null;
+  industry?: string | null;
+  companySize?: string | null;
+  foundedYear?: number | null;
   email?: string | null;
   phone?: string | null;
   address?: string | null;
@@ -21,8 +26,17 @@ export interface CompanyProfile {
   province?: string | null;
   website?: string | null;
   logoUrl?: string | null;
+  coverUrl?: string | null;
+  nibNumber?: string | null;
+  npwpNumber?: string | null;
+  sustainabilityReportUrl?: string | null;
+  instagramUrl?: string | null;
+  linkedinUrl?: string | null;
+  csrLeaders?: any;
   status: string;
   members?: CompanyMember[];
+  metrics?: any;
+  openOpportunities?: any[];
 }
 
 export interface OpportunityItem {

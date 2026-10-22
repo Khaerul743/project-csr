@@ -45,6 +45,7 @@ import { PartnerProgramDetailModal } from "./PartnerProgramDetailModal";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
 import { PartnerFullProfileView } from "./profile/PartnerFullProfileView";
+import { CompanyFullProfileView } from "../company/profile/CompanyFullProfileView";
 import {
   PartnerNavMenu,
   PartnerProfile,
@@ -114,6 +115,24 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
   const [selectedProposalForDetail, setSelectedProposalForDetail] = useState<ProposalItem | null>(null);
   const [selectedCollabForDetail, setSelectedCollabForDetail] = useState<PartnerCollaborationItem | null>(null);
   const [selectedProgramForDetail, setSelectedProgramForDetail] = useState<PartnerProgramItem | null>(null);
+  const [selectedCompanyForDetail, setSelectedCompanyForDetail] = useState<any | null>(null);
+  const [isLoadingCompanyDetail, setIsLoadingCompanyDetail] = useState(false);
+
+  const handleViewCompanyDetail = async (companyId: string) => {
+    setIsLoadingCompanyDetail(true);
+    try {
+      const res = await fetch(`/api/companies/${companyId}`);
+      if (res.ok) {
+        const json = await res.json();
+        setSelectedCompanyForDetail(json.data);
+        setActiveMenu("explore");
+      }
+    } catch {
+      // silent fallback
+    } finally {
+      setIsLoadingCompanyDetail(false);
+    }
+  };
 
   const handleLogout = () => {
     if (onLogout) {
@@ -825,7 +844,17 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* ========================================================================= */}
           {/* SUBVIEW 2: EXPLORE OPPORTUNITIES (KATALOG PELUANG) */}
           {/* ========================================================================= */}
-          {activeMenu === "explore" && (
+          {activeMenu === "explore" && selectedCompanyForDetail ? (
+            <CompanyFullProfileView
+              company={selectedCompanyForDetail}
+              isOwner={false}
+              onBack={() => setSelectedCompanyForDetail(null)}
+              onApplyOpportunity={(opp) => {
+                setSelectedCompanyForDetail(null);
+                setSelectedOppForProposal(opp);
+              }}
+            />
+          ) : activeMenu === "explore" && (
             <div className="space-y-6">
               {/* Header Title & Filter */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -957,12 +986,20 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                         <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
                           <div className="space-y-2">
                             {/* Company Name */}
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
-                              <Building2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                              <span className="font-semibold text-slate-700 truncate">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (opp.companyId) handleViewCompanyDetail(opp.companyId);
+                              }}
+                              className="flex items-center gap-2 text-xs text-slate-500 hover:text-emerald-700 transition-colors text-left group/comp"
+                              title="Lihat Profil Perusahaan"
+                            >
+                              <Building2 className="w-3.5 h-3.5 text-teal-600 shrink-0 group-hover/comp:scale-110 transition-transform" />
+                              <span className="font-semibold text-slate-700 group-hover/comp:text-emerald-700 group-hover/comp:underline truncate">
                                 {opp.companyName || "Perusahaan CSR"}
                               </span>
-                            </div>
+                            </button>
 
                             <h3 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2">
                               {opp.title}
@@ -2001,6 +2038,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
         opportunity={selectedOppForDetail}
         onClose={() => setSelectedOppForDetail(null)}
         onApply={(opp) => setSelectedOppForProposal(opp)}
+        onViewCompany={(companyId) => handleViewCompanyDetail(companyId)}
       />
 
       {/* 2. Modal Ajukan Proposal */}

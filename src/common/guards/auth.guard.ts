@@ -3,6 +3,8 @@ import { UnauthorizedError, ForBiddenError } from "../errors/app-error";
 import { JwtService } from "../jwt/jwt.service";
 import { JwtUserPayload } from "../jwt/jwt.interface";
 
+export type AuthUser = JwtUserPayload;
+
 export class AuthGuard {
   /**
    * Authenticates the incoming request by verifying Bearer JWT token.

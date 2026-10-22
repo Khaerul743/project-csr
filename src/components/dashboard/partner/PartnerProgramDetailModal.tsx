@@ -17,6 +17,7 @@ import {
   Camera,
   FileText,
   Star,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
 import { ActivityTimeline } from "../activities/ActivityTimeline";
 import { BeneficiaryReviewsTab } from "../reviews/BeneficiaryReviewsTab";
+import { ProgramFinancesTab } from "../finances/ProgramFinancesTab";
 
 interface PartnerProgramDetailModalProps {
   isOpen: boolean;
@@ -45,7 +47,7 @@ export function PartnerProgramDetailModal({
   program,
   onSuccess,
 }: PartnerProgramDetailModalProps) {
-  const [activeTab, setActiveTab] = useState<"activities" | "overview" | "reviews">("activities");
+  const [activeTab, setActiveTab] = useState<"activities" | "finances" | "overview" | "reviews">("activities");
   const [status, setStatus] = useState<ProgramStatus>("PLANNED");
   const [spentBudget, setSpentBudget] = useState("");
   const [actualBeneficiaries, setActualBeneficiaries] = useState("");
@@ -172,11 +174,11 @@ export function PartnerProgramDetailModal({
         </div>
 
         {/* Tab Navigation */}
-        <div className="px-6 border-b border-slate-100 flex items-center gap-6 bg-slate-50/30">
+        <div className="px-6 border-b border-slate-100 flex items-center gap-6 bg-slate-50/30 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab("activities")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
               activeTab === "activities"
                 ? "border-teal-600 text-teal-700 font-extrabold"
                 : "border-transparent text-slate-500 hover:text-slate-800"
@@ -187,8 +189,20 @@ export function PartnerProgramDetailModal({
           </button>
           <button
             type="button"
+            onClick={() => setActiveTab("finances")}
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === "finances"
+                ? "border-teal-600 text-teal-700 font-extrabold"
+                : "border-transparent text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <Wallet className="w-4 h-4 text-emerald-600" />
+            Realisasi Dana & Keuangan
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab("overview")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
               activeTab === "overview"
                 ? "border-teal-600 text-teal-700 font-extrabold"
                 : "border-transparent text-slate-500 hover:text-slate-800"
@@ -200,7 +214,7 @@ export function PartnerProgramDetailModal({
           <button
             type="button"
             onClick={() => setActiveTab("reviews")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all ${
+            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
               activeTab === "reviews"
                 ? "border-teal-600 text-teal-700 font-extrabold"
                 : "border-transparent text-slate-500 hover:text-slate-800"
@@ -219,6 +233,16 @@ export function PartnerProgramDetailModal({
               programTitle={program.title}
               role="PARTNER"
               onActivityChanged={onSuccess}
+            />
+          </div>
+        ) : activeTab === "finances" ? (
+          <div className="flex-1 overflow-y-auto p-6">
+            <ProgramFinancesTab
+              programId={program.id}
+              programTitle={program.title}
+              agreedBudget={program.budget || "0"}
+              role="PARTNER"
+              onFinancesUpdated={onSuccess}
             />
           </div>
         ) : activeTab === "reviews" ? (
@@ -244,9 +268,13 @@ export function PartnerProgramDetailModal({
                 <Activity className="w-3.5 h-3.5 text-teal-400" />
                 Laporan Penyerapan Anggaran Kegiatan
               </span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30">
-                {progressPercent}% Terserap
-              </span>
+              <button
+                type="button"
+                onClick={() => setActiveTab("finances")}
+                className="text-xs font-bold px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30 hover:bg-teal-500/30 transition-all flex items-center gap-1"
+              >
+                Detail Keuangan & Nota →
+              </button>
             </div>
 
             <div className="space-y-2">
