@@ -6,6 +6,7 @@ import { users } from "./users";
 export const proposalStatusEnum = [
   "SUBMITTED",
   "UNDER_REVIEW",
+  "REVISION_REQUESTED",
   "ACCEPTED",
   "REJECTED",
   "WITHDRAWN",

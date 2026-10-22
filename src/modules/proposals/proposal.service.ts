@@ -9,11 +9,12 @@ import { opportunityRepository } from "@/modules/opportunities";
 import { ProposalRepository } from "./proposal.repository";
 import {
   CreateProposalDTO,
+  UpdateProposalDTO,
   ReviewProposalDTO,
   ProposalListQuery,
   ProposalWithDetails,
 } from "./proposal.interface";
-import { Proposal } from "@/db/schema/proposals";
+import { Proposal, NewProposal } from "@/db/schema/proposals";
 
 export class ProposalService {
   private readonly logger = new AppLogger("ProposalService");
@@ -174,6 +175,59 @@ export class ProposalService {
     return { proposal: updated };
   }
 
+  async updateProposal(
+    proposalId: string,
+    partnerId: string | null,
+    dto: UpdateProposalDTO
+  ): Promise<Proposal> {
+    if (!partnerId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan organisasi mitra manapun");
+    }
+
+    const proposal = await this.proposalRepository.findById(proposalId);
+    if (!proposal) {
+      throw new NotFoundError("Proposal tidak ditemukan");
+    }
+
+    if (proposal.partnerId !== partnerId) {
+      throw new ForBiddenError("Anda bukan pemilik proposal ini");
+    }
+
+    const editableStatuses = ["SUBMITTED", "UNDER_REVIEW", "REVISION_REQUESTED"];
+    if (!editableStatuses.includes(proposal.status)) {
+      throw new BadRequestError(
+        `Proposal dengan status '${proposal.status}' tidak dapat diubah lagi`
+      );
+    }
+
+    this.logger.info(`Partner ${partnerId} updating proposal ${proposalId}`);
+
+    const updatePayload: Partial<NewProposal> = {
+      // Ketika mitra menyimpan revisi, kembalikan status ke SUBMITTED agar perusahaan tahu ada pembaruan untuk ditinjau
+      status: "SUBMITTED",
+      updatedAt: new Date(),
+    };
+
+    if (dto.title !== undefined) updatePayload.title = dto.title.trim();
+    if (dto.summary !== undefined) updatePayload.summary = dto.summary.trim();
+    if (dto.proposedBudget !== undefined) {
+      const cleaned =
+        typeof dto.proposedBudget === "number"
+          ? String(dto.proposedBudget)
+          : String(dto.proposedBudget).replace(/[^\d.]/g, "");
+      updatePayload.proposedBudget = cleaned;
+    }
+    if (dto.durationMonths !== undefined) updatePayload.durationMonths = dto.durationMonths;
+    if (dto.targetBeneficiaries !== undefined) {
+      updatePayload.targetBeneficiaries = dto.targetBeneficiaries?.trim() || null;
+    }
+    if (dto.documentUrl !== undefined) {
+      updatePayload.documentUrl = dto.documentUrl?.trim() || null;
+    }
+
+    return this.proposalRepository.update(proposalId, updatePayload);
+  }
+
   async withdrawProposal(
     proposalId: string,
     partnerId: string | null
@@ -191,7 +245,11 @@ export class ProposalService {
       throw new ForBiddenError("Anda bukan pemilik proposal ini");
     }
 
-    if (proposal.status !== "SUBMITTED" && proposal.status !== "UNDER_REVIEW") {
+    if (
+      proposal.status !== "SUBMITTED" &&
+      proposal.status !== "UNDER_REVIEW" &&
+      proposal.status !== "REVISION_REQUESTED"
+    ) {
       throw new BadRequestError(
         `Proposal dengan status '${proposal.status}' tidak dapat ditarik kembali`
       );

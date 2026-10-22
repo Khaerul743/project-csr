@@ -29,12 +29,43 @@ export const createProposalSchema = z.object({
   documentUrl: z.string().optional().nullable().or(z.literal("")),
 });
 
+export const updateProposalSchema = z.object({
+  title: z
+    .string()
+    .min(3, "Judul proposal minimal 3 karakter")
+    .max(255, "Judul proposal maksimal 255 karakter")
+    .optional(),
+  summary: z
+    .string()
+    .min(10, "Ringkasan teknis proposal minimal 10 karakter")
+    .optional(),
+  proposedBudget: z
+    .union([z.number(), z.string()])
+    .transform((val) => {
+      if (typeof val === "number") return val.toString();
+      const cleaned = val.replace(/[^\d.]/g, "");
+      return cleaned || "0";
+    })
+    .refine((val) => parseFloat(val) > 0, "Anggaran yang diajukan harus lebih dari 0")
+    .optional(),
+  durationMonths: z
+    .number()
+    .int("Durasi harus bilangan bulat bulan")
+    .min(1, "Durasi minimal 1 bulan")
+    .max(60, "Durasi maksimal 60 bulan")
+    .optional()
+    .nullable(),
+  targetBeneficiaries: z.string().max(255).optional().nullable(),
+  documentUrl: z.string().optional().nullable().or(z.literal("")),
+});
+
 export const reviewProposalSchema = z.object({
-  status: z.enum(["UNDER_REVIEW", "ACCEPTED", "REJECTED"], {
-    message: "Status peninjauan harus UNDER_REVIEW, ACCEPTED, atau REJECTED",
+  status: z.enum(["UNDER_REVIEW", "REVISION_REQUESTED", "ACCEPTED", "REJECTED"], {
+    message: "Status peninjauan harus UNDER_REVIEW, REVISION_REQUESTED, ACCEPTED, atau REJECTED",
   }),
   feedback: z.string().max(2000, "Catatan feedback maksimal 2000 karakter").optional().nullable(),
 });
 
 export type CreateProposalInput = z.infer<typeof createProposalSchema>;
+export type UpdateProposalInput = z.infer<typeof updateProposalSchema>;
 export type ReviewProposalInput = z.infer<typeof reviewProposalSchema>;

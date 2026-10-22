@@ -32,6 +32,7 @@ export const PROPOSAL_STATUS_CONFIG: Record<
 > = {
   SUBMITTED: { label: "Terkirim", variant: "blue" },
   UNDER_REVIEW: { label: "Dalam Tinjauan", variant: "amber" },
+  REVISION_REQUESTED: { label: "Perlu Revisi", variant: "amber" },
   ACCEPTED: { label: "Disetujui", variant: "emerald" },
   REJECTED: { label: "Ditolak", variant: "rose" },
   WITHDRAWN: { label: "Ditarik", variant: "slate" },

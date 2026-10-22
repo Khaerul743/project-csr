@@ -13,8 +13,17 @@ export interface CreateProposalDTO {
   documentUrl?: string | null;
 }
 
+export interface UpdateProposalDTO {
+  title?: string;
+  summary?: string;
+  proposedBudget?: number | string;
+  durationMonths?: number | null;
+  targetBeneficiaries?: string | null;
+  documentUrl?: string | null;
+}
+
 export interface ReviewProposalDTO {
-  status: "UNDER_REVIEW" | "ACCEPTED" | "REJECTED";
+  status: "UNDER_REVIEW" | "REVISION_REQUESTED" | "ACCEPTED" | "REJECTED";
   feedback?: string | null;
 }
 

@@ -1216,7 +1216,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
 
               {/* Status Filter Chips */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                {["ALL", "SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "WITHDRAWN"].map(
+                {["ALL", "SUBMITTED", "UNDER_REVIEW", "REVISION_REQUESTED", "ACCEPTED", "REJECTED", "WITHDRAWN"].map(
                   (st) => {
                     const isSelected = proposalStatusFilter === st;
                     const label =
@@ -1280,6 +1280,11 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                             <Badge variant={statusCfg.variant} size="sm" hasDot>
                               {statusCfg.label}
                             </Badge>
+                            {prop.status === "REVISION_REQUESTED" && (
+                              <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">
+                                Perlu Penyesuaian
+                              </span>
+                            )}
                             <span className="text-[11px] text-slate-400">
                               Diajukan {formatDate(prop.createdAt)}
                             </span>

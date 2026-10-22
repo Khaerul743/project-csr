@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   X,
   FileText,
@@ -13,6 +13,10 @@ import {
   CheckCircle2,
   Sparkles,
   Send,
+  UploadCloud,
+  Trash2,
+  Loader2,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +43,17 @@ export function SubmitProposalModal({
   const [targetBeneficiaries, setTargetBeneficiaries] = useState("");
   const [documentUrl, setDocumentUrl] = useState("");
 
+  // Upload States
+  const [uploadedFile, setUploadedFile] = useState<{
+    name: string;
+    size: number;
+  } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadMode, setUploadMode] = useState<"file" | "url">("file");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -49,9 +64,92 @@ export function SubmitProposalModal({
     setProposedBudget(raw);
   };
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const uploadFile = async (file: File) => {
+    setUploadError(null);
+    setErrorMsg(null);
+
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const allowedExtensions = ["pdf", "doc", "docx", "xls", "xlsx"];
+    if (!allowedExtensions.includes(ext)) {
+      setUploadError("Hanya berkas berformat PDF, DOC, atau DOCX yang diperbolehkan.");
+      return;
+    }
+
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError("Ukuran dokumen terlalu besar. Maksimal 15MB.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Sesi login berakhir. Harap login kembali.");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload/proposal", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal mengunggah dokumen proposal");
+      }
+
+      setDocumentUrl(json.data.url);
+      setUploadedFile({
+        name: json.data.originalName || file.name,
+        size: file.size,
+      });
+    } catch (err: any) {
+      setUploadError(err.message || "Gagal mengunggah dokumen proposal.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    await uploadFile(file);
+  };
+
+  const handleRemoveFile = () => {
+    setDocumentUrl("");
+    setUploadedFile(null);
+    setUploadError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+
+    if (isUploading) {
+      setErrorMsg("Mohon tunggu hingga proses unggah berkas selesai.");
+      return;
+    }
 
     if (!title.trim() || title.trim().length < 3) {
       setErrorMsg("Judul proposal minimal 3 karakter");
@@ -267,40 +365,176 @@ export function SubmitProposalModal({
             </div>
           </div>
 
-          {/* Tautan Dokumen Pendukung */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Tautan Dokumen Proposal / TOR (URL Cloud)
-            </label>
-            <div className="relative">
-              <Link2 className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
-              <input
-                type="url"
-                value={documentUrl}
-                onChange={(e) => setDocumentUrl(e.target.value)}
-                placeholder="https://drive.google.com/file/d/proposal-full.pdf"
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-              />
+          {/* Dokumen Proposal / TOR */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Dokumen Proposal & TOR <span className="text-slate-400 font-normal">(Disarankan)</span>
+              </label>
+              <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setUploadMode("file")}
+                  className={`px-2.5 py-1 rounded-md font-semibold transition ${
+                    uploadMode === "file"
+                      ? "bg-white text-teal-700 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Unggah Berkas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUploadMode("url")}
+                  className={`px-2.5 py-1 rounded-md font-semibold transition ${
+                    uploadMode === "url"
+                      ? "bg-white text-teal-700 shadow-xs"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  Tautan URL
+                </button>
+              </div>
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">
-              Sertakan tautan Google Drive / Dropbox jika memiliki proposal lengkap berformat PDF.
-            </span>
+
+            {uploadMode === "file" ? (
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+
+                {uploadedFile ? (
+                  <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 flex items-center justify-between gap-3 animate-in fade-in">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-teal-600/10 text-teal-700 flex items-center justify-center shrink-0 border border-teal-600/20">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-900 truncate">
+                          {uploadedFile.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[11px] text-slate-500">
+                            {formatFileSize(uploadedFile.size)}
+                          </span>
+                          <span className="text-[10px] bg-teal-100 text-teal-800 font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3 text-teal-600" />
+                            Tersimpan di server
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <a
+                        href={documentUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-2 rounded-xl text-slate-500 hover:text-teal-700 hover:bg-white transition"
+                        title="Pratinjau berkas"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={handleRemoveFile}
+                        className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        title="Hapus / ganti berkas"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    className={`p-6 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+                      isDragging
+                        ? "border-teal-500 bg-teal-50/50 scale-[0.99]"
+                        : "border-slate-200 hover:border-teal-500 hover:bg-slate-50/70"
+                    } ${isUploading ? "pointer-events-none opacity-70" : ""}`}
+                  >
+                    {isUploading ? (
+                      <div className="flex flex-col items-center py-2 gap-2 text-teal-700">
+                        <Loader2 className="w-8 h-8 animate-spin" />
+                        <p className="text-xs font-bold">Mengunggah dokumen proposal...</p>
+                        <span className="text-[11px] text-slate-400">Menyimpan berkas ke direktori server</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-600 mb-3 shadow-xs">
+                          <UploadCloud className="w-6 h-6" />
+                        </div>
+                        <p className="text-xs font-bold text-slate-800">
+                          Pilih berkas atau seret ke sini
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Format <strong className="text-slate-600">PDF, DOC, DOCX</strong> (Maksimal 15MB)
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {uploadError && (
+                  <div className="mt-2 text-xs text-rose-600 flex items-center gap-1.5 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{uploadError}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <div className="relative">
+                  <Link2 className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                  <input
+                    type="url"
+                    value={documentUrl}
+                    onChange={(e) => setDocumentUrl(e.target.value)}
+                    placeholder="https://drive.google.com/file/d/proposal-full.pdf"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                  />
+                </div>
+                <span className="text-[11px] text-slate-400 mt-1 block">
+                  Sertakan tautan Google Drive / Dropbox jika dokumen berformat online atau di cloud.
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Footer Actions */}
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-            <Button type="button" variant="ghost" size="md" onClick={onClose} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              onClick={onClose}
+              disabled={isSubmitting || isUploading}
+            >
               Batal
             </Button>
             <Button
               type="submit"
               variant="primary"
               size="md"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isUploading}
               className="bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20"
               leftIcon={<Send className="w-4 h-4" />}
             >
-              {isSubmitting ? "Mengirimkan..." : "Kirimkan Proposal"}
+              {isSubmitting
+                ? "Mengirimkan..."
+                : isUploading
+                ? "Mengunggah..."
+                : "Kirimkan Proposal"}
             </Button>
           </div>
         </form>

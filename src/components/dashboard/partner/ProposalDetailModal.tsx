@@ -16,11 +16,14 @@ import {
   RotateCcw,
   MessageSquareQuote,
   ShieldCheck,
+  Download,
+  Edit3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProposalItem } from "./types";
 import { PROPOSAL_STATUS_CONFIG, formatRupiah, formatDate } from "./helpers";
+import { EditProposalModal } from "./EditProposalModal";
 
 interface ProposalDetailModalProps {
   isOpen: boolean;
@@ -38,6 +41,7 @@ export function ProposalDetailModal({
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [showConfirmWithdraw, setShowConfirmWithdraw] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   if (!isOpen || !proposal) return null;
 
@@ -46,7 +50,15 @@ export function ProposalDetailModal({
     variant: "slate" as const,
   };
 
-  const canWithdraw = proposal.status === "SUBMITTED" || proposal.status === "UNDER_REVIEW";
+  const canEdit =
+    proposal.status === "SUBMITTED" ||
+    proposal.status === "UNDER_REVIEW" ||
+    proposal.status === "REVISION_REQUESTED";
+
+  const canWithdraw =
+    proposal.status === "SUBMITTED" ||
+    proposal.status === "UNDER_REVIEW" ||
+    proposal.status === "REVISION_REQUESTED";
 
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
@@ -96,6 +108,7 @@ export function ProposalDetailModal({
               </p>
             </div>
           </div>
+
           <button
             onClick={onClose}
             className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 transition"
@@ -104,16 +117,16 @@ export function ProposalDetailModal({
           </button>
         </div>
 
-        {/* Opportunity Context Header */}
+        {/* Opportunity Context Banner */}
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
           <div className="space-y-1">
             <span className="font-semibold text-slate-400 text-[11px] uppercase tracking-wider block">
-              Inisiatif Target
+              Inisiatif Target CSR
             </span>
-            <h4 className="font-bold text-slate-900 text-sm">{proposal.opportunityTitle || "Peluang CSR"}</h4>
+            <h4 className="font-bold text-slate-900 text-sm">{proposal.opportunityTitle}</h4>
             <div className="flex items-center gap-1.5 text-slate-500">
               <Building2 className="w-3.5 h-3.5 text-teal-600" />
-              <span>{proposal.companyName || "Perusahaan CSR"}</span>
+              <span>{proposal.companyName || "Perusahaan Pengelola"}</span>
             </div>
           </div>
 
@@ -140,6 +153,28 @@ export function ProposalDetailModal({
             </div>
           )}
 
+          {proposal.status === "REVISION_REQUESTED" && (
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 font-bold text-amber-900 text-xs">
+                  <RotateCcw className="w-4 h-4 text-amber-600" />
+                  <span>Perusahaan Meminta Penyesuaian / Revisi Proposal</span>
+                </div>
+                <Badge variant="amber" size="sm">
+                  Perlu Revisi
+                </Badge>
+              </div>
+              {proposal.feedback && (
+                <div className="bg-white/90 p-3 rounded-xl border border-amber-200 text-xs text-amber-900 italic leading-relaxed">
+                  "{proposal.feedback}"
+                </div>
+              )}
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Silakan sesuaikan isi proposal, anggaran, atau berkas pendukung dengan menekan tombol <strong>"Revisi Proposal Sekarang"</strong> di bawah.
+              </p>
+            </div>
+          )}
+
           {proposal.status === "REJECTED" && (
             <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 space-y-1.5">
               <div className="flex items-center gap-2 font-bold text-rose-900 text-xs">
@@ -152,7 +187,7 @@ export function ProposalDetailModal({
             </div>
           )}
 
-          {proposal.feedback && (
+          {proposal.status !== "REVISION_REQUESTED" && proposal.feedback && (
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 space-y-1.5">
               <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
                 <MessageSquareQuote className="w-4 h-4 text-teal-600" />
@@ -181,7 +216,7 @@ export function ProposalDetailModal({
             </div>
           </div>
 
-          {/* Key Parameters Metrics Grid */}
+          {/* Parameters Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
               <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">
@@ -205,31 +240,51 @@ export function ProposalDetailModal({
           </div>
 
           {/* Document URL */}
-          {proposal.documentUrl && (
-            <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200/70 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <FileText className="w-5 h-5 text-teal-600 shrink-0" />
-                <div className="min-w-0">
-                  <span className="text-xs font-bold text-teal-900 block truncate">
-                    Dokumen Proposal Lengkap
-                  </span>
-                  <span className="text-[11px] text-teal-700 block truncate">
-                    {proposal.documentUrl}
-                  </span>
+          {proposal.documentUrl && (() => {
+            const isLocalUpload = proposal.documentUrl.startsWith("/uploads/");
+            const fileName = isLocalUpload
+              ? proposal.documentUrl.split("/").pop()
+              : proposal.documentUrl;
+
+            return (
+              <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 flex items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-teal-600/15 text-teal-700 flex items-center justify-center shrink-0 border border-teal-600/20">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-teal-950 truncate">
+                        Dokumen Proposal Lengkap
+                      </span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-teal-200/60 text-teal-800">
+                        {isLocalUpload ? "Berkas Server" : "Cloud Link"}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-teal-700 block truncate mt-0.5">
+                      {fileName}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <a
+                    href={proposal.documentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3.5 py-2 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition flex items-center gap-1.5 shadow-xs"
+                  >
+                    <span>{isLocalUpload ? "Lihat / Unduh" : "Buka Berkas"}</span>
+                    {isLocalUpload ? (
+                      <Download className="w-3.5 h-3.5" />
+                    ) : (
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    )}
+                  </a>
                 </div>
               </div>
-
-              <a
-                href={proposal.documentUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="shrink-0 px-3 py-1.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition flex items-center gap-1.5 shadow-sm"
-              >
-                <span>Buka Berkas</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Withdraw Error if any */}
           {withdrawError && (
@@ -274,7 +329,7 @@ export function ProposalDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 px-6 border-t border-slate-100 flex items-center justify-between bg-slate-50">
+        <div className="p-4 px-6 border-t border-slate-100 flex items-center justify-between bg-slate-50 gap-3">
           <div>
             {canWithdraw && !showConfirmWithdraw && (
               <Button
@@ -289,11 +344,42 @@ export function ProposalDetailModal({
             )}
           </div>
 
-          <Button variant="ghost" size="md" onClick={onClose}>
-            Tutup
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="md" onClick={onClose}>
+              Tutup
+            </Button>
+            {canEdit && (
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setIsEditModalOpen(true)}
+                className={
+                  proposal.status === "REVISION_REQUESTED"
+                    ? "bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-600/20"
+                    : "bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20"
+                }
+                leftIcon={<Edit3 className="w-4 h-4" />}
+              >
+                {proposal.status === "REVISION_REQUESTED"
+                  ? "Revisi Proposal Sekarang"
+                  : "Ubah Isi Proposal"}
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Modal Edit Proposal */}
+      <EditProposalModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        proposal={proposal}
+        onSuccess={() => {
+          setIsEditModalOpen(false);
+          onSuccess();
+          onClose();
+        }}
+      />
     </div>
   );
 }

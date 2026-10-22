@@ -1478,7 +1478,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
 
                 {/* Status Chips */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-                  {["ALL", "SUBMITTED", "UNDER_REVIEW", "ACCEPTED", "REJECTED", "WITHDRAWN"].map((st) => {
+                  {["ALL", "SUBMITTED", "UNDER_REVIEW", "REVISION_REQUESTED", "ACCEPTED", "REJECTED", "WITHDRAWN"].map((st) => {
                     const isSelected = proposalStatusFilter === st;
                     const label =
                       st === "ALL"

@@ -71,7 +71,12 @@ export class ProposalRepository {
         and(
           eq(proposals.partnerId, partnerId),
           eq(proposals.opportunityId, opportunityId),
-          inArray(proposals.status, ["SUBMITTED", "UNDER_REVIEW", "ACCEPTED"])
+          inArray(proposals.status, [
+            "SUBMITTED",
+            "UNDER_REVIEW",
+            "REVISION_REQUESTED",
+            "ACCEPTED",
+          ])
         )
       )
       .limit(1);

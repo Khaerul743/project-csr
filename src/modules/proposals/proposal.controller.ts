@@ -5,6 +5,7 @@ import { AuthGuard } from "@/common/guards/auth.guard";
 import { ProposalService } from "./proposal.service";
 import {
   createProposalSchema,
+  updateProposalSchema,
   reviewProposalSchema,
 } from "./proposal.validation";
 
@@ -26,6 +27,26 @@ export class ProposalController {
       );
 
       return ApiResponse.created(result, "Proposal berhasil diajukan kepada perusahaan");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async update(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["PARTNER_ADMIN"]);
+
+      const body = await request.json();
+      const validatedInput = updateProposalSchema.parse(body);
+
+      const result = await this.proposalService.updateProposal(
+        id,
+        authUser.partnerId,
+        validatedInput
+      );
+
+      return ApiResponse.success(result, "Proposal berhasil diperbarui dan diajukan kembali");
     } catch (error) {
       return ErrorHandler.handle(error);
     }
@@ -108,7 +129,9 @@ export class ProposalController {
 
       const message =
         validatedInput.status === "ACCEPTED"
-          ? "Proposal berhasil diterima! Kolaborasi baru telah dibentuk."
+          ? "Proposal berhasil disetujui! Kolaborasi baru telah dibentuk."
+          : validatedInput.status === "REVISION_REQUESTED"
+          ? "Permintaan revisi proposal berhasil dikirimkan ke mitra."
           : validatedInput.status === "REJECTED"
           ? "Proposal telah ditolak."
           : "Proposal sedang dalam peninjauan.";

@@ -10,3 +10,15 @@ export async function GET(request: Request, { params }: RouteParams) {
   const { id } = await params;
   return proposalController.getById(request, id);
 }
+
+export async function PATCH(request: Request, { params }: RouteParams) {
+  await connection();
+  const { id } = await params;
+  return proposalController.update(request, id);
+}
+
+export async function PUT(request: Request, { params }: RouteParams) {
+  await connection();
+  const { id } = await params;
+  return proposalController.update(request, id);
+}
