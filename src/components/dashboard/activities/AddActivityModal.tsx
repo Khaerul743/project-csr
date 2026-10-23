@@ -14,14 +14,18 @@ import {
   Image as ImageIcon,
   AlertCircle,
   FileText,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProgramStageItem } from "./types";
 
 interface AddActivityModalProps {
   isOpen: boolean;
   onClose: () => void;
   programId: string;
   programTitle: string;
+  stages?: ProgramStageItem[];
+  defaultStageId?: string;
   onSuccess: () => void;
 }
 
@@ -30,8 +34,11 @@ export function AddActivityModal({
   onClose,
   programId,
   programTitle,
+  stages = [],
+  defaultStageId = "",
   onSuccess,
 }: AddActivityModalProps) {
+  const [stageId, setStageId] = useState<string>(defaultStageId);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [activityDate, setActivityDate] = useState(
@@ -50,7 +57,16 @@ export function AddActivityModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (defaultStageId) {
+      setStageId(defaultStageId);
+    }
+  }, [defaultStageId]);
+
   if (!isOpen) return null;
+
+  const selectedStage = stages.find((s) => s.id === stageId);
+
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -127,6 +143,7 @@ export function AddActivityModal({
       if (!token) return;
 
       const payload = {
+        stageId: stageId || null,
         title: title.trim(),
         description: description.trim(),
         activityDate,
@@ -201,6 +218,51 @@ export function AddActivityModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          {/* Pilihan Tahapan Program (Milestone) */}
+          {stages && stages.length > 0 && (
+            <div className="p-3.5 rounded-2xl bg-teal-50/40 border border-teal-200/70 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-slate-800 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5 text-teal-600" />
+                  Kaitkan ke Tahap / Milestone Kegiatan
+                </label>
+                <span className="text-[10px] text-teal-700 font-bold bg-teal-100/80 px-2 py-0.5 rounded-full">
+                  Panduan AI Terstruktur
+                </span>
+              </div>
+              <select
+                value={stageId}
+                onChange={(e) => setStageId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+              >
+                <option value="">-- Tanpa Tahapan Tertentu (Kegiatan Tambahan) --</option>
+                {stages.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    Tahap {st.orderIndex}: {st.title} {st.targetTimeline ? `[${st.targetTimeline}]` : ""}
+                  </option>
+                ))}
+              </select>
+
+              {/* Panduan Bukti Kegiatan untuk Tahap yang Dipilih */}
+              {selectedStage && (
+                <div className="p-3 rounded-xl bg-white border border-teal-100 text-[11px] space-y-1.5 shadow-2xs">
+                  {selectedStage.expectedEvidence && (
+                    <div className="flex items-start gap-1.5 text-teal-900">
+                      <span className="font-bold text-teal-700 shrink-0">📸 Panduan Bukti:</span>
+                      <span className="leading-relaxed">{selectedStage.expectedEvidence}</span>
+                    </div>
+                  )}
+                  {selectedStage.suggestedKpi && (
+                    <div className="flex items-start gap-1.5 text-slate-600">
+                      <span className="font-bold text-slate-700 shrink-0">🎯 Target KPI:</span>
+                      <span className="leading-relaxed">{selectedStage.suggestedKpi}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Judul Kegiatan */}
           <div className="space-y-1">
             <label className="font-bold text-slate-700">
@@ -211,7 +273,7 @@ export function AddActivityModal({
               placeholder="Contoh: Penanaman 500 Bibit Mangrove & Edukasi Warga Pesisir"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
               required
             />
           </div>

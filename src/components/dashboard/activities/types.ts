@@ -1,6 +1,34 @@
+export interface ProgramStageItem {
+  id: string;
+  programId: string;
+  orderIndex: number;
+  title: string;
+  description?: string | null;
+  targetTimeline?: string | null;
+  expectedEvidence?: string | null;
+  suggestedKpi?: string | null;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
+  source: "AI_GENERATED" | "MANUAL";
+  createdAt?: string;
+  updatedAt?: string;
+  activityCount?: number;
+}
+
+export const STAGE_STATUS_CONFIG: Record<
+  "PENDING" | "IN_PROGRESS" | "COMPLETED",
+  { label: string; variant: "amber" | "emerald" | "slate" | "indigo" }
+> = {
+  PENDING: { label: "Belum Dimulai", variant: "slate" },
+  IN_PROGRESS: { label: "Sedang Berjalan", variant: "indigo" },
+  COMPLETED: { label: "Tahap Selesai", variant: "emerald" },
+};
+
 export interface ProgramActivityItem {
   id: string;
   programId: string;
+  stageId?: string | null;
+  stageTitle?: string | null;
+  stageOrderIndex?: number | null;
   submittedBy: string;
   title: string;
   description: string;

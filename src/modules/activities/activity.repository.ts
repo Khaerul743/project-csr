@@ -5,6 +5,7 @@ import {
   NewProgramActivity,
 } from "@/db/schema/program-activities";
 import { programs } from "@/db/schema/programs";
+import { programStages } from "@/db/schema/program-stages";
 import { users } from "@/db/schema/users";
 import { eq, desc } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
@@ -35,11 +36,14 @@ export class ActivityRepository {
         submitterRole: submitterUsers.role,
         verifierName: verifierUsers.name,
         programTitle: programs.title,
+        stageTitle: programStages.title,
+        stageOrderIndex: programStages.orderIndex,
       })
       .from(programActivities)
       .leftJoin(submitterUsers, eq(programActivities.submittedBy, submitterUsers.id))
       .leftJoin(verifierUsers, eq(programActivities.verifiedBy, verifierUsers.id))
       .leftJoin(programs, eq(programActivities.programId, programs.id))
+      .leftJoin(programStages, eq(programActivities.stageId, programStages.id))
       .where(eq(programActivities.id, id))
       .limit(1);
 
@@ -52,6 +56,8 @@ export class ActivityRepository {
       submitterRole: r.submitterRole,
       verifierName: r.verifierName,
       programTitle: r.programTitle,
+      stageTitle: r.stageTitle,
+      stageOrderIndex: r.stageOrderIndex,
     };
   }
 
@@ -63,11 +69,14 @@ export class ActivityRepository {
         submitterRole: submitterUsers.role,
         verifierName: verifierUsers.name,
         programTitle: programs.title,
+        stageTitle: programStages.title,
+        stageOrderIndex: programStages.orderIndex,
       })
       .from(programActivities)
       .leftJoin(submitterUsers, eq(programActivities.submittedBy, submitterUsers.id))
       .leftJoin(verifierUsers, eq(programActivities.verifiedBy, verifierUsers.id))
       .leftJoin(programs, eq(programActivities.programId, programs.id))
+      .leftJoin(programStages, eq(programActivities.stageId, programStages.id))
       .where(eq(programActivities.programId, programId))
       .orderBy(desc(programActivities.activityDate), desc(programActivities.createdAt));
 
@@ -77,6 +86,8 @@ export class ActivityRepository {
       submitterRole: r.submitterRole,
       verifierName: r.verifierName,
       programTitle: r.programTitle,
+      stageTitle: r.stageTitle,
+      stageOrderIndex: r.stageOrderIndex,
     }));
   }
 

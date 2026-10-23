@@ -1409,7 +1409,90 @@ Perusahaan memeriksa keabsahan nota belanja fisik.
 
 ---
 
-## 14. Contoh Implementasi RBAC Guard
+## 14. Modul AI: Ekstraksi Tahapan & Milestone Kegiatan (`/api/programs/:id/stages`)
+
+Modul ini mengintegrasikan **LangChain + OpenAI GPT-4o-mini** untuk mendekonstruksi isi proposal menjadi tahapan pelaksanaan terstruktur beserta panduan bukti lapangan.
+
+### 14.1 Ekstraksi Tahapan dari Proposal dengan AI
+Menganalisis proposal dan berkas PDF untuk merumuskan tahapan kegiatan kronologis.
+
+- **Method / Path:** `POST /api/programs/:id/stages/generate`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN`)
+
+**Response Body (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Tahapan kegiatan terstruktur berhasil diekstraksi dari proposal oleh AI",
+  "data": {
+    "summaryRationale": "Rencana kerja disusun menjadi 4 tahapan sekuensial mencakup sosialisasi awal, pengadaan bibit, penanaman serentak, dan evaluasi kelangsungan hidup mangrove.",
+    "source": "AI_OPENAI",
+    "stages": [
+      {
+        "orderIndex": 1,
+        "title": "Tahap 1: Sosialisasi & Rembug Warga Pesisir",
+        "description": "Koordinasi awal bersama kelompok tani nelayan...",
+        "targetTimeline": "Bulan ke-1",
+        "expectedEvidence": "Foto pertemuan rembug warga, absensi nelayan, BAST koordinat",
+        "suggestedKpi": "100% warga sasaran teredukasi"
+      }
+    ]
+  }
+}
+```
+
+### 14.2 Ambil Daftar Tahapan Program
+Mengambil seluruh tahapan kegiatan yang terdaftar pada program beserta jumlah log kegiatan terlampir.
+
+- **Method / Path:** `GET /api/programs/:id/stages`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN`)
+
+### 14.3 Simpan / Terapkan Tahapan Program
+Menerapkan draf tahapan hasil kurasi AI ke program.
+
+- **Method / Path:** `POST /api/programs/:id/stages`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "replaceExisting": true,
+  "stages": [
+    {
+      "orderIndex": 1,
+      "title": "Tahap 1: Sosialisasi & Koordinasi",
+      "description": "Koordinasi awal bersama stakeholder...",
+      "targetTimeline": "Bulan ke-1",
+      "expectedEvidence": "Foto rembug warga & daftar hadir",
+      "suggestedKpi": "Koordinasi tingkat desa selesai",
+      "status": "PENDING"
+    }
+  ]
+}
+```
+
+### 14.4 Perbarui Status / Detail Tahap
+Memperbarui status tahapan (`PENDING`, `IN_PROGRESS`, `COMPLETED`) atau detail teksnya.
+
+- **Method / Path:** `PATCH /api/programs/:id/stages/:stageId`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "status": "IN_PROGRESS"
+}
+```
+
+### 14.5 Hapus Tahapan Kegiatan
+Menghapus tahapan tertentu jika belum memiliki log aktivitas terkait.
+
+- **Method / Path:** `DELETE /api/programs/:id/stages/:stageId`
+- **Auth:** Bearer Token (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN`)
+
+---
+
+## 15. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 

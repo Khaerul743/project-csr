@@ -1,6 +1,7 @@
 import { mysqlTable, varchar, text, mysqlEnum, timestamp, decimal } from "drizzle-orm/mysql-core";
 import { programs } from "./programs";
 import { users } from "./users";
+import { programStages } from "./program-stages";
 
 export const activityStatusEnum = [
   "SUBMITTED",
@@ -16,6 +17,8 @@ export const programActivities = mysqlTable("program_activities", {
   programId: varchar("program_id", { length: 36 })
     .notNull()
     .references(() => programs.id, { onDelete: "cascade" }),
+  stageId: varchar("stage_id", { length: 36 })
+    .references(() => programStages.id, { onDelete: "set null" }),
   submittedBy: varchar("submitted_by", { length: 36 })
     .notNull()
     .references(() => users.id),

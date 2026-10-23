@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const createActivitySchema = z.object({
+  stageId: z.string().uuid("ID tahapan tidak valid").optional().nullable(),
   title: z.string().min(3, "Judul kegiatan minimal 3 karakter").max(255),
   description: z.string().min(10, "Deskripsi kegiatan minimal 10 karakter"),
   activityDate: z.string().min(1, "Tanggal kegiatan harus diisi"),
@@ -17,6 +18,7 @@ export const reviewActivitySchema = z.object({
 });
 
 export const updateActivitySchema = z.object({
+  stageId: z.string().uuid("ID tahapan tidak valid").optional().nullable(),
   title: z.string().min(3, "Judul kegiatan minimal 3 karakter").max(255).optional(),
   description: z.string().min(10, "Deskripsi kegiatan minimal 10 karakter").optional(),
   activityDate: z.string().optional(),

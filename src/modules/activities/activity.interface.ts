@@ -5,9 +5,12 @@ export interface ActivityWithDetails extends ProgramActivity {
   submitterRole?: string | null;
   verifierName?: string | null;
   programTitle?: string | null;
+  stageTitle?: string | null;
+  stageOrderIndex?: number | null;
 }
 
 export interface CreateActivityDTO {
+  stageId?: string | null;
   title: string;
   description: string;
   activityDate: string | Date;
@@ -24,6 +27,7 @@ export interface ReviewActivityDTO {
 }
 
 export interface UpdateActivityDTO {
+  stageId?: string | null;
   title?: string;
   description?: string;
   activityDate?: string | Date;
