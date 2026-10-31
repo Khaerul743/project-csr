@@ -1,17 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #F9F9FB;
+  --foreground: #1A1C1D;
 }
 
 @theme {
+  /* Identitas brand SIPENA */
+  --color-brand-deep-navy: #181343;
+  --color-brand-secondary-navy: #26224C;
+  --color-brand-emerald-primary: #059669;
+  --color-brand-emerald-light: #10B981;
+  --color-brand-accent-amber: #f6ac2f;
+  --color-brand-surface-light: #F4F4F6;
+  --color-brand-pure-white: #FFFFFF;
+
+  /* Background, surfaces & text */
+  --color-background: #F9F9FB;
+  --color-on-background: #1A1C1D;
+  --color-surface: #F9F9FB;
+  --color-surface-dim: #D9DADC;
+  --color-surface-bright: #F9F9FB;
+  --color-surface-container-lowest: #FFFFFF;
+  --color-surface-container-low: #F3F3F5;
+  --color-surface-container: #EEEEF0;
+  --color-surface-container-high: #E8E8EA;
+  --color-surface-container-highest: #E2E2E4;
+  --color-surface-variant: #E2E2E4;
+  --color-on-surface: #1A1C1D;
+  --color-on-surface-variant: #47464F;
+  --color-outline: #787680;
+  --color-outline-variant: #C8C5D0;
+  --color-inverse-surface: #2F3132;
+  --color-inverse-on-surface: #F0F0F2;
+  --color-surface-tint: #5D588C;
+
+  /* Semantic source tokens */
+  --color-primary: #000000;
+  --color-on-primary: #FFFFFF;
+  --color-primary-container: #191444;
+  --color-on-primary-container: #837EB4;
+  --color-inverse-primary: #C6C0FA;
+  --color-secondary: #5D5987;
+  --color-on-secondary: #FFFFFF;
+  --color-secondary-container: #CFC9FE;
+  --color-on-secondary-container: #575380;
+  --color-tertiary: #000000;
+  --color-on-tertiary: #FFFFFF;
+  --color-tertiary-container: #400012;
+  --color-on-tertiary-container: #EA456B;
+  --color-error: #BA1A1A;
+  --color-on-error: #FFFFFF;
+  --color-error-container: #FFDAD6;
+  --color-on-error-container: #93000A;
+
+  /* Backward-compatible aliases for dashboard */
   --color-brand-emerald-50: #ecfdf5;
   --color-brand-emerald-100: #d1fae5;
   --color-brand-emerald-200: #a7f3d0;
   --color-brand-emerald-500: #10b981;
   --color-brand-emerald-600: #059669;
   --color-brand-emerald-700: #047857;
+
+  --color-brand-accent-orange: #f6ac2f;
+  --color-brand-orange-50: #fffbeb;
+  --color-brand-orange-100: #fef3c7;
+  --color-brand-orange-500: #f6ac2f;
+  --color-brand-orange-600: #e5971a;
 
   --color-brand-slate-50: #f8fafc;
   --color-brand-slate-100: #f1f5f9;
@@ -24,13 +79,94 @@
   --color-brand-slate-800: #1e293b;
   --color-brand-slate-900: #0f172a;
 
-  --font-sans: var(--font-sans), system-ui, sans-serif;
+  /* Typography fonts */
+  --font-display: var(--font-display), "Plus Jakarta Sans", sans-serif;
+  --font-body: var(--font-body), "Inter", sans-serif;
+  --font-sans: var(--font-body), "Inter", system-ui, sans-serif;
+
+  /* Shapes */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Layout spacing */
+  --spacing-gutter: 24px;
+  --spacing-page-margin: 32px;
+  --spacing-section-xl: 48px;
+  --spacing-section-2xl: 80px;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+@layer components {
+  .headline-xl {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 56px;
+    letter-spacing: -0.02em;
+  }
+
+  .headline-lg {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 44px;
+    letter-spacing: -0.01em;
+  }
+
+  .headline-md {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 36px;
+  }
+
+  .headline-sm {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 28px;
+  }
+
+  .card-sipena {
+    background: #FFFFFF;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-lg);
+  }
+}
+
+@media (max-width: 640px) {
+  .headline-xl {
+    font-size: 32px;
+    line-height: 38px;
+    letter-spacing: normal;
+  }
+
+  .headline-md {
+    font-size: 24px;
+    line-height: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media print {

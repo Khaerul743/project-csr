@@ -1,8 +1,7 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { Sparkles, Building2, Users2, BarChart3, ShieldCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { AppLogo } from "@/components/ui/app-logo";
+import { ArrowLeft } from "lucide-react";
 
 export interface AuthLayoutProps {
   children: React.ReactNode;
@@ -22,118 +21,103 @@ export function AuthLayout({
   footerActionHref,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-slate-50">
-      {/* Sisi Kiri: Branding Showcase & Nilai Tambah Platform (Desktop Only) */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white p-12 xl:p-16 flex-col justify-between overflow-hidden">
-        {/* Glow effect dekoratif di background */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-emerald-600/10 blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-[#F4F4F6]">
+      {/* Layered background — soft radial gradient wash for depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(24,19,67,0.04) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 80% 100%, rgba(217,56,95,0.03) 0%, transparent 60%)",
+        }}
+      />
 
-        {/* Brand Header */}
-        <div className="relative z-10">
-          <AppLogo
-            size="lg"
-            theme="dark"
-            subtitle="KOLABORASI & KEMITRAAN ESG"
+      {/* Full-height flex wrapper */}
+      <div className="relative z-10 flex flex-col items-center w-full px-5 py-10 sm:py-16">
+        {/* Back link — sits above the card, left-aligned to card width */}
+        <div className="w-full max-w-[420px] mb-5">
+          <Link
             href="/"
-          />
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#787680] hover:text-[#181343] transition-colors duration-200 group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-x-0.5" />
+            <span>Kembali ke Beranda</span>
+          </Link>
         </div>
 
-        {/* Hero Narrative & Fitur Utama */}
-        <div className="relative z-10 my-auto py-12 max-w-lg">
-          <Badge variant="emerald" className="mb-4 bg-emerald-950/60 text-emerald-300 border-emerald-500/30">
-            Inisiatif Dampak Nyata
-          </Badge>
+        {/* Main Card */}
+        <div
+          className="w-full max-w-[420px] bg-white rounded-2xl border border-[#E8E8EA] overflow-hidden"
+          style={{
+            boxShadow:
+              "0 1px 2px rgba(24,19,67,0.04), 0 4px 12px rgba(24,19,67,0.04), 0 12px 32px rgba(24,19,67,0.03)",
+          }}
+        >
+          {/* Card Header — Logo & Title Zone */}
+          <div className="pt-8 pb-1 px-8 sm:pt-10 sm:px-10">
+            {/* Logo lockup */}
+            <div className="flex flex-col items-center text-center mb-6">
+              <Link
+                href="/"
+                className="inline-flex flex-col items-center gap-3 group focus:outline-hidden select-none"
+              >
+                <div
+                  className="relative w-[56px] h-[56px] rounded-2xl overflow-hidden flex items-center justify-center shrink-0 bg-white border border-[#E8E8EA] transition-all duration-300 group-hover:scale-[1.04] group-hover:shadow-md"
+                  style={{
+                    boxShadow:
+                      "0 1px 3px rgba(24,19,67,0.06), 0 2px 8px rgba(24,19,67,0.04)",
+                  }}
+                >
+                  <Image
+                    src="/LOGO SIPENA.png"
+                    alt="Logo SIPENA"
+                    width={48}
+                    height={48}
+                    className="w-[42px] h-[42px] object-contain"
+                    priority
+                  />
+                </div>
 
-          <h1 className="text-3xl xl:text-4xl font-extrabold tracking-tight leading-tight text-white mb-4">
-            Jembatan Kemitraan Strategis untuk Proyek CSR Berkelanjutan.
-          </h1>
-
-          <p className="text-slate-300 text-sm xl:text-base leading-relaxed mb-8">
-            Hubungkan perusahaan dan mitra terverifikasi untuk menciptakan, mendanai, dan mengeksekusi program CSR yang akuntabel dan selaras dengan target SDG.
-          </p>
-
-          {/* 3 Value Pillars */}
-          <div className="space-y-4">
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 mt-0.5">
-                <Building2 className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">Bagi Perusahaan</h4>
-                <p className="text-xs text-slate-400 leading-normal">
-                  Rilis proyek CSR, alokasikan anggaran, dan temukan mitra lapangan yang kredibel.
-                </p>
-              </div>
+                <div className="leading-tight">
+                  <span
+                    className="text-[22px] font-extrabold tracking-tight text-[#181343] block"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    SIPENA
+                  </span>
+                  <span className="text-[11px] font-medium text-[#787680] block mt-0.5 tracking-wide uppercase">
+                    Tata Kelola &amp; Kolaborasi CSR
+                  </span>
+                </div>
+              </Link>
             </div>
 
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 mt-0.5">
-                <Users2 className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">Bagi Mitra & Yayasan</h4>
-                <p className="text-xs text-slate-400 leading-normal">
-                  Akses peluang inisiatif CSR, ajukan proposal, dan wujudkan visi komunitas Anda.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3.5 p-3.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm">
-              <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 mt-0.5">
-                <BarChart3 className="w-4 h-4" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-white">Pelaporan Dampak ESG</h4>
-                <p className="text-xs text-slate-400 leading-normal">
-                  Pantau penerima manfaat dan metrik capaian sosial dengan standar akuntabilitas tinggi.
-                </p>
-              </div>
+            {/* Title & subtitle */}
+            <div className="text-center">
+              <h1
+                className="text-[20px] sm:text-[22px] font-bold tracking-tight text-[#1A1C1D]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {title}
+              </h1>
+              <p className="text-[13px] text-[#787680] mt-1.5 leading-relaxed">
+                {subtitle}
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Footer info & Security assurance */}
-        <div className="relative z-10 flex items-center gap-2 text-xs text-slate-400 pt-6 border-t border-white/10">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Platform terverifikasi dan aman untuk tata kelola kemitraan korporasi.</span>
-        </div>
-      </div>
+          {/* Divider */}
+          <div className="mx-8 sm:mx-10 mt-5 mb-6 h-px bg-[#EEEEF0]" />
 
-      {/* Sisi Kanan: Form Card Area */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-12 xl:p-16">
-        {/* Mobile Header Branding */}
-        <div className="lg:hidden mb-8">
-          <AppLogo
-            size="md"
-            theme="light"
-            subtitle="KOLABORASI & KEMITRAAN ESG"
-            href="/"
-          />
-        </div>
+          {/* Form Content */}
+          <div className="px-8 sm:px-10 pb-6">{children}</div>
 
-        {/* Card Form Container */}
-        <div className="w-full max-w-md bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm">
-          {/* Header */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-              {title}
-            </h2>
-            <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
-              {subtitle}
-            </p>
-          </div>
-
-          {/* Form Content Slot */}
-          {children}
-
-          {/* Footer Switcher Link */}
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-600">
+          {/* Footer — Switch between Login/Register */}
+          <div className="border-t border-[#F4F4F6] bg-[#FAFAFE] px-8 sm:px-10 py-4">
+            <p className="text-[13px] text-[#787680] text-center">
               {footerText}{" "}
               <Link
                 href={footerActionHref}
-                className="font-semibold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors"
+                className="font-semibold text-[#181343] hover:text-emerald-600 transition-colors duration-200"
               >
                 {footerActionText}
               </Link>
@@ -141,9 +125,15 @@ export function AuthLayout({
           </div>
         </div>
 
-        {/* Bottom copyright */}
-        <div className="mt-8 text-center text-xs text-slate-400">
-          &copy; 2026 CSR Impact Hub. Seluruh hak cipta dilindungi.
+        {/* Institutional footer */}
+        <div className="mt-8 text-center space-y-0.5">
+          <p className="text-[11px] text-[#C8C5D0]">
+            &copy; 2026 SIPENA — Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi
+            CSR
+          </p>
+          <p className="text-[11px] text-[#C8C5D0]">
+            Hak cipta dilindungi undang-undang.
+          </p>
         </div>
       </div>
     </div>

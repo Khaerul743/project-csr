@@ -168,9 +168,9 @@ export function Sidebar({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-200 border-r border-slate-800 select-none">
+    <div className="flex flex-col h-full bg-[#120E33] text-slate-200 border-r border-[#26224C] select-none">
       {/* 1. Header & Brand */}
-      <div className="p-5 border-b border-slate-800/80 flex items-center justify-between">
+      <div className="p-5 border-b border-[#26224C]/80 flex items-center justify-between">
         <AppLogo
           size="md"
           theme="dark"
@@ -181,7 +181,7 @@ export function Sidebar({
         <button
           type="button"
           onClick={onCloseMobile}
-          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#26224C]"
         >
           <X className="w-5 h-5" />
         </button>
@@ -205,10 +205,10 @@ export function Sidebar({
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       isActive
-                        ? "bg-emerald-500/15 text-emerald-300 shadow-sm border border-emerald-500/20 font-bold"
-                        : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
+                        ? "bg-white/12 text-white shadow-xs border-l-3 border-emerald-500 font-bold"
+                        : "text-slate-300 hover:text-white hover:bg-white/6"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -225,8 +225,8 @@ export function Sidebar({
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                             isActive
-                              ? "bg-emerald-500/30 text-emerald-200"
-                              : "bg-slate-800 text-slate-400"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-white/10 text-slate-300"
                           }`}
                         >
                           {item.count}
@@ -234,7 +234,7 @@ export function Sidebar({
                       )}
 
                       {item.badge && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-md font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-md font-semibold bg-[#26224C] text-slate-300 border border-white/10">
                           {item.badge}
                         </span>
                       )}
@@ -248,10 +248,10 @@ export function Sidebar({
       </div>
 
       {/* 3. Footer: User Profile & Logout */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/40 space-y-3">
+      <div className="p-4 border-t border-[#26224C] bg-[#0E0B28] space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
+            <div className="w-9 h-9 rounded-xl bg-[#181343] border border-white/15 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-inner">
               {user.name.charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0">
@@ -265,9 +265,9 @@ export function Sidebar({
           </div>
 
           <Badge
-            variant={isManagement ? "purple" : "emerald"}
+            variant={isManagement ? "navy" : "emerald"}
             size="sm"
-            className="shrink-0 text-[10px]"
+            className="shrink-0 text-[10px] bg-white/10 text-white border-white/20"
           >
             {user.role}
           </Badge>
@@ -276,7 +276,7 @@ export function Sidebar({
         <button
           type="button"
           onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors border border-transparent hover:border-rose-500/20"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors border border-transparent hover:border-rose-500/20 cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Keluar dari Akun</span>

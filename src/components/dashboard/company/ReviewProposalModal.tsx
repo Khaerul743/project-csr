@@ -116,7 +116,7 @@ export function ReviewProposalModal({
         {/* Header Modal */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-slate-900 to-slate-850 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-white">
               <FileText className="w-5 h-5" />
             </div>
             <div>
@@ -170,7 +170,7 @@ export function ReviewProposalModal({
 
           <div className="sm:text-right shrink-0 bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
             <span className="text-[11px] text-slate-400 block font-medium">Usulan Anggaran</span>
-            <span className="text-base font-extrabold text-emerald-600">
+            <span className="text-base font-extrabold text-[#181343]">
               {formatRupiah(proposal.proposedBudget)}
             </span>
           </div>
@@ -188,7 +188,7 @@ export function ReviewProposalModal({
           {/* Target Inisiatif Opportunity */}
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-emerald-600" />
+              <Building2 className="w-4 h-4 text-[#181343]" />
               <span className="font-semibold text-slate-500">Inisiatif CSR:</span>
               <span className="font-bold text-slate-900">{proposal.opportunityTitle}</span>
             </div>
@@ -217,7 +217,7 @@ export function ReviewProposalModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
               <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                <Calendar className="w-3.5 h-3.5 text-[#181343]" />
                 <span>Estimasi Durasi</span>
               </div>
               <p className="text-sm font-extrabold text-slate-900">
@@ -227,7 +227,7 @@ export function ReviewProposalModal({
 
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
               <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                <Users className="w-3.5 h-3.5 text-emerald-600" />
+                <Users className="w-3.5 h-3.5 text-[#181343]" />
                 <span>Target Penerima Manfaat</span>
               </div>
               <p className="text-sm font-extrabold text-slate-900 truncate">
@@ -244,21 +244,21 @@ export function ReviewProposalModal({
               : proposal.documentUrl;
 
             return (
-              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center justify-between gap-3 shadow-xs">
+              <div className="p-4 rounded-2xl bg-[#181343]/5 border border-[#181343]/15 flex items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-600/15 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-600/20">
+                  <div className="w-10 h-10 rounded-xl bg-[#181343]/10 text-[#181343] flex items-center justify-center shrink-0 border border-[#181343]/20">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-emerald-950 truncate">
-                        Dokumen Proposal & TOR Mitra
+                      <span className="text-xs font-bold text-[#181343] truncate">
+                        Dokumen Proposal &amp; TOR Mitra
                       </span>
-                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-200/60 text-emerald-800">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#181343]/10 text-[#181343]">
                         {isLocalUpload ? "Berkas Server" : "Cloud Link"}
                       </span>
                     </div>
-                    <span className="text-[11px] text-emerald-700 block truncate mt-0.5">
+                    <span className="text-[11px] text-slate-500 block truncate mt-0.5">
                       {fileName}
                     </span>
                   </div>
@@ -269,7 +269,7 @@ export function ReviewProposalModal({
                     href={proposal.documentUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1.5 shadow-xs"
+                    className="px-3.5 py-2 rounded-xl bg-[#181343] text-white text-xs font-bold hover:bg-[#26224C] transition flex items-center gap-1.5 shadow-xs"
                   >
                     <span>{isLocalUpload ? "Lihat / Unduh" : "Buka Tautan"}</span>
                     {isLocalUpload ? (
@@ -433,7 +433,7 @@ export function ReviewProposalModal({
                       ? "Tuliskan poin-poin yang perlu diperbaiki atau disesuaikan oleh mitra (misal: penyesuaian rincian anggaran, revisi timeline, dokumen pendukung)..."
                       : "Berikan catatan penilaian, apresiasi, atau poin penyesuaian yang perlu didiskusikan..."
                   }
-                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343]"
                 />
                 <span className="text-[11px] text-slate-400 mt-1 block">
                   Catatan ini akan dapat dibaca langsung oleh mitra pada dashboard mereka.

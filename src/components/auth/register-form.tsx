@@ -3,9 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Mail, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
-import { Button } from "@/components/ui/button";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -78,73 +76,155 @@ export function RegisterForm() {
     }
   };
 
+  // Shared input styles
+  const inputClass =
+    "w-full h-11 pl-11 pr-4 text-[14px] text-[#1A1C1D] placeholder:text-[#C8C5D0] bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl outline-none transition-all duration-200 focus:bg-white focus:border-[#181343]/40 focus:ring-2 focus:ring-[#181343]/8";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Error alert */}
       {errorMessage && (
-        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200/80 text-rose-700 text-xs animate-in fade-in duration-200">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
-          <span className="leading-relaxed">{errorMessage}</span>
+        <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-[#FFDAD6]/40 border border-[#BA1A1A]/10 text-[#93000A] text-[13px] leading-relaxed">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#BA1A1A]" />
+          <span>{errorMessage}</span>
         </div>
       )}
 
-      {/* Info notice mengenai role default */}
-      <div className="flex items-start gap-2 p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-emerald-800 text-xs">
-        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
-        <span className="leading-normal">
-          Pendaftaran akun baru secara otomatis berstatus <strong>STAGING</strong>. Anda dapat menghubungkan profil Perusahaan atau Mitra setelah masuk.
+      {/* Info notice — default role */}
+      <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F0FAF0] border border-[#C8E6C9]/60 text-[#2E7D32] text-[12px] leading-relaxed">
+        <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#43A047]" />
+        <span>
+          Akun baru secara otomatis berstatus <strong>STAGING</strong>. Hubungkan
+          profil Perusahaan atau Mitra setelah masuk.
         </span>
       </div>
 
-      <Input
-        label="Username / Nama Pengguna"
-        type="text"
-        placeholder="budi_santoso / yayasan_harapan"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        leftIcon={<User className="w-4 h-4" />}
-        required
-        autoComplete="username"
-      />
+      {/* Username field */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="register-username"
+          className="block text-[13px] font-semibold text-[#1A1C1D]"
+        >
+          Username
+        </label>
+        <div className="relative">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C8C5D0] pointer-events-none">
+            <User className="w-[18px] h-[18px]" />
+          </div>
+          <input
+            id="register-username"
+            type="text"
+            placeholder="budi_santoso"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+            autoComplete="username"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
-      <Input
-        label="Email Akun"
-        type="email"
-        placeholder="nama@perusahaan.com / nama@mitra.org"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        leftIcon={<Mail className="w-4 h-4" />}
-        required
-        autoComplete="email"
-      />
+      {/* Email field */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="register-email"
+          className="block text-[13px] font-semibold text-[#1A1C1D]"
+        >
+          Email
+        </label>
+        <div className="relative">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C8C5D0] pointer-events-none">
+            <Mail className="w-[18px] h-[18px]" />
+          </div>
+          <input
+            id="register-email"
+            type="email"
+            placeholder="nama@perusahaan.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
-      <PasswordInput
-        label="Kata Sandi"
-        placeholder="Minimal 6 karakter"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        autoComplete="new-password"
-      />
+      {/* Password field */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="register-password"
+          className="block text-[13px] font-semibold text-[#1A1C1D]"
+        >
+          Kata Sandi
+        </label>
+        <PasswordInput
+          id="register-password"
+          placeholder="Minimal 6 karakter"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="new-password"
+          className="h-11 text-[14px] bg-[#F9F9FB] border-[#E8E8EA] focus:bg-white focus:border-[#181343]/40 focus:ring-2 focus:ring-[#181343]/8"
+        />
+      </div>
 
-      <PasswordInput
-        label="Konfirmasi Kata Sandi"
-        placeholder="Ulangi kata sandi Anda"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        required
-        autoComplete="new-password"
-      />
+      {/* Confirm password field */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="register-confirm-password"
+          className="block text-[13px] font-semibold text-[#1A1C1D]"
+        >
+          Konfirmasi Kata Sandi
+        </label>
+        <PasswordInput
+          id="register-confirm-password"
+          placeholder="Ulangi kata sandi Anda"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          autoComplete="new-password"
+          className="h-11 text-[14px] bg-[#F9F9FB] border-[#E8E8EA] focus:bg-white focus:border-[#181343]/40 focus:ring-2 focus:ring-[#181343]/8"
+        />
+      </div>
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="md"
-        className="w-full mt-2"
-        isLoading={isLoading}
-        rightIcon={!isLoading ? <ArrowRight className="w-4 h-4" /> : undefined}
-      >
-        Daftar Akun Baru
-      </Button>
+      {/* Submit button */}
+      <div className="pt-1">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full h-11 inline-flex items-center justify-center gap-2 text-[14px] font-semibold text-white bg-[#181343] rounded-xl transition-all duration-200 hover:bg-[#26224C] hover:shadow-md active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+          style={{
+            boxShadow: "0 1px 3px rgba(24,19,67,0.12), 0 2px 8px rgba(24,19,67,0.08)",
+          }}
+        >
+          {isLoading ? (
+            <svg
+              className="w-4 h-4 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          ) : (
+            <>
+              <span>Daftar Akun Baru</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 }

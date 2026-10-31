@@ -41,7 +41,23 @@ Fondasi untuk tipografi, border, navbar, card surface, dan background.
 | **`slate-900`** | **`#0f172a`** | **Heading utama, tombol secondary dark, navbar dark** |
 | `surface-card` | `#ffffff` | Background kartu, modal dialog |
 
-### C. Aksen & Kategori SDG (*Sustainable Development Goals*)
+### C. Secondary Accent: *Warm Amber / Orange* (`#f6ac2f`)
+Warna aksen hangat (*warm accent*) yang melengkapi dominasi hijau emerald dan corporate slate. Berfungsi menarik atensi pada alur operasional dan progres transisi aktif secara harmonis tanpa memicu kesan alarm/bahaya seperti warna merah.
+
+| Token | Hex Code | Penggunaan |
+| :--- | :--- | :--- |
+| `orange-50` | `#fffbeb` | Background badge status ringan, hover surface aksen |
+| `orange-100` | `#fef3c7` | Border chip aksen, background container peringatan lembut |
+| **`orange-500` / `accent-orange`** | **`#f6ac2f`** | **Bar pipeline alur kerja, teks angka metrik kunci, indikator tahap aktif** |
+| `orange-600` | `#e5971a` | State hover aksen oranye, teks kontras tinggi pada background terang |
+
+#### Kasus Penggunaan Utama:
+1. **Pipeline Konversi Inisiatif:** Digunakan pada tahap **"Proposal Masuk"** (`bg-[#f6ac2f]` dan `text-[#f6ac2f]`) untuk menyorot aliran masuk proposal baru dari mitra pelaksana yang sedang menunggu respons manajemen.
+2. **Status Moderat & Tinjauan:** Indikator status evaluasi seperti `SUBMITTED` dan `UNDER_REVIEW` (Dalam Tinjauan) serta status negosiasi berjalan.
+3. **Komposisi Analitik Data (BI):** Pembeda kontras harmonis pada grafik portofolio bidang fokus (Pemberdayaan Ekonomi / UMKM) dan metrik transisi.
+4. **Pemberitahuan Tenggat Waktu:** Badge sisa hari pengajuan proposal (*"Sisa X hari"*).
+
+### D. Aksen & Kategori SDG (*Sustainable Development Goals*)
 Digunakan untuk label kategori proyek CSR agar mudah dibedakan secara visual:
 
 | Kategori SDG | Warna Badge | Hex / Tailwind |
@@ -49,14 +65,14 @@ Digunakan untuk label kategori proyek CSR agar mudah dibedakan secara visual:
 | 🌿 **Lingkungan & Energi** | Emerald | `bg-emerald-50 text-emerald-700 border-emerald-200` |
 | 🎓 **Pendidikan & Riset** | Royal Blue | `bg-blue-50 text-blue-700 border-blue-200` |
 | 🏥 **Kesehatan & Gizi** | Coral Rose | `bg-rose-50 text-rose-700 border-rose-200` |
-| 💼 **Ekonomi & UMKM** | Amber Gold | `bg-amber-50 text-amber-700 border-amber-200` |
+| 💼 **Ekonomi & UMKM** | Warm Orange | `bg-amber-50 text-[#f6ac2f] border-amber-200` |
 | 🤝 **Sosial & Bencana** | Purple Violet | `bg-purple-50 text-purple-700 border-purple-200` |
 
-### D. Status Feedback System
-- **Success (`ACTIVE`, Disetujui):** `#10B981` (Emerald)
-- **Warning / Review (`STAGING`, Menunggu Review):** `#F59E0B` (Amber)
-- **Danger (`SUSPENDED`, Ditolak):** `#EF4444` (Red)
-- **Info (`INACTIVE`, Draft):** `#64748B` (Slate)
+### E. Status Feedback System
+- **Success (`ACTIVE`, Disetujui, `AGREED`):** `#10B981` / `#059669` (Emerald)
+- **Active Transition / Review (`Proposal Masuk`, `STAGING`, Menunggu Review):** `#f6ac2f` (Warm Orange)
+- **Danger / Critical (`SUSPENDED`, Ditolak, Batal):** `#EF4444` / `#BA1A1A` (Red)
+- **Info / Inactive (`INACTIVE`, Draft):** `#64748B` (Slate)
 
 ---
 
@@ -146,6 +162,12 @@ Pemetaan token ke file `app/globals.css`:
   --color-brand-emerald-500: #10b981;
   --color-brand-emerald-600: #059669;
   --color-brand-emerald-700: #047857;
+
+  --color-brand-accent-orange: #f6ac2f;
+  --color-brand-orange-50: #fffbeb;
+  --color-brand-orange-100: #fef3c7;
+  --color-brand-orange-500: #f6ac2f;
+  --color-brand-orange-600: #e5971a;
   
   --color-brand-slate-50: #f8fafc;
   --color-brand-slate-100: #f1f5f9;

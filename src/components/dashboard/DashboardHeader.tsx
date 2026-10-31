@@ -18,24 +18,27 @@ export function DashboardHeader({
   rightAction,
 }: DashboardHeaderProps) {
   return (
-    <header className="sticky top-0 z-20 w-full bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <header className="sticky top-0 z-20 w-full bg-white/95 backdrop-blur-md border-b border-[#E8E8EA] px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       {/* Left: Mobile Hamburger & Page Title */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           type="button"
           onClick={onOpenMobileSidebar}
-          className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+          className="lg:hidden p-2 rounded-xl text-[#47464F] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
           title="Buka Menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         <div className="min-w-0">
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate leading-tight">
+          <h2
+            className="text-base sm:text-lg font-extrabold text-[#181343] tracking-tight truncate leading-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             {title}
           </h2>
           {subtitle && (
-            <p className="text-[11px] text-slate-400 hidden sm:block truncate mt-0.5">
+            <p className="text-[11px] text-[#787680] hidden sm:block truncate mt-0.5">
               {subtitle}
             </p>
           )}

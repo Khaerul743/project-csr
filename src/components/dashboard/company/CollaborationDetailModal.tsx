@@ -165,7 +165,7 @@ export function CollaborationDetailModal({
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           {/* Company Side */}
           <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-200/80 shadow-2xs">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold shrink-0">
               <Building2 className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -181,7 +181,7 @@ export function CollaborationDetailModal({
 
           {/* Partner Side */}
           <div className="flex items-center gap-3 p-3 bg-white rounded-2xl border border-slate-200/80 shadow-2xs">
-            <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
               <HeartHandshake className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -207,12 +207,12 @@ export function CollaborationDetailModal({
 
           {/* Info Status Banner */}
           {isAgreed ? (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 space-y-1">
-              <div className="flex items-center gap-2 font-bold text-emerald-950 text-xs">
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-950 space-y-1">
+              <div className="flex items-center gap-2 font-bold text-emerald-900 text-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>Kesepakatan MoU Telah Disahkan! (AGREED)</span>
               </div>
-              <p className="text-xs text-emerald-700 leading-relaxed">
+              <p className="text-xs text-emerald-800 leading-relaxed">
                 Kemitraan ini telah sah pada {formatDate(collaboration.agreedAt || collaboration.updatedAt)}. Program telah otomatis diinisiasi pada sistem eksekusi program.
               </p>
             </div>

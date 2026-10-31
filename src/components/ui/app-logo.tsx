@@ -42,11 +42,11 @@ export const AppLogo: React.FC<AppLogoProps> = ({
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Logo Icon Container */}
       <div
-        className={`relative ${cfg.box} rounded-2xl p-0.5 bg-white shadow-sm ring-1 ring-slate-900/5 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${iconClassName}`}
+        className={`relative ${cfg.box} rounded-xl p-0.5 bg-white shadow-2xs ring-1 ring-slate-900/5 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${iconClassName}`}
       >
         <Image
-          src="/logo.png"
-          alt="CSR Impact Hub Logo"
+          src="/LOGO SIPENA.png"
+          alt="Logo SIPENA"
           width={cfg.img}
           height={cfg.img}
           className="w-full h-full object-contain"
@@ -58,27 +58,28 @@ export const AppLogo: React.FC<AppLogoProps> = ({
       {showText && (
         <div className="min-w-0 leading-tight">
           <span
-            className={`font-black tracking-tight block truncate ${cfg.text} ${
-              theme === "dark" ? "text-white" : "text-slate-900"
+            className={`font-extrabold tracking-tight block truncate ${cfg.text} ${
+              theme === "dark" ? "text-white" : "text-[#181343]"
             }`}
+            style={{ fontFamily: "var(--font-display)" }}
           >
-            CSR Impact Hub
+            SIPENA
           </span>
           {subtitle !== undefined ? (
             <span
-              className={`font-semibold block truncate ${cfg.sub} ${
-                theme === "dark" ? "text-emerald-400" : "text-emerald-600"
+              className={`font-medium block truncate ${cfg.sub} ${
+                theme === "dark" ? "text-slate-300" : "text-[#787680]"
               }`}
             >
               {subtitle}
             </span>
           ) : (
             <span
-              className={`font-semibold tracking-wide uppercase block truncate ${cfg.sub} ${
+              className={`font-semibold tracking-normal block truncate ${cfg.sub} ${
                 theme === "dark" ? "text-emerald-400" : "text-emerald-600"
               }`}
             >
-              Platform Kolaborasi ESG
+              Mencatat Aksi, Mengukur Dampak
             </span>
           )}
         </div>
@@ -88,7 +89,7 @@ export const AppLogo: React.FC<AppLogoProps> = ({
 
   if (href) {
     return (
-      <Link href={href} className="group inline-flex items-center focus:outline-none">
+      <Link href={href} className="group inline-flex items-center focus:outline-hidden">
         {content}
       </Link>
     );
@@ -96,3 +97,4 @@ export const AppLogo: React.FC<AppLogoProps> = ({
 
   return content;
 };
+

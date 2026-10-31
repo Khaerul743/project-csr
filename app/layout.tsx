@@ -1,9 +1,15 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-sans",
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+const inter = Inter({
+  variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -14,13 +20,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CSR Impact Hub - Platform Kolaborasi Perusahaan & Mitra",
+  title: "SIPENA — Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR",
   description:
-    "Platform kolaborasi strategis menghubungkan perusahaan dan mitra dalam mengeksekusi proyek CSR dan inisiatif keberlanjutan (ESG) nyata.",
+    "Mencatat Aksi, Mengukur Dampak. Platform tata kelola CSR modern dan akuntabel yang menghubungkan perusahaan, yayasan/NGO, dan masyarakat secara transparan.",
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: "/LOGO SIPENA.png",
+    shortcut: "/LOGO SIPENA.png",
+    apple: "/LOGO SIPENA.png",
   },
 };
 
@@ -32,9 +38,9 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${plusJakartaSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} ${inter.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#F9F9FB] text-[#1A1C1D] selection:bg-emerald-600 selection:text-white font-[family-name:var(--font-body)]">
         {children}
       </body>
     </html>

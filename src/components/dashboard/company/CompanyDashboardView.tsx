@@ -67,11 +67,14 @@ import {
 } from "./helpers";
 import { ReviewProposalModal } from "./ReviewProposalModal";
 import { CollaborationDetailModal } from "./CollaborationDetailModal";
-import { ProgramDetailModal } from "./ProgramDetailModal";
+import { ProgramMonitoringDetailView } from "./programs/ProgramMonitoringDetailView";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
 import { PartnerFullProfileView } from "../partner/profile/PartnerFullProfileView";
 import { CompanyFullProfileView } from "./profile/CompanyFullProfileView";
+import { ExecutiveOverviewView } from "./overview/ExecutiveOverviewView";
+import { OpportunitiesManagementView } from "./opportunities/OpportunitiesManagementView";
+import { PartnerCurationView } from "./partners/PartnerCurationView";
 
 interface CompanyDashboardViewProps {
   user: {
@@ -603,13 +606,21 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 flex">
+    <div className="min-h-screen bg-[#F9F9FB] flex">
       {/* 1. Sidebar Navigation */}
       <Sidebar
         user={user}
         organizationName={company?.name}
         activeMenu={activeMenu}
-        onSelectMenu={(menu) => setActiveMenu(menu)}
+        onSelectMenu={(menu) => {
+          if (menu !== "programs") {
+            setSelectedProgramForDetail(null);
+          }
+          if (menu !== "partners") {
+            setSelectedPartnerForDetail(null);
+          }
+          setActiveMenu(menu);
+        }}
         counts={{
           opportunities: opportunities.length,
           partners: partners.length,
@@ -627,618 +638,71 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Sticky Dashboard Header */}
         <DashboardHeader
-          title={headerMeta[activeMenu]?.title || "Dashboard Perusahaan"}
-          subtitle={headerMeta[activeMenu]?.subtitle}
+          title={
+            activeMenu === "programs" && selectedProgramForDetail
+              ? "Monitoring Pelaksanaan Program"
+              : headerMeta[activeMenu]?.title || "Dashboard Perusahaan"
+          }
+          subtitle={
+            activeMenu === "programs" && selectedProgramForDetail
+              ? `Detail pelaporan lapangan, keuangan, dan evaluasi: ${selectedProgramForDetail.title}`
+              : headerMeta[activeMenu]?.subtitle
+          }
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           rightAction={
-            (activeMenu === "overview" || activeMenu === "opportunities") && (
+            activeMenu === "opportunities" ? (
               <Button
                 variant="primary"
                 size="sm"
                 onClick={() => setIsCreateOppOpen(true)}
                 leftIcon={<Plus className="w-4 h-4" />}
+                className="bg-[#181343] hover:bg-[#26224C] text-white font-bold rounded-xl text-xs py-2 px-3.5 cursor-pointer shadow-2xs"
               >
-                <span className="hidden sm:inline">Buka Opportunity Baru</span>
-                <span className="sm:hidden">Baru</span>
+                <span className="hidden sm:inline">Inisiasi Peluang Baru</span>
+                <span className="sm:hidden">Peluang</span>
               </Button>
-            )
+            ) : null
           }
         />
 
         {/* Content Body Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-8">
           {/* ============================================================ */}
-          {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF) */}
+          {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF & BI ANALYTICS) */}
           {/* ============================================================ */}
           {activeMenu === "overview" && (
-            <div className="space-y-8">
-              {/* Welcome Banner */}
-              <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-emerald-950 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-96 h-96 rounded-full bg-emerald-500/20 blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-1/4 -mb-10 w-72 h-72 rounded-full bg-teal-500/15 blur-3xl pointer-events-none" />
-
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  <div className="space-y-3 max-w-2xl">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-semibold flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        Workspace Perusahaan
-                      </span>
-                      <Badge variant="emerald" size="sm" hasDot>
-                        {user.role}
-                      </Badge>
-                    </div>
-
-                    <div>
-                      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                        Selamat Datang, {user.name}! 👋
-                      </h1>
-                      <p className="text-sm text-slate-300 mt-1.5 leading-relaxed">
-                        Kelola strategi program CSR {company?.name || "perusahaan Anda"}, kurasi mitra pelaksana bereputasi, dan buka peluang kolaborasi berdampak nyata.
-                      </p>
-                    </div>
-
-                    {company && (
-                      <div className="pt-1 flex flex-wrap items-center gap-4 text-xs text-slate-300">
-                        {company.city && (
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>
-                              {company.city}, {company.province || "Indonesia"}
-                            </span>
-                          </div>
-                        )}
-                        {company.email && (
-                          <span className="text-slate-400">
-                            Email: <span className="text-slate-200">{company.email}</span>
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-3 shrink-0">
-                    <Button
-                      variant="primary"
-                      size="md"
-                      onClick={() => setIsCreateOppOpen(true)}
-                      leftIcon={<Plus className="w-4 h-4" />}
-                    >
-                      Buka Opportunity Baru
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Live Metric Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Peluang CSR Aktif
-                      </span>
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <FileText className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-extrabold text-slate-900">
-                      {metrics.activeOpps}
-                      <span className="text-xs font-normal text-slate-400 ml-1.5">
-                        / {metrics.totalOpps} total
-                      </span>
-                    </div>
-                    <span className="text-[11px] text-emerald-600 font-medium block">
-                      Status publikasi OPEN
-                    </span>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Alokasi Anggaran
-                      </span>
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <TrendingUp className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-extrabold text-emerald-600 truncate">
-                      {formatRupiah(metrics.totalBudget)}
-                    </div>
-                    <span className="text-[11px] text-slate-400 block">
-                      Estimasi kumulatif inisiatif
-                    </span>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Mitra Tersedia
-                      </span>
-                      <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                        <HeartHandshake className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-extrabold text-slate-900">
-                      {partners.length}
-                    </div>
-                    <span className="text-[11px] text-slate-400 block">
-                      NGO / Yayasan terdaftar
-                    </span>
-                  </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-5 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                        Tim Internal CSR
-                      </span>
-                      <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-                        <Users className="w-4 h-4" />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-extrabold text-slate-900">
-                      {metrics.membersCount}
-                      {metrics.pendingInvitesCount > 0 && (
-                        <span className="text-xs font-normal text-amber-600 ml-1.5">
-                          (+{metrics.pendingInvitesCount} pending)
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[11px] text-slate-400 block">
-                      Pengelola workspace aktif
-                    </span>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Proposal Baru Perlu Ditinjau Banner */}
-              {metrics.submittedProposalsCount > 0 && (
-                <div className="p-6 rounded-3xl bg-blue-50/70 border border-blue-200/80 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                      <Inbox className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-                        <h4 className="font-extrabold text-blue-950 text-sm">
-                          Ada {metrics.submittedProposalsCount} Proposal Masuk Baru Menunggu Evaluasi!
-                        </h4>
-                      </div>
-                      <p className="text-xs text-blue-800 leading-relaxed max-w-2xl">
-                        Mitra pelaksana telah mengajukan proposal penawaran untuk program CSR Anda. Segera lakukan peninjauan teknis dan anggaran untuk memulai kerja sama.
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-xs shrink-0 shadow-sm"
-                    onClick={() => setActiveMenu("proposals")}
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
-                  >
-                    Buka Proposal Masuk ({metrics.submittedProposalsCount})
-                  </Button>
-                </div>
-              )}
-
-              {/* Kontrak Kolaborasi Menunggu Negosiasi / MoU Banner */}
-              {metrics.negotiatingCollabsCount > 0 && (
-                <div className="p-6 rounded-3xl bg-amber-50/80 border border-amber-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                      <FileCheck2 className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-ping" />
-                        <h4 className="font-extrabold text-amber-950 text-sm">
-                          Ada {metrics.negotiatingCollabsCount} Kontrak Kerja Sama Menunggu Finalisasi MoU!
-                        </h4>
-                      </div>
-                      <p className="text-xs text-amber-800 leading-relaxed max-w-2xl">
-                        Proposal mitra yang telah disetujui berada dalam tahap negosiasi anggaran dan penandatanganan dokumen legal MoU sebelum program CSR resmi dimulai.
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="bg-amber-600 hover:bg-amber-700 text-white text-xs shrink-0 shadow-sm"
-                    onClick={() => setActiveMenu("collaborations")}
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
-                  >
-                    Kelola Kontrak ({metrics.negotiatingCollabsCount})
-                  </Button>
-                </div>
-              )}
-
-              {/* Program Berjalan & Monitoring Banner */}
-              {metrics.inProgressProgramsCount > 0 && (
-                <div className="p-6 rounded-3xl bg-teal-50/80 border border-teal-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                      <Activity className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-teal-600 animate-ping" />
-                        <h4 className="font-extrabold text-teal-950 text-sm">
-                          {metrics.inProgressProgramsCount} Program CSR Sedang Berjalan di Lapangan!
-                        </h4>
-                      </div>
-                      <p className="text-xs text-teal-800 leading-relaxed max-w-2xl">
-                        Realisasi serapan anggaran saat ini mencapai {formatRupiah(metrics.totalSpentBudget)} ({metrics.budgetAbsorptionRate}% dari total alokasi). Pantau progres lapangan dan laporan dampak mitra.
-                      </p>
-                    </div>
-                  </div>
-
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    className="bg-teal-600 hover:bg-teal-700 text-white text-xs shrink-0 shadow-sm"
-                    onClick={() => setActiveMenu("programs")}
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
-                  >
-                    Pantau Program ({metrics.inProgressProgramsCount})
-                  </Button>
-                </div>
-              )}
-
-              {/* Recent Opportunities Snapshot */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">
-                      Peluang Inisiatif Terkini
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Daftar program CSR yang baru dibuka oleh perusahaan Anda
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveMenu("opportunities")}
-                    rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                  >
-                    Lihat Semua ({opportunities.length})
-                  </Button>
-                </div>
-
-                {opportunities.length === 0 ? (
-                  <div className="p-8 rounded-2xl bg-white border border-dashed border-slate-200 text-center space-y-3">
-                    <p className="text-xs text-slate-500">
-                      Belum ada inisiatif opportunity yang dibuat.
-                    </p>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => setIsCreateOppOpen(true)}
-                      leftIcon={<Plus className="w-4 h-4" />}
-                    >
-                      Buka Opportunity Pertama
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {opportunities.slice(0, 3).map((opp) => {
-                      const focus = FOCUS_AREA_CONFIG[opp.focusArea] || {
-                        label: opp.focusArea,
-                        variant: "emerald" as const,
-                      };
-                      const statusCfg = STATUS_CONFIG[opp.status] || {
-                        label: opp.status,
-                        variant: "emerald" as const,
-                      };
-
-                      return (
-                        <div
-                          key={opp.id}
-                          className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-3 overflow-hidden group"
-                        >
-                          <div className="space-y-2">
-                            {opp.bannerUrl ? (
-                              <div
-                                className="relative -mx-5 -mt-5 h-36 overflow-hidden bg-slate-900 cursor-pointer"
-                                onClick={() => setSelectedOppForDetail(opp)}
-                              >
-                                <img
-                                  src={opp.bannerUrl}
-                                  alt={opp.title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
-                                <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-                                  <Badge
-                                    variant={statusCfg.variant}
-                                    size="sm"
-                                    hasDot
-                                    className="shadow-sm backdrop-blur-md bg-white/95"
-                                  >
-                                    {statusCfg.label}
-                                  </Badge>
-                                  <Badge
-                                    variant={focus.variant}
-                                    size="sm"
-                                    className="shadow-sm backdrop-blur-md bg-white/95"
-                                  >
-                                    {focus.label}
-                                  </Badge>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-between gap-2">
-                                <Badge variant={statusCfg.variant} size="sm" hasDot>
-                                  {statusCfg.label}
-                                </Badge>
-                                <Badge variant={focus.variant} size="sm">
-                                  {focus.label}
-                                </Badge>
-                              </div>
-                            )}
-
-                            <h4
-                              onClick={() => setSelectedOppForDetail(opp)}
-                              className="text-sm font-bold text-slate-900 line-clamp-2 hover:text-emerald-700 cursor-pointer transition-colors"
-                            >
-                              {opp.title}
-                            </h4>
-
-                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                              <span className="text-slate-400">Anggaran:</span>
-                              <span className="font-bold text-emerald-700">
-                                {formatRupiah(opp.estimatedBudget)}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedOppForDetail(opp)}
-                              className="text-xs font-semibold text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>Lihat Detail</span>
-                            </button>
-                            <span className="text-[11px] text-slate-400">
-                              Batas: {formatDate(opp.deadline)}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+            <ExecutiveOverviewView
+              company={company}
+              user={user}
+              opportunities={opportunities}
+              partners={partners}
+              proposals={proposals}
+              collaborations={collaborations}
+              programs={programs}
+              metrics={metrics}
+              onNavigateMenu={(menu) => setActiveMenu(menu)}
+              onOpenCreateOpportunity={() => setIsCreateOppOpen(true)}
+              onSelectOpportunityDetail={(opp) => setSelectedOppForDetail(opp)}
+            />
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: OPPORTUNITIES (PELUANG CSR) */}
+          {/* VIEW: OPPORTUNITIES (PELUANG CSR & BI INITIATIVES) */}
           {/* ============================================================ */}
           {activeMenu === "opportunities" && (
-            <div className="space-y-6">
-              {/* Filter Bar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:w-80">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="Cari inisiatif atau lokasi..."
-                    value={oppSearch}
-                    onChange={(e) => setOppSearch(e.target.value)}
-                    className="w-full text-sm bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-800"
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
-                    <Filter className="w-3.5 h-3.5" />
-                    <span>Status:</span>
-                  </div>
-                  <select
-                    value={oppStatusFilter}
-                    onChange={(e) => setOppStatusFilter(e.target.value)}
-                    className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-emerald-500 text-slate-800 font-medium"
-                  >
-                    <option value="ALL">Semua Status</option>
-                    {opportunityStatusEnum.map((st) => (
-                      <option key={st} value={st}>
-                        {STATUS_CONFIG[st]?.label || st}
-                      </option>
-                    ))}
-                  </select>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={fetchOpportunities}
-                    title="Refresh Data"
-                    className="p-2"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Opportunity Cards */}
-              {isLoadingOpportunities ? (
-                <div className="p-12 text-center text-sm text-slate-400 space-y-3">
-                  <div className="w-7 h-7 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <span>Memuat data inisiatif CSR perusahaan Anda...</span>
-                </div>
-              ) : filteredOpportunities.length === 0 ? (
-                <div className="p-12 rounded-3xl bg-white border border-dashed border-slate-200 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
-                    <FileText className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-slate-900">
-                      {oppSearch || oppStatusFilter !== "ALL"
-                        ? "Tidak ada opportunity yang sesuai filter"
-                        : "Belum Ada Peluang Inisiatif CSR"}
-                    </h4>
-                    <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 leading-relaxed">
-                      {oppSearch || oppStatusFilter !== "ALL"
-                        ? "Coba sesuaikan kata kunci pencarian atau ubah status filter."
-                        : "Mulai buat inisiatif CSR pertama Anda untuk mengundang mitra pelaksana dan membuka penerimaan proposal."}
-                    </p>
-                  </div>
-                  {!oppSearch && oppStatusFilter === "ALL" && (
-                    <Button
-                      variant="primary"
-                      size="md"
-                      onClick={() => setIsCreateOppOpen(true)}
-                      leftIcon={<Plus className="w-4 h-4" />}
-                    >
-                      Buka Opportunity Sekarang
-                    </Button>
-                  )}
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filteredOpportunities.map((opp) => {
-                    const focus = FOCUS_AREA_CONFIG[opp.focusArea] || {
-                      label: opp.focusArea,
-                      variant: "emerald" as const,
-                    };
-                    const statusCfg = STATUS_CONFIG[opp.status] || {
-                      label: opp.status,
-                      variant: "emerald" as const,
-                    };
-
-                    return (
-                      <div
-                        key={opp.id}
-                        className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4 overflow-hidden group"
-                      >
-                        <div className="space-y-3">
-                          {opp.bannerUrl ? (
-                            <div
-                              className="relative -mx-5 -mt-5 h-44 overflow-hidden bg-slate-900 cursor-pointer"
-                              onClick={() => setSelectedOppForDetail(opp)}
-                            >
-                              <img
-                                src={opp.bannerUrl}
-                                alt={opp.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
-                              <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-                                <Badge
-                                  variant={statusCfg.variant}
-                                  size="sm"
-                                  hasDot
-                                  className="shadow-sm backdrop-blur-md bg-white/95"
-                                >
-                                  {statusCfg.label}
-                                </Badge>
-                                <Badge
-                                  variant={focus.variant}
-                                  size="sm"
-                                  className="shadow-sm backdrop-blur-md bg-white/95"
-                                >
-                                  {focus.label}
-                                </Badge>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-between gap-2">
-                              <Badge variant={statusCfg.variant} size="sm" hasDot>
-                                {statusCfg.label}
-                              </Badge>
-                              <Badge variant={focus.variant} size="sm">
-                                {focus.label}
-                              </Badge>
-                            </div>
-                          )}
-
-                          <h3
-                            onClick={() => setSelectedOppForDetail(opp)}
-                            className="text-base font-bold text-slate-900 line-clamp-2 hover:text-emerald-700 cursor-pointer transition-colors"
-                          >
-                            {opp.title}
-                          </h3>
-
-                          <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
-                            {opp.description}
-                          </p>
-
-                          <div className="pt-2 border-t border-slate-100 space-y-1.5 text-xs">
-                            <div className="flex items-center justify-between text-slate-600">
-                              <span className="text-slate-400">Anggaran:</span>
-                              <span className="font-bold text-emerald-700">
-                                {formatRupiah(opp.estimatedBudget)}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center justify-between text-slate-600">
-                              <span className="text-slate-400">Lokasi:</span>
-                              <span className="font-medium truncate max-w-[150px]">
-                                {opp.targetCity || opp.targetProvince || "Nasional"}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center justify-between text-slate-600">
-                              <span className="text-slate-400">Batas Proposal:</span>
-                              <span className="font-medium">
-                                {formatDate(opp.deadline)}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card Actions */}
-                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedOppForDetail(opp)}
-                            className="p-2 rounded-xl text-slate-600 hover:text-emerald-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5 text-xs font-semibold"
-                            title="Lihat Detail Inisiatif"
-                          >
-                            <Eye className="w-4 h-4" />
-                            <span>Detail</span>
-                          </button>
-
-                          <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => setSelectedOppForEdit(opp)}
-                              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                              title="Edit Inisiatif"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteOpportunity(opp.id, opp.title)}
-                              className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                              title="Hapus Inisiatif"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <OpportunitiesManagementView
+              opportunities={opportunities}
+              isLoading={isLoadingOpportunities}
+              onRefresh={fetchOpportunities}
+              onOpenCreateModal={() => setIsCreateOppOpen(true)}
+              onOpenEditModal={(opp) => setSelectedOppForEdit(opp)}
+              onOpenDetailModal={(opp) => setSelectedOppForDetail(opp)}
+              onDeleteOpportunity={handleDeleteOpportunity}
+            />
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: PARTNERS (KURASI MITRA) */}
+          {/* VIEW: PARTNERS (KURASI MITRA & BI ECOSYSTEM) */}
           {/* ============================================================ */}
           {activeMenu === "partners" && (
             selectedPartnerForDetail ? (
@@ -1257,150 +721,16 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                 }}
               />
             ) : (
-            <div className="space-y-6">
-              {/* Search & Focus Filter */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <form onSubmit={handlePartnerSearchSubmit} className="relative w-full sm:w-80">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder="Cari nama mitra atau kota..."
-                    value={partnerSearch}
-                    onChange={(e) => setPartnerSearch(e.target.value)}
-                    className="w-full text-sm bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-slate-800"
-                  />
-                </form>
-
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
-                    <Filter className="w-3.5 h-3.5" />
-                    <span>Bidang Fokus:</span>
-                  </div>
-                  <select
-                    value={partnerFocusFilter}
-                    onChange={(e) => setPartnerFocusFilter(e.target.value)}
-                    className="text-xs bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-emerald-500 text-slate-800 font-medium"
-                  >
-                    <option value="ALL">Semua Bidang</option>
-                    {csrFocusAreaEnum.map((area) => (
-                      <option key={area} value={area}>
-                        {FOCUS_AREA_CONFIG[area]?.label || area}
-                      </option>
-                    ))}
-                  </select>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={fetchPartners}
-                    title="Refresh Mitra"
-                    className="p-2"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Partner Grid */}
-              {isLoadingPartners ? (
-                <div className="p-12 text-center text-sm text-slate-400 space-y-3">
-                  <div className="w-7 h-7 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
-                  <span>Memuat direktori mitra pelaksana...</span>
-                </div>
-              ) : partners.length === 0 ? (
-                <div className="p-12 rounded-3xl bg-white border border-dashed border-slate-200 text-center space-y-3">
-                  <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
-                    <HeartHandshake className="w-7 h-7" />
-                  </div>
-                  <h4 className="text-base font-bold text-slate-900">
-                    Mitra Tidak Ditemukan
-                  </h4>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    Belum ada mitra pelaksana yang cocok dengan kriteria filter saat ini.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {partners.map((partner) => {
-                    const focus = FOCUS_AREA_CONFIG[partner.focusArea] || {
-                      label: partner.focusArea,
-                      variant: "emerald" as const,
-                    };
-
-                    return (
-                      <div
-                        key={partner.id}
-                        className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-4 group"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0 overflow-hidden">
-                              {partner.logoUrl ? (
-                                <img
-                                  src={partner.logoUrl}
-                                  alt={partner.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                partner.name.substring(0, 2).toUpperCase()
-                              )}
-                            </div>
-                            <Badge variant={focus.variant} size="sm">
-                              {focus.label}
-                            </Badge>
-                          </div>
-
-                          <div>
-                            <h4 className="text-base font-bold text-slate-900 leading-snug group-hover:text-teal-700 transition-colors">
-                              {partner.name}
-                            </h4>
-                            {partner.tagline ? (
-                              <p className="text-xs font-semibold text-teal-700 line-clamp-1 mt-0.5">
-                                {partner.tagline}
-                              </p>
-                            ) : null}
-                            {partner.city && (
-                              <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1">
-                                <MapPin className="w-3.5 h-3.5" />
-                                <span>
-                                  {partner.city}, {partner.province || "Indonesia"}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                            {partner.description || "Organisasi pelaksana program dampak sosial masyarakat."}
-                          </p>
-                        </div>
-
-                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isLoadingPartnerDetail}
-                            onClick={() => handleViewPartnerDetail(partner)}
-                            leftIcon={<Eye className="w-3.5 h-3.5" />}
-                            className="text-xs font-bold text-slate-700 border-slate-200 hover:bg-slate-50"
-                          >
-                            Lihat Profil
-                          </Button>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => setSelectedPartnerForInvite(partner)}
-                            leftIcon={<Send className="w-3.5 h-3.5" />}
-                            className="text-xs font-bold"
-                          >
-                            Undang Pitch
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+              <PartnerCurationView
+                partners={partners}
+                isLoading={isLoadingPartners}
+                focusFilter={partnerFocusFilter}
+                onFocusFilterChange={(focus) => setPartnerFocusFilter(focus)}
+                onRefresh={fetchPartners}
+                onViewPartnerDetail={handleViewPartnerDetail}
+                onInvitePitch={(partner) => setSelectedPartnerForInvite(partner)}
+                isLoadingDetail={isLoadingPartnerDetail}
+              />
             )
           )}
 
@@ -1974,6 +1304,23 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           {/* VIEW: PROGRAMS (PELAKSANAAN PROGRAM & MONITORING) */}
           {/* ============================================================ */}
           {activeMenu === "programs" && (
+            selectedProgramForDetail ? (
+              <ProgramMonitoringDetailView
+                program={selectedProgramForDetail}
+                onBack={() => setSelectedProgramForDetail(null)}
+                onProgramUpdated={() => {
+                  fetchPrograms();
+                }}
+                onOpenChat={(collabId) => {
+                  setSelectedProgramForDetail(null);
+                  if (collabId) {
+                    setActiveCollaborationChatId(collabId);
+                  }
+                  setActiveMenu("conversations");
+                }}
+                isManagement={isManagement}
+              />
+            ) : (
             <div className="space-y-8">
               {/* Executive Metrics Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -2286,11 +1633,11 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                             <Button
                               variant="primary"
                               size="sm"
-                              className="w-full bg-teal-600 hover:bg-teal-700 text-white text-xs shadow-xs"
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs rounded-xl cursor-pointer"
                               onClick={() => setSelectedProgramForDetail(prog)}
                               leftIcon={<Activity className="w-3.5 h-3.5" />}
                             >
-                              Kelola & Pantau Program
+                              Kelola &amp; Pantau Program
                             </Button>
                           </div>
                         </div>
@@ -2312,6 +1659,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                 </div>
               )}
             </div>
+            )
           )}
 
           {/* ============================================================ */}
@@ -2618,14 +1966,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
         }}
       />
 
-      <ProgramDetailModal
-        isOpen={!!selectedProgramForDetail}
-        program={selectedProgramForDetail}
-        onClose={() => setSelectedProgramForDetail(null)}
-        onSuccess={() => {
-          fetchPrograms();
-        }}
-      />
+
     </div>
   );
 }

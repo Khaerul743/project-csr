@@ -66,12 +66,12 @@ export function OpportunityDetailModal({
 
   const focusConfig = FOCUS_AREA_CONFIG[opportunity.focusArea] || {
     label: opportunity.focusArea,
-    variant: "emerald" as const,
+    variant: "navy" as const,
   };
 
   const statusConfig = STATUS_CONFIG[opportunity.status] || {
     label: opportunity.status,
-    variant: "emerald" as const,
+    variant: "navy" as const,
   };
 
   return (

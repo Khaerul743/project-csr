@@ -195,11 +195,11 @@ export function ProgramDetailModal({
             onClick={() => setActiveTab("finances")}
             className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
               activeTab === "finances"
-                ? "border-teal-600 text-teal-700 font-extrabold"
+                ? "border-[#181343] text-[#181343] font-extrabold"
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
-            <Wallet className="w-4 h-4 text-emerald-600" />
+            <Wallet className="w-4 h-4 text-[#181343]" />
             Realisasi Dana & Keuangan
           </button>
           <button
@@ -207,7 +207,7 @@ export function ProgramDetailModal({
             onClick={() => setActiveTab("overview")}
             className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
               activeTab === "overview"
-                ? "border-teal-600 text-teal-700 font-extrabold"
+                ? "border-[#181343] text-[#181343] font-extrabold"
                 : "border-transparent text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -299,7 +299,7 @@ export function ProgramDetailModal({
               {/* Progress bar */}
               <div className="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden p-0.5">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-teal-400 to-emerald-400 transition-all duration-500"
+                  className="h-full rounded-full bg-emerald-500 transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -339,7 +339,7 @@ export function ProgramDetailModal({
                   href={program.collaborationMouUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#181343] hover:underline"
                 >
                   <FileCheck2 className="w-3.5 h-3.5" /> Buka MoU
                   <ExternalLink className="w-3 h-3 ml-0.5" />

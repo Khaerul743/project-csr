@@ -30,10 +30,16 @@ Folder routing bawaan Next.js App Router:
 - **`globals.css` & `layout.tsx`**: Pengaturan layout dasar, font, dan konfigurasi tema Tailwind CSS.
 
 ### 📁 `docs/`
-Pusat dokumentasi proyek:
-- Dokumentasi kontrak REST API ([api-documentation.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)).
-- Panduan tema, warna, dan komponen UI ([design-system.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)).
-- Koleksi Postman siap pakai ([postman_collection.json](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/postman_collection.json)).
+Pusat dokumentasi lengkap proyek untuk pengembang & AI:
+- **[INDEX.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/INDEX.md)**: Gerbang utama dokumentasi, peta navigasi, dan aturan utama bagi AI/developer.
+- **[system-architecture.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/system-architecture.md)**: Arsitektur 3-Tier, multi-tenancy, RBAC, dan sub-sistem AI.
+- **[database-schema.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/database-schema.md)**: Skema 16+ tabel MySQL, ERD Mermaid, master enum, dan konvensi Drizzle.
+- **[business-workflows.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/business-workflows.md)**: Siklus hidup bisnis, alur transisi status, MoU, realisasi termin & QR survei publik.
+- **[developer-guide.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/developer-guide.md)**: Panduan praktis penambahan modul baru, langkah Drizzle, dan tips pencegahan bug.
+- **[design-system.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)**: Panduan palet warna (Emerald & Slate Navy), tipografi, dan komponen UI.
+- **[api-documentation.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)**: Dokumentasi kontrak lengkap seluruh endpoint REST API.
+- **[ai-service-milestone-extraction.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-milestone-extraction.md)**: Dokumentasi teknis ekstraksi milestone otomatis dari proposal PDF via LangChain.
+- **[postman_collection.json](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/postman_collection.json)**: Koleksi Postman siap pakai untuk pengujian API.
 
 ### 📁 `drizzle/`
 Menyimpan riwayat file migrasi SQL otomatis yang di-generate oleh Drizzle Kit saat ada perubahan skema tabel di database.

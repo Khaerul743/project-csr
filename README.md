@@ -262,13 +262,19 @@ Drizzle menyediakan antarmuka web visual bawaan untuk melihat dan menyunting isi
 
 ---
 
-## 📚 Dokumentasi Tambahan
+## 📚 Dokumentasi Teknis Proyek
 
-- 📘 [Dokumentasi REST API Lengkap (`docs/api-documentation.md`)](file:///docs/api-documentation.md)
-- 🎨 [Panduan Sistem Desain & Token UI (`docs/design-system.md`)](file:///docs/design-system.md)
-- 📁 [Dokumentasi Struktur Direktori Proyek (`docs/folder-structure.md`)](file:///docs/folder-structure.md)
-- 📋 [Spesifikasi Kebutuhan Perangkat Lunak (`srs.md`)](file:///srs.md)
-- 📬 [Postman API Collection (`docs/postman_collection.json`)](file:///docs/postman_collection.json)
+Dokumentasi lengkap untuk developer dan agen AI tersedia di folder [`docs/`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs):
+- 🧭 **[Peta Dokumentasi & Panduan Utama (`docs/INDEX.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/INDEX.md)** *(Mulai dari sini)*
+- 🏛️ [Arsitektur Sistem 3-Tier & RBAC (`docs/system-architecture.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/system-architecture.md)
+- 🗄️ [Kamus Data & Skema ERD Database (`docs/database-schema.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/database-schema.md)
+- 🔄 [Alur Kerja Bisnis & Mesin Status (`docs/business-workflows.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/business-workflows.md)
+- 🛠️ [Playbook Pengembang & Pedoman Fitur Baru (`docs/developer-guide.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/developer-guide.md)
+- 🎨 [Panduan Sistem Desain & Token UI (`docs/design-system.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)
+- 📁 [Dokumentasi Struktur Direktori Proyek (`docs/folder-structure.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/folder-structure.md)
+- 📘 [Dokumentasi Kontrak REST API Lengkap (`docs/api-documentation.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)
+- 🤖 [Layanan AI Ekstraksi Milestone Proposal (`docs/ai-service-milestone-extraction.md`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-milestone-extraction.md)
+- 📬 [Postman API Collection (`docs/postman_collection.json`)](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/postman_collection.json)
 
 ---
 

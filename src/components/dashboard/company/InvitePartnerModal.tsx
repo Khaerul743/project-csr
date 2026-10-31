@@ -132,7 +132,7 @@ export function InvitePartnerModal({
 
           {/* Mitra Info Card */}
           <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
+            <div className="w-11 h-11 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-base shadow-sm shrink-0">
               {partner.name.substring(0, 2).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
@@ -198,11 +198,12 @@ export function InvitePartnerModal({
             </Button>
             <Button
               type="submit"
-              variant="primary"
+              variant="accent"
               size="md"
               isLoading={isLoading}
               disabled={eligibleOpportunities.length === 0}
               leftIcon={<Send className="w-4 h-4" />}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 px-5 cursor-pointer"
             >
               Kirim Undangan
             </Button>

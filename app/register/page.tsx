@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { AuthLayout, RegisterForm } from "@/components/auth";
 
 export const metadata: Metadata = {
-  title: "Daftar Akun Baru - CSR Impact Hub",
+  title: "Daftar Akun Baru — SIPENA",
   description:
-    "Daftarkan akun Anda di CSR Impact Hub untuk mulai berkolaborasi dalam inisiatif keberlanjutan dan CSR terverifikasi.",
+    "Daftarkan akun institusi Anda di SIPENA untuk mulai berkolaborasi dalam inisiatif keberlanjutan dan CSR terverifikasi.",
 };
 
 export default function RegisterPage() {

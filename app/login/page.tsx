@@ -2,9 +2,9 @@ import { Metadata } from "next";
 import { AuthLayout, LoginForm } from "@/components/auth";
 
 export const metadata: Metadata = {
-  title: "Masuk ke Akun - CSR Impact Hub",
+  title: "Masuk ke Akun — SIPENA",
   description:
-    "Masuk ke platform CSR Impact Hub untuk mengelola inisiatif proyek CSR dan kemitraan strategis.",
+    "Masuk ke platform SIPENA untuk mengelola tata kelola inisiatif proyek CSR dan kemitraan strategis.",
 };
 
 export default function LoginPage() {

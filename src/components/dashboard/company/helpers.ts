@@ -3,7 +3,7 @@ import { OpportunityStatus } from "@/db/schema/opportunities";
 
 export const FOCUS_AREA_CONFIG: Record<
   CsrFocusArea,
-  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+  { label: string; variant: "navy" | "red" | "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
 > = {
   LINGKUNGAN: { label: "Lingkungan & Alam", variant: "emerald" },
   PENDIDIKAN: { label: "Pendidikan & Literasi", variant: "blue" },
@@ -16,7 +16,7 @@ export const FOCUS_AREA_CONFIG: Record<
 
 export const STATUS_CONFIG: Record<
   OpportunityStatus,
-  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+  { label: string; variant: "navy" | "red" | "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
 > = {
   OPEN: { label: "Buka Proposal", variant: "emerald" },
   DRAFT: { label: "Draf Internal", variant: "slate" },
@@ -26,7 +26,7 @@ export const STATUS_CONFIG: Record<
 
 export const PROPOSAL_STATUS_CONFIG: Record<
   string,
-  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+  { label: string; variant: "navy" | "red" | "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
 > = {
   SUBMITTED: { label: "Perlu Ditinjau", variant: "blue" },
   UNDER_REVIEW: { label: "Dalam Tinjauan", variant: "amber" },
@@ -38,7 +38,7 @@ export const PROPOSAL_STATUS_CONFIG: Record<
 
 export const COLLABORATION_STATUS_CONFIG: Record<
   string,
-  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+  { label: string; variant: "navy" | "red" | "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
 > = {
   NEGOTIATION: { label: "Tahap Negosiasi", variant: "amber" },
   AGREED: { label: "MoU Disepakati", variant: "emerald" },
@@ -47,7 +47,7 @@ export const COLLABORATION_STATUS_CONFIG: Record<
 
 export const PROGRAM_STATUS_CONFIG: Record<
   string,
-  { label: string; variant: "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
+  { label: string; variant: "navy" | "red" | "emerald" | "blue" | "rose" | "amber" | "purple" | "slate" }
 > = {
   PLANNED: { label: "Direncanakan", variant: "blue" },
   IN_PROGRESS: { label: "Sedang Berjalan", variant: "amber" },

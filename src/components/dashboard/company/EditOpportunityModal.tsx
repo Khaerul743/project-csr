@@ -251,7 +251,7 @@ export function EditOpportunityModal({
               </div>
             </div>
           ) : (
-            <label className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-50/60 hover:bg-emerald-50/20 flex flex-col items-center justify-center gap-2 group">
+            <label className="border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-2xl p-5 text-center cursor-pointer transition-all bg-slate-50/60 hover:bg-emerald-50/30 flex flex-col items-center justify-center gap-2 group">
               <input
                 type="file"
                 accept="image/*"
@@ -382,7 +382,7 @@ export function EditOpportunityModal({
                 onClick={() => setStatus(st)}
                 className={`p-2.5 rounded-xl border text-center transition-all ${
                   status === st
-                    ? "border-emerald-500 bg-emerald-50/70 text-emerald-900 font-bold ring-2 ring-emerald-500/20"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-800 font-bold ring-2 ring-emerald-500/20"
                     : "border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-medium"
                 } text-xs`}
               >
@@ -404,10 +404,11 @@ export function EditOpportunityModal({
           </Button>
           <Button
             type="submit"
-            variant="primary"
+            variant="accent"
             size="md"
             isLoading={isLoading}
             leftIcon={<Save className="w-4 h-4" />}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 cursor-pointer"
           >
             Simpan Perubahan
           </Button>
