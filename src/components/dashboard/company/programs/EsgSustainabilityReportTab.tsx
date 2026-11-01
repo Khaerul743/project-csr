@@ -121,7 +121,13 @@ export function EsgSustainabilityReportTab({
   };
 
   const handlePrint = () => {
+    const originalTitle = document.title;
+    const safeTitle = (program.title || "Program_CSR").replace(/[^a-zA-Z0-9]/g, "_");
+    document.title = `Laporan_Keberlanjutan_ESG_${safeTitle}`;
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1000);
   };
 
   // Helper warna badge SDG (PBB style)
@@ -324,7 +330,7 @@ export function EsgSustainabilityReportTab({
       {/* TAMPILAN RESMI LAPORAN KEBERLANJUTAN (PRINT & SCREEN READY)   */}
       {/* ============================================================ */}
       {report && !isGenerating && (
-        <div className="space-y-6 print:m-0 print:p-0">
+        <div id="printable-esg-report" className="space-y-6 print:m-0 print:p-0 bg-white">
           {/* Print-Only Header: Kop Laporan Resmi */}
           <div className="hidden print:block pb-4 mb-4 border-b-2 border-slate-900">
             <div className="flex items-center justify-between">
