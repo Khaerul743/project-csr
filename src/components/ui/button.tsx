@@ -25,7 +25,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-semibold transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer";
+      "inline-flex flex-row items-center justify-center font-semibold transition-all duration-200 outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer whitespace-nowrap";
 
     const variantStyles = {
       primary:
@@ -56,9 +56,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin text-current shrink-0" />}
-        {!isLoading && leftIcon}
+        {!isLoading && leftIcon && (
+          <span className="inline-flex items-center justify-center shrink-0 leading-none">
+            {leftIcon}
+          </span>
+        )}
         {children}
-        {!isLoading && rightIcon}
+        {!isLoading && rightIcon && (
+          <span className="inline-flex items-center justify-center shrink-0 leading-none">
+            {rightIcon}
+          </span>
+        )}
       </button>
     );
   }

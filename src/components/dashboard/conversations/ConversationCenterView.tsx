@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, MessageSquare, AlertCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { ConversationList } from "./ConversationList";
 import { ChatWindow } from "./ChatWindow";
 import { ConversationListItem, MessageWithSender } from "./types";
@@ -28,7 +28,7 @@ export function ConversationCenterView({
   const [isSending, setIsSending] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Extract user ID from token
+  // Extract user ID from JWT token
   useEffect(() => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -45,40 +45,45 @@ export function ConversationCenterView({
   }, []);
 
   // Fetch conversations list
-  const fetchConversations = useCallback(async (isBackground = false) => {
-    if (!isBackground) setIsLoadingConversations(true);
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
+  const fetchConversations = useCallback(
+    async (isBackground = false) => {
+      if (!isBackground) setIsLoadingConversations(true);
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
 
-      const res = await fetch("/api/conversations", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+        const res = await fetch("/api/conversations", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.message || "Gagal memuat percakapan");
-      }
-
-      setConversations(json.data || []);
-
-      // If initialCollaborationId is provided, select it
-      if (initialCollaborationId && !selectedConversation) {
-        const matched = (json.data || []).find(
-          (c: ConversationListItem) => c.collaborationId === initialCollaborationId
-        );
-        if (matched) {
-          setSelectedConversation(matched);
+        const json = await res.json();
+        if (!res.ok) {
+          throw new Error(json.message || "Gagal memuat percakapan");
         }
+
+        const data: ConversationListItem[] = json.data || [];
+        setConversations(data);
+
+        // If initialCollaborationId is provided, select it automatically
+        if (initialCollaborationId && !selectedConversation) {
+          const matched = data.find(
+            (c: ConversationListItem) =>
+              c.collaborationId === initialCollaborationId
+          );
+          if (matched) {
+            setSelectedConversation(matched);
+          }
+        }
+      } catch (err: any) {
+        if (!isBackground) setErrorMsg(err.message);
+      } finally {
+        if (!isBackground) setIsLoadingConversations(false);
       }
-    } catch (err: any) {
-      if (!isBackground) setErrorMsg(err.message);
-    } finally {
-      if (!isBackground) setIsLoadingConversations(false);
-    }
-  }, [initialCollaborationId, selectedConversation]);
+    },
+    [initialCollaborationId, selectedConversation]
+  );
 
   // Fetch messages for active conversation
   const fetchMessages = useCallback(
@@ -158,7 +163,7 @@ export function ConversationCenterView({
     setIsSending(true);
     try {
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Sesi login berakhir");
+      if (!token) throw new Error("Sesi login berakhir. Silakan login kembali.");
 
       const res = await fetch(
         `/api/conversations/${selectedConversation.collaborationId}/messages`,
@@ -189,33 +194,36 @@ export function ConversationCenterView({
       // Refresh list to update latest message preview
       fetchConversations(true);
     } catch (err: any) {
-      alert(err.message || "Terjadi kesalahan saat mengirim pesan");
+      // Throw error to ChatWindow to display inline banner without wiping user input
+      throw err;
     } finally {
       setIsSending(false);
     }
   };
 
   return (
-    <div className="h-[calc(100vh-8.5rem)] min-h-[500px] bg-white rounded-3xl border border-slate-200/90 shadow-sm flex flex-col md:flex-row overflow-hidden">
-      {/* Mobile Back Button (shown when chat is active on mobile) */}
+    <div className="h-[calc(100vh-8.5rem)] min-h-[550px] bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs flex flex-col md:flex-row overflow-hidden">
+      {/* Mobile Back Button (hanya tampil di layar kecil saat percakapan aktif) */}
       {selectedConversation && (
-        <div className="md:hidden p-3 bg-slate-900 text-white flex items-center gap-2">
+        <div className="md:hidden p-3 bg-[#181343] text-white flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={() => setSelectedConversation(null)}
-            className="p-1 hover:bg-slate-800 rounded-lg flex items-center gap-1.5 text-xs font-bold"
+            className="p-1 hover:bg-white/10 rounded-lg flex items-center gap-1.5 text-xs font-bold transition cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Kembali ke Daftar Percakapan
+            <ArrowLeft className="w-4 h-4 text-emerald-400" />
+            <span>Kembali ke Daftar Percakapan</span>
           </button>
         </div>
       )}
 
-      {/* Left Column: Conversation List */}
+      {/* ============================================================ */}
+      {/* 1. PANEL KIRI: DAFTAR PERCAKAPAN (~32% Desktop)              */}
+      {/* ============================================================ */}
       <div
         className={`${
           selectedConversation ? "hidden md:flex" : "flex"
-        } w-full md:w-80 lg:w-96 shrink-0 h-full`}
+        } w-full md:w-[32%] lg:w-[32%] shrink-0 h-full border-r border-[#E8E8EA]`}
       >
         <ConversationList
           conversations={conversations}
@@ -226,11 +234,13 @@ export function ConversationCenterView({
         />
       </div>
 
-      {/* Right Column: Chat Window */}
+      {/* ============================================================ */}
+      {/* 2. PANEL KANAN: RUANG PERCAKAPAN (~68% Desktop)              */}
+      {/* ============================================================ */}
       <div
         className={`${
           selectedConversation ? "flex" : "hidden md:flex"
-        } flex-1 h-full min-w-0`}
+        } w-full md:w-[68%] lg:w-[68%] flex-1 h-full min-w-0`}
       >
         <ChatWindow
           activeConversation={selectedConversation}

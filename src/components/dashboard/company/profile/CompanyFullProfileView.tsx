@@ -534,10 +534,10 @@ export function CompanyFullProfileView({
                   {onOpenChat && (
                     <Button
                       onClick={onOpenChat}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-sm flex items-center gap-2"
+                      leftIcon={<Send className="w-4 h-4 shrink-0" />}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-sm"
                     >
-                      <Send className="w-4 h-4" />
-                      <span>Kirim Pesan</span>
+                      Kirim Pesan
                     </Button>
                   )}
                 </div>

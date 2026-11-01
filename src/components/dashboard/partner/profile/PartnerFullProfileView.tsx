@@ -10,30 +10,40 @@ import {
   Calendar,
   Users,
   ShieldCheck,
-  Edit3,
+  ShieldAlert,
   ArrowLeft,
   ExternalLink,
   FileText,
   Send,
   Download,
-  Image as ImageIcon,
   Camera,
-  X,
+  Layers,
+  HeartHandshake,
+  Award,
+  CheckCircle2,
+  Star,
+  SquarePen,
   Clock,
   Compass,
-  AlertCircle,
-  FileCheck,
   Briefcase,
-  CheckCircle2,
+  Sparkles,
+  Plus,
+  Filter,
+  Check,
+  RotateCcw,
+  FileCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FOCUS_AREA_CONFIG } from "../helpers";
+import { FOCUS_AREA_CONFIG, formatRupiah, formatDate } from "../helpers";
 import { PastActivityItem, TeamMemberItem } from "@/modules/partners/partner.interface";
-import { EditPartnerProfileModal } from "./EditPartnerProfileModal";
+import { EditPartnerProfilePageView, PartnerProfileCategoryTab } from "./EditPartnerProfilePageView";
 
 interface PartnerFullProfileViewProps {
   partner: any;
+  programs?: any[];
+  collaborations?: any[];
+  isLoadingPrograms?: boolean;
   isOwner?: boolean;
   onBack?: () => void;
   onInvitePitch?: () => void;
@@ -67,13 +77,13 @@ function PartnerAvatar({
         src={logoUrl}
         alt={name}
         onError={() => setHasError(true)}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain p-1"
       />
     );
   }
 
   return (
-    <div className="w-full h-full bg-[#181343] text-white flex items-center justify-center font-bold text-2xl sm:text-3xl tracking-wider">
+    <div className="w-full h-full bg-gradient-to-br from-[#181343] to-emerald-800 text-white flex items-center justify-center font-black text-3xl sm:text-4xl tracking-wider">
       {initials}
     </div>
   );
@@ -81,28 +91,31 @@ function PartnerAvatar({
 
 export function PartnerFullProfileView({
   partner,
+  programs = [],
+  collaborations = [],
+  isLoadingPrograms = false,
   isOwner = false,
   onBack,
   onInvitePitch,
   onInvitePartner,
+  onOpenChat,
   onProfileUpdated,
 }: PartnerFullProfileViewProps) {
   const [currentPartner, setCurrentPartner] = useState(partner);
-  const [activeTab, setActiveTab] = useState<
-    "overview" | "activities" | "legal" | "team"
-  >("overview");
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"about" | "portfolio" | "legal" | "team">("about");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editCategory, setEditCategory] = useState<PartnerProfileCategoryTab>("info");
 
-  // Sync when prop changes
+  // Filters for Portofolio Tab
+  const [programStatusFilter, setProgramStatusFilter] = useState<string>("ALL");
+  const [programFocusFilter, setProgramFocusFilter] = useState<string>("ALL");
+
+  // Sync state if prop changes
   React.useEffect(() => {
     setCurrentPartner(partner);
   }, [partner]);
 
   const p = currentPartner;
-  const focusConfig = p?.focusArea ? FOCUS_AREA_CONFIG[p.focusArea as keyof typeof FOCUS_AREA_CONFIG] : null;
-
-  // Single unified invite action
   const handleInviteAction = onInvitePartner || onInvitePitch;
 
   // Parse JSON data for past activities and team members
@@ -126,48 +139,241 @@ export function PartnerFullProfileView({
     }
   }, [p?.teamMembers]);
 
-  // Actual Administrative Check Status
-  const hasLegal = Boolean(p?.legalNumber && String(p.legalNumber).trim());
-  const hasNpwp = Boolean(p?.npwpNumber && String(p.npwpNumber).trim());
+  // Combined program list from props or partner object
+  const programList = useMemo(() => {
+    if (programs && programs.length > 0) return programs;
+    if (p?.programs && Array.isArray(p.programs)) return p.programs;
+    return [];
+  }, [programs, p?.programs]);
 
-  // Calculate profile completeness score for Owner only
+  // Combined collaborations list
+  const collabList = useMemo(() => {
+    if (collaborations && collaborations.length > 0) return collaborations;
+    if (p?.collaborations && Array.isArray(p.collaborations)) return p.collaborations;
+    return [];
+  }, [collaborations, p?.collaborations]);
+
+  // Helper to get friendly Indonesian label for focus areas
+  const getFocusAreaLabel = (focusKey: string): string => {
+    switch (focusKey) {
+      case "PENDIDIKAN":
+        return "Pendidikan & Literasi";
+      case "KESEHATAN":
+        return "Kesehatan Masyarakat";
+      case "LINGKUNGAN":
+        return "Lingkungan & Alam";
+      case "PEMBERDAYAAN_EKONOMI":
+      case "EKONOMI_UMKM":
+        return "Pemberdayaan Ekonomi / UMKM";
+      case "INFRASTRUKTUR_SOSIAL":
+      case "INFRASTRUKTUR":
+        return "Infrastruktur Sosial";
+      case "TANGGAP_BENCANA":
+        return "Tanggap Kemanusiaan & Bencana";
+      case "LAINNYA":
+        return "Inisiatif Khusus Lainnya";
+      default:
+        if (FOCUS_AREA_CONFIG[focusKey as keyof typeof FOCUS_AREA_CONFIG]) {
+          return FOCUS_AREA_CONFIG[focusKey as keyof typeof FOCUS_AREA_CONFIG].label;
+        }
+        return focusKey;
+    }
+  };
+
+  // Dynamic Focus Area options for filter dropdown
+  const focusOptions = useMemo(() => {
+    const baseOptions = [
+      { value: "ALL", label: "Semua Fokus" },
+      { value: "PENDIDIKAN", label: "Pendidikan & Literasi" },
+      { value: "KESEHATAN", label: "Kesehatan Masyarakat" },
+      { value: "LINGKUNGAN", label: "Lingkungan & Alam" },
+      { value: "PEMBERDAYAAN_EKONOMI", label: "Ekonomi & UMKM" },
+      { value: "INFRASTRUKTUR_SOSIAL", label: "Infrastruktur Sosial" },
+      { value: "TANGGAP_BENCANA", label: "Tanggap Bencana" },
+    ];
+
+    const added = new Set(baseOptions.map((o) => o.value));
+
+    programList.forEach((prog: any) => {
+      if (prog.focusArea && !added.has(prog.focusArea)) {
+        added.add(prog.focusArea);
+        baseOptions.push({
+          value: prog.focusArea,
+          label: getFocusAreaLabel(prog.focusArea),
+        });
+      }
+    });
+
+    if (p?.focusArea && !added.has(p.focusArea)) {
+      added.add(p.focusArea);
+      baseOptions.push({
+        value: p.focusArea,
+        label: getFocusAreaLabel(p.focusArea),
+      });
+    }
+
+    return baseOptions;
+  }, [programList, p?.focusArea]);
+
+  // Calculate administrative verification status based on actual legal documents & verification status
+  const adminVerification = useMemo(() => {
+    const explicitStatus = (p?.verificationStatus || "").toUpperCase();
+    const hasLegal = Boolean(p?.legalNumber && String(p.legalNumber).trim().length > 3);
+    const hasNpwp = Boolean(p?.npwpNumber && String(p.npwpNumber).trim().length > 3);
+    const isSystemActive = p?.status === "ACTIVE" || !p?.status;
+
+    if (explicitStatus === "VERIFIED" || (hasLegal && hasNpwp && isSystemActive)) {
+      return {
+        status: "VERIFIED" as const,
+        label: "Terverifikasi Administratif",
+        badgeBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
+        iconColor: "text-emerald-600",
+        icon: ShieldCheck,
+        description: "Dokumen legalitas lembaga (SK Kemenkumham & NPWP) telah terverifikasi sah dalam sistem SIPENA.",
+      };
+    }
+
+    if (explicitStatus === "PENDING" || hasLegal || hasNpwp) {
+      return {
+        status: "PENDING" as const,
+        label: "Menunggu Verifikasi Administratif",
+        badgeBg: "bg-amber-50 border-amber-200 text-amber-800",
+        iconColor: "text-amber-600",
+        icon: Clock,
+        description: "Dokumen legalitas sedang dalam proses peninjauan administratif oleh tim verifikator SIPENA.",
+      };
+    }
+
+    return {
+      status: "UNVERIFIED" as const,
+      label: "Belum Terverifikasi Administratif",
+      badgeBg: "bg-slate-100 border-slate-200 text-slate-700",
+      iconColor: "text-slate-500",
+      icon: ShieldAlert,
+      description: "Lembaga belum melengkapi dokumen legalitas resmi (SK Kemenkumham & NPWP) untuk verifikasi institusional.",
+    };
+  }, [p?.verificationStatus, p?.legalNumber, p?.npwpNumber, p?.status]);
+
+  // Calculate profile completeness score for Owner only (differentiated from legal verification)
   const completeness = useMemo(() => {
     let score = 0;
     const missing: string[] = [];
 
     if (p?.name) score += 10;
-    if (p?.tagline) score += 15;
+    if (p?.tagline) score += 10;
     else missing.push("Tagline / slogan lembaga");
 
     if (p?.logoUrl) score += 10;
-    else missing.push("Logo resmi");
+    else missing.push("Logo resmi lembaga");
 
-    if (p?.coverUrl) score += 15;
+    if (p?.coverUrl) score += 10;
     else missing.push("Foto sampul lapangan");
+
+    if (p?.focusArea) score += 10;
+    else missing.push("Bidang keahlian utama");
 
     if (p?.description && p.description.length > 30) score += 15;
     else missing.push("Deskripsi visi & misi");
 
-    if (p?.legalNumber || p?.npwpNumber) score += 15;
+    if (p?.city || p?.province) score += 10;
+    else missing.push("Domisili kantor sekretariat");
+
+    if (p?.legalNumber || p?.npwpNumber) score += 10;
     else missing.push("Nomor SK Kemenkumham / NPWP");
 
-    if (pastActivities.length > 0) score += 15;
-    else missing.push("Rekam jejak kegiatan portofolio");
+    if (pastActivities.length > 0 || programList.length > 0) score += 10;
+    else missing.push("Rekam jejak portofolio kegiatan");
 
     if (teamMembers.length > 0) score += 5;
+    else missing.push("Kontak PIC / Tim pengurus");
 
     return { score: Math.min(100, score), missing };
-  }, [p, pastActivities, teamMembers]);
+  }, [p, pastActivities, programList, teamMembers]);
+
+  // Compute live, accurate statistics tailored for NGO partner role
+  const realMetrics = useMemo(() => {
+    // 1. Kerja Sama Aktif (program with agreed / in progress status)
+    const activeProgramsCount = programList.filter(
+      (prog: any) => prog.status === "IN_PROGRESS" || prog.status === "PLANNED"
+    ).length;
+
+    const activeCollabCount = collabList.filter(
+      (col: any) => col.status === "AGREED"
+    ).length;
+
+    const activeCooperations = Math.max(activeProgramsCount, activeCollabCount);
+
+    // 2. Program Selesai
+    const completedProgramsCount = programList.filter(
+      (prog: any) => prog.status === "COMPLETED"
+    ).length;
+
+    // 3. Kegiatan Terlaksana
+    let activitiesCompleted = 0;
+    collabList.forEach((col: any) => {
+      activitiesCompleted += Number(col.completedActivitiesCount || 0);
+    });
+
+    const totalActivities =
+      activitiesCompleted > 0
+        ? activitiesCompleted
+        : pastActivities.length > 0
+        ? pastActivities.length
+        : (p?.metrics?.totalActivities || 0);
+
+    // 4. Ulasan & Penilaian Penerima Manfaat
+    const fallbackReviews = p?.metrics?.totalReviews || 0;
+    const fallbackRating = p?.metrics?.averageRating || 0;
+
+    return {
+      activeCooperations,
+      completedPrograms: completedProgramsCount > 0 ? completedProgramsCount : (p?.metrics?.completedPrograms || 0),
+      totalPrograms: programList.length,
+      totalActivities,
+      averageRating: fallbackRating,
+      totalReviews: fallbackReviews,
+    };
+  }, [programList, collabList, pastActivities, p?.metrics]);
+
+  // Filtered programs for Tab 2
+  const filteredPrograms = useMemo(() => {
+    return programList.filter((prog: any) => {
+      const matchStatus = programStatusFilter === "ALL" || prog.status === programStatusFilter;
+      const matchFocus = programFocusFilter === "ALL" || prog.focusArea === programFocusFilter;
+      return matchStatus && matchFocus;
+    });
+  }, [programList, programStatusFilter, programFocusFilter]);
+
+  const isFilterActive = programStatusFilter !== "ALL" || programFocusFilter !== "ALL";
+
+  const handleResetFilters = () => {
+    setProgramStatusFilter("ALL");
+    setProgramFocusFilter("ALL");
+  };
 
   const handleSuccessUpdate = (updated: any) => {
     setCurrentPartner(updated);
     if (onProfileUpdated) onProfileUpdated(updated);
   };
 
+  if (isEditingProfile) {
+    return (
+      <EditPartnerProfilePageView
+        partner={currentPartner}
+        initialCategory={editCategory}
+        onBack={() => setIsEditingProfile(false)}
+        onProfileUpdated={(updated) => {
+          handleSuccessUpdate(updated);
+          setIsEditingProfile(false);
+        }}
+      />
+    );
+  }
+
   if (!p) {
     return (
       <div className="py-20 text-center text-slate-400">
-        <p className="text-sm">Data profil mitra tidak ditemukan.</p>
+        <p className="text-sm">Data profil lembaga tidak ditemukan.</p>
         {onBack && (
           <Button variant="outline" size="sm" onClick={onBack} className="mt-4">
             Kembali
@@ -178,34 +384,61 @@ export function PartnerFullProfileView({
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-in fade-in duration-300">
-      {/* 1. Top Navigation Bar (Kembali ke Direktori Mitra) */}
+    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-in fade-in">
+      {/* Top Navigation Bar (When viewed by company or has onBack) */}
       {onBack && (
-        <div className="flex items-center justify-between gap-4 bg-white p-3 px-5 rounded-2xl border border-[#E8E8EA] shadow-2xs">
+        <div className="flex items-center justify-between gap-4 bg-white p-3.5 px-5 rounded-2xl border border-slate-200/80 shadow-xs">
           <button
             type="button"
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#181343] hover:text-emerald-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Direktori Mitra</span>
+            <span>Kembali ke Halaman Sebelumnya</span>
           </button>
+
+          <div className="flex items-center gap-2">
+            {onOpenChat && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onOpenChat}
+                leftIcon={<Send className="w-3.5 h-3.5 shrink-0" />}
+                className="text-xs font-bold"
+              >
+                Kirim Pesan
+              </Button>
+            )}
+            {handleInviteAction && (
+              <Button
+                size="sm"
+                onClick={handleInviteAction}
+                leftIcon={<HeartHandshake className="w-3.5 h-3.5" />}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+              >
+                Undang Bermitra
+              </Button>
+            )}
+          </div>
         </div>
       )}
 
-      {/* 2. Main Profile Card (Header, Avatar, Identity & Stats) */}
-      <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden relative">
-        {/* Cover Banner (Proportional height with subtle navy-emerald gradient fallback) */}
-        <div className="h-40 sm:h-48 w-full bg-gradient-to-r from-[#181343] via-[#1F195A] to-[#0A4D3C] relative overflow-hidden">
+      {/* Main Header / LinkedIn-Style Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+        {/* Cover Banner */}
+        <div className="relative h-48 sm:h-64 w-full bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 overflow-hidden">
           {p.coverUrl ? (
             <img
               src={p.coverUrl}
-              alt={`Banner ${p.name}`}
-              className="w-full h-full object-cover"
+              alt={p.name}
+              className="w-full h-full object-cover opacity-90"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center opacity-10">
-              <Building2 className="w-28 h-28 text-white" />
+            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 p-6 text-center">
+              <Building2 className="w-12 h-12 text-slate-700/60 mb-2" />
+              <p className="text-xs text-slate-400 font-medium">
+                Belum ada foto sampul profil lapangan lembaga
+              </p>
             </div>
           )}
 
@@ -213,8 +446,11 @@ export function PartnerFullProfileView({
           {isOwner && (
             <button
               type="button"
-              onClick={() => setIsEditModalOpen(true)}
-              className="absolute top-4 right-4 p-2 px-3 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              onClick={() => {
+                setEditCategory("branding");
+                setIsEditingProfile(true);
+              }}
+              className="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
             >
               <Camera className="w-3.5 h-3.5" />
               <span>Ganti Sampul</span>
@@ -223,131 +459,164 @@ export function PartnerFullProfileView({
         </div>
 
         {/* Profile Info Header Bar */}
-        <div className="px-6 sm:px-8 pb-6 pt-0 relative">
-          {/* Avatar / Logo (Overlapping Banner) & Single Main Action Button */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 mb-4">
+        <div className="px-6 sm:px-10 pb-8 pt-0 relative">
+          {/* Avatar / Logo (Overlapping Banner) */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-5">
             <div className="relative group">
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white p-1 shadow-md border-2 border-white overflow-hidden shrink-0">
-                <div className="w-full h-full rounded-xl overflow-hidden">
+              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-white p-2 shadow-xl border-2 border-white overflow-hidden shrink-0">
+                <div className="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-black text-3xl sm:text-4xl overflow-hidden shadow-inner">
                   <PartnerAvatar logoUrl={p.logoUrl} name={p.name} />
                 </div>
               </div>
               {isOwner && (
                 <button
                   type="button"
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="absolute bottom-1 right-1 p-1.5 bg-[#181343] hover:bg-emerald-600 text-white rounded-full shadow-md transition-colors cursor-pointer"
-                  title="Ubah Logo Lembaga"
+                  onClick={() => {
+                    setEditCategory("branding");
+                    setIsEditingProfile(true);
+                  }}
+                  className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform active:scale-95 cursor-pointer"
+                  title="Ganti Logo Lembaga"
                 >
                   <Camera className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
 
-            {/* Single Primary Action Button */}
-            <div className="flex items-center gap-2.5 self-end sm:self-auto w-full sm:w-auto justify-end">
+            {/* Action Buttons Top-Right */}
+            <div className="flex items-center gap-3 self-end sm:self-auto w-full sm:w-auto justify-end">
               {isOwner ? (
-                <Button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="bg-[#181343] hover:bg-[#25205c] text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-xs flex items-center gap-2 cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditCategory("info");
+                    setIsEditingProfile(true);
+                  }}
+                  className="inline-flex items-center gap-2 h-[38px] px-3.5 sm:px-4 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] hover:border-slate-300 transition-colors duration-150 text-xs sm:text-sm font-semibold shadow-2xs shrink-0 cursor-pointer"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  Edit Profil Lembaga
-                </Button>
-              ) : handleInviteAction ? (
-                <Button
-                  variant="accent"
-                  size="md"
-                  onClick={handleInviteAction}
-                  leftIcon={<Send className="w-3.5 h-3.5" />}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-xs cursor-pointer transition-all"
-                >
-                  Undang Bermitra
-                </Button>
-              ) : null}
+                  <SquarePen className="w-4 h-4 text-[#181343] shrink-0" strokeWidth={1.75} />
+                  <span>Edit Profil Lembaga</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {onOpenChat && (
+                    <Button
+                      onClick={onOpenChat}
+                      variant="outline"
+                      size="sm"
+                      leftIcon={<Send className="w-3.5 h-3.5 shrink-0" />}
+                      className="text-xs font-bold"
+                    >
+                      Kirim Pesan
+                    </Button>
+                  )}
+                  {handleInviteAction && (
+                    <Button
+                      onClick={handleInviteAction}
+                      leftIcon={<HeartHandshake className="w-4 h-4 shrink-0" />}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-sm"
+                    >
+                      Undang Bermitra
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Identity & Headline */}
+          {/* Name & Dynamic Administrative Verification Status */}
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {p.name}
               </h1>
 
-              {/* Status Pemeriksaan Dokumen Administratif (Bukan klaim akreditasi) */}
-              {hasLegal && hasNpwp ? (
-                <span
-                  title="Nomor SK Kemenkumham dan NPWP telah dicantumkan"
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Dokumen Administratif Lengkap</span>
-                </span>
-              ) : hasLegal || hasNpwp ? (
-                <span
-                  title="Sebagian berkas administratif telah dicantumkan"
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200/80"
-                >
-                  <FileCheck className="w-3.5 h-3.5 text-sky-600" />
-                  <span>Dokumen Sebagian Tercatat</span>
-                </span>
-              ) : (
-                <span
-                  title="Berkas administratif dalam pemeriksaan / belum dilengkapi"
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-50 text-slate-600 border border-slate-200"
-                >
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Dokumen Dalam Pemeriksaan</span>
-                </span>
-              )}
-
-              {/* Bidang Keahlian Utama */}
-              {focusConfig && (
-                <Badge variant={focusConfig.variant} size="sm">
-                  {focusConfig.label}
-                </Badge>
-              )}
+              {/* Administrative Verification Badge (Calculated from actual legal documents) */}
+              <div
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold shadow-2xs ${adminVerification.badgeBg}`}
+                title={adminVerification.description}
+              >
+                <adminVerification.icon className={`w-4 h-4 ${adminVerification.iconColor}`} />
+                <span>{adminVerification.label}</span>
+              </div>
             </div>
 
-            {/* Tagline / Deskripsi Singkat */}
-            <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed max-w-3xl">
-              {p.tagline || "Organisasi pelaksana program kemitraan sosial dan keberlanjutan masyarakat."}
-            </p>
+            {p.tagline ? (
+              <p className="text-sm sm:text-base font-semibold text-slate-700 leading-snug max-w-3xl">
+                {p.tagline}
+              </p>
+            ) : (
+              <p className="text-xs text-slate-400 italic">
+                {isOwner
+                  ? "Tambahkan slogan atau fokus komitmen sosial lembaga Anda..."
+                  : "Organisasi pelaksana program kemitraan sosial dan keberlanjutan masyarakat."}
+              </p>
+            )}
 
-            {/* Meta Attributes Row */}
-            <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-[#787680] font-medium">
-              {(p.city || p.province) && (
-                <span className="flex items-center gap-1 text-[#181343] font-semibold">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>{p.city ? `${p.city}, ${p.province || "Indonesia"}` : p.province}</span>
+            {/* Quick Metadata Chips */}
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-4 pt-2 text-xs text-slate-500 font-medium">
+              {p.focusArea && (
+                <span className="flex items-center gap-1 text-emerald-800 font-semibold bg-emerald-50 border border-emerald-200/80 px-2.5 py-1 rounded-lg">
+                  <Compass className="w-3.5 h-3.5 text-emerald-600" />
+                  {getFocusAreaLabel(p.focusArea)}
                 </span>
               )}
 
               {p.organizationType && (
-                <span className="flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{p.organizationType}</span>
+                <span className="flex items-center gap-1 text-slate-700 font-semibold bg-slate-100 px-2.5 py-1 rounded-lg">
+                  <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                  {p.organizationType}
+                </span>
+              )}
+
+              {(p.city || p.province) && (
+                <span className="flex items-center gap-1 text-slate-600">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  {[p.city, p.province].filter(Boolean).join(", ")}
                 </span>
               )}
 
               {p.foundedYear && (
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-slate-600">
                   <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Berdiri sejak {p.foundedYear}</span>
+                  Berdiri {p.foundedYear}
                 </span>
               )}
 
               {p.website && (
                 <a
-                  href={p.website}
+                  href={p.website.startsWith("http") ? p.website : `https://${p.website}`}
                   target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-emerald-700 hover:underline font-semibold"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 font-semibold"
                 >
-                  <Globe className="w-3.5 h-3.5 text-emerald-600" />
+                  <Globe className="w-3.5 h-3.5" />
                   <span>Website Resmi</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
+                  <ExternalLink className="w-3 h-3 ml-0.5 opacity-70" />
+                </a>
+              )}
+
+              {p.instagramUrl && (
+                <a
+                  href={p.instagramUrl.startsWith("http") ? p.instagramUrl : `https://${p.instagramUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-pink-600 hover:text-pink-700 font-semibold"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Instagram</span>
+                </a>
+              )}
+
+              {p.linkedinUrl && (
+                <a
+                  href={p.linkedinUrl.startsWith("http") ? p.linkedinUrl : `https://${p.linkedinUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>LinkedIn</span>
                 </a>
               )}
             </div>
@@ -356,644 +625,891 @@ export function PartnerFullProfileView({
 
         {/* Profile Completeness Bar (Owner Only) */}
         {isOwner && completeness.score < 100 && (
-          <div className="mx-6 sm:mx-8 mb-5 p-4 bg-slate-50 rounded-2xl border border-[#E8E8EA] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1 flex-1">
-              <div className="flex items-center justify-between text-xs font-bold text-[#181343] pr-4">
-                <span>Kelengkapan Profil Lembaga</span>
-                <span className="text-emerald-700">{completeness.score}% Lengkap</span>
+          <div className="mx-6 sm:mx-10 mb-8 p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white border border-emerald-200/80 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
+                  Persentase Kelengkapan Profil Lembaga
+                </span>
               </div>
-              <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-600 rounded-full transition-all duration-500"
-                  style={{ width: `${completeness.score}%` }}
-                />
-              </div>
-              {completeness.missing.length > 0 && (
-                <p className="text-[11px] text-[#787680]">
-                  Lengkapi: <strong className="text-slate-700">{completeness.missing.slice(0, 2).join(", ")}</strong> untuk memudahkan penilaian oleh perusahaan sponsor.
-                </p>
-              )}
+              <span className="text-xs font-black text-emerald-700">
+                {completeness.score}% Lengkap
+              </span>
             </div>
 
-            <Button
-              size="sm"
-              onClick={() => setIsEditModalOpen(true)}
-              className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-bold shrink-0 rounded-xl"
-            >
-              Lengkapi Sekarang
-            </Button>
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Tingkat kelengkapan data informasi publik lembaga untuk membangun transparansi di hadapan perusahaan sponsor CSR. Berbeda dengan status verifikasi administratif yang memvalidasi keabsahan dokumen hukum legalitas (SK Kemenkumham & NPWP).
+            </p>
+
+            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500"
+                style={{ width: `${completeness.score}%` }}
+              />
+            </div>
+
+            {completeness.missing.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
+                <span className="text-slate-500 font-medium">Lengkapi atribut profil:</span>
+                {completeness.missing.slice(0, 3).map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      if (item.includes("Logo") || item.includes("sampul") || item.includes("Tagline")) {
+                        setEditCategory("branding");
+                      } else if (item.includes("keahlian") || item.includes("visi") || item.includes("portofolio")) {
+                        setEditCategory("portfolio");
+                      } else if (item.includes("SK") || item.includes("NPWP")) {
+                        setEditCategory("legal");
+                      } else if (item.includes("pengurus") || item.includes("PIC")) {
+                        setEditCategory("team");
+                      } else {
+                        setEditCategory("info");
+                      }
+                      setIsEditingProfile(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-emerald-300 text-emerald-700 font-bold hover:bg-emerald-50 transition cursor-pointer"
+                  >
+                    <span>+ {item}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         )}
+      </div>
 
-        {/* 3. Objective Metrics Strip (Hanya data aktual yang membantu penilaian) */}
-        <div className="border-t border-[#E8E8EA] bg-[#F9F9FB] grid grid-cols-2 sm:grid-cols-4 divide-x divide-[#E8E8EA] text-center py-3.5">
-          {/* Metrik 1: Program Portofolio */}
-          <div className="p-2 space-y-0.5">
-            <span className="text-[10px] font-bold text-[#787680] uppercase tracking-wider block">
-              Program Portofolio
+      {/* 4 Live Impact Highlight Metrics Cards (Layout Identik Profil Perusahaan) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Metric 1: Kerja Sama Aktif */}
+        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Kerja Sama Aktif
             </span>
-            <strong className="text-xl font-bold text-[#181343]">
-              {pastActivities.length}
-            </strong>
-            <span className="text-[10px] text-[#787680] block">Riwayat kegiatan tercatat</span>
+            <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
+              <HeartHandshake className="w-4 h-4" />
+            </div>
           </div>
-
-          {/* Metrik 2: Kerja Sama Selesai */}
-          <div className="p-2 space-y-0.5">
-            <span className="text-[10px] font-bold text-[#787680] uppercase tracking-wider block">
-              Kerja Sama Selesai
+          <div>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
+              {realMetrics.activeCooperations} Program
             </span>
-            <strong className="text-xl font-bold text-[#181343]">
-              {p.metrics?.completedPrograms ?? 0}
-            </strong>
-            <span className="text-[10px] text-[#787680] block">Program via SIPENA</span>
+            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block truncate">
+              {realMetrics.activeCooperations > 0
+                ? "Program kemitraan sedang berjalan"
+                : "Belum ada kerja sama aktif"}
+            </span>
           </div>
+        </div>
 
-          {/* Metrik 3: Bidang Keahlian */}
-          <div className="p-2 space-y-0.5">
-            <span className="text-[10px] font-bold text-[#787680] uppercase tracking-wider block">
-              Bidang Keahlian
+        {/* Metric 2: Program Selesai */}
+        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Program Selesai
             </span>
-            <strong className="text-sm sm:text-base font-bold text-[#181343] truncate block px-2 mt-1">
-              {focusConfig?.label || p.focusArea}
-            </strong>
-            <span className="text-[10px] text-[#787680] block">Fokus inisiatif utama</span>
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+              <Award className="w-4 h-4" />
+            </div>
           </div>
+          <div>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
+              {realMetrics.completedPrograms}
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+              Dari {realMetrics.totalPrograms} total program terdaftar
+            </span>
+          </div>
+        </div>
 
-          {/* Metrik 4: Status Kelengkapan Dokumen */}
-          <div className="p-2 space-y-0.5">
-            <span className="text-[10px] font-bold text-[#787680] uppercase tracking-wider block">
-              Status Administratif
+        {/* Metric 3: Kegiatan Terlaksana */}
+        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Kegiatan Terlaksana
             </span>
-            <strong className={`text-sm sm:text-base font-bold block mt-1 ${hasLegal && hasNpwp ? "text-emerald-700" : hasLegal || hasNpwp ? "text-sky-700" : "text-slate-600"}`}>
-              {hasLegal && hasNpwp ? "Dokumen Lengkap" : hasLegal || hasNpwp ? "Sebagian Tercatat" : "Dalam Proses"}
-            </strong>
-            <span className="text-[10px] text-[#787680] block">
-              {hasLegal && hasNpwp ? "SK & NPWP terdaftar" : hasLegal || hasNpwp ? "SK / NPWP terdaftar" : "Belum dilengkapi"}
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+          </div>
+          <div>
+            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
+              {realMetrics.totalActivities} Aktivitas
             </span>
+            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+              Intervensi lapangan terealisasi
+            </span>
+          </div>
+        </div>
+
+        {/* Metric 4: Umpan Balik Penerima Manfaat */}
+        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between text-slate-400 mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+              Umpan Balik Warga
+            </span>
+            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+            </div>
+          </div>
+          <div>
+            {realMetrics.totalReviews > 0 && realMetrics.averageRating > 0 ? (
+              <>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    {realMetrics.averageRating.toFixed(1)}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400">/ 5.0</span>
+                </div>
+                <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                  Berdasarkan {realMetrics.totalReviews} ulasan masyarakat
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl sm:text-2xl font-black text-slate-400 tracking-tight block">
+                  —
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                  Belum ada ulasan penerima manfaat
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* 4. Tabs Navigation (4 Tab sesuai arahan) */}
-      <div className="flex items-center gap-2 border-b border-[#E8E8EA] px-1 overflow-x-auto">
-        {[
-          { id: "overview", label: "Tentang Organisasi" },
-          { id: "activities", label: `Rekam Jejak & Portofolio (${pastActivities.length})` },
-          { id: "legal", label: "Legalitas & Dokumen" },
-          { id: "team", label: `Tim Pengurus (${teamMembers.length})` },
-        ].map((tab) => (
+      {/* Profile Detail Tabs (Styling Identik Profil Perusahaan) */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+        {/* Tab Headers: 4 Tab requested */}
+        <div className="flex items-center border-b border-slate-200 bg-slate-50/60 px-6 gap-2 sm:gap-4 overflow-x-auto">
+          {/* Tab 1: Profil & Informasi Lembaga */}
           <button
-            key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`py-3 px-3 text-xs font-bold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
-              activeTab === tab.id
-                ? "border-[#181343] text-[#181343] font-bold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+            onClick={() => setActiveTab("about")}
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
+              activeTab === "about"
+                ? "border-emerald-600 text-emerald-700 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
-            {tab.label}
+            <Building2 className="w-4 h-4" />
+            <span>Profil & Informasi Lembaga</span>
           </button>
-        ))}
-      </div>
 
-      {/* TAB 1: TENTANG ORGANISASI */}
-      {activeTab === "overview" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-200">
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Deskripsi & Visi Misi */}
-            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E8E8EA] shadow-2xs space-y-4">
-              <div className="flex items-center gap-2 text-[#181343]">
-                <FileText className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-base font-bold">Tentang Organisasi</h3>
+          {/* Tab 2: Portofolio Kegiatan & Kolaborasi */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("portfolio")}
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
+              activeTab === "portfolio"
+                ? "border-emerald-600 text-emerald-700 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-900"
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>
+              Portofolio Kegiatan & Kolaborasi ({programList.length + pastActivities.length})
+            </span>
+          </button>
+
+          {/* Tab 3: Legalitas & Dokumen */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("legal")}
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
+              activeTab === "legal"
+                ? "border-emerald-600 text-emerald-700 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-900"
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Legalitas & Dokumen</span>
+          </button>
+
+          {/* Tab 4: Tim & PIC Lembaga */}
+          <button
+            type="button"
+            onClick={() => setActiveTab("team")}
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
+              activeTab === "team"
+                ? "border-emerald-600 text-emerald-700 bg-white"
+                : "border-transparent text-slate-500 hover:text-slate-900"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span>Tim & PIC Lembaga ({teamMembers.length})</span>
+          </button>
+        </div>
+
+        {/* Tab Contents Area */}
+        <div className="p-6 sm:p-8">
+          {/* ============================================================ */}
+          {/* TAB 1: PROFIL & INFORMASI LEMBAGA */}
+          {/* ============================================================ */}
+          {activeTab === "about" && (
+            <div className="space-y-8 animate-in fade-in">
+              {/* Tentang Lembaga & Visi Misi */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-emerald-600" />
+                    <span>Tentang Lembaga & Visi Misi</span>
+                  </h3>
+                  {isOwner && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditCategory("portfolio");
+                        setIsEditingProfile(true);
+                      }}
+                      className="text-xs text-emerald-600 hover:text-emerald-700 font-bold hover:underline cursor-pointer"
+                    >
+                      Edit Deskripsi
+                    </button>
+                  )}
+                </div>
+
+                <div className="p-6 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-4">
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                    {p.description ||
+                      "Lembaga belum mencantumkan deskripsi visi, misi, dan metodologi pendekatan lapangan secara lengkap. Lengkapi informasi ini pada menu Edit Profil Lembaga."}
+                  </p>
+                </div>
               </div>
 
-              <div className="text-xs sm:text-sm text-[#47464F] leading-relaxed whitespace-pre-line space-y-3 font-normal">
-                {p.description ||
-                  "Lembaga ini belum menambahkan deskripsi naratif mengenai visi, misi, dan latar belakang kiprah sosialnya."}
-              </div>
-
-              {/* Unduh Berkas Profil / Company Profile jika tersedia */}
-              {p.portfolioDocUrl && (
-                <div className="pt-4 border-t border-[#F4F4F6] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-[#181343] block">
-                      Dokumen Profil &amp; Portofolio Lembaga (PDF)
+              {/* Fokus Bidang & Cakupan Wilayah */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Bidang Keahlian */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Bidang Keahlian Utama</span>
+                  </h4>
+                  <div className="space-y-1.5">
+                    <span className="text-sm font-extrabold text-slate-900 block">
+                      {getFocusAreaLabel(p.focusArea || "LAINNYA")}
                     </span>
-                    <p className="text-[11px] text-[#787680]">
-                      Disahkan oleh pengurus organisasi untuk referensi kemitraan CSR.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Fokus intervensi tematik dan spesialisasi program lapangan yang menjadi keunggulan yayasan dalam kemitraan CSR.
                     </p>
                   </div>
-                  <a
-                    href={p.portfolioDocUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-[#181343] text-xs font-semibold border border-[#E8E8EA] transition-colors cursor-pointer shrink-0 self-start sm:self-auto"
-                  >
-                    <Download className="w-3.5 h-3.5 text-emerald-600" />
-                    Unduh Dokumen
-                  </a>
                 </div>
-              )}
-            </div>
 
-            {/* Preview Portofolio Terkini di Tab Tentang */}
-            {pastActivities.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E8E8EA] shadow-2xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[#181343]">
-                    <Briefcase className="w-4 h-4 text-emerald-600" />
-                    <h3 className="text-base font-bold">Portofolio Kegiatan Terkini</h3>
+                {/* Domisili & Cakupan */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Domisili & Wilayah Operasional</span>
+                  </h4>
+                  <div className="space-y-1.5">
+                    <span className="text-sm font-extrabold text-slate-900 block">
+                      {[p.city, p.province].filter(Boolean).join(", ") || "Seluruh Indonesia"}
+                    </span>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      {p.address ? p.address : "Alamat kantor sekretariat belum dicantumkan secara lengkap."}
+                    </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("activities")}
-                    className="text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
-                  >
-                    Lihat Semua ({pastActivities.length}) →
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {pastActivities.slice(0, 2).map((act, i) => (
-                    <div
-                      key={act.id || i}
-                      className="p-4 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2 hover:border-slate-300 transition-colors"
-                    >
-                      {act.photoUrl && (
-                        <img
-                          src={act.photoUrl}
-                          alt={act.title}
-                          className="w-full h-32 object-cover rounded-xl mb-2"
-                        />
-                      )}
-                      <div className="flex items-center justify-between text-[11px] text-[#787680]">
-                        <span className="font-bold text-emerald-700">Tahun {act.year}</span>
-                        {act.beneficiaries && <span>{act.beneficiaries}</span>}
-                      </div>
-                      <h4 className="text-xs font-bold text-[#181343] line-clamp-1">
-                        {act.title}
-                      </h4>
-                      <p className="text-[11px] text-[#47464F] line-clamp-2 leading-relaxed">
-                        {act.description}
-                      </p>
-                    </div>
-                  ))}
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Sidebar Info Column */}
-          <div className="space-y-6">
-            {/* Informasi Domisili & Kontak Resmi */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E8E8EA] shadow-2xs space-y-4">
-              <h4 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
-                Informasi Domisili &amp; Kontak Resmi
-              </h4>
+              {/* Kontak Resmi & Media Sosial */}
+              <div className="space-y-3">
+                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-emerald-600" />
+                  <span>Kontak Resmi & Sekretariat</span>
+                </h3>
 
-              <div className="space-y-3.5 text-xs">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Email */}
+                  <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+                    <span className="text-[11px] font-bold text-slate-400 block">Email Resmi</span>
+                    <span className="text-xs font-bold text-slate-800 break-all block">
+                      {p.email || "Belum dicantumkan"}
+                    </span>
+                  </div>
+
+                  {/* Phone */}
+                  <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+                    <span className="text-[11px] font-bold text-slate-400 block">Nomor Telepon</span>
+                    <span className="text-xs font-bold text-slate-800 block">
+                      {p.phone || "Belum dicantumkan"}
+                    </span>
+                  </div>
+
+                  {/* Website */}
+                  <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-1">
+                    <span className="text-[11px] font-bold text-slate-400 block">Website Resmi</span>
+                    {p.website ? (
+                      <a
+                        href={p.website.startsWith("http") ? p.website : `https://${p.website}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-bold text-emerald-600 hover:underline flex items-center gap-1"
+                      >
+                        <span className="truncate">{p.website}</span>
+                        <ExternalLink className="w-3 h-3 shrink-0" />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-slate-400">Belum dicantumkan</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Ringkasan Profil Singkat */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Identitas Organisasi</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
                   <div>
-                    <span className="font-bold text-[#181343] block">Alamat Sekretariat</span>
-                    <span className="text-[#47464F] leading-relaxed">
-                      {p.address || "-"}
-                      {p.city && <>, {p.city}</>}
-                      {p.province && <>, {p.province}</>}
+                    <span className="text-slate-400 block text-[11px]">Bentuk Organisasi</span>
+                    <span className="font-bold text-slate-800">{p.organizationType || "Yayasan"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Tahun Berdiri</span>
+                    <span className="font-bold text-slate-800">{p.foundedYear || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Status Legal</span>
+                    <span className="font-bold text-slate-800">
+                      {p.legalNumber ? "Tercatat SK Kemenkumham" : "Dalam Proses"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">NPWP Lembaga</span>
+                    <span className="font-bold text-slate-800">
+                      {p.npwpNumber ? "Terdaftar" : "Belum Dilengkapi"}
                     </span>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
 
-                <div className="flex items-start gap-3">
-                  <Mail className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-[#181343] block">Email Resmi</span>
-                    <span className="text-[#47464F] select-all">{p.email || "-"}</span>
-                  </div>
+          {/* ============================================================ */}
+          {/* TAB 2: PORTOFOLIO KEGIATAN & KOLABORASI */}
+          {/* ============================================================ */}
+          {activeTab === "portfolio" && (
+            <div className="space-y-6 animate-in fade-in">
+              {/* Filter Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-bold text-slate-800">Filter Portofolio</span>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-[#181343] block">Telepon / Hotline</span>
-                    <span className="text-[#47464F]">{p.phone || "-"}</span>
-                  </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Status Filter */}
+                  <select
+                    value={programStatusFilter}
+                    onChange={(e) => setProgramStatusFilter(e.target.value)}
+                    className="bg-white border border-slate-200 text-xs font-semibold text-slate-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  >
+                    <option value="ALL">Semua Status</option>
+                    <option value="IN_PROGRESS">Sedang Berjalan</option>
+                    <option value="COMPLETED">Selesai</option>
+                    <option value="PLANNED">Tahap Persiapan</option>
+                  </select>
+
+                  {/* Focus Filter */}
+                  <select
+                    value={programFocusFilter}
+                    onChange={(e) => setProgramFocusFilter(e.target.value)}
+                    className="bg-white border border-slate-200 text-xs font-semibold text-slate-700 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                  >
+                    {focusOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Reset Filters */}
+                  {isFilterActive && (
+                    <button
+                      type="button"
+                      onClick={handleResetFilters}
+                      className="inline-flex items-center gap-1 text-xs text-emerald-700 hover:text-emerald-800 font-bold px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Reset</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Sub-Section 1: Program Kolaborasi Resmi SIPENA */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                    <HeartHandshake className="w-4 h-4 text-emerald-600" />
+                    <span>Program Kemitraan CSR Terverifikasi ({filteredPrograms.length})</span>
+                  </h4>
+                  <span className="text-xs text-slate-400">
+                    Berdasarkan MoU dan monitoring aktual
+                  </span>
                 </div>
 
-                {p.website && (
-                  <div className="flex items-start gap-3">
-                    <Globe className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#181343] block">Website</span>
-                      <a
-                        href={p.website}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-emerald-700 hover:underline break-all font-medium"
+                {filteredPrograms.length === 0 ? (
+                  <div className="p-8 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-2">
+                    <Layers className="w-8 h-8 text-slate-300 mx-auto" />
+                    <span className="text-xs font-bold text-slate-700 block">
+                      {isFilterActive
+                        ? "Tidak Ada Program yang Sesuai dengan Filter"
+                        : "Belum Ada Program Kemitraan Resmi Terlaksana"}
+                    </span>
+                    <p className="text-[11px] text-slate-500 max-w-md mx-auto">
+                      {isFilterActive
+                        ? "Coba ubah atau reset filter status dan bidang kegiatan untuk melihat program lainnya."
+                        : "Program CSR bersama perusahaan sponsor yang telah disepakati akan otomatis tercatat di sini."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredPrograms.map((prog: any) => (
+                      <div
+                        key={prog.id}
+                        className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all space-y-3 flex flex-col justify-between"
                       >
-                        {p.website}
-                      </a>
-                    </div>
+                        <div className="space-y-2.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+                              {getFocusAreaLabel(prog.focusArea)}
+                            </span>
+                            <Badge
+                              variant={
+                                prog.status === "COMPLETED"
+                                  ? "emerald"
+                                  : prog.status === "IN_PROGRESS"
+                                  ? "amber"
+                                  : "slate"
+                              }
+                              size="sm"
+                              hasDot
+                            >
+                              {prog.status === "COMPLETED"
+                                ? "Selesai"
+                                : prog.status === "IN_PROGRESS"
+                                ? "Sedang Berjalan"
+                                : "Persiapan"}
+                            </Badge>
+                          </div>
+
+                          <h5 className="text-sm font-bold text-slate-900 line-clamp-2">
+                            {prog.title}
+                          </h5>
+
+                          {prog.description && (
+                            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                              {prog.description}
+                            </p>
+                          )}
+
+                          {/* Sponsor Company Info */}
+                          {prog.companyName && (
+                            <div className="flex items-center gap-2 pt-1 text-xs text-slate-600">
+                              <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                              <span className="font-semibold text-slate-800 truncate">
+                                Mitra: {prog.companyName}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Location & Period */}
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
+                            {(prog.targetCity || prog.targetProvince) && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3 text-slate-400" />
+                                <span>{[prog.targetCity, prog.targetProvince].filter(Boolean).join(", ")}</span>
+                              </span>
+                            )}
+                            {prog.startDate && (
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-slate-400" />
+                                <span>
+                                  {formatDate(prog.startDate)}
+                                  {prog.endDate ? ` – ${formatDate(prog.endDate)}` : ""}
+                                </span>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Beneficiaries & Budget info */}
+                        <div className="border-t border-slate-100 pt-3 flex items-center justify-between text-xs text-slate-600">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block">Penerima Manfaat</span>
+                            <span className="font-bold text-slate-800">
+                              {prog.actualBeneficiaries || prog.targetBeneficiaries || "Dalam pendataan"}
+                            </span>
+                          </div>
+                          {prog.budget && (
+                            <div className="text-right">
+                              <span className="text-[10px] text-slate-400 block">Alokasi Dana</span>
+                              <span className="font-bold text-emerald-700">
+                                {formatRupiah(prog.budget)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Social Links jika ada */}
-              {(p.instagramUrl || p.linkedinUrl || p.youtubeUrl) && (
-                <div className="pt-3 border-t border-[#F4F4F6] space-y-1.5">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-                    Kanal Media Sosial
-                  </span>
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    {p.instagramUrl && (
-                      <a
-                        href={p.instagramUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-slate-50 border border-[#E8E8EA] text-slate-700 hover:text-emerald-700 transition-colors"
-                      >
-                        Instagram
-                      </a>
-                    )}
-                    {p.linkedinUrl && (
-                      <a
-                        href={p.linkedinUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-slate-50 border border-[#E8E8EA] text-slate-700 hover:text-emerald-700 transition-colors"
-                      >
-                        LinkedIn
-                      </a>
-                    )}
-                    {p.youtubeUrl && (
-                      <a
-                        href={p.youtubeUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-2.5 py-1 rounded-lg bg-slate-50 border border-[#E8E8EA] text-slate-700 hover:text-emerald-700 transition-colors"
-                      >
-                        YouTube
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Ringkasan Legalitas Cepat */}
-            <div className="bg-white rounded-3xl p-6 border border-[#E8E8EA] shadow-2xs space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
-                  Ringkasan Dokumen
-                </h4>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("legal")}
-                  className="text-xs font-bold text-emerald-700 hover:underline cursor-pointer"
-                >
-                  Detail →
-                </button>
-              </div>
-
-              <div className="space-y-2 text-xs">
-                <div className="p-3 rounded-xl bg-slate-50 border border-[#E8E8EA]">
-                  <span className="text-[10px] uppercase font-bold text-[#787680] block">
-                    No. SK Kemenkumham / Izin
-                  </span>
-                  <span className="font-mono font-bold text-[#181343] text-xs">
-                    {p.legalNumber || "Belum dicantumkan"}
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 border border-[#E8E8EA]">
-                  <span className="text-[10px] uppercase font-bold text-[#787680] block">
-                    NPWP Lembaga
-                  </span>
-                  <span className="font-mono font-bold text-[#181343] text-xs">
-                    {p.npwpNumber || "Belum dicantumkan"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: REKAM JEJAK & PORTOFOLIO */}
-      {activeTab === "activities" && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E8EA] shadow-2xs space-y-6 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-base font-bold text-[#181343]">
-                Rekam Jejak &amp; Portofolio Program Lapangan
-              </h3>
-              <p className="text-xs text-[#787680] mt-0.5">
-                Riwayat inisiatif sosial dan kegiatan CSR yang pernah dilaksanakan oleh organisasi.
-              </p>
-            </div>
-
-            {isOwner && (
-              <Button
-                size="sm"
-                onClick={() => setIsEditModalOpen(true)}
-                className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-bold rounded-xl self-start sm:self-auto cursor-pointer"
-              >
-                + Tambah Program Portofolio
-              </Button>
-            )}
-          </div>
-
-          {pastActivities.length === 0 ? (
-            /* Natural Empty State */
-            <div className="p-12 text-center rounded-3xl bg-[#F9F9FB] border border-dashed border-[#C8C5D0] space-y-3">
-              <Calendar className="w-10 h-10 text-slate-400 mx-auto" />
-              <h4 className="text-sm font-bold text-[#181343]">
-                Belum Ada Riwayat Program yang Tercatat
-              </h4>
-              <p className="text-xs text-[#787680] max-w-sm mx-auto leading-relaxed">
-                {isOwner
-                  ? "Cantumkan pengalaman kegiatan CSR masa lalu organisasi Anda untuk memperkuat portofolio kemitraan."
-                  : "Organisasi ini belum menambahkan daftar program atau kegiatan terdahulu ke dalam portofolio profil."}
-              </p>
-              {isOwner && (
-                <Button
-                  size="sm"
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl mt-2 cursor-pointer"
-                >
-                  Tambah Kegiatan Sekarang
-                </Button>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {pastActivities.map((act, index) => (
-                <div
-                  key={act.id || index}
-                  className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] hover:border-slate-300 transition-all flex flex-col sm:flex-row items-start gap-5"
-                >
-                  {act.photoUrl ? (
-                    <button
-                      type="button"
-                      onClick={() => setPreviewPhoto(act.photoUrl || null)}
-                      className="w-full sm:w-44 h-32 rounded-xl overflow-hidden border border-slate-200 shrink-0 group relative cursor-pointer"
-                    >
-                      <img
-                        src={act.photoUrl}
-                        alt={act.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                      <div className="absolute inset-0 bg-[#181343]/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[11px] font-bold transition-opacity">
-                        Lihat Foto
-                      </div>
-                    </button>
-                  ) : (
-                    <div className="w-full sm:w-44 h-32 rounded-xl bg-slate-200/60 flex items-center justify-center text-slate-400 shrink-0">
-                      <ImageIcon className="w-6 h-6" />
-                    </div>
-                  )}
-
-                  <div className="flex-1 space-y-2.5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h4 className="text-sm sm:text-base font-bold text-[#181343]">
-                        {act.title}
+              {/* Sub-Section 2: Rekam Jejak Portofolio Lapangan (pastActivities) */}
+              {pastActivities.length > 0 && (
+                <div className="border-t border-slate-200/80 pt-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-emerald-600" />
+                        <span>Rekam Jejak Portofolio Lapangan ({pastActivities.length})</span>
                       </h4>
-                      <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80">
-                        Tahun {act.year}
-                      </span>
+                      <p className="text-xs text-slate-500">
+                        Inisiatif intervensi sosial yang tercatat dalam rekam jejak lembaga
+                      </p>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-[#787680]">
-                      {act.clientSponsor && (
-                        <span className="flex items-center gap-1 font-semibold text-[#181343]">
-                          <Building2 className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Mitra Sponsor: {act.clientSponsor}</span>
-                        </span>
-                      )}
-                      {act.beneficiaries && (
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3.5 h-3.5 text-slate-400" />
-                          <span>Penerima: {act.beneficiaries}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-xs text-[#47464F] leading-relaxed font-normal bg-white p-3.5 rounded-xl border border-[#E8E8EA]">
-                      {act.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* TAB 3: LEGALITAS & DOKUMEN */}
-      {activeTab === "legal" && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E8EA] shadow-2xs space-y-6 animate-in fade-in duration-200">
-          <div>
-            <h3 className="text-base font-bold text-[#181343]">
-              Legalitas &amp; Dokumen Administratif
-            </h3>
-            <p className="text-xs text-[#787680] mt-0.5">
-              Daftar kelengkapan berkas resmi dan nomor izin operasional organisasi pelaksana.
-            </p>
-          </div>
-
-          {/* Disclaimer Transparansi Pemeriksaan Dokumen */}
-          <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-900 flex items-start gap-3">
-            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <strong className="font-semibold block text-amber-950">Catatan Peninjauan Administratif SIPENA:</strong>
-              <p className="leading-relaxed text-amber-800">
-                Pemeriksaan dokumen oleh SIPENA merupakan peninjauan administratif kelengkapan berkas legalitas yang diunggah oleh organisasi. Peninjauan ini bukan merupakan bentuk sertifikasi resmi, akreditasi lembaga, atau jaminan mutlak atas kredibilitas dan keberhasilan pelaksanaan program. Perusahaan disarankan melakukan konfirmasi atau uji kelayakan (due diligence) mandiri sesuai kebijakan tata kelola CSR masing-masing.
-              </p>
-            </div>
-          </div>
-
-          {/* Grid Dokumen Administratif */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Dokumen 1: SK Kemenkumham */}
-            <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-              <span className="text-[11px] uppercase font-bold text-[#787680] block">
-                Nomor SK Kemenkumham / Izin Operasional
-              </span>
-              <strong className="text-sm font-mono text-[#181343] block">
-                {p.legalNumber || "Belum didaftarkan"}
-              </strong>
-              <p className="text-[11px] text-[#787680]">
-                {p.legalNumber ? "Dasar legalitas formal perkumpulan atau yayasan nirlaba." : "Lembaga belum mencantumkan nomor SK resmi."}
-              </p>
-            </div>
-
-            {/* Dokumen 2: NPWP Lembaga */}
-            <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-              <span className="text-[11px] uppercase font-bold text-[#787680] block">
-                Nomor Pokok Wajib Pajak (NPWP) Lembaga
-              </span>
-              <strong className="text-sm font-mono text-[#181343] block">
-                {p.npwpNumber || "Belum didaftarkan"}
-              </strong>
-              <p className="text-[11px] text-[#787680]">
-                {p.npwpNumber ? "Kepatuhan perpajakan dan pelaporan institusional." : "Lembaga belum mencantumkan NPWP resmi."}
-              </p>
-            </div>
-
-            {/* Dokumen 3: Status Akun di Platform */}
-            <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-              <span className="text-[11px] uppercase font-bold text-[#787680] block">
-                Status Akun di Platform SIPENA
-              </span>
-              <div className="flex items-center gap-1.5 pt-1">
-                <span className={`w-2.5 h-2.5 rounded-full ${hasLegal && hasNpwp ? "bg-emerald-500" : hasLegal || hasNpwp ? "bg-sky-500" : "bg-slate-400"}`} />
-                <strong className="text-sm font-bold text-[#181343]">
-                  {hasLegal && hasNpwp
-                    ? "Aktif — Dokumen Lengkap"
-                    : hasLegal || hasNpwp
-                    ? "Aktif — Sebagian Tercatat"
-                    : "Aktif — Dalam Pemeriksaan"}
-                </strong>
-              </div>
-              <p className="text-[11px] text-[#787680]">
-                Terdaftar dalam ekosistem kemitraan CSR SIPENA.
-              </p>
-            </div>
-
-            {/* Dokumen 4: Berkas Company Profile / Laporan Tahunan */}
-            <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-              <span className="text-[11px] uppercase font-bold text-[#787680] block">
-                Berkas Company Profile / Laporan Tahunan
-              </span>
-              {p.portfolioDocUrl ? (
-                <a
-                  href={p.portfolioDocUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:underline pt-1 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Unduh Dokumen Legal (PDF)</span>
-                </a>
-              ) : (
-                <span className="text-xs text-[#787680] block pt-1">Belum ada dokumen diunggah</span>
-              )}
-              <p className="text-[11px] text-[#787680]">
-                Dapat diakses oleh pihak yang berwenang untuk keperluan due diligence.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 4: TIM PENGURUS */}
-      {activeTab === "team" && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E8EA] shadow-2xs space-y-6 animate-in fade-in duration-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-              <h3 className="text-base font-bold text-[#181343]">
-                Tim Pengurus Inti &amp; Penanggung Jawab
-              </h3>
-              <p className="text-xs text-[#787680] mt-0.5">
-                Susunan pimpinan dan PIC yang bertanggung jawab atas pelaksanaan operasional organisasi.
-              </p>
-            </div>
-
-            {isOwner && (
-              <Button
-                size="sm"
-                onClick={() => setIsEditModalOpen(true)}
-                className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-bold rounded-xl self-start sm:self-auto cursor-pointer"
-              >
-                + Tambah Pengurus
-              </Button>
-            )}
-          </div>
-
-          {teamMembers.length === 0 ? (
-            /* Natural Empty State */
-            <div className="p-12 text-center rounded-3xl bg-[#F9F9FB] border border-dashed border-[#C8C5D0] space-y-2">
-              <Users className="w-10 h-10 text-slate-400 mx-auto" />
-              <h4 className="text-sm font-bold text-[#181343]">
-                Belum Ada Anggota Tim yang Ditampilkan
-              </h4>
-              <p className="text-xs text-[#787680] max-w-sm mx-auto leading-relaxed">
-                {isOwner
-                  ? "Kenalkan pimpinan lembaga dan manajer program Anda untuk membangun transparansi kemitraan."
-                  : "Organisasi ini belum mencantumkan susunan tim pengurus inti."}
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {teamMembers.map((member, index) => (
-                <div
-                  key={member.id || index}
-                  className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] hover:border-slate-300 transition-colors flex items-center gap-4"
-                >
-                  <div className="w-13 h-13 rounded-2xl bg-[#181343] text-white font-bold text-base flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
-                    {member.photoUrl ? (
-                      <img
-                        src={member.photoUrl}
-                        alt={member.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      member.name.substring(0, 2).toUpperCase()
+                    {isOwner && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditCategory("portfolio");
+                          setIsEditingProfile(true);
+                        }}
+                        className="text-xs text-emerald-600 hover:text-emerald-700 font-bold hover:underline cursor-pointer"
+                      >
+                        Kelola Portofolio
+                      </button>
                     )}
                   </div>
 
-                  <div className="min-w-0 flex-1">
-                    <h4 className="text-sm font-bold text-[#181343] truncate">
-                      {member.name}
-                    </h4>
-                    <p className="text-xs text-emerald-700 font-semibold truncate mt-0.5">
-                      {member.role}
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {pastActivities.map((act, idx) => (
+                      <div
+                        key={act.id || idx}
+                        className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3 flex flex-col justify-between"
+                      >
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs font-bold text-slate-900 line-clamp-1">
+                              {act.title}
+                            </span>
+                            {act.year && (
+                              <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md shrink-0">
+                                {act.year}
+                              </span>
+                            )}
+                          </div>
+
+                          {act.description && (
+                            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                              {act.description}
+                            </p>
+                          )}
+
+                          {act.photoUrl && (
+                            <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-100 mt-2">
+                              <img
+                                src={act.photoUrl}
+                                alt={act.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="border-t border-slate-100 pt-2.5 flex items-center justify-between text-[11px] text-slate-500">
+                          <span>
+                            {act.clientSponsor ? `Mitra: ${act.clientSponsor}` : "Inisiatif Mandiri"}
+                          </span>
+                          {act.beneficiaries && (
+                            <span className="font-semibold text-slate-700">
+                              {act.beneficiaries}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              ))}
+              )}
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB 3: LEGALITAS & DOKUMEN */}
+          {/* ============================================================ */}
+          {activeTab === "legal" && (
+            <div className="space-y-6 animate-in fade-in">
+              {/* Informative Guidance Alert */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-200 text-blue-900 text-xs leading-relaxed flex items-start gap-3.5">
+                <ShieldCheck className="w-6 h-6 text-blue-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <span className="font-bold text-sm block">Standar Kepatuhan Administratif SIPENA</span>
+                  <p className="text-[11px] text-blue-800 leading-relaxed">
+                    Pemeriksaan berkas berfokus pada kelengkapan format SK Kemenkumham, NPWP, serta profil kelembagaan untuk menjamin tata kelola yang transparan sebelum kerja sama program CSR dimulai.
+                  </p>
+                </div>
+              </div>
+
+              {/* 4 Legal Credentials Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. SK Kemenkumham */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      SK Pengesahan Kemenkumham
+                    </span>
+                    <Badge
+                      variant={p.legalNumber ? "emerald" : "slate"}
+                      size="sm"
+                      hasDot
+                    >
+                      {p.legalNumber ? "Tercatat di Sistem" : "Belum Dilengkapi"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-sm font-mono font-bold text-slate-900 block truncate">
+                      {p.legalNumber || "Nomor SK belum dicantumkan"}
+                    </span>
+                    <span className="text-[11px] text-slate-400 mt-0.5 block">
+                      Akta Pendirian & Pengesahan Badan Hukum
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. NPWP Lembaga */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Nomor Pokok Wajib Pajak (NPWP)
+                    </span>
+                    <Badge
+                      variant={p.npwpNumber ? "emerald" : "slate"}
+                      size="sm"
+                      hasDot
+                    >
+                      {p.npwpNumber ? "Terdaftar Resmi" : "Belum Dilengkapi"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-sm font-mono font-bold text-slate-900 block truncate">
+                      {p.npwpNumber || "Nomor NPWP belum dicantumkan"}
+                    </span>
+                    <span className="text-[11px] text-slate-400 mt-0.5 block">
+                      NPWP terdaftar atas nama lembaga yayasan
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Bentuk Badan Hukum */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Bentuk Badan Hukum
+                    </span>
+                    <Badge variant="blue" size="sm">
+                      {p.organizationType || "Yayasan"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-sm font-bold text-slate-900 block">
+                      {p.organizationType || "Yayasan"}
+                    </span>
+                    <span className="text-[11px] text-slate-400 mt-0.5 block">
+                      Entitas nirlaba pelaksana program sosial
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. Dokumen Portofolio PDF */}
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Company Profile Yayasan (PDF)
+                    </span>
+                    <Badge
+                      variant={p.portfolioDocUrl ? "emerald" : "slate"}
+                      size="sm"
+                      hasDot
+                    >
+                      {p.portfolioDocUrl ? "Tersedia" : "Belum Diunggah"}
+                    </Badge>
+                  </div>
+                  <div>
+                    {p.portfolioDocUrl ? (
+                      <a
+                        href={p.portfolioDocUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs font-bold text-emerald-700 hover:underline inline-flex items-center gap-1.5"
+                      >
+                        <FileText className="w-4 h-4 text-emerald-600" />
+                        <span>Unduh / Buka Dokumen Portofolio (PDF)</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <span className="text-xs text-slate-400 block">
+                        Berkas company profile PDF belum diunggah
+                      </span>
+                    )}
+                    <span className="text-[11px] text-slate-400 mt-0.5 block">
+                      Dokumen resmi presentasi rekam jejak lembaga
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action for Owner */}
+              {isOwner && (
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">
+                      Perbarui Data Legalitas Organisasi
+                    </span>
+                    <span className="text-[11px] text-slate-500">
+                      Pastikan nomor registrasi dan dokumen PDF selalu mutakhir untuk kelancaran kemitraan.
+                    </span>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      setEditCategory("legal");
+                      setIsEditingProfile(true);
+                    }}
+                    className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-bold shrink-0"
+                  >
+                    Perbarui Berkas Legalitas
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB 4: TIM & PIC LEMBAGA */}
+          {/* ============================================================ */}
+          {activeTab === "team" && (
+            <div className="space-y-6 animate-in fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-emerald-600" />
+                    <span>Pengurus & Tim Pelaksana ({teamMembers.length})</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Struktur kepengurusan dan penanggung jawab operasional program lembaga.
+                  </p>
+                </div>
+
+                {isOwner && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => {
+                      setEditCategory("team");
+                      setIsEditingProfile(true);
+                    }}
+                    leftIcon={<Plus className="w-3.5 h-3.5" />}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0"
+                  >
+                    Kelola Pengurus
+                  </Button>
+                )}
+              </div>
+
+              {/* PIC Utama Card */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-emerald-50/40 border border-slate-200 shadow-2xs space-y-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+                  Penanggung Jawab Resmi Organisasi (PIC)
+                </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900">
+                      {teamMembers.length > 0 ? teamMembers[0].name : p.name}
+                    </h4>
+                    <span className="text-xs text-slate-500">
+                      {teamMembers.length > 0 ? teamMembers[0].role : "Penanggung Jawab Lembaga"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-slate-600">
+                    {p.email && (
+                      <span className="flex items-center gap-1">
+                        <Mail className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{p.email}</span>
+                      </span>
+                    )}
+                    {p.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{p.phone}</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid of Team Members */}
+              {teamMembers.length === 0 ? (
+                <div className="p-8 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-2">
+                  <Users className="w-8 h-8 text-slate-300 mx-auto" />
+                  <span className="text-xs font-bold text-slate-700 block">
+                    Belum Ada Tim atau Pengurus yang Ditambahkan
+                  </span>
+                  <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                    {isOwner
+                      ? "Tambahkan nama-nama pengurus yayasan Anda untuk meningkatkan transparansi di hadapan sponsor."
+                      : "Lembaga belum mencantumkan susunan pengurus organisasi."}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {teamMembers.map((member, idx) => {
+                    const initials = member.name
+                      ? member.name.substring(0, 2).toUpperCase()
+                      : "TM";
+                    return (
+                      <div
+                        key={member.id || idx}
+                        className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:shadow-xs transition-all flex items-center gap-3.5"
+                      >
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-slate-700 overflow-hidden shrink-0">
+                          {member.photoUrl ? (
+                            <img
+                              src={member.photoUrl}
+                              alt={member.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span>{initials}</span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h5 className="text-xs font-bold text-slate-900 truncate">
+                            {member.name}
+                          </h5>
+                          <span className="text-[11px] text-slate-500 block truncate">
+                            {member.role}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
-
-      {/* Edit Profile Modal for Owner */}
-      {isOwner && (
-        <EditPartnerProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          partner={p}
-          onSuccess={handleSuccessUpdate}
-        />
-      )}
-
-      {/* Photo Lightbox */}
-      {previewPhoto && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in"
-          onClick={() => setPreviewPhoto(null)}
-        >
-          <div
-            className="relative max-w-3xl w-full max-h-[85vh] flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setPreviewPhoto(null)}
-              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white bg-white/10 rounded-full hover:bg-white/20 transition-all cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <img
-              src={previewPhoto}
-              alt="Preview Dokumentasi"
-              className="max-w-full max-h-[80vh] rounded-2xl object-contain shadow-2xl border border-white/20"
-            />
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

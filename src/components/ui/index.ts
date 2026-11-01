@@ -6,3 +6,4 @@ export * from "./card";
 export * from "./textarea";
 export * from "./modal";
 export * from "./app-logo";
+export * from "./searchable-select";

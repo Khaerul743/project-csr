@@ -38,6 +38,6 @@ export const COLLABORATION_STATUS_CONFIG: Record<
   { label: string; variant: "amber" | "emerald" | "rose" | "slate" }
 > = {
   NEGOTIATION: { label: "Tahap Negosiasi", variant: "amber" },
-  AGREED: { label: "Disepakati (MoU)", variant: "emerald" },
+  AGREED: { label: "Disepakati", variant: "emerald" },
   CANCELLED: { label: "Dibatalkan", variant: "rose" },
 };
