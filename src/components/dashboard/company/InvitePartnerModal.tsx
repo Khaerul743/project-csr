@@ -398,12 +398,12 @@ export function InvitePartnerModal({
             </Button>
             <Button
               type="submit"
-              variant="accent"
+              variant="primary"
               size="md"
               isLoading={isLoading}
               disabled={eligibleOpportunities.length === 0 || isAlreadyInvited || isCheckingDuplicate}
               leftIcon={<Send className="w-4 h-4" />}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-xs px-5 cursor-pointer text-xs"
+              className="px-5 cursor-pointer text-xs"
             >
               {isCheckingDuplicate
                 ? "Memeriksa..."

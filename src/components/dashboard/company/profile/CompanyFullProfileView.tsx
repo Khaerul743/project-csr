@@ -533,9 +533,10 @@ export function CompanyFullProfileView({
                 <div className="flex items-center gap-2">
                   {onOpenChat && (
                     <Button
+                      variant="primary"
                       onClick={onOpenChat}
                       leftIcon={<Send className="w-4 h-4 shrink-0" />}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-sm"
+                      className="text-xs px-5 py-2.5"
                     >
                       Kirim Pesan
                     </Button>
@@ -1158,7 +1159,7 @@ export function CompanyFullProfileView({
                                 size="sm"
                                 variant="primary"
                                 onClick={() => onApplyOpportunity(opp)}
-                                className="text-xs font-bold py-1 px-3 bg-emerald-600 hover:bg-emerald-700"
+                                className="text-xs font-semibold py-1 px-3"
                               >
                                 Ajukan Proposal
                               </Button>
@@ -1250,7 +1251,7 @@ export function CompanyFullProfileView({
                     href={c.sustainabilityReportUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs shadow-2xs transition-all shrink-0 cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
                     <span>Unduh Laporan (PDF)</span>

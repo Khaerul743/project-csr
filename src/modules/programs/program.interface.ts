@@ -20,6 +20,7 @@ export interface ProgramWithDetails extends Program {
   completedActivitiesCount?: number;
   pendingActivitiesCount?: number;
   pendingVerificationCount?: number;
+  revisionRequestedReportsCount?: number;
   activityProgressPercent?: number;
   nextActivityTitle?: string | null;
   nextActivityDate?: string | null;

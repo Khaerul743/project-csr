@@ -483,17 +483,17 @@ export function PartnerCurationView({
                     disabled={isLoadingDetail}
                     onClick={() => onViewPartnerDetail(partner)}
                     leftIcon={<Eye className="w-3.5 h-3.5" />}
-                    className="flex-1 text-xs font-semibold text-[#181343] hover:text-emerald-700 border-[#E8E8EA] hover:border-emerald-300 hover:bg-emerald-50/50 rounded-xl transition-all cursor-pointer"
+                    className="flex-1 text-xs cursor-pointer"
                   >
                     Lihat Profil
                   </Button>
 
                   <Button
-                    variant="accent"
+                    variant="primary"
                     size="sm"
                     onClick={() => handleInvite(partner)}
                     leftIcon={<Send className="w-3.5 h-3.5" />}
-                    className="flex-1 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs cursor-pointer transition-all"
+                    className="flex-1 text-xs cursor-pointer"
                   >
                     Undang Bermitra
                   </Button>

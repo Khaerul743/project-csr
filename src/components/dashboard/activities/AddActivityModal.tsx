@@ -465,7 +465,7 @@ export function AddActivityModal({
               variant="primary"
               size="sm"
               isLoading={isSubmitting}
-              className="bg-teal-600 hover:bg-teal-700 text-white shadow-xs"
+              className="text-xs font-semibold"
             >
               Simpan & Unggah Laporan
             </Button>

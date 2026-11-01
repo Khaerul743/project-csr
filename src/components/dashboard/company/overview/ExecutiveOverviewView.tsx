@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SoftDataGrid } from "@/components/ui/soft-data-grid";
 import { CompanyNavMenu } from "../../Sidebar";
 import {
   CompanyProfile,
@@ -700,10 +701,14 @@ export function ExecutiveOverviewView({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* ============================================================ */}
-      {/* BAGIAN 1 — HEADER & FILTER ANALISIS                          */}
-      {/* ============================================================ */}
+    <div className="space-y-8 animate-in fade-in duration-300 relative">
+      {/* Eksperimen Visual Opsi 3: Soft Data Grid Background & Atmospheric Glow */}
+      <SoftDataGrid variant="page" />
+
+      <div className="relative z-10 space-y-8">
+        {/* ============================================================ */}
+        {/* BAGIAN 1 — HEADER & FILTER ANALISIS                          */}
+        {/* ============================================================ */}
       <div className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
           <div className="space-y-1">
@@ -727,11 +732,11 @@ export function ExecutiveOverviewView({
           {/* Primary Action Button */}
           <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
             <Button
-              variant="accent"
+              variant="primary"
               size="md"
               onClick={onOpenCreateOpportunity}
               leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-md shadow-emerald-600/25 px-5 py-2.5 cursor-pointer active:scale-95 transition-all focus:ring-2 focus:ring-emerald-500/30"
+              className="px-5 py-2.5 cursor-pointer"
             >
               Buat Peluang CSR
             </Button>
@@ -841,12 +846,12 @@ export function ExecutiveOverviewView({
             <div className="pt-2 border-t border-[#F4F4F6] flex flex-wrap items-center gap-2 text-xs">
               <span className="text-[#787680] font-medium">Filter Aktif:</span>
               {selectedYear !== "ALL" && (
-                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[11px] inline-flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-xl bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] font-semibold text-[11px] inline-flex items-center gap-1">
                   Tahun: {selectedYear}
                 </span>
               )}
               {selectedMonth !== null && (
-                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[11px] inline-flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-xl bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] font-semibold text-[11px] inline-flex items-center gap-1">
                   Bulan: {MONTH_NAMES.find((m) => m.num === selectedMonth)?.name || selectedMonth}
                   <button
                     type="button"
@@ -1682,10 +1687,10 @@ export function ExecutiveOverviewView({
             </div>
             {hasActiveFilters && (
               <Button
-                variant="accent"
+                variant="primary"
                 size="sm"
                 onClick={handleResetFilters}
-                className="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl"
+                className="text-xs"
               >
                 Reset Semua Filter
               </Button>
@@ -1855,11 +1860,11 @@ export function ExecutiveOverviewView({
                                   </p>
                                 </div>
                                 <Button
-                                  variant="accent"
+                                  variant="primary"
                                   size="sm"
                                   onClick={() => onNavigateMenu("programs")}
                                   rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl self-start sm:self-auto cursor-pointer"
+                                  className="text-xs self-start sm:self-auto cursor-pointer"
                                 >
                                   Buka Halaman Monitoring Program
                                 </Button>
@@ -1977,8 +1982,8 @@ export function ExecutiveOverviewView({
             variant="outline"
             size="sm"
             onClick={() => onNavigateMenu("opportunities")}
-            rightIcon={<ArrowRight className="w-3.5 h-3.5 text-emerald-600" />}
-            className="text-xs font-semibold text-[#181343] hover:text-emerald-700 border-[#C8C5D0] hover:border-emerald-400 hover:bg-emerald-50 cursor-pointer"
+            rightIcon={<ArrowRight className="w-3.5 h-3.5 text-[#181343]" />}
+            className="text-xs font-semibold text-[#181343] cursor-pointer"
           >
             Lihat Semua Peluang CSR ({opportunities.length})
           </Button>
@@ -1990,11 +1995,11 @@ export function ExecutiveOverviewView({
               Belum ada inisiatif peluang CSR yang dibuat oleh perusahaan Anda.
             </p>
             <Button
-              variant="accent"
+              variant="primary"
               size="sm"
               onClick={onOpenCreateOpportunity}
               leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer shadow-md shadow-emerald-600/20"
+              className="text-xs cursor-pointer"
             >
               Buat Peluang CSR Baru
             </Button>
@@ -2110,6 +2115,7 @@ export function ExecutiveOverviewView({
             })}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

@@ -454,7 +454,7 @@ export function PartnerProgramDetailModal({
               variant="primary"
               size="sm"
               disabled={isSubmitting}
-              className="bg-teal-600 hover:bg-teal-700 text-white shadow-xs"
+              className="text-xs font-semibold"
               leftIcon={<CheckCircle2 className="w-4 h-4" />}
             >
               {isSubmitting ? "Menyimpan Laporan..." : "Kirim Laporan Progres"}

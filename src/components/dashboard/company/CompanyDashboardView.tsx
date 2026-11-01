@@ -748,7 +748,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F9FB] flex">
+    <div className={`min-h-screen bg-[#F9F9FB] flex ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
       {/* 1. Sidebar Navigation */}
       <Sidebar
         user={user}
@@ -777,7 +777,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       />
 
       {/* 2. Main Workspace Layout */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" ? "h-screen overflow-hidden" : "overflow-y-auto"}`}>
         {/* Sticky Dashboard Header */}
         <DashboardHeader
           breadcrumbs={
@@ -842,7 +842,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
         />
 
         {/* Content Body Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-8">
+        <main className={`w-full mx-auto ${activeMenu === "chat" ? "p-3 sm:p-4 lg:p-5 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden" : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"}`}>
           {/* ============================================================ */}
           {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF & BI ANALYTICS) */}
           {/* ============================================================ */}
@@ -1963,9 +1963,9 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                           </div>
 
                           <Button
-                            variant="primary"
+                            variant="outline"
                             size="sm"
-                            className="bg-[#009E75] hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs rounded-xl cursor-pointer self-end sm:self-auto"
+                            className="text-xs cursor-pointer self-end sm:self-auto"
                             onClick={() => setSelectedProgramForDetail(prog)}
                             leftIcon={<Activity className="w-3.5 h-3.5" />}
                           >

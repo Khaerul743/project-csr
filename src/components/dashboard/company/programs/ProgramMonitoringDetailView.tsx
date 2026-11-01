@@ -679,7 +679,7 @@ export function ProgramMonitoringDetailView({
                       size="sm"
                       disabled={isSubmitting}
                       leftIcon={isSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs py-2.5 px-5 cursor-pointer shadow-md shadow-emerald-600/20"
+                      className="text-xs py-2.5 px-5 cursor-pointer font-semibold"
                     >
                       {isSubmitting ? "Menyimpan Pembaruan..." : "Simpan Pembaruan Program"}
                     </Button>

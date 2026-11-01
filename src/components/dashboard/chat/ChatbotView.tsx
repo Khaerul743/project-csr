@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Sparkles,
   Send,
@@ -21,7 +21,9 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
-  TrendingUp,
+  RotateCcw,
+  AlertCircle,
+  ShieldCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownRenderer } from "./MarkdownRenderer";
@@ -35,6 +37,8 @@ export interface ChatMessage {
   cards?: any[];
   toolCallsMade?: string[];
   timestamp: string;
+  isError?: boolean;
+  failedPrompt?: string;
 }
 
 interface ChatbotViewProps {
@@ -55,64 +59,91 @@ export function ChatbotView({
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [lastUserPrompt, setLastUserPrompt] = useState<string | null>(null);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isNearBottomRef = useRef(true);
 
+  // 4 Standardized Quick Prompts for NGO Mitra
   const defaultPrompts = isPartner
     ? [
         {
           icon: Compass,
-          title: "Cari Peluang Terbuka",
-          prompt: "Rekomendasikan peluang CSR yang sedang buka di platform SIPENA",
+          title: "Temukan Peluang CSR",
+          subtitle: "Cari peluang sesuai keahlian dan wilayah lembaga.",
+          prompt:
+            "Rekomendasikan peluang CSR yang sedang dibuka di SIPENA yang relevan dengan fokus keahlian dan wilayah kerja lembaga kami.",
         },
         {
           icon: Lightbulb,
-          title: "Brainstorming Proposal",
-          prompt: "Bantu saya brainstorming draf ide proposal program CSR bidang lingkungan dengan target SDG 13",
+          title: "Bantu Susun Proposal",
+          subtitle: "Kembangkan ide, metodologi, dan target program.",
+          prompt:
+            "Bantu kami mengembangkan ide proposal inisiatif CSR, rancangan metodologi pelaksanaan, dan target penerima manfaat.",
         },
         {
           icon: FileText,
           title: "Cek Status Proposal",
-          prompt: "Bagaimana status proposal saya yang terakhir dan apakah ada catatan revisi?",
+          subtitle: "Lihat perkembangan pengajuan dan catatan revisi.",
+          prompt:
+            "Bagaimana status pengajuan proposal lembaga kami saat ini dan apakah terdapat catatan evaluasi atau revisi dari perusahaan?",
         },
         {
-          icon: TrendingUp,
-          title: "Tips Lolos AI Screening",
-          prompt: "Apa saja tips agar proposal mitra lolos screening AI dengan skor tinggi?",
+          icon: CheckCircle2,
+          title: "Evaluasi Kesiapan Proposal",
+          subtitle: "Periksa kelengkapan dan kesesuaian pengajuan.",
+          prompt:
+            "Berikan panduan evaluasi kesiapan proposal sebelum diajukan, mencakup kelengkapan TOR, estimasi RAB, dan keselarasan dengan target SDGs.",
         },
       ]
     : [
         {
           icon: Activity,
           title: "Rekap Program Aktif",
+          subtitle: "Pantau serapan anggaran dan progres program berjalan.",
           prompt: "Berapa total serapan anggaran dan progres program CSR kita yang sedang berjalan?",
         },
         {
           icon: Lightbulb,
           title: "Rancang Inisiatif Baru",
+          subtitle: "Konsep inisiatif strategis berbasis POJK 51 dan SDGs.",
           prompt: "Berikan 3 ide konsep program CSR inovatif yang selaras dengan POJK 51 dan SDG 12",
         },
         {
           icon: FileText,
           title: "Evaluasi Proposal Masuk",
+          subtitle: "Tinjau proposal mitra yang membutuhkan seleksi.",
           prompt: "Ada berapa proposal mitra yang statusnya masih UNDER_REVIEW?",
         },
         {
-          icon: TrendingUp,
+          icon: CheckCircle2,
           title: "Indikator ESG & Dampak",
+          subtitle: "Panduan pengukuran dampak sosial-lingkungan terukur.",
           prompt: "Panduan indikator keberlanjutan terukur untuk laporan tahunan CSR",
         },
       ];
 
-  // Auto scroll to bottom
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // Detect user scroll position to avoid forceful auto-scroll disruption
+  const handleScroll = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+    isNearBottomRef.current = distanceFromBottom < 100;
+  }, []);
+
+  // Smooth scroll to bottom if user is already near bottom or just sent a message
+  const scrollToBottomIfNeeded = useCallback((force = false) => {
+    if (force || isNearBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
+    scrollToBottomIfNeeded();
+  }, [messages, isLoading, scrollToBottomIfNeeded]);
 
   // Load chat history from sessionStorage if available
   useEffect(() => {
@@ -148,11 +179,14 @@ export function ChatbotView({
         m.id === msgId ? { ...m, content: fullText || m.content, isTyping: false } : m
       )
     );
+    scrollToBottomIfNeeded(true);
   };
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text || isLoading) return;
+
+    setLastUserPrompt(text);
 
     // Stop any active typing
     if (typingTimerRef.current) {
@@ -167,15 +201,20 @@ export function ChatbotView({
       timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
     };
 
+    // Filter out previous error messages and finalize uncompleted typing
     const newMessages = [
-      ...messages.map((m) =>
-        m.isTyping ? { ...m, content: m.fullContent || m.content, isTyping: false } : m
-      ),
+      ...messages
+        .filter((m) => !m.isError)
+        .map((m) =>
+          m.isTyping ? { ...m, content: m.fullContent || m.content, isTyping: false } : m
+        ),
       userMsg,
     ];
+
     setMessages(newMessages);
     setInputText("");
     setIsLoading(true);
+    setTimeout(() => scrollToBottomIfNeeded(true), 50);
 
     try {
       const token = localStorage.getItem("accessToken");
@@ -194,7 +233,8 @@ export function ChatbotView({
       });
 
       if (!res.ok) {
-        throw new Error("Gagal mendapatkan respon dari server");
+        const errJson = await res.json().catch(() => null);
+        throw new Error(errJson?.message || "Gagal mendapatkan respon dari asisten AI");
       }
 
       const json = await res.json();
@@ -213,12 +253,12 @@ export function ChatbotView({
       };
 
       setMessages((prev) => [...prev, aiMsg]);
-      setIsLoading(false); // Stop loading animation since typing has started!
+      setIsLoading(false);
 
-      // Token-by-token typewriter animation stream
+      // Token-by-token typewriter animation
       let currentIdx = 0;
-      const chunkSize = 3; // ~1 token (3-4 characters) per tick
-      const speed = 12; // 12ms per tick for natural reading speed
+      const chunkSize = 3;
+      const speed = 12;
 
       typingTimerRef.current = setInterval(() => {
         currentIdx += chunkSize;
@@ -243,9 +283,13 @@ export function ChatbotView({
       const errorMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: `⚠️ Terjadi kendala saat menghubungi asisten AI: ${err.message || "Koneksi terputus"}. Silakan coba kirim ulang.`,
+        content: `Terjadi kendala saat menghubungi asisten AI: ${
+          err.message || "Koneksi terputus"
+        }. Silakan coba kirim ulang.`,
         timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
         isTyping: false,
+        isError: true,
+        failedPrompt: text,
       };
       setMessages((prev) => [...prev, errorMsg]);
       setIsLoading(false);
@@ -264,7 +308,7 @@ export function ChatbotView({
   };
 
   const handleClearChat = () => {
-    if (confirm("Apakah Anda yakin ingin membersihkan percakapan ini?")) {
+    if (confirm("Bersihkan seluruh riwayat percakapan ini?")) {
       if (typingTimerRef.current) {
         clearInterval(typingTimerRef.current);
         typingTimerRef.current = null;
@@ -280,205 +324,250 @@ export function ChatbotView({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const displayName = organizationName || userName;
+
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] max-w-6xl mx-auto w-full bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-      {/* 1. Header Bar */}
-      <header className="px-6 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-md flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-            <Sparkles className="w-5 h-5 animate-pulse" />
+    <div className="flex flex-col h-full w-full max-w-[1120px] mx-auto bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      {/* ========================================================================= */}
+      {/* 1. HEADER AI (Clean, Sederhana, Tanpa Jargon Teknis) */}
+      {/* ========================================================================= */}
+      <header className="px-5 sm:px-6 py-3.5 border-b border-slate-100 bg-white flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          {/* Ikon AI SIPENA Resmi */}
+          <div className="w-9 h-9 rounded-xl bg-[#181343] text-emerald-400 flex items-center justify-center border border-[#26224C] shadow-2xs shrink-0">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
           </div>
-          <div>
+
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-extrabold text-[#181343] tracking-tight">
+              <h2 className="text-sm sm:text-base font-bold text-[#181343] tracking-tight truncate">
                 SIPENA AI Advisor
               </h2>
-              <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200/60">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                Live Drizzle DB
+              {/* Indikator Ketersediaan Layanan (Clean & Nyata) */}
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200/60 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Siap Membantu
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">
+            <p className="text-xs text-slate-500 truncate mt-0.5">
               {isPartner
-                ? "Proposal & Opportunity Co-Pilot untuk Mitra"
-                : "Konsultan Perencanaan & Evaluasi Program ESG"}
+                ? "Asisten kolaborasi CSR untuk mitra"
+                : "Konsultan perencanaan & evaluasi program ESG"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {messages.length > 0 && (
             <button
               onClick={handleClearChat}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 border border-slate-200/60 transition flex items-center gap-1.5"
+              className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/70 transition flex items-center gap-1.5 cursor-pointer"
               title="Bersihkan Percakapan"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Reset Chat</span>
+              <span className="hidden sm:inline">Reset Percakapan</span>
             </button>
           )}
-          <Badge variant={isPartner ? "purple" : "blue"} size="sm">
-            {organizationName || (isPartner ? "Mitra NGO" : "Perusahaan Korporasi")}
+
+          <Badge variant={isPartner ? "emerald" : "blue"} size="sm" className="hidden sm:inline-flex">
+            {organizationName || (isPartner ? "Mitra Pelaksana" : "Perusahaan Korporasi")}
           </Badge>
         </div>
       </header>
 
-      {/* 2. Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-50/60">
+      {/* ========================================================================= */}
+      {/* 2. CHAT MESSAGES AREA (Scroll Independen, Tanpa Double Scrollbar) */}
+      {/* ========================================================================= */}
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#F9F9FB]"
+      >
         {messages.length === 0 ? (
-          // Empty State & Suggested Prompts
-          <div className="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center space-y-8 py-8">
-            <div className="space-y-3">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-500 via-teal-500 to-indigo-600 text-white flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/25">
-                <Bot className="w-9 h-9" />
+          /* ========================================================================= */
+          /* EMPTY STATE: PROPORTIONAL WELCOME SECTION & 4 QUICK PROMPTS */
+          /* ========================================================================= */
+          <div className="h-full min-h-[380px] flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-6 py-4">
+            {/* Welcome Box with subtle flowing glow ornament */}
+            <div className="relative p-6 sm:p-7 rounded-2xl bg-gradient-to-b from-white via-white to-slate-50/70 border border-slate-200/80 shadow-2xs w-full overflow-hidden space-y-3">
+              {/* Soft subtle glow accent */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#181343]/5 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Icon */}
+              <div className="w-11 h-11 rounded-2xl bg-[#181343] text-emerald-400 flex items-center justify-center mx-auto shadow-sm border border-[#26224C]">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
               </div>
-              <h3 className="text-2xl font-black text-[#181343] tracking-tight">
-                Halo, {userName}! 👋
+
+              {/* Heading: Nama Resmi Organisasi */}
+              <h3 className="text-lg sm:text-xl font-bold text-[#181343] tracking-tight">
+                Halo, {displayName}!
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed max-w-md mx-auto">
-                Saya adalah asisten cerdas SIPENA yang terhubung langsung ke basis data program,
-                peluang CSR, dan standar keberlanjutan. Apa yang ingin Anda diskusikan hari ini?
+
+              {/* Deskripsi Resmi */}
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
+                Saya siap membantu Anda menemukan peluang CSR, menyusun ide proposal, dan memahami perkembangan pengajuan kerja sama.
               </p>
             </div>
 
-            {/* Prompt Cards Grid */}
+            {/* Grid 2x2 Quick Action Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
               {defaultPrompts.map((p, idx) => {
                 const Icon = p.icon;
                 return (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => handleSendMessage(p.prompt)}
-                    className="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-emerald-500/50 hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-200 group flex items-start gap-3.5 text-left"
+                    className="p-3.5 sm:p-4 rounded-xl bg-white border border-slate-200/80 hover:border-[#009E75]/50 hover:shadow-xs transition-all flex items-start gap-3 text-left group cursor-pointer"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-[#009E75] flex items-center justify-center shrink-0 group-hover:bg-[#009E75] group-hover:text-white transition-colors">
                       <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition">
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-[#009E75] transition leading-snug">
                         {p.title}
                       </h4>
-                      <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 leading-normal">
-                        {p.prompt}
+                      <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 leading-normal">
+                        {p.subtitle}
                       </p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-600 shrink-0 transition" />
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#009E75] shrink-0 self-center transition-transform group-hover:translate-x-0.5" />
                   </button>
                 );
               })}
             </div>
           </div>
         ) : (
-          // Message List
+          /* ========================================================================= */
+          /* MESSAGE LIST */
+          /* ========================================================================= */
           messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex gap-3.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {msg.role === "assistant" && (
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-1">
-                  <Bot className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs border border-[#26224C]">
+                  <Sparkles className="w-3.5 h-3.5" />
                 </div>
               )}
 
               <div
-                className={`max-w-[85%] sm:max-w-[78%] space-y-2 ${
+                className={`max-w-[88%] sm:max-w-[80%] space-y-1.5 ${
                   msg.role === "user" ? "items-end text-right" : "items-start text-left"
                 }`}
               >
-                {/* Bubble */}
+                {/* Bubble Message */}
                 <div
-                  className={`p-4 sm:p-5 rounded-3xl text-sm leading-relaxed ${
+                  className={`p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed rounded-2xl ${
                     msg.role === "user"
-                      ? "bg-[#181343] text-white rounded-br-xs shadow-md shadow-indigo-950/10"
-                      : "bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs shadow-sm"
+                      ? "bg-[#181343] text-white rounded-br-xs shadow-xs font-normal"
+                      : msg.isError
+                      ? "bg-rose-50 text-rose-900 border border-rose-200 rounded-tl-xs shadow-xs font-normal"
+                      : "bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs shadow-xs font-normal"
                   }`}
                 >
-                  {/* Tool Call Badges if any */}
+                  {/* Tool Call Badges jika ada pengambilan data riil */}
                   {msg.toolCallsMade && msg.toolCallsMade.length > 0 && (
-                    <div className="mb-3 flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-100">
+                    <div className="mb-2.5 flex flex-wrap items-center gap-1.5 pb-2 border-b border-slate-100">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                        Data Diakses:
+                        Data Terverifikasi:
                       </span>
                       {msg.toolCallsMade.map((toolName, tIdx) => (
                         <span
                           key={tIdx}
-                          className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-mono font-semibold border border-emerald-200/50"
+                          className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-mono font-medium border border-emerald-200/60"
                         >
-                          ⚡ {toolName}
+                          ✓ {toolName}
                         </span>
                       ))}
                     </div>
                   )}
 
-                  {/* Message Content Rendered with MarkdownRenderer */}
+                  {/* Konten Pesan */}
                   {msg.role === "user" ? (
-                    <div className="whitespace-pre-wrap leading-relaxed text-sm select-text">
+                    <div className="whitespace-pre-wrap leading-relaxed select-text font-normal">
                       {msg.content}
+                    </div>
+                  ) : msg.isError ? (
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                        <p className="text-xs text-rose-800 font-medium">{msg.content}</p>
+                      </div>
+                      {msg.failedPrompt && (
+                        <button
+                          type="button"
+                          onClick={() => handleSendMessage(msg.failedPrompt)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-semibold transition"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          <span>Coba Lagi</span>
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <MarkdownRenderer content={msg.content} isTyping={msg.isTyping} />
                   )}
 
-                  {/* Skip typing button */}
+                  {/* Tombol Tampilkan Teks Langsung saat mengetik */}
                   {msg.isTyping && (
                     <button
                       onClick={() => handleSkipTyping(msg.id, msg.fullContent)}
-                      className="mt-2 text-[11px] font-bold text-emerald-600 hover:text-emerald-800 underline transition flex items-center gap-1"
+                      className="mt-2 text-[11px] font-semibold text-[#009E75] hover:underline transition flex items-center gap-1 cursor-pointer"
                     >
-                      ⚡ Tampilkan teks langsung
+                      <span>Tampilkan teks langsung</span>
                     </button>
                   )}
 
-                  {/* Render Structured Interactive Cards once typing completes */}
+                  {/* Render Structured Interactive Cards */}
                   {!msg.isTyping && msg.cards && msg.cards.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-slate-100 space-y-3 animate-in fade-in duration-300">
+                    <div className="mt-3.5 pt-3 border-t border-slate-100 space-y-2.5 animate-in fade-in duration-200">
                       {msg.cards.map((card, cIdx) => {
                         // 1. Opportunities Card
                         if (card.type === "OPPORTUNITIES" && card.items) {
                           return (
-                            <div key={cIdx} className="space-y-2.5">
-                              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                                📌 Kartu Rekomendasi Peluang:
+                            <div key={cIdx} className="space-y-2">
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Rujukan Peluang Terkait:
                               </span>
-                              <div className="grid grid-cols-1 gap-2.5">
+                              <div className="grid grid-cols-1 gap-2">
                                 {card.items.slice(0, 3).map((item: any, itemIdx: number) => (
                                   <div
                                     key={itemIdx}
-                                    className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500/60 transition group text-left"
+                                    className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-[#009E75]/60 transition text-left space-y-1.5"
                                   >
                                     <div className="flex items-start justify-between gap-2">
                                       <div>
-                                        <h5 className="font-extrabold text-slate-900 text-xs group-hover:text-emerald-700 transition">
+                                        <h5 className="font-bold text-slate-900 text-xs">
                                           {item.title}
                                         </h5>
                                         <p className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
                                           <Building2 className="w-3 h-3 text-slate-400" />
-                                          {item.companyName || item.company || "Perusahaan Korporasi"}
+                                          {item.companyName || item.company || "Perusahaan Mitra"}
                                         </p>
                                       </div>
-                                      <span className="px-2 py-0.5 rounded-md bg-teal-100/70 text-teal-800 text-[10px] font-bold">
+                                      <span className="px-2 py-0.5 rounded-md bg-teal-100/70 text-teal-800 text-[10px] font-bold shrink-0">
                                         {item.focusArea}
                                       </span>
                                     </div>
 
-                                    <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
-                                      <div className="flex items-center gap-2 text-slate-600 font-semibold">
-                                        <Coins className="w-3.5 h-3.5 text-amber-500" />
-                                        <span>
-                                          {item.estimatedBudget
-                                            ? `Rp ${Number(item.estimatedBudget).toLocaleString("id-ID")}`
-                                            : item.budget || "Fleksibel"}
-                                        </span>
-                                      </div>
+                                    <div className="pt-1.5 border-t border-slate-200/60 flex items-center justify-between text-[11px]">
+                                      <span className="text-slate-600 font-semibold">
+                                        {item.estimatedBudget
+                                          ? `Rp ${Number(item.estimatedBudget).toLocaleString("id-ID")}`
+                                          : item.budget || "Fleksibel"}
+                                      </span>
                                       {onNavigate && (
                                         <button
+                                          type="button"
                                           onClick={() =>
                                             onNavigate(isPartner ? "explore" : "opportunities")
                                           }
-                                          className="text-emerald-600 hover:text-emerald-800 font-bold flex items-center gap-1 text-[11px] hover:underline"
+                                          className="text-[#009E75] hover:underline font-bold flex items-center gap-1 text-[11px] cursor-pointer"
                                         >
-                                          Buka Menu Peluang
+                                          <span>Lihat di Eksplorasi</span>
                                           <ArrowRight className="w-3 h-3" />
                                         </button>
                                       )}
@@ -494,14 +583,14 @@ export function ChatbotView({
                         if (card.type === "PROPOSALS" && card.items) {
                           return (
                             <div key={cIdx} className="space-y-2">
-                              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                                📑 Status Proposal:
+                              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Status Proposal Anda:
                               </span>
                               <div className="grid grid-cols-1 gap-2">
                                 {card.items.slice(0, 3).map((item: any, pIdx: number) => (
                                   <div
                                     key={pIdx}
-                                    className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-left"
+                                    className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-left"
                                   >
                                     <div className="flex items-center justify-between gap-2">
                                       <span className="font-bold text-xs text-slate-900 truncate">
@@ -512,7 +601,7 @@ export function ChatbotView({
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-slate-500 mt-1">
-                                      Peluang: {item.opportunityTitle || item.opportunity}
+                                      Inisiatif: {item.opportunityTitle || item.opportunity}
                                     </p>
                                   </div>
                                 ))}
@@ -527,23 +616,23 @@ export function ChatbotView({
                   )}
                 </div>
 
-                {/* Footer metadata & copy action */}
+                {/* Footer Metadata & Salin Teks */}
                 <div
-                  className={`flex items-center gap-2 text-[11px] text-slate-400 px-1 ${
+                  className={`flex items-center gap-2 text-[10px] text-slate-400 px-1 ${
                     msg.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
                   <span>{msg.timestamp}</span>
-                  {msg.role === "assistant" && !msg.isTyping && (
+                  {msg.role === "assistant" && !msg.isTyping && !msg.isError && (
                     <button
                       onClick={() => handleCopyText(msg.id, msg.fullContent || msg.content)}
-                      className="p-1 rounded-md hover:bg-slate-200/60 text-slate-400 hover:text-slate-700 transition flex items-center gap-1"
+                      className="p-1 rounded-md hover:bg-slate-200/60 text-slate-400 hover:text-slate-700 transition flex items-center gap-1 cursor-pointer"
                       title="Salin Teks"
                     >
                       {copiedId === msg.id ? (
                         <>
                           <Check className="w-3 h-3 text-emerald-600" />
-                          <span className="text-emerald-600 text-[10px] font-bold">Tersalin</span>
+                          <span className="text-emerald-600 text-[10px] font-semibold">Tersalin</span>
                         </>
                       ) : (
                         <>
@@ -557,8 +646,8 @@ export function ChatbotView({
               </div>
 
               {msg.role === "user" && (
-                <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-1">
-                  <User className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 mt-0.5">
+                  <User className="w-3.5 h-3.5" />
                 </div>
               )}
             </div>
@@ -567,21 +656,23 @@ export function ChatbotView({
 
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="flex gap-3.5 justify-start">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-1 animate-pulse">
-              <Bot className="w-4 h-4" />
+          <div className="flex gap-3 justify-start">
+            <div className="w-7 h-7 rounded-lg bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0 mt-0.5 shadow-2xs border border-[#26224C]">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             </div>
-            <div className="p-4 rounded-3xl bg-white border border-slate-200/80 rounded-tl-xs shadow-sm flex items-center gap-2 text-slate-500 text-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" />
+            <div className="p-3.5 rounded-2xl bg-white border border-slate-200/80 rounded-tl-xs shadow-xs flex items-center gap-2 text-slate-500 text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#009E75] animate-bounce" />
               <span
-                className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"
+                className="w-2 h-2 rounded-full bg-[#009E75] animate-bounce"
                 style={{ animationDelay: "150ms" }}
               />
               <span
-                className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"
+                className="w-2 h-2 rounded-full bg-[#009E75] animate-bounce"
                 style={{ animationDelay: "300ms" }}
               />
-              <span className="font-medium ml-1">Menganalisis data & menyusun respon...</span>
+              <span className="font-normal text-slate-500 ml-1">
+                SIPENA AI sedang menelaah data &amp; menyusun respon...
+              </span>
             </div>
           </div>
         )}
@@ -589,9 +680,11 @@ export function ChatbotView({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 3. Input & Action Bar */}
-      <footer className="p-4 border-t border-slate-200/80 bg-white">
-        <div className="relative rounded-2xl bg-slate-50 border border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all p-2">
+      {/* ========================================================================= */}
+      {/* 3. INPUT COMPOSER (Tersemat di Bagian Bawah, Selalu Terjangkau) */}
+      {/* ========================================================================= */}
+      <footer className="p-3 sm:p-4 border-t border-slate-200/80 bg-white shrink-0">
+        <div className="rounded-xl bg-slate-50/90 border border-slate-200 focus-within:border-[#009E75] focus-within:ring-1 focus-within:ring-[#009E75]/30 transition-all p-2 space-y-1.5">
           <textarea
             ref={textareaRef}
             rows={2}
@@ -603,26 +696,27 @@ export function ChatbotView({
                 ? "Tanyakan peluang CSR, bantuan draf proposal, atau status pengajuan..."
                 : "Tanyakan ide program baru, rekapitulasi data program, atau kriteria evaluasi..."
             }
-            className="w-full bg-transparent resize-none border-none focus:outline-hidden text-sm text-slate-800 placeholder:text-slate-400 px-2 py-1 leading-relaxed"
+            className="w-full bg-transparent resize-none border-none focus:outline-hidden text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 px-2 py-1 leading-relaxed max-h-32"
           />
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-200/50 px-1">
+          <div className="flex items-center justify-between pt-1 border-t border-slate-200/50 px-1">
             <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
               <span className="hidden sm:inline">Tekan</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-bold">
+              <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-medium">
                 Enter
               </kbd>
               <span className="hidden sm:inline">untuk mengirim,</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-bold">
+              <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-medium">
                 Shift + Enter
               </kbd>
               <span className="hidden sm:inline">baris baru</span>
             </div>
 
             <button
+              type="button"
               onClick={() => handleSendMessage()}
               disabled={!inputText.trim() || isLoading}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="px-4 py-1.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
             >
               <span>Kirim</span>
               <Send className="w-3.5 h-3.5" />

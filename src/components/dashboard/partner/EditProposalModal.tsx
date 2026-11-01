@@ -62,7 +62,14 @@ export function EditProposalModal({
   useEffect(() => {
     if (proposal) {
       setTitle(proposal.title || "");
-      setSummary(proposal.summary || "");
+      let initialSummary = proposal.summary || "";
+      try {
+        const parsed = JSON.parse(proposal.summary);
+        if (parsed && typeof parsed === "object" && typeof parsed.overview === "string") {
+          initialSummary = parsed.overview;
+        }
+      } catch {}
+      setSummary(initialSummary);
       setProposedBudget(
         proposal.proposedBudget ? String(parseInt(String(proposal.proposedBudget), 10)) : ""
       );
@@ -564,7 +571,7 @@ export function EditProposalModal({
                 variant="primary"
                 size="md"
                 disabled={isSubmitting || isUploading}
-                className="bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20"
+                className="font-semibold"
                 leftIcon={<Send className="w-4 h-4" />}
               >
                 {isSubmitting

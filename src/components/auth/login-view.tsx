@@ -254,7 +254,7 @@ export function LoginView() {
                   SIPENA
                 </span>
                 <span className="text-[10px] font-bold text-slate-300/90 tracking-wider block uppercase mt-0.5">
-                  Mencatat Aksi, Mengukur Dampak
+                  Petakan Kebutuhan, Pantau Perubahan
                 </span>
               </div>
             </div>
@@ -376,7 +376,7 @@ export function LoginView() {
                     id="login-password"
                     type={showPassword ? "text" : "password"}
                     required
-                    placeholder="••••••••••••"
+                    placeholder="Masukkan kata sandi"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"

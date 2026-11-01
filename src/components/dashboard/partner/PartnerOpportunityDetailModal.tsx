@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   X,
   MapPin,
@@ -33,6 +33,8 @@ export function PartnerOpportunityDetailModal({
   onApply,
   onViewCompany,
 }: PartnerOpportunityDetailModalProps) {
+  const [bannerFailed, setBannerFailed] = useState(false);
+
   if (!isOpen || !opportunity) return null;
 
   const focusConfig = FOCUS_AREA_CONFIG[opportunity.focusArea] || {
@@ -51,7 +53,7 @@ export function PartnerOpportunityDetailModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Banner Thumbnail (if available) */}
-        {opportunity.bannerUrl && (
+        {opportunity.bannerUrl && !bannerFailed && (
           <div className="relative w-full h-48 bg-slate-100 overflow-hidden shrink-0">
             <img
               src={opportunity.bannerUrl}
@@ -77,7 +79,7 @@ export function PartnerOpportunityDetailModal({
         )}
 
         {/* Modal Header if no banner */}
-        {!opportunity.bannerUrl && (
+        {(!opportunity.bannerUrl || bannerFailed) && (
           <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-900 text-white">
             <div className="flex items-center gap-3">
               <Badge variant={focusConfig.variant} size="md">
@@ -210,7 +212,7 @@ export function PartnerOpportunityDetailModal({
             <Button
               variant="primary"
               size="md"
-              className="bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/25"
+              className="font-semibold"
               leftIcon={<Send className="w-4 h-4" />}
               onClick={() => {
                 onClose();

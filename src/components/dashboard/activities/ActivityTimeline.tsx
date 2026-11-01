@@ -593,7 +593,7 @@ export function ActivityTimeline({
                   setIsAddModalOpen(true);
                 }}
                 leftIcon={<Plus className="w-4 h-4" />}
-                className="bg-[#009E75] hover:bg-[#008764] text-white text-xs font-bold rounded-xl shrink-0"
+                className="text-xs font-semibold shrink-0"
               >
                 Tambah Laporan
               </Button>
@@ -636,7 +636,7 @@ export function ActivityTimeline({
                     setIsAddModalOpen(true);
                   }}
                   leftIcon={<Plus className="w-4 h-4" />}
-                  className="bg-[#009E75] text-white text-xs rounded-xl"
+                  className="text-xs font-semibold"
                 >
                   Unggah Bukti Lapangan
                 </Button>
@@ -872,7 +872,7 @@ export function ActivityTimeline({
                             size="sm"
                             onClick={() => setSelectedActivityForVerify(act)}
                             leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />}
-                            className="text-xs h-7.5 px-3 rounded-lg bg-[#009E75] hover:bg-[#008764] text-white font-bold cursor-pointer"
+                            className="text-xs h-7.5 px-3 rounded-xl cursor-pointer font-semibold"
                           >
                             {act.status === "VERIFIED" ? "Perbarui Verifikasi" : "Verifikasi & Evaluasi"}
                           </Button>

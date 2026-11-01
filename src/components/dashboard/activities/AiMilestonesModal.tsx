@@ -427,7 +427,7 @@ export function AiMilestonesModal({
                   onClick={handleSave}
                   isLoading={isSaving}
                   leftIcon={<CheckCircle2 className="w-4 h-4" />}
-                  className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md"
+                  className="text-xs font-semibold"
                 >
                   Terapkan & Simpan Tahapan ({stages.length})
                 </Button>

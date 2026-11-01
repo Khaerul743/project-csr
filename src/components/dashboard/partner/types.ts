@@ -122,6 +122,9 @@ export interface PartnerCollaborationItem {
   proposalTitle?: string | null;
   proposalSummary?: string | null;
   proposedBudget?: string | null;
+  proposalDocumentUrl?: string | null;
+  proposalDurationMonths?: number | null;
+  proposalTargetBeneficiaries?: string | null;
   companyName?: string | null;
   companyLogo?: string | null;
   companyCity?: string | null;
@@ -135,6 +138,7 @@ export interface PartnerCollaborationItem {
   completedActivitiesCount?: number;
   pendingActivitiesCount?: number;
   pendingVerificationCount?: number;
+  revisionRequestedReportsCount?: number;
   activityProgressPercent?: number;
   nextActivityTitle?: string | null;
   nextActivityDate?: string | null;
@@ -179,6 +183,7 @@ export interface PartnerProgramItem {
   completedActivitiesCount?: number;
   pendingActivitiesCount?: number;
   pendingVerificationCount?: number;
+  revisionRequestedReportsCount?: number;
   activityProgressPercent?: number;
   nextActivityTitle?: string | null;
   nextActivityDate?: string | null;

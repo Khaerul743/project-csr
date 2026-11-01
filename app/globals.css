@@ -3,6 +3,12 @@
 :root {
   --background: #F9F9FB;
   --foreground: #1A1C1D;
+  --sipena-grid-size: 40px;
+  --sipena-grid-line: rgba(24, 19, 67, 0.035);
+  --sipena-grid-line-hero: rgba(255, 255, 255, 0.04);
+  --sipena-glow-mint: #EAF8F4;
+  --sipena-glow-blue: #EDF5FA;
+  --sipena-glow-ice: #E8F2F5;
 }
 
 @theme {
@@ -145,6 +151,25 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--color-outline-variant);
     border-radius: var(--radius-lg);
   }
+
+  .onboarding-card {
+    box-shadow: 0 12px 30px -4px rgba(24, 19, 67, 0.12), 0 4px 12px -2px rgba(24, 19, 67, 0.06);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .onboarding-card:hover {
+    box-shadow: 0 22px 42px -6px rgba(24, 19, 67, 0.18), 0 8px 18px -4px rgba(24, 19, 67, 0.10);
+    transform: translateY(-3px);
+  }
+
+  .onboarding-subcard {
+    box-shadow: 0 8px 22px -3px rgba(24, 19, 67, 0.09), 0 3px 8px -2px rgba(24, 19, 67, 0.04);
+  }
+
+  .auth-split-card {
+    box-shadow: 0 24px 50px -10px rgba(15, 23, 42, 0.16), 0 10px 22px -5px rgba(15, 23, 42, 0.08);
+  }
+
 }
 
 @media (max-width: 640px) {
@@ -227,4 +252,3 @@ h1, h2, h3, h4, h5, h6 {
     page-break-inside: avoid !important;
   }
 }
-

@@ -55,6 +55,9 @@ export class ProgramRepository {
         const pendingVerificationCount = activities.filter(
           (a) => a.status === "SUBMITTED"
         ).length;
+        const revisionRequestedReportsCount = activities.filter(
+          (a) => a.status === "REVISION_REQUESTED"
+        ).length;
 
         const pendingActivitiesCount = Math.max(
           0,
@@ -86,6 +89,7 @@ export class ProgramRepository {
           completedActivitiesCount,
           pendingActivitiesCount,
           pendingVerificationCount,
+          revisionRequestedReportsCount,
           activityProgressPercent,
           nextActivityTitle,
           nextActivityDate,

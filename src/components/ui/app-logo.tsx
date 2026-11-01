@@ -79,7 +79,7 @@ export const AppLogo: React.FC<AppLogoProps> = ({
                 theme === "dark" ? "text-emerald-400" : "text-emerald-600"
               }`}
             >
-              Mencatat Aksi, Mengukur Dampak
+              Petakan Kebutuhan, Pantau Perubahan
             </span>
           )}
         </div>

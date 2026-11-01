@@ -527,7 +527,7 @@ export function SubmitProposalModal({
               variant="primary"
               size="md"
               disabled={isSubmitting || isUploading}
-              className="bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20"
+              className="font-semibold"
               leftIcon={<Send className="w-4 h-4" />}
             >
               {isSubmitting

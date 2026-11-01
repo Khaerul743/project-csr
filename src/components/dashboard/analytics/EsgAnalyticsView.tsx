@@ -32,6 +32,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SoftDataGrid } from "@/components/ui/soft-data-grid";
 import {
   ProgramAnalyticsData,
   SdgGoal,
@@ -248,6 +249,9 @@ export function EsgAnalyticsView({
       {/* 1. HEADER BANNER: IDENTITAS HALAMAN */}
       {/* ========================================================================= */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#181343] via-[#1a1c4b] to-[#0A6E51] text-white shadow-xl relative overflow-hidden">
+        {/* Soft Data Grid Corner Texture for Dark Hero Gradient */}
+        <SoftDataGrid variant="hero" />
+
         {/* Soft decorative background glows */}
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 -mb-12 w-60 h-60 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
@@ -268,20 +272,20 @@ export function EsgAnalyticsView({
         {/* Action Buttons */}
         <div className="relative z-10 flex flex-wrap items-center gap-2.5 shrink-0">
           <Button
-            variant="outline"
+            variant="translucent-white"
             size="sm"
             onClick={() => exportSdgEsgCsv(filteredPrograms, displayName)}
-            leftIcon={<Download className="w-4 h-4" />}
-            className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs backdrop-blur-md font-bold rounded-xl h-10 px-4"
+            leftIcon={<Download className="w-4 h-4 text-white shrink-0" />}
+            className="text-xs font-semibold rounded-xl h-10 px-4 cursor-pointer"
           >
             Ekspor Data (CSV)
           </Button>
           <Button
-            variant="primary"
+            variant="translucent-white"
             size="sm"
             onClick={() => setIsPrintModalOpen(true)}
-            leftIcon={<Printer className="w-4 h-4" />}
-            className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow-md shadow-emerald-500/20 rounded-xl h-10 px-4 cursor-pointer"
+            leftIcon={<Printer className="w-4 h-4 text-white shrink-0" />}
+            className="text-xs font-semibold rounded-xl h-10 px-4 cursor-pointer"
           >
             Cetak Ringkasan Eksekutif
           </Button>
@@ -1202,7 +1206,7 @@ export function EsgAnalyticsView({
                           <button
                             type="button"
                             onClick={() => onOpenProgramDetail(prog)}
-                            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1 cursor-pointer"
+                            className="text-xs font-semibold text-[#181343] hover:text-[#26224C] hover:underline inline-flex items-center gap-1 cursor-pointer"
                           >
                             <span>Detail</span>
                             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -1351,7 +1355,7 @@ export function EsgAnalyticsView({
                 size="sm"
                 onClick={handlePrint}
                 leftIcon={<Printer className="w-4 h-4" />}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs cursor-pointer"
+                className="text-xs font-semibold cursor-pointer"
               >
                 Cetak Dokumen Sekarang
               </Button>

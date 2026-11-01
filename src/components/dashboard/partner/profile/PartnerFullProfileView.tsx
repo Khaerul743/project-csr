@@ -514,7 +514,7 @@ export function PartnerFullProfileView({
                     <Button
                       onClick={handleInviteAction}
                       leftIcon={<HeartHandshake className="w-4 h-4 shrink-0" />}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-sm"
+                      variant="primary" className="text-xs px-5 py-2.5"
                     >
                       Undang Bermitra
                     </Button>
@@ -1420,7 +1420,7 @@ export function PartnerFullProfileView({
                       setIsEditingProfile(true);
                     }}
                     leftIcon={<Plus className="w-3.5 h-3.5" />}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0"
+                    className="text-xs font-semibold shrink-0"
                   >
                     Kelola Pengurus
                   </Button>

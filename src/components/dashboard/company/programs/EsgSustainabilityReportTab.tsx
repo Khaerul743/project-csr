@@ -229,7 +229,7 @@ export function EsgSustainabilityReportTab({
             onClick={handleGenerateReport}
             disabled={isGenerating}
             isLoading={isGenerating}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20"
+            className="text-xs font-semibold"
             leftIcon={
               isGenerating ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -299,7 +299,7 @@ export function EsgSustainabilityReportTab({
               size="lg"
               onClick={handleGenerateReport}
               disabled={isGenerating}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-xl shadow-emerald-600/30 px-8 py-3.5 rounded-2xl cursor-pointer"
+              className="text-sm px-8 py-3.5 cursor-pointer font-semibold"
               leftIcon={<Sparkles className="w-4 h-4" />}
             >
               🚀 Susun Laporan Keberlanjutan AI Sekarang

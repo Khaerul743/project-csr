@@ -6,6 +6,7 @@ import { proposals } from "@/db/schema/proposals";
 import { companies } from "@/db/schema/companies";
 import { partners } from "@/db/schema/partners";
 import { programs } from "@/db/schema/programs";
+import { programStages } from "@/db/schema/program-stages";
 import { CollaborationListQuery, CollaborationWithDetails } from "./collaboration.interface";
 
 export class CollaborationRepository {
@@ -19,6 +20,9 @@ export class CollaborationRepository {
         proposalTitle: proposals.title,
         proposalSummary: proposals.summary,
         proposedBudget: proposals.proposedBudget,
+        proposalDocumentUrl: proposals.documentUrl,
+        proposalDurationMonths: proposals.durationMonths,
+        proposalTargetBeneficiaries: proposals.targetBeneficiaries,
         companyName: companies.name,
         companyLogo: companies.logoUrl,
         companyCity: companies.city,
@@ -48,6 +52,9 @@ export class CollaborationRepository {
       proposalTitle: r.proposalTitle,
       proposalSummary: r.proposalSummary,
       proposedBudget: r.proposedBudget,
+      proposalDocumentUrl: r.proposalDocumentUrl,
+      proposalDurationMonths: r.proposalDurationMonths,
+      proposalTargetBeneficiaries: r.proposalTargetBeneficiaries,
       companyName: r.companyName,
       companyLogo: r.companyLogo,
       companyCity: r.companyCity,
@@ -104,6 +111,9 @@ export class CollaborationRepository {
         proposalTitle: proposals.title,
         proposalSummary: proposals.summary,
         proposedBudget: proposals.proposedBudget,
+        proposalDocumentUrl: proposals.documentUrl,
+        proposalDurationMonths: proposals.durationMonths,
+        proposalTargetBeneficiaries: proposals.targetBeneficiaries,
         companyName: companies.name,
         companyLogo: companies.logoUrl,
         companyCity: companies.city,
@@ -132,6 +142,9 @@ export class CollaborationRepository {
       proposalTitle: r.proposalTitle,
       proposalSummary: r.proposalSummary,
       proposedBudget: r.proposedBudget,
+      proposalDocumentUrl: r.proposalDocumentUrl,
+      proposalDurationMonths: r.proposalDurationMonths,
+      proposalTargetBeneficiaries: r.proposalTargetBeneficiaries,
       companyName: r.companyName,
       companyLogo: r.companyLogo,
       companyCity: r.companyCity,
@@ -190,6 +203,9 @@ export class CollaborationRepository {
         proposalTitle: proposals.title,
         proposalSummary: proposals.summary,
         proposedBudget: proposals.proposedBudget,
+        proposalDocumentUrl: proposals.documentUrl,
+        proposalDurationMonths: proposals.durationMonths,
+        proposalTargetBeneficiaries: proposals.targetBeneficiaries,
         companyName: companies.name,
         companyLogo: companies.logoUrl,
         companyCity: companies.city,
@@ -218,6 +234,9 @@ export class CollaborationRepository {
       proposalTitle: r.proposalTitle,
       proposalSummary: r.proposalSummary,
       proposedBudget: r.proposedBudget,
+      proposalDocumentUrl: r.proposalDocumentUrl,
+      proposalDurationMonths: r.proposalDurationMonths,
+      proposalTargetBeneficiaries: r.proposalTargetBeneficiaries,
       companyName: r.companyName,
       companyLogo: r.companyLogo,
       companyCity: r.companyCity,
@@ -269,16 +288,33 @@ export class CollaborationRepository {
         .where(eq(programs.collaborationId, id))
         .limit(1);
 
+      let programId = existingProg[0]?.id;
+
+      let proposalOverview = collabDetails.proposalSummary || null;
+      let proposalActivities: any[] = [];
+      if (collabDetails.proposalSummary) {
+        try {
+          const parsed = JSON.parse(collabDetails.proposalSummary);
+          if (parsed && typeof parsed === "object") {
+            if (typeof parsed.overview === "string") proposalOverview = parsed.overview;
+            if (Array.isArray(parsed.activities)) proposalActivities = parsed.activities;
+          }
+        } catch {
+          // plain text fallback
+        }
+      }
+
       if (!existingProg[0]) {
+        programId = crypto.randomUUID();
         const finalBudget = data.finalBudget || collabDetails.finalBudget || "0";
         await tx.insert(programs).values({
-          id: crypto.randomUUID(),
+          id: programId,
           collaborationId: id,
           opportunityId: collabDetails.opportunityId,
           companyId: collabDetails.companyId,
           partnerId: collabDetails.partnerId,
           title: collabDetails.proposalTitle || collabDetails.opportunityTitle || "Program Kemitraan CSR",
-          description: collabDetails.proposalSummary || null,
+          description: proposalOverview,
           focusArea: (collabDetails.opportunityFocusArea as any) || "LAINNYA",
           budget: finalBudget,
           spentBudget: "0",
@@ -288,6 +324,70 @@ export class CollaborationRepository {
           endDate: data.endDate || null,
           status: "PLANNED",
         });
+      }
+
+      // Sinkronisasi otomatis rencana milestone yang disepakati ke tabel tahapan monitoring (program_stages)
+      let agreedStages: Array<{
+        title: string;
+        description?: string | null;
+        targetTimeline?: string | null;
+        expectedEvidence?: string | null;
+        suggestedKpi?: string | null;
+        source: "MANUAL" | "AI_GENERATED";
+      }> = [];
+
+      const rawNotesToInspect = data.notes !== undefined ? data.notes : collabDetails.notes;
+      if (rawNotesToInspect) {
+        try {
+          const parsedNotes = JSON.parse(rawNotesToInspect);
+          if (parsedNotes && Array.isArray(parsedNotes.milestones) && parsedNotes.milestones.length > 0) {
+            agreedStages = parsedNotes.milestones.map((m: any) => ({
+              title: m.title || "Tahapan Pelaksanaan",
+              description: m.description || null,
+              targetTimeline: m.targetTimeline || null,
+              expectedEvidence: m.expectedEvidence || null,
+              suggestedKpi: m.suggestedKpi || null,
+              source: m.source === "AI_GENERATED" ? "AI_GENERATED" : "MANUAL",
+            }));
+          }
+        } catch {
+          // format plain text lama
+        }
+      }
+
+      // Fallback ke proposalActivities lama jika tidak ada milestone di notes
+      if (agreedStages.length === 0 && proposalActivities.length > 0) {
+        agreedStages = proposalActivities.map((act: any, idx: number) => ({
+          title: act.title || ("Tahapan Pelaksanaan " + (idx + 1)),
+          description: act.description || null,
+          targetTimeline: act.targetTimeline || null,
+          expectedEvidence: act.expectedEvidence || null,
+          suggestedKpi: act.suggestedKpi || null,
+          source: "MANUAL" as const,
+        }));
+      }
+
+      if (programId && agreedStages.length > 0) {
+        const existingStages = await tx
+          .select({ id: programStages.id })
+          .from(programStages)
+          .where(eq(programStages.programId, programId));
+
+        if (existingStages.length === 0) {
+          const stagesToInsert = agreedStages.map((act, idx: number) => ({
+            id: crypto.randomUUID(),
+            programId,
+            orderIndex: idx + 1,
+            title: act.title,
+            description: act.description,
+            targetTimeline: act.targetTimeline,
+            expectedEvidence: act.expectedEvidence,
+            suggestedKpi: act.suggestedKpi,
+            status: "PENDING" as const,
+            source: act.source,
+          }));
+          await tx.insert(programStages).values(stagesToInsert);
+        }
       }
 
       const [updated] = await tx

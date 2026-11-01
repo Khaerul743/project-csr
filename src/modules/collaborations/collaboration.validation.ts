@@ -16,7 +16,7 @@ export const updateCollaborationSchema = z.object({
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
   mouDocumentUrl: z.string().optional().nullable().or(z.literal("")),
-  notes: z.string().max(3000).optional().nullable(),
+  notes: z.string().max(65000).optional().nullable(),
   status: z.enum(collaborationStatusEnum, {
     message: "Status kolaborasi harus NEGOTIATION, AGREED, atau CANCELLED",
   }).optional(),

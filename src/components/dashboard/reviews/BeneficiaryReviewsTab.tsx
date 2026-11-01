@@ -185,10 +185,10 @@ export function BeneficiaryReviewsTab({
           <button
             type="button"
             onClick={() => setSelectedRating("ALL")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-xl text-xs transition-colors ${
               selectedRating === "ALL"
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] font-semibold"
+                : "bg-white text-[#181343] border border-[#E1E4EB] hover:bg-[#F8F8FB] font-medium"
             }`}
           >
             Semua ({stats.totalReviews})
@@ -198,14 +198,14 @@ export function BeneficiaryReviewsTab({
               key={star}
               type="button"
               onClick={() => setSelectedRating(star)}
-              className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 ${
+              className={`px-2.5 py-1.5 rounded-xl text-xs transition-colors flex items-center gap-1 ${
                 selectedRating === star
-                  ? "bg-teal-600 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  ? "bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] font-semibold"
+                  : "bg-white text-[#181343] border border-[#E1E4EB] hover:bg-[#F8F8FB] font-medium"
               }`}
             >
               <span>{star}</span>
-              <Star className="w-3 h-3 fill-current" />
+              <Star className="w-3 h-3 fill-current text-amber-500" />
               <span className="text-[10px] opacity-80">
                 ({stats.ratingDistribution[star as 1 | 2 | 3 | 4 | 5] || 0})
               </span>

@@ -228,14 +228,9 @@ export function VerifyActivityModal({
             </Button>
             <Button
               type="submit"
-              variant="primary"
               size="sm"
               isLoading={isSubmitting}
-              className={
-                status === "VERIFIED"
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  : "bg-rose-600 hover:bg-rose-700 text-white"
-              }
+              variant={status === "VERIFIED" ? "primary" : "destructive-solid"}
             >
               Simpan Hasil Verifikasi
             </Button>

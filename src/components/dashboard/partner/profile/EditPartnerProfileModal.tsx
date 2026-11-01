@@ -1021,7 +1021,7 @@ export function EditPartnerProfileModal({
             <Button
               type="submit"
               disabled={isSubmitting || isUploadingLogo || isUploadingCover}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-sm"
+              variant="primary" className="text-xs px-6 py-2.5"
             >
               {isSubmitting ? (
                 <>

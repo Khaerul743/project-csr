@@ -751,7 +751,7 @@ export function EditCompanyProfileModal({
               variant="primary"
               size="sm"
               isLoading={isSubmitting}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6"
+              className="px-6 font-semibold"
             >
               Simpan Perubahan
             </Button>

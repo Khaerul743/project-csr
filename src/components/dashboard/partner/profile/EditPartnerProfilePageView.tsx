@@ -1654,7 +1654,7 @@ export function EditPartnerProfilePageView({
               disabled={isSubmitting}
               isLoading={isSubmitting}
               leftIcon={<Check className="w-4 h-4" />}
-              className="h-10 px-6 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs cursor-pointer"
+              variant="primary" className="h-10 px-6 rounded-xl text-xs sm:text-sm cursor-pointer"
             >
               Simpan Perubahan
             </Button>

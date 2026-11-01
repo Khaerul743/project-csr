@@ -202,7 +202,7 @@ export function PartnerRegisterModal({
             variant="primary"
             size="md"
             isLoading={isLoading}
-            className="bg-teal-600 hover:bg-teal-700 focus:ring-teal-500"
+            className="text-xs font-semibold"
             leftIcon={<CheckCircle2 className="w-4 h-4" />}
           >
             Konfirmasi & Buat Mitra

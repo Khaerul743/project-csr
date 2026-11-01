@@ -24,6 +24,8 @@ import {
   RefreshCw,
   Copy,
   TrendingUp,
+  Layers,
+  FileCheck2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -145,6 +147,28 @@ export function ReviewProposalModal({
     setIsCopiedNotes(true);
     setTimeout(() => setIsCopiedNotes(false), 2000);
   };
+
+  // Parse structured proposal content if available
+  const { overviewText, activities, budgetItems } = useMemo(() => {
+    let overview = proposal?.summary || "";
+    let acts: any[] = [];
+    let bItems: any[] = [];
+
+    if (proposal?.summary) {
+      try {
+        const parsed = JSON.parse(proposal.summary);
+        if (parsed && typeof parsed === "object") {
+          if (typeof parsed.overview === "string") overview = parsed.overview;
+          if (Array.isArray(parsed.activities)) acts = parsed.activities;
+          if (Array.isArray(parsed.budgetItems)) bItems = parsed.budgetItems;
+        }
+      } catch {
+        // Plain text fallback
+      }
+    }
+
+    return { overviewText: overview, activities: acts, budgetItems: bItems };
+  }, [proposal?.summary]);
 
   if (!isOpen || !proposal) return null;
 
@@ -295,7 +319,7 @@ export function ReviewProposalModal({
               Ringkasan Teknis & Metodologi Pelaksanaan
             </span>
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-slate-700 leading-relaxed whitespace-pre-line text-xs">
-              {proposal.summary}
+              {overviewText}
             </div>
           </div>
 
@@ -321,6 +345,109 @@ export function ReviewProposalModal({
               </p>
             </div>
           </div>
+
+          {/* Rencana Kegiatan & Milestone Terstruktur */}
+          {activities.length > 0 && (
+            <div className="space-y-3 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                  Rencana Kegiatan & Milestone ({activities.length} Tahapan)
+                </span>
+                <span className="text-[10px] font-semibold text-[#181343] bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                  Akan Dikonversi ke Monitoring
+                </span>
+              </div>
+
+              <div className="space-y-2.5">
+                {activities.map((act: any, idx: number) => (
+                  <div
+                    key={act.id || idx}
+                    className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          {idx + 1}
+                        </span>
+                        <h5 className="text-xs font-bold text-slate-900">{act.title}</h5>
+                      </div>
+                      {act.targetTimeline && (
+                        <span className="text-[10px] font-semibold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded-md shrink-0">
+                          {act.targetTimeline}
+                        </span>
+                      )}
+                    </div>
+                    {act.description && (
+                      <p className="text-xs text-slate-600 leading-relaxed pl-7">
+                        {act.description}
+                      </p>
+                    )}
+                    {(act.suggestedKpi || act.expectedEvidence) && (
+                      <div className="pl-7 pt-1 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                        {act.suggestedKpi && (
+                          <div className="bg-white p-2 rounded-xl border border-slate-200/60">
+                            <span className="text-slate-400 font-medium block text-[10px]">Target Output / KPI</span>
+                            <span className="text-slate-700 font-semibold">{act.suggestedKpi}</span>
+                          </div>
+                        )}
+                        {act.expectedEvidence && (
+                          <div className="bg-white p-2 rounded-xl border border-slate-200/60">
+                            <span className="text-slate-400 font-medium block text-[10px]">Bukti Pelaksanaan</span>
+                            <span className="text-teal-700 font-semibold">{act.expectedEvidence}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Rencana Anggaran Biaya (RAB) Terstruktur */}
+          {budgetItems.length > 0 && (
+            <div className="space-y-3 pt-1">
+              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                Rencana Anggaran Biaya (RAB) Terstruktur
+              </span>
+              <div className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-2xs">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 text-[11px]">
+                      <tr>
+                        <th className="py-2.5 px-3">Komponen Biaya</th>
+                        <th className="py-2.5 px-2 text-center w-16">Vol</th>
+                        <th className="py-2.5 px-2 text-center w-16">Satuan</th>
+                        <th className="py-2.5 px-3 text-right">Harga Satuan</th>
+                        <th className="py-2.5 px-3 text-right">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {budgetItems.map((item: any, idx: number) => (
+                        <tr key={item.id || idx} className="hover:bg-slate-50/50">
+                          <td className="py-2 px-3 font-medium text-slate-900">{item.itemName}</td>
+                          <td className="py-2 px-2 text-center text-slate-600">{item.quantity}</td>
+                          <td className="py-2 px-2 text-center text-slate-600">{item.unit}</td>
+                          <td className="py-2 px-3 text-right text-slate-600">{formatRupiah(item.unitPrice)}</td>
+                          <td className="py-2 px-3 text-right font-bold text-slate-900">{formatRupiah(item.subtotal)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-slate-50 font-bold border-t border-slate-200 text-slate-900">
+                      <tr>
+                        <td colSpan={4} className="py-2.5 px-3 text-right text-xs">
+                          Total Anggaran Proposal:
+                        </td>
+                        <td className="py-2.5 px-3 text-right text-[#181343] text-xs font-black">
+                          {formatRupiah(proposal.proposedBudget)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Tautan Dokumen Pendukung */}
           {proposal.documentUrl && (() => {
@@ -821,18 +948,10 @@ export function ReviewProposalModal({
             <Button
               type="submit"
               form="review-form"
-              variant="primary"
               size="md"
               disabled={isSubmitting}
-              className={
-                decisionStatus === "ACCEPTED"
-                  ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-600/20"
-                  : decisionStatus === "REJECTED"
-                  ? "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20"
-                  : decisionStatus === "REVISION_REQUESTED"
-                  ? "bg-amber-600 hover:bg-amber-700 text-white shadow-md shadow-amber-600/20"
-                  : "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20"
-              }
+              variant={decisionStatus === "REJECTED" ? "destructive-solid" : "primary"}
+              className="text-xs sm:text-sm font-semibold"
               leftIcon={
                 decisionStatus === "REVISION_REQUESTED" ? (
                   <RotateCcw className="w-4 h-4" />
