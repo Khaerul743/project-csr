@@ -15,6 +15,16 @@ export interface ProgramWithDetails extends Program {
   partnerCity?: string | null;
   partnerEmail?: string | null;
   partnerFocusArea?: string | null;
+  // Activity Monitoring Fields
+  totalActivitiesCount?: number;
+  completedActivitiesCount?: number;
+  pendingActivitiesCount?: number;
+  pendingVerificationCount?: number;
+  activityProgressPercent?: number;
+  nextActivityTitle?: string | null;
+  nextActivityDate?: string | null;
+  lastReportStatus?: "SUBMITTED" | "VERIFIED" | "REVISION_REQUESTED" | null;
+  lastReportDate?: string | null;
 }
 
 export interface UpdateProgramDTO {

@@ -12,6 +12,7 @@ export interface CsrLeaderItem {
 
 export interface CompanyMetrics {
   totalDisbursedBudget: number;
+  totalAllocatedBudget?: number;
   completedPrograms: number;
   totalPrograms: number;
   totalOpportunities: number;
@@ -24,6 +25,7 @@ export interface CompanyDetailedProfile extends Company {
   members?: any[];
   metrics?: CompanyMetrics;
   openOpportunities?: any[];
+  programs?: any[];
 }
 
 export interface CreateCompanyDTO {

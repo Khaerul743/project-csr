@@ -119,7 +119,7 @@ export function ProgramsImpactSection() {
                 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Bukti Nyata Kolaborasi Sosial yang Tercatat & Tervalidasi.
+                Bukti Nyata Kolaborasi Sosial yang Tercatat & Tervalidasi
               </h2>
             </div>
             <p className="text-sm sm:text-base text-[#47464F] max-w-md leading-relaxed">
@@ -134,22 +134,20 @@ export function ProgramsImpactSection() {
             <button
               type="button"
               onClick={() => setSelectedCategory("ALL")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                selectedCategory === "ALL"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${selectedCategory === "ALL"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
-              }`}
+                }`}
             >
               Semua Program ({SAMPLE_PROGRAMS.length})
             </button>
             <button
               type="button"
               onClick={() => setSelectedCategory("LINGKUNGAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "LINGKUNGAN"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "LINGKUNGAN"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
-              }`}
+                }`}
             >
               <TreePine className="w-3.5 h-3.5 text-emerald-600" />
               <span>Lingkungan Hidup</span>
@@ -157,11 +155,10 @@ export function ProgramsImpactSection() {
             <button
               type="button"
               onClick={() => setSelectedCategory("PENDIDIKAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "PENDIDIKAN"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "PENDIDIKAN"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
-              }`}
+                }`}
             >
               <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
               <span>Pendidikan & Literasi</span>
@@ -169,11 +166,10 @@ export function ProgramsImpactSection() {
             <button
               type="button"
               onClick={() => setSelectedCategory("KESEHATAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "KESEHATAN"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "KESEHATAN"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
-              }`}
+                }`}
             >
               <Droplets className="w-3.5 h-3.5 text-cyan-600" />
               <span>Kesehatan & Sanitasi</span>
@@ -181,11 +177,10 @@ export function ProgramsImpactSection() {
             <button
               type="button"
               onClick={() => setSelectedCategory("EKONOMI")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "EKONOMI"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "EKONOMI"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
-              }`}
+                }`}
             >
               <Coins className="w-3.5 h-3.5 text-amber-600" />
               <span>Pemberdayaan UMKM</span>
@@ -214,11 +209,10 @@ export function ProgramsImpactSection() {
                       {prog.sdgTag}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        prog.statusVariant === "emerald"
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${prog.statusVariant === "emerald"
                           ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                           : "bg-[#181343]/10 text-[#181343] border border-[#181343]/20"
-                      }`}
+                        }`}
                     >
                       {prog.status}
                     </span>

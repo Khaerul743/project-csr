@@ -1,7 +1,7 @@
-import { eq, like, or, count, inArray } from "drizzle-orm";
+import { eq, like, or, count, inArray, and, ne } from "drizzle-orm";
 import { db } from "@/db";
 import { companies, Company } from "@/db/schema/companies";
-import { users, User } from "@/db/schema/users";
+import { users, User, UserRole, UserStatus } from "@/db/schema/users";
 import { opportunities } from "@/db/schema/opportunities";
 import { programs } from "@/db/schema/programs";
 import { programReviews } from "@/db/schema/program-reviews";
@@ -30,6 +30,54 @@ export class CompanyRepository {
       })
       .from(users)
       .where(eq(users.companyId, companyId));
+  }
+
+  async findMemberById(companyId: string, memberId: string) {
+    const result = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        status: users.status,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(and(eq(users.id, memberId), eq(users.companyId, companyId)))
+      .limit(1);
+    return result[0] ?? null;
+  }
+
+  async countActiveManagement(companyId: string, excludeUserId?: string): Promise<number> {
+    const conditions = [
+      eq(users.companyId, companyId),
+      eq(users.role, "MANAGEMENT"),
+      eq(users.status, "ACTIVE"),
+    ];
+    if (excludeUserId) {
+      conditions.push(ne(users.id, excludeUserId));
+    }
+    const [result] = await db
+      .select({ count: count() })
+      .from(users)
+      .where(and(...conditions));
+    return Number(result?.count ?? 0);
+  }
+
+  async updateMember(
+    companyId: string,
+    memberId: string,
+    data: { role?: UserRole; status?: UserStatus }
+  ) {
+    await db
+      .update(users)
+      .set({
+        ...(data.role ? { role: data.role } : {}),
+        ...(data.status ? { status: data.status } : {}),
+      })
+      .where(and(eq(users.id, memberId), eq(users.companyId, companyId)));
+
+    return this.findMemberById(companyId, memberId);
   }
 
   async findByName(name: string): Promise<Company | null> {
@@ -129,6 +177,7 @@ export class CompanyRepository {
       .select({
         id: programs.id,
         budget: programs.budget,
+        spentBudget: programs.spentBudget,
         status: programs.status,
         partnerId: programs.partnerId,
       })
@@ -138,18 +187,18 @@ export class CompanyRepository {
     const totalPrograms = companyPrograms.length;
     const completedPrograms = companyPrograms.filter((p) => p.status === "COMPLETED").length;
 
-    // Total disbursed/realized budget from completed or in_progress programs
-    const totalDisbursedBudget = companyPrograms
-      .filter((p) => p.status === "COMPLETED" || p.status === "IN_PROGRESS")
-      .reduce((acc, curr) => acc + Number(curr.budget || 0), 0);
+    // Realized spent budget vs allocated budget
+    const totalDisbursedBudget = companyPrograms.reduce((acc, curr) => acc + Number(curr.spentBudget || 0), 0);
+    const totalAllocatedBudget = companyPrograms.reduce((acc, curr) => acc + Number(curr.budget || 0), 0);
 
     // Distinct partners engaged
-    const partnerIds = new Set(companyPrograms.map((p) => p.partnerId).filter(Boolean));
+    const partnerIds = new Set(companyPrograms.filter((p) => p.status === "IN_PROGRESS" || p.status === "COMPLETED").map((p) => p.partnerId).filter(Boolean));
     const totalPartnersEngaged = partnerIds.size;
 
     if (totalPrograms === 0) {
       return {
         totalDisbursedBudget,
+        totalAllocatedBudget,
         completedPrograms,
         totalPrograms,
         totalOpportunities,
@@ -175,6 +224,7 @@ export class CompanyRepository {
 
     return {
       totalDisbursedBudget,
+      totalAllocatedBudget,
       completedPrograms,
       totalPrograms,
       totalOpportunities,
@@ -182,6 +232,10 @@ export class CompanyRepository {
       averageRating,
       totalReviews,
     };
+  }
+
+  async getCompanyPrograms(companyId: string) {
+    return await db.select().from(programs).where(eq(programs.companyId, companyId));
   }
 
   async getOpenOpportunities(companyId: string) {

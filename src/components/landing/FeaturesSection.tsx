@@ -25,21 +25,31 @@ export function FeaturesSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <ScrollReveal animation="fade-up" delay={50}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-12 border-b border-[#C8C5D0]/60">
-            <div className="max-w-2xl space-y-3">
-              <span className="px-3 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
+          <div className="pb-12 sm:pb-14 border-b border-[#C8C5D0]/60 space-y-4">
+            <div>
+              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
                 Fitur Platform
               </span>
-              <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Dirancang untuk Akurasi Data, Efisiensi Eksekusi, & Integritas Bukti.
-              </h2>
             </div>
-            <p className="text-sm sm:text-base text-[#47464F] max-w-md leading-relaxed">
-              Setiap fitur dibangun dengan pendekatan tata kelola institusional yang memudahkan pekerjaan operasional mitra di lapangan sekaligus memberikan kepastian data bagi manajemen perusahaan.
-            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+              {/* Left Column (Headline ~55%) */}
+              <div className="lg:col-span-7">
+                <h2
+                  className="text-2xl sm:text-3xl lg:text-[38px] font-extrabold tracking-tight text-[#181343] leading-[1.25]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Fitur Cerdas untuk Pengelolaan CSR yang Lebih Efektif
+                </h2>
+              </div>
+
+              {/* Right Column (Description ~45%) */}
+              <div className="lg:col-span-5">
+                <p className="text-base sm:text-lg text-[#47464F] leading-relaxed">
+                  Jelajahi berbagai fitur SIPENA yang dirancang untuk menyederhanakan pekerjaan, memperlancar kolaborasi, dan mendukung pengambilan keputusan berbasis data.
+                </p>
+              </div>
+            </div>
           </div>
         </ScrollReveal>
 

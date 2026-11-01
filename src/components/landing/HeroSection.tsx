@@ -65,7 +65,7 @@ export function HeroSection() {
                   <ShieldCheck className="w-3 h-3 text-emerald-600" />
                 </span>
                 <span className="text-[11px] sm:text-xs font-bold tracking-tight text-[#181343] uppercase">
-                  TERVERIFIKASI POJK 51/2017 & KERANGKA KERJA 17 SDGS NASIONAL
+                  SINERGI CSR UNTUK PEMBANGUNAN BERKELANJUTAN
                 </span>
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5 shrink-0" />
               </div>
@@ -79,10 +79,10 @@ export function HeroSection() {
               >
                 Transformasi Tata Kelola CSR:{" "}
                 <span className="text-emerald-600 block sm:inline">
-                  Mencatat Bukti Nyata,
+                  Petakan Kebutuhan,
                 </span>{" "}
                 <span className="text-[#181343]">
-                  Mengukur Dampak Teruji.
+                  Pantau Perubahan
                 </span>
               </h1>
             </ScrollReveal>
@@ -124,15 +124,15 @@ export function HeroSection() {
               <div className="pt-5 border-t border-[#E5E7EB] flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-[#787680] font-medium">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Tanpa Klaim Semu</span>
+                  <span>Prioritas Kebutuhan</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Geolokasi GPS Teruji</span>
+                  <span>Kolaborasi CSR</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#181343]" />
-                  <span>Pencairan Bertahap Faktual</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Monitoring Program Terstruktur</span>
                 </div>
               </div>
             </ScrollReveal>

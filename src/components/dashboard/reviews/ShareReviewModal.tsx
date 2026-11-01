@@ -133,9 +133,9 @@ export function ShareReviewModal({
               variant="outline"
               size="sm"
               onClick={handleDownloadQr}
+              leftIcon={<Download className="w-3.5 h-3.5 shrink-0" />}
               className="w-full text-xs font-bold text-teal-700 border-teal-200 hover:bg-teal-50"
             >
-              <Download className="w-3.5 h-3.5 mr-1.5" />
               Unduh QR Code (Cetak Spanduk/Flyer)
             </Button>
           </div>
@@ -156,23 +156,20 @@ export function ShareReviewModal({
                 type="button"
                 onClick={handleCopy}
                 size="sm"
-                className={`text-xs font-bold transition-all ${
+                leftIcon={
+                  copied ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-200 shrink-0" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 shrink-0" />
+                  )
+                }
+                className={`text-xs font-bold transition-all shrink-0 ${
                   copied
                     ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                     : "bg-slate-900 hover:bg-slate-800 text-white"
                 }`}
               >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 mr-1 text-emerald-200" />
-                    Tersalin
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5 mr-1" />
-                    Salin
-                  </>
-                )}
+                {copied ? "Tersalin" : "Salin"}
               </Button>
             </div>
           </div>

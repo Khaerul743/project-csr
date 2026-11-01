@@ -203,4 +203,37 @@ export class InvitationService {
     await this.invitationRepository.cancelInvitation(invitationId, inviterCompanyId);
     this.logger.info(`Invitation ${invitationId} cancelled by company ${inviterCompanyId}`);
   }
+
+  async resendCompanyInvitation(
+    inviterCompanyId: string | null,
+    invitationId: string
+  ): Promise<Invitation> {
+    if (!inviterCompanyId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan perusahaan manapun");
+    }
+
+    const invitation = await this.invitationRepository.findById(invitationId);
+    if (!invitation) {
+      throw new NotFoundError("Undangan tidak ditemukan");
+    }
+
+    if (invitation.companyId !== inviterCompanyId) {
+      throw new ForBiddenError("Undangan ini bukan milik perusahaan Anda");
+    }
+
+    if (invitation.status === "ACCEPTED") {
+      throw new ConflictError("Undangan sudah diterima oleh anggota tim");
+    }
+
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 hari
+
+    const updated = await this.invitationRepository.resendInvitation(
+      invitationId,
+      token,
+      expiresAt
+    );
+    this.logger.info(`Invitation ${invitationId} resent by company ${inviterCompanyId}`);
+    return updated;
+  }
 }

@@ -90,6 +90,8 @@ export interface PartnerItem {
   linkedinUrl?: string | null;
   youtubeUrl?: string | null;
   portfolioDocUrl?: string | null;
+  pastActivities?: string | any[] | null;
+  teamMembers?: string | any[] | null;
   focusArea: CsrFocusArea;
   status: string;
   createdAt: string;
@@ -135,7 +137,7 @@ export interface CompanyProposalItem {
   durationMonths?: number | null;
   targetBeneficiaries?: string | null;
   documentUrl?: string | null;
-  status: "SUBMITTED" | "UNDER_REVIEW" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+  status: "SUBMITTED" | "UNDER_REVIEW" | "REVISION_REQUESTED" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
   reviewedBy?: string | null;
   reviewedAt?: string | null;
   feedback?: string | null;
@@ -184,6 +186,15 @@ export interface CompanyCollaborationItem {
   partnerCity?: string | null;
   partnerEmail?: string | null;
   partnerFocusArea?: string | null;
+  totalActivitiesCount?: number;
+  completedActivitiesCount?: number;
+  pendingActivitiesCount?: number;
+  pendingVerificationCount?: number;
+  activityProgressPercent?: number;
+  nextActivityTitle?: string | null;
+  nextActivityDate?: string | null;
+  lastReportStatus?: string | null;
+  lastReportDate?: string | null;
 }
 
 export interface CompanyProgramItem {
@@ -219,6 +230,15 @@ export interface CompanyProgramItem {
   partnerCity?: string | null;
   partnerEmail?: string | null;
   partnerFocusArea?: string | null;
+  totalActivitiesCount?: number;
+  completedActivitiesCount?: number;
+  pendingActivitiesCount?: number;
+  pendingVerificationCount?: number;
+  activityProgressPercent?: number;
+  nextActivityTitle?: string | null;
+  nextActivityDate?: string | null;
+  lastReportStatus?: string | null;
+  lastReportDate?: string | null;
 }
 
 

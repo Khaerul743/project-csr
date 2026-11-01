@@ -81,30 +81,31 @@ export function InviteMemberModal({
     <Modal
       isOpen={isOpen}
       onClose={handleReset}
-      title="Undang Anggota Tim Perusahaan"
+      title="Undang Anggota Tim Baru"
       description="Kirimkan undangan resmi kepada rekan tim Anda untuk bergabung mengelola program CSR."
       maxWidth="md"
     >
       {successData ? (
         <div className="space-y-4 text-center py-2">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#009E75] flex items-center justify-center mx-auto shadow-inner">
             <CheckCircle2 className="w-6 h-6" />
           </div>
 
           <div>
-            <h4 className="text-base font-bold text-slate-900">
+            <h4 className="text-base font-bold text-[#181343]">
               Undangan Berhasil Dibuat!
             </h4>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto leading-relaxed">
-              Undangan untuk <strong>{successData.email}</strong> dengan peran <strong>{successData.role}</strong> siap digunakan.
+            <p className="text-xs text-[#787680] mt-1 max-w-sm mx-auto leading-relaxed">
+              Undangan untuk <strong>{successData.email}</strong> dengan peran{" "}
+              <strong>{successData.role === "MANAGEMENT" ? "Management" : "CSR Admin"}</strong> siap digunakan.
             </p>
           </div>
 
-          <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-left space-y-1.5">
-            <span className="text-[11px] font-semibold text-slate-400 block">
+          <div className="p-3 bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl text-left space-y-1.5">
+            <span className="text-[11px] font-bold text-[#787680] block">
               Token Undangan (Masa berlaku 7 hari):
             </span>
-            <div className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-mono text-slate-700">
+            <div className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-[#E8E8EA] text-xs font-mono text-[#181343]">
               <span className="truncate">{successData.token}</span>
               <button
                 type="button"
@@ -115,7 +116,7 @@ export function InviteMemberModal({
                 {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 pt-1">
+            <p className="text-[10px] text-[#787680] pt-1">
               Ketika pengguna login menggunakan email tersebut, sistem akan langsung mendeteksi undangan ini secara otomatis.
             </p>
           </div>
@@ -150,7 +151,7 @@ export function InviteMemberModal({
           />
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-slate-700">
+            <label className="text-xs font-bold text-[#181343]">
               Peran / Role yang Diberikan
             </label>
             <div className="grid grid-cols-2 gap-3">
@@ -159,15 +160,15 @@ export function InviteMemberModal({
                 onClick={() => setRole("CSR_ADMIN")}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   role === "CSR_ADMIN"
-                    ? "border-emerald-500 bg-emerald-50/50 text-slate-900 ring-2 ring-emerald-500/20"
-                    : "border-slate-200 bg-white hover:bg-slate-50 text-slate-600"
+                    ? "border-[#35B98E] bg-[#EDF9F3] text-[#181343] ring-2 ring-[#35B98E]/20"
+                    : "border-[#E8E8EA] bg-white hover:bg-[#F9F9FB] text-[#787680]"
                 }`}
               >
-                <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-800">
-                  <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>CSR_ADMIN</span>
+                <div className="flex items-center gap-1.5 font-bold text-xs text-[#009E75]">
+                  <Shield className="w-3.5 h-3.5 text-[#009E75]" />
+                  <span>CSR Admin</span>
                 </div>
-                <span className="text-[11px] text-slate-500 block mt-1">
+                <span className="text-[11px] text-[#787680] block mt-1">
                   Operasional program & verifikasi mitra CSR
                 </span>
               </button>
@@ -177,22 +178,22 @@ export function InviteMemberModal({
                 onClick={() => setRole("MANAGEMENT")}
                 className={`p-3 rounded-xl border text-left transition-all ${
                   role === "MANAGEMENT"
-                    ? "border-emerald-500 bg-emerald-50/50 text-slate-900 ring-2 ring-emerald-500/20"
-                    : "border-slate-200 bg-white hover:bg-slate-50 text-slate-600"
+                    ? "border-indigo-500 bg-indigo-50/60 text-[#181343] ring-2 ring-indigo-500/20"
+                    : "border-[#E8E8EA] bg-white hover:bg-[#F9F9FB] text-[#787680]"
                 }`}
               >
-                <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900">
-                  <Shield className="w-3.5 h-3.5 text-slate-700" />
-                  <span>MANAGEMENT</span>
+                <div className="flex items-center gap-1.5 font-bold text-xs text-indigo-700">
+                  <Shield className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Management</span>
                 </div>
-                <span className="text-[11px] text-slate-500 block mt-1">
-                  Hak penuh manajerial & analisis strategis
+                <span className="text-[11px] text-[#787680] block mt-1">
+                  Hak penuh manajerial & analisis portofolio
                 </span>
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F4F4F6]">
             <Button
               type="button"
               variant="outline"

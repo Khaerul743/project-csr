@@ -11,7 +11,7 @@ import { ContactSection } from "@/components/landing/ContactSection";
 import { LandingFooter } from "@/components/landing/Footer";
 
 export const metadata: Metadata = {
-  title: "SIPENA — Tata Kelola & Evaluasi Nilai Aksi CSR Terpercaya",
+  title: "SIPENA — Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR",
   description:
     "Platform kolaborasi strategis antara perusahaan, yayasan/NGO, dan masyarakat. Pencatatan proposal berbasis AI, pemantauan milestone geolokasi, dan evaluasi dampak ESG.",
 };

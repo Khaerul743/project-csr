@@ -12,7 +12,9 @@ import {
   Users,
   CheckCircle2,
   ShieldCheck,
-  Edit3,
+  ShieldAlert,
+  Clock,
+  SquarePen,
   ArrowLeft,
   ExternalLink,
   FileText,
@@ -26,15 +28,22 @@ import {
   HeartHandshake,
   DollarSign,
   TrendingUp,
+  Filter,
+  Check,
+  RotateCcw,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatRupiah, formatDate, FOCUS_AREA_CONFIG } from "../helpers";
 import { CsrLeaderItem, CompanyDetailedProfile } from "@/modules/companies/company.interface";
-import { EditCompanyProfileModal } from "./EditCompanyProfileModal";
+import { EditCompanyProfilePageView, ProfileCategoryTab } from "./EditCompanyProfilePageView";
 
 interface CompanyFullProfileViewProps {
   company: CompanyDetailedProfile | any;
+  programs?: any[];
+  collaborations?: any[];
+  isLoadingPrograms?: boolean;
   isOwner?: boolean;
   onBack?: () => void;
   onOpenChat?: () => void;
@@ -44,6 +53,9 @@ interface CompanyFullProfileViewProps {
 
 export function CompanyFullProfileView({
   company,
+  programs = [],
+  collaborations = [],
+  isLoadingPrograms = false,
   isOwner = false,
   onBack,
   onOpenChat,
@@ -51,8 +63,13 @@ export function CompanyFullProfileView({
   onProfileUpdated,
 }: CompanyFullProfileViewProps) {
   const [currentCompany, setCurrentCompany] = useState(company);
-  const [activeTab, setActiveTab] = useState<"about" | "opportunities" | "legal" | "leaders">("about");
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"about" | "programs" | "legal" | "leaders">("about");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editCategory, setEditCategory] = useState<ProfileCategoryTab>("info");
+
+  // Filters for Portofolio Program CSR
+  const [programStatusFilter, setProgramStatusFilter] = useState<string>("ALL");
+  const [programFocusFilter, setProgramFocusFilter] = useState<string>("ALL");
 
   // Sync state if prop changes
   React.useEffect(() => {
@@ -61,7 +78,7 @@ export function CompanyFullProfileView({
 
   const c = currentCompany;
 
-  // Parse CSR Leaders from JSON
+  // Parse CSR Leaders from JSON or Array
   const csrLeaders: CsrLeaderItem[] = useMemo(() => {
     if (!c?.csrLeaders) return [];
     if (Array.isArray(c.csrLeaders)) return c.csrLeaders;
@@ -72,7 +89,112 @@ export function CompanyFullProfileView({
     }
   }, [c?.csrLeaders]);
 
-  // Calculate profile completeness (for owner)
+  // Combined program list from props or company object
+  const programList = useMemo(() => {
+    if (programs && programs.length > 0) return programs;
+    if (c?.programs && Array.isArray(c.programs)) return c.programs;
+    return [];
+  }, [programs, c?.programs]);
+
+  // Combined collaborations list
+  const collabList = useMemo(() => {
+    if (collaborations && collaborations.length > 0) return collaborations;
+    if (c?.collaborations && Array.isArray(c.collaborations)) return c.collaborations;
+    return [];
+  }, [collaborations, c?.collaborations]);
+
+  // Helper to get friendly Indonesian label for focus areas
+  const getFocusAreaLabel = (focusKey: string): string => {
+    switch (focusKey) {
+      case "PENDIDIKAN":
+        return "Pendidikan & Literasi";
+      case "KESEHATAN":
+        return "Kesehatan Masyarakat";
+      case "LINGKUNGAN":
+        return "Lingkungan & Alam";
+      case "PEMBERDAYAAN_EKONOMI":
+      case "EKONOMI_UMKM":
+        return "Pemberdayaan Ekonomi / UMKM";
+      case "INFRASTRUKTUR_SOSIAL":
+      case "INFRASTRUKTUR":
+        return "Infrastruktur Sosial";
+      case "TANGGAP_BENCANA":
+        return "Tanggap Kemanusiaan & Bencana";
+      case "LAINNYA":
+        return "Inisiatif Lainnya";
+      default:
+        if (FOCUS_AREA_CONFIG[focusKey as keyof typeof FOCUS_AREA_CONFIG]) {
+          return FOCUS_AREA_CONFIG[focusKey as keyof typeof FOCUS_AREA_CONFIG].label;
+        }
+        return focusKey;
+    }
+  };
+
+  // Dynamic Focus Area options for filter dropdown
+  const focusOptions = useMemo(() => {
+    const baseOptions = [
+      { value: "ALL", label: "Semua Fokus" },
+      { value: "PENDIDIKAN", label: "Pendidikan & Literasi" },
+      { value: "KESEHATAN", label: "Kesehatan Masyarakat" },
+      { value: "LINGKUNGAN", label: "Lingkungan & Alam" },
+    ];
+
+    const added = new Set(baseOptions.map((o) => o.value));
+
+    // Dynamically include other categories based on available program data
+    programList.forEach((p: any) => {
+      if (p.focusArea && !added.has(p.focusArea)) {
+        added.add(p.focusArea);
+        baseOptions.push({
+          value: p.focusArea,
+          label: getFocusAreaLabel(p.focusArea),
+        });
+      }
+    });
+
+    return baseOptions;
+  }, [programList]);
+
+  // Calculate administrative verification status based on actual legal documents & verification flags
+  const adminVerification = useMemo(() => {
+    const explicitStatus = (c?.verificationStatus || "").toUpperCase();
+    const hasNib = Boolean(c?.nibNumber && c.nibNumber.trim().length > 3);
+    const hasNpwp = Boolean(c?.npwpNumber && c.npwpNumber.trim().length > 3);
+    const isSystemActive = c?.status === "ACTIVE" || !c?.status;
+
+    if (explicitStatus === "VERIFIED" || (hasNib && hasNpwp && isSystemActive)) {
+      return {
+        status: "VERIFIED" as const,
+        label: "Terverifikasi Administratif",
+        badgeBg: "bg-emerald-50 border-emerald-200 text-emerald-800",
+        iconColor: "text-emerald-600",
+        icon: ShieldCheck,
+        description: "Dokumen legalitas badan usaha (NIB & NPWP) telah terverifikasi sah dalam sistem SIPENA.",
+      };
+    }
+
+    if (explicitStatus === "PENDING" || hasNib || hasNpwp) {
+      return {
+        status: "PENDING" as const,
+        label: "Menunggu Verifikasi Legalitas",
+        badgeBg: "bg-amber-50 border-amber-200 text-amber-800",
+        iconColor: "text-amber-600",
+        icon: Clock,
+        description: "Dokumen legalitas sedang dalam proses peninjauan administratif oleh tim verifikator SIPENA.",
+      };
+    }
+
+    return {
+      status: "UNVERIFIED" as const,
+      label: "Belum Terverifikasi Administratif",
+      badgeBg: "bg-slate-100 border-slate-200 text-slate-700",
+      iconColor: "text-slate-500",
+      icon: ShieldAlert,
+      description: "Perusahaan belum melengkapi dokumen legalitas resmi (NIB & NPWP) untuk verifikasi institusional.",
+    };
+  }, [c?.verificationStatus, c?.nibNumber, c?.npwpNumber, c?.status]);
+
+  // Calculate profile completeness (measures public information completion, distinct from legal verification)
   const completeness = useMemo(() => {
     let score = 0;
     const missing: string[] = [];
@@ -105,10 +227,181 @@ export function CompanyFullProfileView({
     return { score: Math.min(100, score), missing };
   }, [c, csrLeaders]);
 
+  // Fallback backend metrics
+  const fallbackMetrics = c?.metrics || {
+    totalDisbursedBudget: 0,
+    totalAllocatedBudget: 0,
+    completedPrograms: 0,
+    totalPrograms: 0,
+    totalOpportunities: 0,
+    totalPartnersEngaged: 0,
+    averageRating: 0,
+    totalReviews: 0,
+  };
+
+  // Compute live, accurate statistics from real data
+  const realMetrics = useMemo(() => {
+    if (programList.length > 0) {
+      const totalAllocated = programList.reduce((acc: number, p: any) => acc + Number(p.budget || 0), 0);
+      const totalRealized = programList.reduce((acc: number, p: any) => acc + Number(p.spentBudget || 0), 0);
+      const completed = programList.filter((p: any) => p.status === "COMPLETED").length;
+
+      // Calculate distinct partner organizations that actually collaborate
+      const activeCollabPartners = collabList
+        .filter((col: any) => col.status === "AGREED" || col.status === "ACTIVE")
+        .map((col: any) => col.partnerId)
+        .filter(Boolean);
+
+      const activeProgramPartners = programList
+        .filter((p: any) => p.status === "IN_PROGRESS" || p.status === "COMPLETED")
+        .map((p: any) => p.partnerId)
+        .filter(Boolean);
+
+      const uniquePartners = new Set([...activeCollabPartners, ...activeProgramPartners]);
+      const partnersCount = uniquePartners.size > 0 ? uniquePartners.size : (fallbackMetrics.totalPartnersEngaged || 0);
+
+      return {
+        totalRealizedBudget: totalRealized,
+        totalAllocatedBudget: totalAllocated,
+        completedPrograms: completed,
+        totalPrograms: programList.length,
+        totalPartnersEngaged: partnersCount,
+        averageRating: fallbackMetrics.averageRating || 0,
+        totalReviews: fallbackMetrics.totalReviews || 0,
+      };
+    }
+
+    return {
+      totalRealizedBudget: fallbackMetrics.totalDisbursedBudget || 0,
+      totalAllocatedBudget: fallbackMetrics.totalAllocatedBudget || 0,
+      completedPrograms: fallbackMetrics.completedPrograms || 0,
+      totalPrograms: fallbackMetrics.totalPrograms || 0,
+      totalPartnersEngaged: fallbackMetrics.totalPartnersEngaged || 0,
+      averageRating: fallbackMetrics.averageRating || 0,
+      totalReviews: fallbackMetrics.totalReviews || 0,
+    };
+  }, [programList, collabList, fallbackMetrics]);
+
+  // Filtered programs for Tab 2
+  const filteredPrograms = useMemo(() => {
+    return programList.filter((p: any) => {
+      const matchStatus = programStatusFilter === "ALL" || p.status === programStatusFilter;
+      const matchFocus = programFocusFilter === "ALL" || p.focusArea === programFocusFilter;
+      return matchStatus && matchFocus;
+    });
+  }, [programList, programStatusFilter, programFocusFilter]);
+
+  // Filter activity status
+  const isFilterActive = programStatusFilter !== "ALL" || programFocusFilter !== "ALL";
+
+  // Reset filter handler
+  const handleResetFilters = () => {
+    setProgramStatusFilter("ALL");
+    setProgramFocusFilter("ALL");
+  };
+
+  // Dynamic Empty State calculation according to business specifications
+  const emptyStateContent = useMemo(() => {
+    const isAllStatus = programStatusFilter === "ALL";
+    const isAllFocus = programFocusFilter === "ALL";
+    const isPlanned = programStatusFilter === "PLANNED";
+    const isProgress = programStatusFilter === "IN_PROGRESS";
+    const isCompleted = programStatusFilter === "COMPLETED";
+
+    const currentFocusOption = focusOptions.find((o) => o.value === programFocusFilter);
+    const focusLabel = currentFocusOption ? currentFocusOption.label : getFocusAreaLabel(programFocusFilter);
+
+    // 1. Semua Status + Semua Fokus
+    if (isAllStatus && isAllFocus) {
+      return {
+        title: "Belum Ada Program CSR",
+        description: "Program CSR perusahaan akan ditampilkan di sini setelah tersedia.",
+      };
+    }
+
+    // 2. Persiapan + Semua Fokus
+    if (isPlanned && isAllFocus) {
+      return {
+        title: "Belum Ada Program dalam Tahap Persiapan",
+        description: "Program yang telah disepakati dan sedang dipersiapkan akan ditampilkan di sini.",
+      };
+    }
+
+    // 3. Sedang Berjalan + Semua Fokus
+    if (isProgress && isAllFocus) {
+      return {
+        title: "Belum Ada Program yang Sedang Berjalan",
+        description: "Program yang sedang dilaksanakan akan muncul di sini.",
+      };
+    }
+
+    // 4. Selesai + Semua Fokus
+    if (isCompleted && isAllFocus) {
+      return {
+        title: "Belum Ada Program yang Selesai",
+        description: "Program yang telah menyelesaikan tahap pelaksanaan akan ditampilkan di sini.",
+      };
+    }
+
+    // 5. Semua Status + Fokus Tertentu
+    if (isAllStatus && !isAllFocus) {
+      return {
+        title: `Belum Ada Program ${focusLabel}`,
+        description: "Belum tersedia program CSR dalam bidang ini. Coba pilih fokus lainnya.",
+      };
+    }
+
+    // 6. Persiapan + Fokus Tertentu
+    if (isPlanned && !isAllFocus) {
+      return {
+        title: `Belum Ada Program ${focusLabel} dalam Tahap Persiapan`,
+        description: "Belum tersedia program persiapan dalam bidang ini. Coba sesuaikan filter untuk melihat program lainnya.",
+      };
+    }
+
+    // 7. Sedang Berjalan + Fokus Tertentu
+    if (isProgress && !isAllFocus) {
+      return {
+        title: `Belum Ada Program ${focusLabel} yang Sedang Berjalan`,
+        description: "Belum tersedia program aktif dalam bidang ini. Coba sesuaikan filter untuk melihat program lainnya.",
+      };
+    }
+
+    // 8. Selesai + Fokus Tertentu
+    if (isCompleted && !isAllFocus) {
+      return {
+        title: `Belum Ada Program ${focusLabel} yang Selesai`,
+        description: "Belum tersedia program selesai dalam bidang ini. Coba sesuaikan filter untuk melihat program lainnya.",
+      };
+    }
+
+    // Fallback
+    return {
+      title: `Belum Ada Program ${focusLabel}`,
+      description: "Belum tersedia program yang sesuai dengan filter yang dipilih. Coba sesuaikan filter lainnya.",
+    };
+  }, [programStatusFilter, programFocusFilter, focusOptions]);
+
+  const openOpportunities = c?.openOpportunities || [];
+
   const handleSuccessUpdate = (updated: any) => {
     setCurrentCompany(updated);
     if (onProfileUpdated) onProfileUpdated(updated);
   };
+
+  if (isEditingProfile) {
+    return (
+      <EditCompanyProfilePageView
+        company={currentCompany}
+        initialCategory={editCategory}
+        onBack={() => setIsEditingProfile(false)}
+        onProfileUpdated={(updated) => {
+          handleSuccessUpdate(updated);
+          setIsEditingProfile(false);
+        }}
+      />
+    );
+  }
 
   if (!c) {
     return (
@@ -122,18 +415,6 @@ export function CompanyFullProfileView({
       </div>
     );
   }
-
-  const metrics = c.metrics || {
-    totalDisbursedBudget: 0,
-    completedPrograms: 0,
-    totalPrograms: 0,
-    totalOpportunities: 0,
-    totalPartnersEngaged: 0,
-    averageRating: 0,
-    totalReviews: 0,
-  };
-
-  const openOpportunities = c.openOpportunities || [];
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-in fade-in">
@@ -188,8 +469,11 @@ export function CompanyFullProfileView({
           {isOwner && (
             <button
               type="button"
-              onClick={() => setIsEditModalOpen(true)}
-              className="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 transition-all shadow-md"
+              onClick={() => {
+                setEditCategory("branding");
+                setIsEditingProfile(true);
+              }}
+              className="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
             >
               <Camera className="w-3.5 h-3.5" />
               <span>Ganti Sampul</span>
@@ -211,16 +495,19 @@ export function CompanyFullProfileView({
                       className="w-full h-full object-contain p-1"
                     />
                   ) : (
-                    c.name.substring(0, 2).toUpperCase()
+                    c.name?.substring(0, 2).toUpperCase() || "CP"
                   )}
                 </div>
               </div>
               {isOwner && (
                 <button
                   type="button"
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform active:scale-95"
-                  title="Ubah Logo Perusahaan"
+                  onClick={() => {
+                    setEditCategory("branding");
+                    setIsEditingProfile(true);
+                  }}
+                  className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform active:scale-95 cursor-pointer"
+                  title="Ganti Logo Perusahaan"
                 >
                   <Camera className="w-3.5 h-3.5" />
                 </button>
@@ -230,13 +517,18 @@ export function CompanyFullProfileView({
             {/* Action Buttons Top-Right */}
             <div className="flex items-center gap-3 self-end sm:self-auto w-full sm:w-auto justify-end">
               {isOwner ? (
-                <Button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl shadow-sm flex items-center gap-2"
+                /* Redesigned Edit Profil Perusahaan Button: clean, modern, horizontal, 16px icon, 8px gap, secondary outlined */
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditCategory("info");
+                    setIsEditingProfile(true);
+                  }}
+                  className="inline-flex items-center gap-2 h-[38px] px-3.5 sm:px-4 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] hover:border-slate-300 transition-colors duration-150 text-xs sm:text-sm font-semibold shadow-2xs shrink-0 cursor-pointer"
                 >
-                  <Edit3 className="w-4 h-4" />
+                  <SquarePen className="w-4 h-4 text-[#181343] shrink-0" strokeWidth={1.75} />
                   <span>Edit Profil Perusahaan</span>
-                </Button>
+                </button>
               ) : (
                 <div className="flex items-center gap-2">
                   {onOpenChat && (
@@ -253,15 +545,20 @@ export function CompanyFullProfileView({
             </div>
           </div>
 
-          {/* Name & Tagline */}
+          {/* Name & Dynamic Administrative Verification Status */}
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 {c.name}
               </h1>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold shadow-xs">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Perusahaan Terverifikasi</span>
+              
+              {/* Administrative Verification Badge (Calculated from actual data) */}
+              <div
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-xs font-bold shadow-2xs ${adminVerification.badgeBg}`}
+                title={adminVerification.description}
+              >
+                <adminVerification.icon className={`w-4 h-4 ${adminVerification.iconColor}`} />
+                <span>{adminVerification.label}</span>
               </div>
             </div>
 
@@ -335,20 +632,24 @@ export function CompanyFullProfileView({
           </div>
         </div>
 
-        {/* Profile Completeness Bar (Owner Only) */}
+        {/* Profile Completeness Bar (Owner Only) - Clearly differentiated from Administrative Verification */}
         {isOwner && completeness.score < 100 && (
           <div className="mx-6 sm:mx-10 mb-8 p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white border border-emerald-200/80 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-600" />
                 <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                  Kelengkapan Profil Korporat
+                  Persentase Kelengkapan Profil Organisasi
                 </span>
               </div>
               <span className="text-xs font-black text-emerald-700">
-                {completeness.score}% Selesai
+                {completeness.score}% Lengkap
               </span>
             </div>
+
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Tingkat kelengkapan data informasi publik perusahaan untuk membangun transparansi di hadapan mitra CSR. Berbeda dengan status verifikasi administratif yang memvalidasi keabsahan dokumen hukum legalitas (NIB & NPWP).
+            </p>
 
             <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
               <div
@@ -359,13 +660,24 @@ export function CompanyFullProfileView({
 
             {completeness.missing.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
-                <span className="text-slate-500 font-medium">Tingkatkan kredibilitas dengan melengkapi:</span>
+                <span className="text-slate-500 font-medium">Lengkapi atribut profil:</span>
                 {completeness.missing.slice(0, 3).map((item, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setIsEditModalOpen(true)}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-emerald-300 text-emerald-700 font-bold hover:bg-emerald-50 transition"
+                    onClick={() => {
+                      if (item.includes("Logo") || item.includes("sampul") || item.includes("Tagline")) {
+                        setEditCategory("branding");
+                      } else if (item.includes("ESG") || item.includes("CSR")) {
+                        setEditCategory("csr");
+                      } else if (item.includes("NIB") || item.includes("Laporan")) {
+                        setEditCategory("legal");
+                      } else {
+                        setEditCategory("info");
+                      }
+                      setIsEditingProfile(true);
+                    }}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-emerald-300 text-emerald-700 font-bold hover:bg-emerald-50 transition cursor-pointer"
                   >
                     <span>+ {item}</span>
                   </button>
@@ -378,11 +690,11 @@ export function CompanyFullProfileView({
 
       {/* 4 Live Impact Highlight Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Realisasi Dana CSR */}
+        {/* Metric 1: Total Realisasi Anggaran CSR (Distinct from initial allocated budget) */}
         <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Realisasi Dana CSR
+              Total Realisasi Anggaran CSR
             </span>
             <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
               <DollarSign className="w-4 h-4" />
@@ -390,10 +702,12 @@ export function CompanyFullProfileView({
           </div>
           <div>
             <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
-              {formatRupiah(metrics.totalDisbursedBudget)}
+              {formatRupiah(realMetrics.totalRealizedBudget)}
             </span>
-            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
-              Teralokasi dalam program aktif & selesai
+            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block truncate" title={realMetrics.totalAllocatedBudget > 0 ? `Alokasi Anggaran: ${formatRupiah(realMetrics.totalAllocatedBudget)}` : "Pengeluaran dana program terealisasi"}>
+              {realMetrics.totalAllocatedBudget > 0
+                ? `Alokasi: ${formatRupiah(realMetrics.totalAllocatedBudget)}`
+                : "Pengeluaran dana program terealisasi"}
             </span>
           </div>
         </div>
@@ -402,7 +716,7 @@ export function CompanyFullProfileView({
         <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Program CSR Selesai
+              Program Selesai
             </span>
             <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
               <Award className="w-4 h-4" />
@@ -410,19 +724,19 @@ export function CompanyFullProfileView({
           </div>
           <div>
             <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
-              {metrics.completedPrograms}
+              {realMetrics.completedPrograms}
             </span>
             <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
-              Dari total {metrics.totalPrograms} program terlaksana
+              Dari {realMetrics.totalPrograms} total program terkelola
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Mitra NGO Digandeng */}
+        {/* Metric 3: Mitra Berkolaborasi (Only actual collaborating partner organizations) */}
         <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Mitra NGO Digandeng
+              Mitra Berkolaborasi
             </span>
             <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
               <HeartHandshake className="w-4 h-4" />
@@ -430,100 +744,117 @@ export function CompanyFullProfileView({
           </div>
           <div>
             <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
-              {metrics.totalPartnersEngaged} Mitra
+              {realMetrics.totalPartnersEngaged} Mitra
             </span>
             <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
-              Yayasan & komunitas pelaksana
+              {realMetrics.totalPartnersEngaged > 0
+                ? "Organisasi mitra pelaksana resmi"
+                : "Belum ada kemitraan aktif"}
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Indeks Kepuasan Warga */}
+        {/* Metric 4: Penilaian Penerima Manfaat (With explicit empty state when no reviews exist) */}
         <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-400 mb-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Kepuasan Warga
+              Penilaian Penerima Manfaat
             </span>
             <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
             </div>
           </div>
           <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                {metrics.averageRating > 0 ? metrics.averageRating.toFixed(1) : "Baru"}
-              </span>
-              {metrics.averageRating > 0 && (
-                <span className="text-xs font-bold text-slate-400">/ 5.0</span>
-              )}
-            </div>
-            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
-              Berdasarkan {metrics.totalReviews} ulasan masyarakat
-            </span>
+            {realMetrics.totalReviews > 0 && realMetrics.averageRating > 0 ? (
+              <>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    {realMetrics.averageRating.toFixed(1)}
+                  </span>
+                  <span className="text-xs font-bold text-slate-400">/ 5.0</span>
+                </div>
+                <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                  Berdasarkan {realMetrics.totalReviews} ulasan masyarakat
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl sm:text-2xl font-black text-slate-400 tracking-tight block">
+                  —
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
+                  Belum ada data evaluasi penerima manfaat
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Profile Detail Tabs */}
       <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-        {/* Tab Headers */}
+        {/* Tab Headers: Exact 4 names requested */}
         <div className="flex items-center border-b border-slate-200 bg-slate-50/60 px-6 gap-2 sm:gap-4 overflow-x-auto">
+          {/* Tab 1: Profil & Informasi Perusahaan */}
           <button
             type="button"
             onClick={() => setActiveTab("about")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === "about"
                 ? "border-emerald-600 text-emerald-700 bg-white"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
-            <FileText className="w-4 h-4" />
-            <span>Tentang & Komitmen ESG</span>
+            <Building2 className="w-4 h-4" />
+            <span>Profil & Informasi Perusahaan</span>
           </button>
 
+          {/* Tab 2: Portofolio Program CSR */}
           <button
             type="button"
-            onClick={() => setActiveTab("opportunities")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
-              activeTab === "opportunities"
+            onClick={() => setActiveTab("programs")}
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
+              activeTab === "programs"
                 ? "border-emerald-600 text-emerald-700 bg-white"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Inisiatif CSR Aktif ({openOpportunities.length})</span>
+            <span>Portofolio Program CSR ({programList.length})</span>
           </button>
 
+          {/* Tab 3: Legalitas & Dokumen */}
           <button
             type="button"
             onClick={() => setActiveTab("legal")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === "legal"
                 ? "border-emerald-600 text-emerald-700 bg-white"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>Legalitas & Berkas</span>
+            <span>Legalitas & Dokumen</span>
           </button>
 
+          {/* Tab 4: Tim Pengelola CSR */}
           <button
             type="button"
             onClick={() => setActiveTab("leaders")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
+            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === "leaders"
                 ? "border-emerald-600 text-emerald-700 bg-white"
                 : "border-transparent text-slate-500 hover:text-slate-900"
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Tim & PIC Keberlanjutan ({csrLeaders.length})</span>
+            <span>Tim Pengelola CSR ({csrLeaders.length})</span>
           </button>
         </div>
 
         {/* Tab Body */}
         <div className="p-6 sm:p-10">
-          {/* TAB 1: TENTANG & KOMITMEN ESG */}
+          {/* TAB 1: PROFIL & INFORMASI PERUSAHAAN */}
           {activeTab === "about" && (
             <div className="space-y-8 animate-in fade-in duration-150">
               {/* Visi & Komitmen ESG */}
@@ -592,77 +923,179 @@ export function CompanyFullProfileView({
             </div>
           )}
 
-          {/* TAB 2: INISIATIF & PELUANG CSR AKTIF */}
-          {activeTab === "opportunities" && (
+          {/* TAB 2: PORTOFOLIO PROGRAM CSR (Filter & Dynamic Empty State) */}
+          {activeTab === "programs" && (
             <div className="space-y-6 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900">
-                    Peluang Kolaborasi yang Sedang Terbuka
+                    Portofolio Pelaksanaan Program CSR
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Mitra pelaksana / NGO dapat mengajukan proposal kemitraan langsung untuk program berikut.
+                    Daftar program CSR yang terencana, aktif berjalan, dan telah selesai, mencakup kontribusi pilar SDGs/ESG.
                   </p>
+                </div>
+
+                {/* Filter Controls: Status Program & Fokus Program (Setara Dimensi & Alignment) */}
+                <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                  {/* Status Program Filter */}
+                  <div className="relative flex-1 sm:w-48 sm:flex-initial">
+                    <select
+                      value={programStatusFilter}
+                      onChange={(e) => setProgramStatusFilter(e.target.value)}
+                      aria-label="Filter Status Program"
+                      className="w-full h-[38px] pl-3.5 pr-9 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="ALL">Semua Status</option>
+                      <option value="PLANNED">Persiapan</option>
+                      <option value="IN_PROGRESS">Sedang Berjalan</option>
+                      <option value="COMPLETED">Selesai</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+
+                  {/* Fokus Program Filter */}
+                  <div className="relative flex-1 sm:w-48 sm:flex-initial">
+                    <select
+                      value={programFocusFilter}
+                      onChange={(e) => setProgramFocusFilter(e.target.value)}
+                      aria-label="Filter Fokus Program"
+                      className="w-full h-[38px] pl-3.5 pr-9 text-xs font-semibold rounded-xl border border-slate-200 bg-white text-slate-700 shadow-2xs hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all appearance-none cursor-pointer truncate"
+                    >
+                      {focusOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
                 </div>
               </div>
 
-              {openOpportunities.length === 0 ? (
-                <div className="py-12 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50">
-                  <Layers className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-700">
-                    Belum ada inisiatif CSR yang sedang dibuka saat ini
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
-                    Perusahaan ini belum membuka peluang baru atau program sebelumnya sedang dalam tahap evaluasi.
-                  </p>
+              {/* Program Cards List / Loading State / Dynamic Empty State */}
+              {isLoadingPrograms ? (
+                <div className="py-14 text-center rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col items-center justify-center space-y-3">
+                  <div className="w-8 h-8 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin" />
+                  <p className="text-xs font-medium text-slate-500">Memuat data portofolio program CSR...</p>
+                </div>
+              ) : filteredPrograms.length === 0 ? (
+                /* Dynamic Empty State Container */
+                <div className="py-12 sm:py-14 px-6 text-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 space-y-3">
+                  <Layers className="w-9 h-9 text-slate-300 mx-auto" />
+                  <div className="space-y-1">
+                    <h4 className="text-base font-semibold text-[#181343]">
+                      {emptyStateContent.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                      {emptyStateContent.description}
+                    </p>
+                  </div>
+
+                  {/* Reset Filter Button: Only shown if at least one filter is active */}
+                  {isFilterActive && (
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-slate-50 hover:border-slate-300 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-[#181343]" />
+                        <span>Reset Filter</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {openOpportunities.map((opp: any) => {
-                    const focusConfig = FOCUS_AREA_CONFIG[opp.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
-                      label: opp.focusArea,
+                  {filteredPrograms.map((program: any) => {
+                    const focusConfig = FOCUS_AREA_CONFIG[program.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
+                      label: getFocusAreaLabel(program.focusArea),
                       variant: "slate" as const,
                     };
 
+                    const statusBadgeConfig = (() => {
+                      switch (program.status) {
+                        case "COMPLETED":
+                          return { label: "Selesai", bg: "bg-emerald-50 text-emerald-800 border-emerald-200" };
+                        case "IN_PROGRESS":
+                          return { label: "Sedang Berjalan", bg: "bg-blue-50 text-blue-800 border-blue-200" };
+                        case "PLANNED":
+                          return { label: "Persiapan", bg: "bg-amber-50 text-amber-800 border-amber-200" };
+                        case "ON_HOLD":
+                          return { label: "Ditunda", bg: "bg-slate-100 text-slate-700 border-slate-200" };
+                        default:
+                          return { label: program.status, bg: "bg-slate-100 text-slate-700 border-slate-200" };
+                      }
+                    })();
+
                     return (
                       <div
-                        key={opp.id}
+                        key={program.id}
                         className="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-emerald-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4"
                       >
-                        <div className="space-y-2.5">
-                          <div className="flex items-center justify-between gap-2">
+                        <div className="space-y-3">
+                          {/* Top Badges: Focus Area (SDGs/ESG) & Status */}
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
                             <Badge variant={focusConfig.variant} size="sm">
                               {focusConfig.label}
                             </Badge>
-                            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-                              {formatRupiah(opp.budget)}
+                            <span
+                              className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusBadgeConfig.bg}`}
+                            >
+                              {statusBadgeConfig.label}
                             </span>
                           </div>
 
-                          <h4 className="font-extrabold text-slate-900 text-sm leading-snug line-clamp-2">
-                            {opp.title}
+                          {/* Title */}
+                          <h4 className="font-extrabold text-slate-900 text-sm leading-snug">
+                            {program.title}
                           </h4>
 
-                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                            {opp.description}
-                          </p>
+                          {/* Description */}
+                          {program.description && (
+                            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                              {program.description}
+                            </p>
+                          )}
+
+                          {/* Partner name if collaborating */}
+                          {program.partnerName && (
+                            <div className="flex items-center gap-1.5 text-xs text-slate-600 font-medium bg-slate-50 p-2 rounded-xl">
+                              <HeartHandshake className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                              <span className="truncate">Mitra: <strong>{program.partnerName}</strong></span>
+                            </div>
+                          )}
+
+                          {/* Financial Realization vs Allocation */}
+                          <div className="p-2.5 rounded-xl bg-slate-50/70 border border-slate-100 space-y-1 text-xs">
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="text-slate-500 font-medium">Realisasi Anggaran:</span>
+                              <span className="font-bold text-emerald-700">
+                                {formatRupiah(program.spentBudget || 0)}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-[11px]">
+                              <span className="text-slate-400 font-medium">Alokasi Total:</span>
+                              <span className="font-semibold text-slate-700">
+                                {formatRupiah(program.budget)}
+                              </span>
+                            </div>
+                          </div>
                         </div>
 
+                        {/* Card Footer: Location & Beneficiaries */}
                         <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
                           <span className="flex items-center gap-1 text-[11px]">
                             <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                            {opp.city || opp.province || "Nasional"}
+                            {[program.targetCity, program.targetProvince].filter(Boolean).join(", ") || "Lokasi belum ditentukan"}
                           </span>
 
-                          {!isOwner && onApplyOpportunity && (
-                            <Button
-                              size="sm"
-                              variant="primary"
-                              onClick={() => onApplyOpportunity(opp)}
-                              className="text-xs font-bold py-1 px-3 bg-emerald-600 hover:bg-emerald-700"
-                            >
-                              Ajukan Proposal
-                            </Button>
+                          {(program.actualBeneficiaries || program.targetBeneficiaries) && (
+                            <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-600">
+                              <Users className="w-3.5 h-3.5 text-slate-400" />
+                              {program.actualBeneficiaries || program.targetBeneficiaries} Penerima
+                            </span>
                           )}
                         </div>
                       </div>
@@ -670,12 +1103,92 @@ export function CompanyFullProfileView({
                   })}
                 </div>
               )}
+
+              {/* Peluang Kolaborasi Terbuka (Hanya tampil pada profil publik bagi calon mitra / NGO, bukan pada portofolio internal perusahaan) */}
+              {!isOwner && openOpportunities.length > 0 && (
+                <div className="pt-8 border-t border-slate-100 space-y-4">
+                  <div>
+                    <h4 className="text-sm font-extrabold text-slate-900">
+                      Peluang Kolaborasi yang Sedang Dibuka ({openOpportunities.length})
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Inisiatif CSR terbuka yang dapat diajukan proposal oleh calon mitra pelaksana.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {openOpportunities.map((opp: any) => {
+                      const focusConfig = FOCUS_AREA_CONFIG[opp.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
+                        label: getFocusAreaLabel(opp.focusArea),
+                        variant: "slate" as const,
+                      };
+
+                      return (
+                        <div
+                          key={opp.id}
+                          className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-emerald-300 hover:shadow-xs transition-all flex flex-col justify-between space-y-4"
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <Badge variant={focusConfig.variant} size="sm">
+                                {focusConfig.label}
+                              </Badge>
+                              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                                {opp.budget && parseFloat(opp.budget) > 0 ? formatRupiah(opp.budget) : "Menyesuaikan Proposal"}
+                              </span>
+                            </div>
+
+                            <h5 className="font-extrabold text-slate-900 text-sm leading-snug">
+                              {opp.title}
+                            </h5>
+
+                            <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                              {opp.description}
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                            <span className="flex items-center gap-1 text-[11px]">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              {[opp.city, opp.province].filter(Boolean).join(", ") || "Lokasi belum ditentukan"}
+                            </span>
+
+                            {onApplyOpportunity && (
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                onClick={() => onApplyOpportunity(opp)}
+                                className="text-xs font-bold py-1 px-3 bg-emerald-600 hover:bg-emerald-700"
+                              >
+                                Ajukan Proposal
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {/* TAB 3: LEGALITAS & LAPORAN KEBERLANJUTAN */}
+          {/* TAB 3: LEGALITAS & DOKUMEN */}
           {activeTab === "legal" && (
             <div className="space-y-6 animate-in fade-in duration-150">
+              {/* Administrative Verification Banner */}
+              <div className={`p-5 rounded-2xl border flex items-start gap-3.5 ${adminVerification.badgeBg}`}>
+                <adminVerification.icon className={`w-5 h-5 shrink-0 mt-0.5 ${adminVerification.iconColor}`} />
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-sm">
+                    Status Verifikasi Administratif: {adminVerification.label}
+                  </h4>
+                  <p className="text-xs leading-relaxed opacity-90">
+                    {adminVerification.description}
+                  </p>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* NIB Card */}
                 <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
@@ -684,8 +1197,8 @@ export function CompanyFullProfileView({
                       <ShieldCheck className="w-4 h-4 text-emerald-600" />
                       Nomor Induk Berusaha (NIB OSS)
                     </span>
-                    <Badge variant="emerald" size="sm">
-                      Terdaftar
+                    <Badge variant={c.nibNumber ? "emerald" : "slate"} size="sm">
+                      {c.nibNumber ? "Terdaftar" : "Belum Ada"}
                     </Badge>
                   </div>
                   <span className="text-base font-extrabold text-slate-900 block font-mono">
@@ -703,8 +1216,8 @@ export function CompanyFullProfileView({
                       <FileText className="w-4 h-4 text-blue-600" />
                       NPWP Perusahaan
                     </span>
-                    <Badge variant="blue" size="sm">
-                      Wajib Pajak
+                    <Badge variant={c.npwpNumber ? "blue" : "slate"} size="sm">
+                      {c.npwpNumber ? "Wajib Pajak" : "Belum Ada"}
                     </Badge>
                   </div>
                   <span className="text-base font-extrabold text-slate-900 block font-mono">
@@ -737,7 +1250,7 @@ export function CompanyFullProfileView({
                     href={c.sustainabilityReportUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all shrink-0"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition-all shrink-0 cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
                     <span>Unduh Laporan (PDF)</span>
@@ -751,16 +1264,16 @@ export function CompanyFullProfileView({
             </div>
           )}
 
-          {/* TAB 4: TIM & PIC KEBERLANJUTAN */}
+          {/* TAB 4: TIM PENGELOLA CSR */}
           {activeTab === "leaders" && (
             <div className="space-y-6 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900">
-                    Tim Penggerak Keberlanjutan & PIC CSR
+                    Tim Pengelola & Penanggung Jawab CSR
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Penanggung jawab inisiatif kemitraan dan koordinasi teknis program CSR.
+                    Penanggung jawab inisiatif kemitraan dan koordinasi teknis program CSR perusahaan.
                   </p>
                 </div>
               </div>
@@ -769,12 +1282,12 @@ export function CompanyFullProfileView({
                 <div className="py-12 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50">
                   <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                   <p className="text-sm font-bold text-slate-700">
-                    Belum ada kontak PIC yang dicantumkan
+                    Belum ada kontak tim pengelola yang dicantumkan
                   </p>
                   <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
                     {isOwner
-                      ? "Tambahkan kontak person atau pimpinan CSR perusahaan Anda agar mitra dapat berkomunikasi secara langsung."
-                      : "Perusahaan belum mencantumkan PIC publik."}
+                      ? "Tambahkan kontak person atau pimpinan CSR perusahaan Anda agar mitra pelaksana dapat berkomunikasi secara langsung."
+                      : "Perusahaan belum mencantumkan PIC tim CSR publik."}
                   </p>
                 </div>
               ) : (
@@ -793,7 +1306,7 @@ export function CompanyFullProfileView({
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            leader.name.substring(0, 1).toUpperCase()
+                            leader.name?.substring(0, 1).toUpperCase() || "P"
                           )}
                         </div>
                         <div className="min-w-0">
@@ -831,15 +1344,7 @@ export function CompanyFullProfileView({
         </div>
       </div>
 
-      {/* Edit Modal (Owner Only) */}
-      {isOwner && (
-        <EditCompanyProfileModal
-          isOpen={isEditModalOpen}
-          company={currentCompany}
-          onClose={() => setIsEditModalOpen(false)}
-          onSuccess={handleSuccessUpdate}
-        />
-      )}
+
     </div>
   );
 }

@@ -208,9 +208,9 @@ export function ConfirmDisbursementModal({
               variant="primary"
               size="sm"
               disabled={isSubmitting}
-              className="bg-teal-600 hover:bg-teal-700 text-white gap-1.5"
+              leftIcon={<CheckCircle2 className="w-4 h-4 shrink-0" />}
+              className="bg-teal-600 hover:bg-teal-700 text-white"
             >
-              <CheckCircle2 className="w-4 h-4" />
               {isSubmitting ? "Mengonfirmasi..." : "Konfirmasi Dana Diterima"}
             </Button>
           </div>

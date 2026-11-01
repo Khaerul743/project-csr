@@ -104,4 +104,19 @@ export class InvitationController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async resend(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT"]);
+
+      const result = await this.invitationService.resendCompanyInvitation(
+        authUser.companyId,
+        id
+      );
+      return ApiResponse.success(result, "Undangan tim berhasil diperbarui dan dikirim ulang");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }
