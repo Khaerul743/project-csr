@@ -49,7 +49,30 @@ export class ProgramStageService {
     user: { companyId?: string | null; partnerId?: string | null }
   ): Promise<ProgramStageWithCount[]> {
     await this.verifyProgramAccess(programId, user);
-    return this.stageRepository.findByProgramId(programId);
+    let stages = await this.stageRepository.findByProgramId(programId);
+    if (stages.length === 0) {
+      try {
+        const extracted = await this.generateStagesFromProposal(programId, user);
+        if (extracted && extracted.stages && extracted.stages.length > 0) {
+          stages = await this.saveStages(programId, user, {
+            stages: extracted.stages.map((m, idx: number) => ({
+              orderIndex: m.orderIndex || idx + 1,
+              title: m.title,
+              description: m.description,
+              targetTimeline: m.targetTimeline,
+              expectedEvidence: m.expectedEvidence,
+              suggestedKpi: m.suggestedKpi,
+              status: "PENDING" as const,
+              source: "AI_GENERATED" as const,
+            })),
+            replaceExisting: false,
+          });
+        }
+      } catch (err) {
+        this.logger.warn(`Could not auto-seed proposal stages for program ${programId}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+    return stages;
   }
 
   async generateStagesFromProposal(

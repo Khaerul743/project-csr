@@ -4,7 +4,9 @@ import { collaborations } from "@/db/schema/collaborations";
 import { opportunities } from "@/db/schema/opportunities";
 import { companies } from "@/db/schema/companies";
 import { partners } from "@/db/schema/partners";
-import { eq, and, or, like, desc, count } from "drizzle-orm";
+import { programStages } from "@/db/schema/program-stages";
+import { programActivities } from "@/db/schema/program-activities";
+import { eq, and, or, like, desc, count, inArray } from "drizzle-orm";
 import {
   ProgramWithDetails,
   ProgramListQuery,
@@ -12,6 +14,91 @@ import {
 } from "./program.interface";
 
 export class ProgramRepository {
+  private async enrichWithActivityStats(
+    programsList: ProgramWithDetails[]
+  ): Promise<ProgramWithDetails[]> {
+    if (programsList.length === 0) return programsList;
+
+    const programIds = programsList.map((p) => p.id);
+
+    try {
+      const [allStages, allActivities] = await Promise.all([
+        db
+          .select()
+          .from(programStages)
+          .where(inArray(programStages.programId, programIds)),
+        db
+          .select()
+          .from(programActivities)
+          .where(inArray(programActivities.programId, programIds)),
+      ]);
+
+      return programsList.map((prog) => {
+        const stages = allStages
+          .filter((s) => s.programId === prog.id)
+          .sort((a, b) => a.orderIndex - b.orderIndex);
+
+        const activities = allActivities
+          .filter((a) => a.programId === prog.id)
+          .sort(
+            (a, b) =>
+              new Date(b.activityDate || b.createdAt).getTime() -
+              new Date(a.activityDate || a.createdAt).getTime()
+          );
+
+        const totalActivitiesCount = stages.length > 0 ? stages.length : activities.length;
+        const completedActivitiesCount =
+          stages.length > 0
+            ? stages.filter((s) => s.status === "COMPLETED").length
+            : activities.filter((a) => a.status === "VERIFIED").length;
+
+        const pendingVerificationCount = activities.filter(
+          (a) => a.status === "SUBMITTED"
+        ).length;
+
+        const pendingActivitiesCount = Math.max(
+          0,
+          totalActivitiesCount - completedActivitiesCount
+        );
+
+        const activityProgressPercent =
+          totalActivitiesCount > 0
+            ? Math.round((completedActivitiesCount / totalActivitiesCount) * 100)
+            : prog.status === "COMPLETED"
+            ? 100
+            : 0;
+
+        // Next activity & timeline
+        const nextStage = stages.find((s) => s.status !== "COMPLETED");
+        const nextActivityTitle = nextStage ? nextStage.title : null;
+        const nextActivityDate = nextStage?.targetTimeline || null;
+
+        // Latest report
+        const lastReport = activities[0] || null;
+        const lastReportStatus = lastReport ? lastReport.status : null;
+        const lastReportDate = lastReport
+          ? (lastReport.activityDate || lastReport.createdAt).toISOString()
+          : null;
+
+        return {
+          ...prog,
+          totalActivitiesCount,
+          completedActivitiesCount,
+          pendingActivitiesCount,
+          pendingVerificationCount,
+          activityProgressPercent,
+          nextActivityTitle,
+          nextActivityDate,
+          lastReportStatus,
+          lastReportDate,
+        };
+      });
+    } catch {
+      // Fallback silently if stages/activities table query encounters issue
+      return programsList;
+    }
+  }
+
   async findById(id: string): Promise<ProgramWithDetails | null> {
     const rows = await db
       .select({
@@ -41,7 +128,7 @@ export class ProgramRepository {
     if (!rows[0]) return null;
 
     const r = rows[0];
-    return {
+    const baseItem: ProgramWithDetails = {
       ...r.program,
       opportunityTitle: r.opportunityTitle,
       opportunityDescription: r.opportunityDescription,
@@ -57,6 +144,9 @@ export class ProgramRepository {
       partnerEmail: r.partnerEmail,
       partnerFocusArea: r.partnerFocusArea,
     };
+
+    const [enriched] = await this.enrichWithActivityStats([baseItem]);
+    return enriched || baseItem;
   }
 
   async findByCompanyId(
@@ -139,8 +229,10 @@ export class ProgramRepository {
       partnerFocusArea: r.partnerFocusArea,
     }));
 
+    const enriched = await this.enrichWithActivityStats(data);
+
     return {
-      data,
+      data: enriched,
       total: totalRes?.count ?? 0,
       page,
       limit,
@@ -227,8 +319,10 @@ export class ProgramRepository {
       partnerFocusArea: r.partnerFocusArea,
     }));
 
+    const enriched = await this.enrichWithActivityStats(data);
+
     return {
-      data,
+      data: enriched,
       total: totalRes?.count ?? 0,
       page,
       limit,

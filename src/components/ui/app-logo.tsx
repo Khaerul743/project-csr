@@ -42,7 +42,7 @@ export const AppLogo: React.FC<AppLogoProps> = ({
     <div className={`flex items-center gap-3 select-none ${className}`}>
       {/* Logo Icon Container */}
       <div
-        className={`relative ${cfg.box} rounded-xl p-0.5 bg-white shadow-2xs ring-1 ring-slate-900/5 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${iconClassName}`}
+        className={`relative ${cfg.box} flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105 ${iconClassName}`}
       >
         <Image
           src="/LOGO SIPENA.png"

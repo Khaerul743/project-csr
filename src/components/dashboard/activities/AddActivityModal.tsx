@@ -60,8 +60,20 @@ export function AddActivityModal({
   React.useEffect(() => {
     if (defaultStageId) {
       setStageId(defaultStageId);
+      const st = stages.find((s) => s.id === defaultStageId);
+      if (st && !title) {
+        setTitle(st.title);
+      }
     }
-  }, [defaultStageId]);
+  }, [defaultStageId, stages]);
+
+  const handleStageChange = (newStageId: string) => {
+    setStageId(newStageId);
+    const st = stages.find((s) => s.id === newStageId);
+    if (st && (!title || stages.some((s) => s.title === title))) {
+      setTitle(st.title);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -232,7 +244,7 @@ export function AddActivityModal({
               </div>
               <select
                 value={stageId}
-                onChange={(e) => setStageId(e.target.value)}
+                onChange={(e) => handleStageChange(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
               >
                 <option value="">-- Tanpa Tahapan Tertentu (Kegiatan Tambahan) --</option>

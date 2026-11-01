@@ -263,9 +263,9 @@ export function ProgramFinancesTab({
               variant="primary"
               size="sm"
               onClick={() => setIsDisburseModalOpen(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs shadow-xs"
+              leftIcon={<Plus className="w-3.5 h-3.5 shrink-0" />}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs shadow-xs"
             >
-              <Plus className="w-3.5 h-3.5" />
               Salurkan Dana Termin Baru
             </Button>
           )}
@@ -276,9 +276,9 @@ export function ProgramFinancesTab({
               variant="primary"
               size="sm"
               onClick={() => setIsAddExpenseModalOpen(true)}
-              className="bg-teal-600 hover:bg-teal-700 text-white gap-1.5 text-xs shadow-xs"
+              leftIcon={<Plus className="w-3.5 h-3.5 shrink-0" />}
+              className="bg-teal-600 hover:bg-teal-700 text-white text-xs shadow-xs"
             >
-              <Plus className="w-3.5 h-3.5" />
               Catat Pengeluaran & Nota
             </Button>
           )}
@@ -311,9 +311,10 @@ export function ProgramFinancesTab({
                   variant="primary"
                   size="sm"
                   onClick={() => setIsDisburseModalOpen(true)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 text-xs"
+                  leftIcon={<Plus className="w-3.5 h-3.5 shrink-0" />}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Salurkan Termin 1
+                  Salurkan Termin 1
                 </Button>
               )}
             </div>
@@ -414,9 +415,9 @@ export function ProgramFinancesTab({
                           variant="primary"
                           size="sm"
                           onClick={() => setConfirmDisbursementItem(d)}
-                          className="bg-teal-600 hover:bg-teal-700 text-white text-xs gap-1.5 py-1 h-8"
+                          leftIcon={<CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
+                          className="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 h-8"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
                           Konfirmasi Terima Dana
                         </Button>
                       )}
@@ -454,9 +455,10 @@ export function ProgramFinancesTab({
                   variant="primary"
                   size="sm"
                   onClick={() => setIsAddExpenseModalOpen(true)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white gap-1.5 text-xs"
+                  leftIcon={<Plus className="w-3.5 h-3.5 shrink-0" />}
+                  className="bg-teal-600 hover:bg-teal-700 text-white text-xs"
                 >
-                  <Plus className="w-3.5 h-3.5" /> Catat Pengeluaran Pertama
+                  Catat Pengeluaran Pertama
                 </Button>
               )}
             </div>
@@ -558,9 +560,9 @@ export function ProgramFinancesTab({
                           variant="primary"
                           size="sm"
                           onClick={() => setVerifyExpenseItem(exp)}
-                          className="bg-teal-600 hover:bg-teal-700 text-white text-xs gap-1.5 py-1 h-8"
+                          leftIcon={<ShieldCheck className="w-3.5 h-3.5 shrink-0" />}
+                          className="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 h-8"
                         >
-                          <ShieldCheck className="w-3.5 h-3.5" />
                           Verifikasi Nota
                         </Button>
                       )}

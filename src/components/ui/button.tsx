@@ -55,9 +55,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
         {...props}
       >
-        {isLoading && <Loader2 className="w-4 h-4 animate-spin text-current" />}
+        {isLoading && <Loader2 className="w-4 h-4 animate-spin text-current shrink-0" />}
         {!isLoading && leftIcon}
-        <span>{children}</span>
+        {children}
         {!isLoading && rightIcon}
       </button>
     );

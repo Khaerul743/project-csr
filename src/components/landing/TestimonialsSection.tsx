@@ -34,16 +34,16 @@ const TESTIMONIALS: TestimonialItem[] = [
   {
     id: "corp",
     name: "Dra. Maya Puspitasari, M.Si",
-    role: "VP Sustainability & Corporate Governance",
+    role: "VP Sustainability & Corporate Affairs",
     organization: "PT Mandiri Mineral Nusantara Tbk",
     category: "perusahaan",
     categoryLabel: "Kemitraan Korporasi",
     quote:
-      "Dengan SIPENA, kami tidak lagi menerima laporan seremonial tanpa bukti valid. Mekanisme verifikasi GPS dan nota realisasi per milestone membuat komite audit internal serta investor yakin bahwa setiap rupiah anggaran CSR bermuara pada dampak terukur.",
-    highlightMetric: "100%",
-    metricLabel: "Lolos Uji Kepatuhan ESG",
+      "SIPENA membantu kami mengelola program CSR secara lebih terarah. Pencatatan kegiatan dan pelaporan realisasi yang terpusat memudahkan pemantauan mitra serta evaluasi capaian program bersama.",
+    highlightMetric: "Terarah",
+    metricLabel: "Penyelarasan prioritas dan pelaporan kemitraan CSR",
     initials: "MP",
-    verifiedLabel: "Pemberi Dana Terverifikasi",
+    verifiedLabel: "Mitra Korporasi",
   },
   {
     id: "ngo",
@@ -53,11 +53,11 @@ const TESTIMONIALS: TestimonialItem[] = [
     category: "ngo",
     categoryLabel: "Mitra Pelaksana Lapangan",
     quote:
-      "Fitur ekstraksi proposal berbasis AI memangkas birokrasi verifikasi hingga 70%. Pencairan bertahap berbasis bukti foto geolokasi memberi kepastian bagi tim lapangan kami tanpa kekhawatiran administrasi yang berbelit.",
-    highlightMetric: "3 Hari",
-    metricLabel: "Durasi Persetujuan Proposal (sebelumnya 3 minggu)",
+      "Pengelolaan proposal dan koordinasi kerja sama menjadi jauh lebih tertata. Kami dapat memperbarui progres kegiatan lapangan dan melaporkan penggunaan anggaran secara berkala dengan jelas.",
+    highlightMetric: "Kolaboratif",
+    metricLabel: "Pembaruan progres lapangan dan penggunaan anggaran",
     initials: "HW",
-    verifiedLabel: "Yayasan Terakreditasi",
+    verifiedLabel: "Lembaga Pelaksana",
   },
   {
     id: "community",
@@ -67,11 +67,11 @@ const TESTIMONIALS: TestimonialItem[] = [
     category: "komunitas",
     categoryLabel: "Penerima Manfaat",
     quote:
-      "Warga desa kami bisa langsung memberikan umpan balik lewat pemindaian QR code di lokasi pelatihan. Pendampingan sarana pasca-panen berjalan nyata dan kami merasa benar-benar didengar, bukan sekadar objek seremonial.",
-    highlightMetric: "96.4%",
-    metricLabel: "Indeks Kepuasan Penerima Manfaat",
+      "Masyarakat dapat langsung menyampaikan penilaian dan umpan balik kegiatan melalui pemindaian QR Code di lokasi. Prosesnya mudah tanpa perlu registrasi, sehingga suara kami didengar dengan baik.",
+    highlightMetric: "Responsif",
+    metricLabel: "Umpan balik langsung via tautan & QR Code",
     initials: "SR",
-    verifiedLabel: "Masyarakat Tervalidasi",
+    verifiedLabel: "Penerima Manfaat",
   },
 ];
 
@@ -109,7 +109,7 @@ export function TestimonialsSection() {
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 Dampak Nyata yang Dirasakan Oleh{" "}
-                <span className="text-emerald-600">Seluruh Ekosistem.</span>
+                <span className="text-emerald-600">Seluruh Ekosistem</span>
               </h2>
               <p className="mt-3 text-base text-[#26224C]/80 leading-relaxed">
                 Dengarkan langsung pengalaman dari korporasi donor, yayasan pelaksana di garis depan, serta komunitas penerima manfaat yang terhubung secara transparan.
@@ -123,11 +123,10 @@ export function TestimonialsSection() {
                   key={t.id}
                   type="button"
                   onClick={() => setActiveIndex(idx)}
-                  className={`px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-                    activeIndex === idx
+                  className={`px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${activeIndex === idx
                       ? "bg-[#181343] text-white shadow-sm"
                       : "text-[#26224C]/70 hover:text-[#181343] hover:bg-white/60"
-                  }`}
+                    }`}
                 >
                   {t.categoryLabel}
                 </button>
@@ -143,111 +142,111 @@ export function TestimonialsSection() {
               <Quote className="w-28 h-28 sm:w-36 sm:h-36" />
             </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative">
-            {/* Left Column: Quote & Story */}
-            <div className="lg:col-span-8 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-[#E5E7EB] text-xs font-semibold text-[#181343]">
-                <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                <span>{active.categoryLabel}</span>
-                <span className="text-slate-300">•</span>
-                <span className="text-slate-600 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
-                  {active.verifiedLabel}
-                </span>
-              </div>
-
-              <blockquote className="text-lg sm:text-2xl font-medium text-[#181343] leading-relaxed italic">
-                &ldquo;{active.quote}&rdquo;
-              </blockquote>
-
-              <div className="pt-4 border-t border-[#E5E7EB] flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[#181343] text-white font-bold flex items-center justify-center text-sm shadow-sm ring-2 ring-emerald-500/30">
-                    {active.initials}
-                  </div>
-                  <div>
-                    <h4
-                      className="font-bold text-[#181343] text-base"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      {active.name}
-                    </h4>
-                    <p className="text-xs text-[#26224C]/70">
-                      {active.role} &mdash;{" "}
-                      <span className="font-semibold text-[#181343]">
-                        {active.organization}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Pagination Controls */}
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveIndex(
-                        (prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length
-                      )
-                    }
-                    className="p-2 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
-                    aria-label="Sebelumnya"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <span className="text-xs font-semibold text-[#26224C]/60 px-2">
-                    {activeIndex + 1} / {TESTIMONIALS.length}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center relative">
+              {/* Left Column: Quote & Story */}
+              <div className="lg:col-span-8 space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white border border-[#E5E7EB] text-xs font-semibold text-[#181343]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                  <span>{active.categoryLabel}</span>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-600 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
+                    {active.verifiedLabel}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveIndex((prev) => (prev + 1) % TESTIMONIALS.length)
-                    }
-                    className="p-2 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
-                    aria-label="Selanjutnya"
+                </div>
+
+                <blockquote className="text-lg sm:text-2xl font-medium text-[#181343] leading-relaxed italic min-h-[5.5rem] sm:min-h-[7rem] lg:min-h-[8rem] flex items-center">
+                  &ldquo;{active.quote}&rdquo;
+                </blockquote>
+
+                <div className="pt-4 border-t border-[#E5E7EB] flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#181343] text-white font-bold flex items-center justify-center text-sm shadow-sm ring-2 ring-emerald-500/30">
+                      {active.initials}
+                    </div>
+                    <div>
+                      <h4
+                        className="font-bold text-[#181343] text-base"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        {active.name}
+                      </h4>
+                      <p className="text-xs text-[#26224C]/70">
+                        {active.role} &mdash;{" "}
+                        <span className="font-semibold text-[#181343]">
+                          {active.organization}
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Pagination Controls */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveIndex(
+                          (prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length
+                        )
+                      }
+                      className="p-2 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+                      aria-label="Sebelumnya"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs font-semibold text-[#26224C]/60 px-2">
+                      {activeIndex + 1} / {TESTIMONIALS.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setActiveIndex((prev) => (prev + 1) % TESTIMONIALS.length)
+                      }
+                      className="p-2 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+                      aria-label="Selanjutnya"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Key Quantitative Proof Card */}
+              <div className="lg:col-span-4 bg-white rounded-2xl p-6 sm:p-7 border border-[#E5E7EB] shadow-xs flex flex-col justify-between h-full">
+                <div>
+                  <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>Fokus Pendekatan (Simulasi)</span>
+                  </div>
+                  <div
+                    className="text-3xl sm:text-4xl font-extrabold text-[#181343] tracking-tight mb-2"
+                    style={{ fontFamily: "var(--font-display)" }}
                   >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                    {active.highlightMetric}
+                  </div>
+                  <p className="text-xs text-[#26224C]/80 leading-relaxed font-medium">
+                    {active.metricLabel}
+                  </p>
                 </div>
-              </div>
-            </div>
 
-            {/* Right Column: Key Quantitative Proof Card */}
-            <div className="lg:col-span-4 bg-white rounded-2xl p-6 border border-[#E5E7EB] shadow-xs flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>Kuantifikasi Manfaat</span>
-                </div>
-                <div
-                  className="text-4xl sm:text-5xl font-extrabold text-[#181343] tracking-tight mb-2"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {active.highlightMetric}
-                </div>
-                <p className="text-xs text-[#26224C]/80 leading-relaxed font-medium">
-                  {active.metricLabel}
-                </p>
-              </div>
-
-              <div className="mt-6 pt-5 border-t border-[#F4F4F6] space-y-2.5">
-                <div className="flex items-center justify-between text-xs text-[#26224C]/70">
-                  <span>Integritas Laporan</span>
-                  <span className="font-semibold text-emerald-700">Tervalidasi Digital</span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-[#26224C]/70">
-                  <span>Kesesuaian SDGs</span>
-                  <span className="font-semibold text-[#181343]">ISO 26000 & POJK 51</span>
-                </div>
-                <div className="flex items-center justify-between text-xs text-[#26224C]/70">
-                  <span>Transparansi Realisasi</span>
-                  <span className="font-semibold text-[#181343]">Real-Time GPS</span>
+                <div className="mt-6 pt-5 border-t border-[#F4F4F6] space-y-2.5">
+                  <div className="flex items-center justify-between text-xs text-[#26224C]/70">
+                    <span>Dokumentasi Program</span>
+                    <span className="font-semibold text-emerald-700">Terpusat</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-[#26224C]/70">
+                    <span>Pemetaan SDGs/ESG</span>
+                    <span className="font-semibold text-[#181343]">Sesuai Program</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-[#26224C]/70">
+                    <span>Monitoring Pelaksanaan</span>
+                    <span className="font-semibold text-[#181343]">Progres & Laporan</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </ScrollReveal>
+        </ScrollReveal>
 
         {/* 3 Secondary Snapshot Cards Below */}
         <StaggerContainer
@@ -259,11 +258,10 @@ export function TestimonialsSection() {
             <div
               key={t.id}
               onClick={() => setActiveIndex(idx)}
-              className={`rounded-2xl p-6 transition-all duration-200 cursor-pointer border h-full ${
-                activeIndex === idx
+              className={`rounded-2xl p-6 transition-all duration-200 cursor-pointer border h-full ${activeIndex === idx
                   ? "bg-white border-[#181343] shadow-md ring-1 ring-[#181343]"
                   : "bg-[#F9F9FB] border-[#E5E7EB] hover:bg-white hover:border-[#C8C5D0]"
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold px-2 py-0.5 rounded bg-[#F4F4F6] text-[#181343]">

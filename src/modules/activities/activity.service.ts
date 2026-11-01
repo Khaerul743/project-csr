@@ -82,6 +82,7 @@ export class ActivityService {
 
     const created = await this.activityRepository.create({
       programId,
+      stageId: input.stageId || null,
       submittedBy: authUser.sub,
       title: input.title.trim(),
       description: input.description.trim(),
@@ -133,12 +134,20 @@ export class ActivityService {
       throw new ForBiddenError("Hanya perusahaan sponsor yang dapat memverifikasi laporan aktivitas");
     }
 
-    return this.activityRepository.update(activityId, {
-      status: input.status,
-      companyFeedback: input.companyFeedback?.trim() || null,
-      verifiedBy: authUser.sub,
-      verifiedAt: new Date(),
-    });
+    const updateData: Partial<ProgramActivity> = {};
+    if (input.status) {
+      updateData.status = input.status;
+      updateData.verifiedBy = authUser.sub;
+      updateData.verifiedAt = new Date();
+    }
+    if (input.companyFeedback !== undefined) {
+      updateData.companyFeedback = input.companyFeedback?.trim() || null;
+    }
+    if (input.stageId !== undefined) {
+      updateData.stageId = input.stageId || null;
+    }
+
+    return this.activityRepository.update(activityId, updateData);
   }
 
   async deleteActivity(
@@ -155,12 +164,9 @@ export class ActivityService {
       throw new NotFoundError("Program pelaksanaan tidak ditemukan");
     }
 
+    // Only submitter or assigned Partner can delete
     if (authUser.role !== "PARTNER_ADMIN" || authUser.partnerId !== program.partnerId) {
-      throw new ForBiddenError("Anda tidak memiliki hak untuk menghapus aktivitas ini");
-    }
-
-    if (activity.status === "VERIFIED") {
-      throw new BadRequestError("Aktivitas yang telah diverifikasi oleh perusahaan tidak dapat dihapus");
+      throw new ForBiddenError("Hanya mitra pelaksana yang dapat menghapus laporan aktivitas");
     }
 
     await this.activityRepository.delete(activityId);

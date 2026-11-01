@@ -159,9 +159,9 @@ export function BeneficiaryReviewsTab({
             <Button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
-              className="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold text-xs py-5 px-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
+              leftIcon={<QrCode className="w-4 h-4 shrink-0" />}
+              className="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold text-xs py-3 px-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all active:scale-95"
             >
-              <QrCode className="w-4 h-4" />
               Bagikan Survei & QR
             </Button>
             <p className="text-[11px] text-slate-400 mt-2 text-center md:text-right">
@@ -229,9 +229,9 @@ export function BeneficiaryReviewsTab({
           <Button
             size="sm"
             onClick={() => setIsShareModalOpen(true)}
+            leftIcon={<QrCode className="w-3.5 h-3.5 shrink-0" />}
             className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold"
           >
-            <QrCode className="w-3.5 h-3.5 mr-1.5" />
             Buka QR Code Survei
           </Button>
         </div>

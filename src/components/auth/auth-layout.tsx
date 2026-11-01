@@ -60,19 +60,13 @@ export function AuthLayout({
                 href="/"
                 className="inline-flex flex-col items-center gap-3 group focus:outline-hidden select-none"
               >
-                <div
-                  className="relative w-[56px] h-[56px] rounded-2xl overflow-hidden flex items-center justify-center shrink-0 bg-white border border-[#E8E8EA] transition-all duration-300 group-hover:scale-[1.04] group-hover:shadow-md"
-                  style={{
-                    boxShadow:
-                      "0 1px 3px rgba(24,19,67,0.06), 0 2px 8px rgba(24,19,67,0.04)",
-                  }}
-                >
+                <div className="relative w-[56px] h-[56px] flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105">
                   <Image
                     src="/LOGO SIPENA.png"
                     alt="Logo SIPENA"
-                    width={48}
-                    height={48}
-                    className="w-[42px] h-[42px] object-contain"
+                    width={56}
+                    height={56}
+                    className="w-full h-full object-contain"
                     priority
                   />
                 </div>

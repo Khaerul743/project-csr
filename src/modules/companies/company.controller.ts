@@ -72,4 +72,22 @@ export class CompanyController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async updateMember(request: Request, memberId: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT"]);
+
+      const body = await request.json();
+      const updated = await this.companyService.updateMember(
+        authUser.sub,
+        authUser.companyId,
+        memberId,
+        body
+      );
+      return ApiResponse.success(updated, "Akses anggota tim berhasil diperbarui");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }

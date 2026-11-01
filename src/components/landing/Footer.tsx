@@ -50,13 +50,13 @@ export function LandingFooter() {
           {/* Brand Column (Col 1-5) */}
           <div className="lg:col-span-5 space-y-5">
             <Link href="#beranda" onClick={(e) => scrollToSection(e, "#beranda")} className="inline-flex items-center gap-3">
-              <div className="relative w-11 h-11 rounded-xl bg-white p-1.5 shadow-md shrink-0 flex items-center justify-center">
+              <div className="relative w-11 h-11 shrink-0 flex items-center justify-center transition-transform duration-200 hover:scale-105">
                 <Image
                   src="/LOGO SIPENA.png"
                   alt="Logo SIPENA"
-                  width={38}
-                  height={38}
-                  className="object-contain"
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-contain"
                 />
               </div>
               <div>
@@ -67,7 +67,7 @@ export function LandingFooter() {
                   SIPENA
                 </span>
                 <span className="text-[11px] font-semibold text-emerald-400 tracking-wide block mt-1">
-                  Mencatat Aksi, Mengukur Dampak
+                  Petakan Kebutuhan,  Pantau Perubahan
                 </span>
               </div>
             </Link>
@@ -80,7 +80,7 @@ export function LandingFooter() {
             <div className="pt-2 flex flex-wrap items-center gap-2">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] text-slate-300 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>POJK 51 Selaras</span>
+                <span>Prioritas Kebutuhan</span>
               </div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] text-slate-300 font-medium">
                 <Globe2 className="w-3.5 h-3.5 text-blue-400" />
@@ -88,7 +88,7 @@ export function LandingFooter() {
               </div>
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] text-slate-300 font-medium">
                 <Award className="w-3.5 h-3.5 text-amber-400" />
-                <span>ISO 26000 CSR</span>
+                <span>Evaluasi Dampak CSR</span>
               </div>
             </div>
           </div>

@@ -130,6 +130,15 @@ export interface PartnerCollaborationItem {
   partnerCity?: string | null;
   partnerEmail?: string | null;
   partnerFocusArea?: string | null;
+  totalActivitiesCount?: number;
+  completedActivitiesCount?: number;
+  pendingActivitiesCount?: number;
+  pendingVerificationCount?: number;
+  activityProgressPercent?: number;
+  nextActivityTitle?: string | null;
+  nextActivityDate?: string | null;
+  lastReportStatus?: string | null;
+  lastReportDate?: string | null;
 }
 
 export interface PartnerProgramItem {
@@ -165,4 +174,13 @@ export interface PartnerProgramItem {
   partnerCity?: string | null;
   partnerEmail?: string | null;
   partnerFocusArea?: string | null;
+  totalActivitiesCount?: number;
+  completedActivitiesCount?: number;
+  pendingActivitiesCount?: number;
+  pendingVerificationCount?: number;
+  activityProgressPercent?: number;
+  nextActivityTitle?: string | null;
+  nextActivityDate?: string | null;
+  lastReportStatus?: string | null;
+  lastReportDate?: string | null;
 }

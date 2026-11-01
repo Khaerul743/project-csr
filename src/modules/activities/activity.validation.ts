@@ -13,7 +13,8 @@ export const createActivitySchema = z.object({
 });
 
 export const reviewActivitySchema = z.object({
-  status: z.enum(["VERIFIED", "REVISION_REQUESTED"]),
+  status: z.enum(["VERIFIED", "REVISION_REQUESTED"]).optional(),
+  stageId: z.string().optional().nullable(),
   companyFeedback: z.string().max(2000, "Catatan feedback maksimal 2000 karakter").optional().nullable(),
 });
 

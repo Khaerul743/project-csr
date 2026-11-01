@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Calendar,
   MapPin,
@@ -14,15 +14,20 @@ import {
   AlertCircle,
   MessageSquare,
   ShieldCheck,
-  Image as ImageIcon,
   Camera,
   Activity,
   Maximize2,
   Sparkles,
   Layers,
-  ChevronRight,
   Clock,
   Filter,
+  ChevronDown,
+  ChevronUp,
+  History,
+  Check,
+  Eye,
+  X,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,18 +42,26 @@ import { AddActivityModal } from "./AddActivityModal";
 import { VerifyActivityModal } from "./VerifyActivityModal";
 import { PhotoLightboxModal } from "./PhotoLightboxModal";
 import { AiMilestonesModal } from "./AiMilestonesModal";
+import { Modal } from "@/components/ui/modal";
 
 interface ActivityTimelineProps {
   programId: string;
   programTitle: string;
   role: "COMPANY" | "PARTNER";
+  isManagement?: boolean;
   onActivityChanged?: () => void;
+}
+
+interface GroupedActivityItem {
+  primary: ProgramActivityItem;
+  history: ProgramActivityItem[];
 }
 
 export function ActivityTimeline({
   programId,
   programTitle,
   role,
+  isManagement = false,
   onActivityChanged,
 }: ActivityTimelineProps) {
   const [activities, setActivities] = useState<ProgramActivityItem[]>([]);
@@ -59,6 +72,14 @@ export function ActivityTimeline({
   const [isLoadingStages, setIsLoadingStages] = useState(true);
   const [selectedStageFilter, setSelectedStageFilter] = useState<string | null>(null);
   const [activeStageForAdd, setActiveStageForAdd] = useState<string | undefined>(undefined);
+
+  // Expandable description state for log cards
+  const [expandedActivityIds, setExpandedActivityIds] = useState<Set<string>>(new Set());
+  const [expandedAuditTrailIds, setExpandedAuditTrailIds] = useState<Set<string>>(new Set());
+
+  // Detail Modal State
+  const [selectedActivityForDetail, setSelectedActivityForDetail] =
+    useState<ProgramActivityItem | null>(null);
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -71,6 +92,24 @@ export function ActivityTimeline({
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxTitle, setLightboxTitle] = useState("");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+  const toggleExpand = (id: string) => {
+    setExpandedActivityIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAuditTrail = (id: string) => {
+    setExpandedAuditTrailIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const fetchActivities = async () => {
     setIsLoading(true);
@@ -153,6 +192,7 @@ export function ActivityTimeline({
 
       if (res.ok) {
         fetchStages();
+        if (onActivityChanged) onActivityChanged();
       }
     } catch {
       // silent fallback
@@ -205,532 +245,819 @@ export function ActivityTimeline({
   const progressPercent =
     stages.length > 0 ? Math.round((completedStagesCount / stages.length) * 100) : 0;
 
-  const filteredActivities = selectedStageFilter
-    ? selectedStageFilter === "UNASSIGNED"
-      ? activities.filter((act) => !act.stageId)
-      : activities.filter((act) => act.stageId === selectedStageFilter)
-    : activities;
+  // Hitung jumlah aktivitas umum / belum terhubung ke stage
+  const unassignedActivitiesCount = useMemo(() => {
+    return activities.filter((act) => !act.stageId).length;
+  }, [activities]);
+
+  // Filter aktivitas berdasarkan stage terpilih
+  const filteredActivities = useMemo(() => {
+    if (!selectedStageFilter) return activities;
+    if (selectedStageFilter === "UNASSIGNED") {
+      return activities.filter((act) => !act.stageId);
+    }
+    return activities.filter((act) => act.stageId === selectedStageFilter);
+  }, [activities, selectedStageFilter]);
+
+  // Deduplikasi & Pengelompokan Riwayat Pengajuan (Requirement 7)
+  // Menampilkan 1 card utama dengan status terkini dan melampirkan riwayat pengajuan/audit trail
+  const groupedActivities: GroupedActivityItem[] = useMemo(() => {
+    const groups: { [key: string]: ProgramActivityItem[] } = {};
+
+    filteredActivities.forEach((act) => {
+      // Normalisasi kunci kesamaan: judul yang mirip/sama dan tanggal yang sama
+      const dateKey = act.activityDate ? act.activityDate.substring(0, 10) : "nodate";
+      const normTitle = act.title.trim().toLowerCase().replace(/\s+/g, " ");
+      const groupKey = `${normTitle}_${dateKey}`;
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(act);
+    });
+
+    return Object.values(groups).map((list) => {
+      // Urutkan: dahulukan VERIFIED, lalu created_at terbaru
+      const sorted = [...list].sort((a, b) => {
+        if (a.status === "VERIFIED" && b.status !== "VERIFIED") return -1;
+        if (b.status === "VERIFIED" && a.status !== "VERIFIED") return 1;
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+
+      return {
+        primary: sorted[0],
+        history: sorted.slice(1),
+      };
+    });
+  }, [filteredActivities]);
+
+  const selectedStage = stages.find((s) => s.id === selectedStageFilter);
 
   return (
     <div className="space-y-6">
       {/* ========================================================================= */}
-      {/* 1. SEKSI TAHAPAN & MILESTONE TERSTRUKTUR DENGAN AI                        */}
+      {/* SPLIT-VIEW: TIMELINE TAHAPAN (35%) + JURNAL & LOG BUKTI LAPANGAN (65%)     */}
       {/* ========================================================================= */}
-      {isLoadingStages ? (
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-400 flex items-center justify-center gap-2">
-          <Activity className="w-4 h-4 animate-spin text-teal-600" />
-          Memuat tahapan pelaksanaan kegiatan...
-        </div>
-      ) : stages.length === 0 ? (
-        /* Standout Callout Banner when no stages exist yet */
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-teal-900 via-slate-900 to-indigo-950 p-6 sm:p-8 text-white shadow-xl border border-teal-500/20">
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-xl">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-300 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5" />
-                LangChain AI Proposal Extractor (gpt-4o-mini)
-              </div>
-              <h3 className="text-lg sm:text-xl font-extrabold tracking-tight text-white">
-                Strukturkan Rencana Lapangan dari Proposal Mitra
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                Belum ada tahapan terstruktur. Gunakan AI untuk mengekstrak metodologi & linimasa proposal menjadi tahapan kegiatan berurutan lengkap dengan rekomendasi bukti foto yang harus dikumpulkan mitra.
-              </p>
-            </div>
-
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => setIsAiModalOpen(true)}
-              leftIcon={<Sparkles className="w-4 h-4" />}
-              className="bg-linear-to-r from-teal-500 to-indigo-600 hover:from-teal-600 hover:to-indigo-700 text-white font-bold text-xs sm:text-sm shadow-lg hover:shadow-xl transition-all shrink-0"
-            >
-              Generate Tahapan dengan AI
-            </Button>
-          </div>
-
-          {/* Decorative background glow */}
-          <div className="absolute -top-12 -right-12 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        </div>
-      ) : (
-        /* Structured Stages Milestones Tracker Bar */
-        <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs space-y-5">
-          {/* Tracker Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-            <div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* ========================================================================= */}
+        {/* KOLOM KIRI (35% -> 5 Cols Desktop): TIMELINE TAHAPAN PROPOSAL             */}
+        {/* ========================================================================= */}
+        <div className="lg:col-span-5 bg-white p-5 sm:p-6 rounded-3xl border border-[#E8E8EA] shadow-2xs space-y-4">
+          {/* Header Timeline */}
+          <div className="space-y-2 pb-3 border-b border-[#F4F4F6]">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center font-bold">
-                  <Layers className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-[#181343] text-white flex items-center justify-center shrink-0">
+                  <Layers className="w-4 h-4 text-emerald-400" />
                 </div>
-                <h4 className="text-sm font-extrabold text-slate-900">
-                  Tahapan & Milestone Pelaksanaan Lapangan
+                <h4 className="text-sm font-bold text-[#181343]">
+                  Tahapan Pelaksanaan
                 </h4>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">
-                  {completedStagesCount} dari {stages.length} Selesai ({progressPercent}%)
-                </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1 pl-9">
-                Tahapan terstruktur diekstrak dari rencana kerja proposal untuk memastikan bukti kegiatan terkumpul lengkap.
-              </p>
-            </div>
 
-            <div className="flex items-center gap-2 self-start sm:self-auto pl-9 sm:pl-0">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsAiModalOpen(true)}
                 leftIcon={<Sparkles className="w-3.5 h-3.5 text-teal-600" />}
-                className="text-xs border-slate-200 hover:bg-slate-50 font-medium"
+                className="text-[11px] h-7 px-2.5 rounded-lg border-slate-200 text-slate-700"
               >
-                Kelola / Ekstrak AI
+                Kelola AI
               </Button>
             </div>
-          </div>
 
-          {/* Progress Bar */}
-          <div className="space-y-1.5">
-            <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div
-                className="h-full bg-linear-to-r from-teal-500 via-teal-600 to-indigo-600 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
+            <p className="text-xs text-[#787680]">
+              Tahapan bersumber dari proposal yang disetujui sebagai acuan bukti lapangan.
+            </p>
 
-          {/* Stages Grid Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            {stages.map((st) => {
-              const statusCfg = STAGE_STATUS_CONFIG[st.status] || {
-                label: st.status,
-                variant: "slate",
-              };
-              const isSelected = selectedStageFilter === st.id;
-
-              return (
-                <div
-                  key={st.id}
-                  className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
-                    isSelected
-                      ? "border-teal-500 bg-teal-50/30 ring-2 ring-teal-500/20 shadow-xs"
-                      : st.status === "COMPLETED"
-                      ? "border-emerald-200 bg-emerald-50/20"
-                      : st.status === "IN_PROGRESS"
-                      ? "border-indigo-200 bg-indigo-50/20"
-                      : "border-slate-200/90 bg-slate-50/40 hover:bg-white"
-                  }`}
-                >
-                  <div className="space-y-2">
-                    {/* Top Row: Index + Status Badge */}
-                    <div className="flex items-center justify-between gap-1.5">
-                      <span className="w-6 h-6 rounded-lg bg-teal-600 text-white font-extrabold text-[11px] flex items-center justify-center shrink-0">
-                        {st.orderIndex}
-                      </span>
-
-                      {/* Status Dropdown/Selector */}
-                      <select
-                        value={st.status}
-                        onChange={(e) =>
-                          handleUpdateStageStatus(
-                            st.id,
-                            e.target.value as "PENDING" | "IN_PROGRESS" | "COMPLETED"
-                          )
-                        }
-                        className="text-[11px] font-bold px-2 py-0.5 rounded-md border border-slate-200 bg-white text-slate-700 cursor-pointer focus:outline-hidden"
-                      >
-                        <option value="PENDING">Belum Dimulai</option>
-                        <option value="IN_PROGRESS">Sedang Berjalan</option>
-                        <option value="COMPLETED">Tahap Selesai</option>
-                      </select>
-                    </div>
-
-                    {/* Title */}
-                    <h5 className="text-xs font-bold text-slate-900 line-clamp-2 leading-snug">
-                      {st.title}
-                    </h5>
-
-                    {/* Timeline */}
-                    {st.targetTimeline && (
-                      <div className="flex items-center gap-1 text-[11px] text-slate-500">
-                        <Clock className="w-3 h-3 text-slate-400" />
-                        <span>{st.targetTimeline}</span>
-                      </div>
-                    )}
-
-                    {/* Expected Evidence Tip */}
-                    {st.expectedEvidence && (
-                      <div className="p-2 rounded-xl bg-white/90 border border-slate-100 text-[10px] text-slate-600 space-y-0.5">
-                        <span className="font-bold text-teal-700 block">Panduan Bukti:</span>
-                        <p className="line-clamp-2 leading-relaxed">{st.expectedEvidence}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Stage Bottom Row: Activity Count & Filter Action */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-slate-500">
-                      {st.activityCount || 0} Bukti
-                    </span>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() =>
-                          setSelectedStageFilter((prev) =>
-                            prev === st.id ? null : st.id
-                          )
-                        }
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold transition ${
-                          isSelected
-                            ? "bg-teal-600 text-white"
-                            : "text-teal-700 hover:bg-teal-100/60"
-                        }`}
-                      >
-                        {isSelected ? "Semua Log" : "Filter"}
-                      </button>
-
-                      {role === "PARTNER" && (
-                        <button
-                          onClick={() => {
-                            setActiveStageForAdd(st.id);
-                            setIsAddModalOpen(true);
-                          }}
-                          className="p-1 rounded-md text-teal-600 hover:bg-teal-50"
-                          title="Tambah bukti untuk tahap ini"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
+            {/* Progress summary & bar */}
+            {stages.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-[#787680]">Progres Tahapan</span>
+                  <span className="text-[#009E75] font-bold">
+                    {completedStagesCount} dari {stages.length} Selesai ({progressPercent}%)
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 2. HEADER DAFTAR AKTIVITAS & FILTER                                       */}
-      {/* ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-extrabold text-slate-900">
-              Jurnal & Log Bukti Lapangan
-            </h3>
-            <span className="px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 text-[11px] font-bold border border-teal-200/60">
-              {filteredActivities.length} {selectedStageFilter ? "Ditampilkan" : "Kegiatan"}
-            </span>
-            {selectedStageFilter && (
-              <button
-                onClick={() => setSelectedStageFilter(null)}
-                className="text-[11px] text-teal-600 hover:underline font-semibold"
-              >
-                (Tampilkan Semua)
-              </button>
+                <div className="w-full h-1.5 rounded-full bg-[#EEEEF0] overflow-hidden">
+                  <div
+                    className="h-full bg-[#009E75] rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Dokumentasi berkala, foto progres riil, dan verifikasi pelaksanaan kegiatan lapangan
-          </p>
-        </div>
 
-        {role === "PARTNER" && (
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => {
-              setActiveStageForAdd(undefined);
-              setIsAddModalOpen(true);
-            }}
-            leftIcon={<Plus className="w-4 h-4" />}
-            className="bg-teal-600 hover:bg-teal-700 text-white text-xs shrink-0 shadow-xs"
-          >
-            Tambah Laporan Kegiatan
-          </Button>
-        )}
-      </div>
-
-      {/* Filter Tabs if stages exist */}
-      {stages.length > 0 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-          <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 pr-1 shrink-0">
-            <Filter className="w-3 h-3" /> Filter Tahap:
-          </span>
+          {/* Filter Opsi "Semua Aktivitas" */}
           <button
+            type="button"
             onClick={() => setSelectedStageFilter(null)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
+            className={`w-full p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
               selectedStageFilter === null
-                ? "bg-slate-900 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-[#181343] border-[#181343] text-white shadow-xs"
+                : "bg-[#F9F9FB] border-[#E8E8EA] text-[#181343] hover:bg-white"
             }`}
           >
-            Semua ({activities.length})
-          </button>
-          {stages.map((st) => (
-            <button
-              key={st.id}
-              onClick={() => setSelectedStageFilter(st.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 ${
-                selectedStageFilter === st.id
-                  ? "bg-teal-600 text-white shadow-xs"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            <div className="flex items-center gap-2">
+              <Filter className="w-3.5 h-3.5" />
+              <span>Semua Aktivitas &amp; Log</span>
+            </div>
+            <span
+              className={`text-[11px] px-2 py-0.5 rounded-md font-bold ${
+                selectedStageFilter === null
+                  ? "bg-white/20 text-white"
+                  : "bg-white border border-[#E8E8EA] text-[#787680]"
               }`}
             >
-              <span>Tahap {st.orderIndex}</span>
-              <span className="opacity-75 text-[10px]">({st.activityCount || 0})</span>
-            </button>
-          ))}
-          <button
-            onClick={() => setSelectedStageFilter("UNASSIGNED")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-              selectedStageFilter === "UNASSIGNED"
-                ? "bg-teal-600 text-white shadow-xs"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            Lainnya / Umum
+              {activities.length}
+            </span>
           </button>
-        </div>
-      )}
 
-      {/* ========================================================================= */}
-      {/* 3. ACTIVITIES TIMELINE FEED                                               */}
-      {/* ========================================================================= */}
-      {isLoading ? (
-        <div className="p-10 text-center text-xs text-slate-400 bg-slate-50/50 rounded-2xl">
-          <Activity className="w-5 h-5 animate-spin mx-auto mb-2 text-teal-600" />
-          Memuat data log aktivitas lapangan...
-        </div>
-      ) : filteredActivities.length === 0 ? (
-        <div className="p-8 sm:p-12 text-center bg-slate-50/50 rounded-3xl border border-slate-200/80 space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
-            <Camera className="w-6 h-6" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-sm font-bold text-slate-900">
-              Belum Ada Laporan Aktivitas Lapangan
-            </h4>
-            <p className="text-xs text-slate-500 max-w-md mx-auto">
-              {role === "PARTNER"
-                ? "Mulai laporkan jalannya kegiatan lapangan dengan mengunggah narasi progres, jumlah warga terjangkau, dan foto dokumentasi."
-                : "Mitra pelaksana belum menambahkan laporan kegiatan lapangan untuk program ini."}
-            </p>
-          </div>
-          {role === "PARTNER" && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                setActiveStageForAdd(selectedStageFilter && selectedStageFilter !== "UNASSIGNED" ? selectedStageFilter : undefined);
-                setIsAddModalOpen(true);
-              }}
-              leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-teal-600 hover:bg-teal-700 text-white text-xs mt-2"
-            >
-              Unggah Laporan Pertama
-            </Button>
-          )}
-        </div>
-      ) : (
-        <div className="relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-2.5 sm:before:left-3.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
-          {filteredActivities.map((act) => {
-            const statusConfig = ACTIVITY_STATUS_CONFIG[act.status] || {
-              label: act.status,
-              variant: "slate" as const,
-            };
-            const photos = parsePhotos(act.mediaUrls);
-            const numFunds = act.fundsSpent ? parseFloat(act.fundsSpent) : 0;
+          {/* Timeline Vertikal Tahapan Proposal */}
+          {isLoadingStages ? (
+            <div className="p-6 text-center text-xs text-[#787680] flex items-center justify-center gap-2">
+              <Activity className="w-4 h-4 animate-spin text-teal-600" />
+              <span>Memuat tahapan pelaksanaan...</span>
+            </div>
+          ) : stages.length === 0 ? (
+            <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-dashed border-[#E8E8EA] text-center space-y-2">
+              <Sparkles className="w-6 h-6 text-teal-600 mx-auto" />
+              <p className="text-xs font-bold text-[#181343]">
+                Belum Ada Tahapan Terstruktur
+              </p>
+              <p className="text-[11px] text-[#787680] leading-relaxed">
+                Strukturkan metodologi proposal menjadi tahapan kegiatan dengan bantuan AI.
+              </p>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setIsAiModalOpen(true)}
+                className="text-xs bg-[#181343] text-white"
+              >
+                Generate Tahapan AI
+              </Button>
+            </div>
+          ) : (
+            <div className="relative pl-6 space-y-3.5 before:absolute before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-[#E8E8EA]">
+              {stages.map((st) => {
+                const isSelected = selectedStageFilter === st.id;
+                const isCompleted = st.status === "COMPLETED";
+                const isInProgress = st.status === "IN_PROGRESS";
 
-            return (
-              <div key={act.id} className="relative group">
-                {/* Timeline Node Dot */}
-                <div
-                  className={`absolute -left-6 sm:-left-8 top-1.5 w-5 h-5 rounded-full border-2 border-white shadow-xs flex items-center justify-center ${
-                    act.status === "VERIFIED"
-                      ? "bg-emerald-600 text-white"
-                      : act.status === "REVISION_REQUESTED"
-                      ? "bg-rose-500 text-white"
-                      : "bg-amber-500 text-white"
-                  }`}
-                >
-                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                </div>
-
-                {/* Activity Card */}
-                <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs hover:shadow-md transition-all space-y-4">
-                  {/* Card Header Row */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-100">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={statusConfig.variant} size="sm" hasDot>
-                        {statusConfig.label}
-                      </Badge>
-
-                      {/* Stage Badge if assigned */}
-                      {act.stageTitle && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200/60 flex items-center gap-1">
-                          <Layers className="w-3 h-3 text-teal-600" />
-                          Tahap {act.stageOrderIndex || ""}: {act.stageTitle}
-                        </span>
-                      )}
-
-                      <span className="text-xs font-bold text-slate-700 flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-teal-600" />
-                        {formatDate(act.activityDate)}
-                      </span>
-
-                      {act.location && (
-                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-slate-400" />
-                          {act.location}
-                        </span>
+                return (
+                  <div key={st.id} className="relative group">
+                    {/* Node Dot Indicator */}
+                    <div
+                      className={`absolute -left-6 top-3 w-6 h-6 rounded-full border-2 flex items-center justify-center text-[10px] font-black transition-all ${
+                        isCompleted
+                          ? "bg-[#009E75] border-white text-white shadow-2xs"
+                          : isInProgress
+                          ? "bg-[#181343] border-white text-white shadow-2xs ring-2 ring-[#181343]/20"
+                          : "bg-white border-[#C8C5D0] text-[#787680]"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <Check className="w-3 h-3 text-white stroke-[3]" />
+                      ) : (
+                        st.orderIndex
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-slate-400">
-                        Oleh: <strong className="text-slate-700">{act.submitterName || "Mitra Lapangan"}</strong>
-                      </span>
+                    {/* Stage Card */}
+                    <div
+                      onClick={() => setSelectedStageFilter(isSelected ? null : st.id)}
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer space-y-2 ${
+                        isSelected
+                          ? "border-[#35B98E] bg-[#EDF9F3] ring-2 ring-[#35B98E]/25 shadow-xs"
+                          : isCompleted
+                          ? "border-emerald-200/80 bg-white hover:border-[#35B98E]"
+                          : isInProgress
+                          ? "border-amber-300 bg-white hover:border-amber-400"
+                          : "border-[#E8E8EA] bg-[#F9F9FB] hover:bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="space-y-0.5 min-w-0">
+                          <span className="text-[10px] font-extrabold text-[#787680] uppercase tracking-wider block">
+                            Tahap {st.orderIndex}
+                          </span>
+                          <h5 className="text-xs font-bold text-[#181343] leading-snug line-clamp-2">
+                            {st.title}
+                          </h5>
+                        </div>
+
+                        {/* Status Label Bahasa Indonesia */}
+                        <span
+                          className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md shrink-0 border ${
+                            isCompleted
+                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                              : isInProgress
+                              ? "bg-amber-50 text-amber-800 border-amber-200"
+                              : "bg-slate-100 text-slate-600 border-slate-200"
+                          }`}
+                        >
+                          {isCompleted
+                            ? "Selesai"
+                            : isInProgress
+                            ? "Berjalan"
+                            : "Belum Mulai"}
+                        </span>
+                      </div>
+
+                      {/* Jadwal Rencana */}
+                      {st.targetTimeline && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-[#787680]">
+                          <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span>Rencana: {st.targetTimeline}</span>
+                        </div>
+                      )}
+
+                      {/* Expected Evidence Tip */}
+                      {st.expectedEvidence && (
+                        <p className="text-[10px] text-[#787680] line-clamp-2 italic pt-1 border-t border-[#F4F4F6]">
+                          Bukti: {st.expectedEvidence}
+                        </p>
+                      )}
+
+                      {/* Footer: Count Bukti Terkait & Tombol Status */}
+                      <div className="pt-1.5 border-t border-[#F4F4F6] flex items-center justify-between text-xs">
+                        <span className="text-[11px] font-bold text-teal-800 flex items-center gap-1">
+                          <Camera className="w-3 h-3 text-teal-600" />
+                          {st.activityCount || 0} bukti log
+                        </span>
+
+                        <div className="flex items-center gap-1">
+                          {!isManagement ? (
+                            <select
+                              value={st.status}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) =>
+                                handleUpdateStageStatus(
+                                  st.id,
+                                  e.target.value as "PENDING" | "IN_PROGRESS" | "COMPLETED"
+                                )
+                              }
+                              className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-[#E8E8EA] bg-white text-[#181343] focus:outline-none"
+                            >
+                              <option value="PENDING">Belum Mulai</option>
+                              <option value="IN_PROGRESS">Berjalan</option>
+                              <option value="COMPLETED">Selesai</option>
+                            </select>
+                          ) : null}
+
+                          <span
+                            className={`text-[11px] font-bold ${
+                              isSelected ? "text-[#009E75]" : "text-[#787680]"
+                            }`}
+                          >
+                            {isSelected ? "Terpilih ✓" : "Pilih"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                );
+              })}
 
-                  {/* Title & Description */}
-                  <div className="space-y-1.5">
-                    <h4 className="text-base font-extrabold text-slate-900 leading-snug">
-                      {act.title}
-                    </h4>
-                    <p className="text-xs text-slate-700 whitespace-pre-line leading-relaxed">
-                      {act.description}
+              {/* Node Laporan Umum / Belum Terhubung (jika ada) */}
+              {unassignedActivitiesCount > 0 && (
+                <div className="relative group">
+                  <div className="absolute -left-6 top-3 w-6 h-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600">
+                    ?
+                  </div>
+                  <div
+                    onClick={() =>
+                      setSelectedStageFilter(
+                        selectedStageFilter === "UNASSIGNED" ? null : "UNASSIGNED"
+                      )
+                    }
+                    className={`p-3 rounded-2xl border transition-all cursor-pointer space-y-1 ${
+                      selectedStageFilter === "UNASSIGNED"
+                        ? "border-amber-400 bg-amber-50/60 ring-2 ring-amber-400/20"
+                        : "border-[#E8E8EA] bg-[#F9F9FB] hover:bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-[#181343]">
+                        Laporan Umum / Belum Terkait
+                      </span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800">
+                        {unassignedActivitiesCount} Bukti
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-[#787680]">
+                      Laporan lapangan yang belum dihubungkan ke milestone tahapan tertentu.
                     </p>
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
-                  {/* Quick Metrics Bar */}
-                  {(act.beneficiariesReached || numFunds > 0) && (
-                    <div className="flex flex-wrap items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs">
-                      {act.beneficiariesReached && (
-                        <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                          <Users className="w-3.5 h-3.5 text-teal-600" />
-                          <span>Penerima Manfaat Sesi Ini: <strong>{act.beneficiariesReached}</strong></span>
-                        </div>
-                      )}
-                      {numFunds > 0 && (
-                        <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                          <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>Dana Terpakai: <strong className="text-emerald-700">{formatRupiah(act.fundsSpent)}</strong></span>
+        {/* ========================================================================= */}
+        {/* KOLOM KANAN (65% -> 7 Cols Desktop): JURNAL & LOG BUKTI LAPANGAN          */}
+        {/* ========================================================================= */}
+        <div className="lg:col-span-7 bg-white p-5 sm:p-6 rounded-3xl border border-[#E8E8EA] shadow-2xs space-y-4">
+          {/* Header Jurnal */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#F4F4F6]">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base font-bold text-[#181343]">
+                  Jurnal &amp; Log Bukti Lapangan
+                </h3>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EDF9F3] text-[#009E75]">
+                  {groupedActivities.length} Laporan
+                </span>
+              </div>
+              <p className="text-xs text-[#787680]">
+                {selectedStage
+                  ? `Menampilkan bukti untuk: Tahap ${selectedStage.orderIndex} (${selectedStage.title})`
+                  : selectedStageFilter === "UNASSIGNED"
+                  ? "Menampilkan laporan umum yang belum terhubung ke tahapan"
+                  : "Seluruh dokumentasi kegiatan dan pertanggungjawaban lapangan mitra"}
+              </p>
+            </div>
+
+            {role === "PARTNER" && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => {
+                  setActiveStageForAdd(
+                    selectedStageFilter && selectedStageFilter !== "UNASSIGNED"
+                      ? selectedStageFilter
+                      : undefined
+                  );
+                  setIsAddModalOpen(true);
+                }}
+                leftIcon={<Plus className="w-4 h-4" />}
+                className="bg-[#009E75] hover:bg-[#008764] text-white text-xs font-bold rounded-xl shrink-0"
+              >
+                Tambah Laporan
+              </Button>
+            )}
+          </div>
+
+          {/* Activity Cards List */}
+          {isLoading ? (
+            <div className="p-10 text-center text-xs text-[#787680] bg-[#F9F9FB] rounded-2xl border border-[#E8E8EA] space-y-2">
+              <Activity className="w-5 h-5 animate-spin mx-auto text-emerald-600" />
+              <span>Memuat data log aktivitas lapangan...</span>
+            </div>
+          ) : groupedActivities.length === 0 ? (
+            <div className="p-8 sm:p-10 text-center bg-[#F9F9FB] rounded-2xl border border-dashed border-[#E8E8EA] space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-[#E8E8EA] text-[#787680] flex items-center justify-center mx-auto">
+                <Camera className="w-6 h-6 text-emerald-600" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-[#181343]">
+                  {selectedStage
+                    ? `Belum Ada Laporan untuk Tahap ${selectedStage.orderIndex}`
+                    : "Belum Ada Laporan Kegiatan"}
+                </h4>
+                <p className="text-xs text-[#787680] max-w-sm mx-auto">
+                  {role === "PARTNER"
+                    ? "Mulai laporkan jalannya kegiatan lapangan dengan mengunggah narasi progres, penerima manfaat, dan foto dokumentasi."
+                    : "Mitra pelaksana belum menambahkan laporan kegiatan lapangan untuk tahapan ini."}
+                </p>
+              </div>
+              {role === "PARTNER" && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setActiveStageForAdd(
+                      selectedStageFilter && selectedStageFilter !== "UNASSIGNED"
+                        ? selectedStageFilter
+                        : undefined
+                    );
+                    setIsAddModalOpen(true);
+                  }}
+                  leftIcon={<Plus className="w-4 h-4" />}
+                  className="bg-[#009E75] text-white text-xs rounded-xl"
+                >
+                  Unggah Bukti Lapangan
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3.5">
+              {groupedActivities.map(({ primary: act, history }) => {
+                const photos = parsePhotos(act.mediaUrls);
+                const numFunds = act.fundsSpent ? parseFloat(act.fundsSpent) : 0;
+                const isExpanded = expandedActivityIds.has(act.id);
+                const isAuditTrailExpanded = expandedAuditTrailIds.has(act.id);
+
+                return (
+                  <div
+                    key={act.id}
+                    className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-slate-300 shadow-2xs transition-all space-y-3"
+                  >
+                    {/* Header Row: Status, Tanggal, Tahapan & Submitter */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-[#F4F4F6] text-xs">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Status Verifikasi Bahasa Indonesia Baku */}
+                        {act.status === "VERIFIED" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#EDF9F3] text-[#009E75] border border-[#35B98E]/50">
+                            <CheckCircle2 className="w-3 h-3 text-[#009E75]" />
+                            Terverifikasi
+                          </span>
+                        ) : act.status === "REVISION_REQUESTED" ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                            <AlertCircle className="w-3 h-3 text-rose-600" />
+                            Perlu Perbaikan
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            <Clock className="w-3 h-3 text-amber-600" />
+                            Menunggu Verifikasi
+                          </span>
+                        )}
+
+                        {/* Linked Stage Badge */}
+                        {act.stageTitle ? (
+                          <span className="px-2 py-0.5 rounded-md bg-[#F4F4F6] text-[#181343] text-[11px] font-bold border border-[#E8E8EA]">
+                            Tahap {act.stageOrderIndex}: {act.stageTitle}
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-[#787680] text-[11px] font-medium border border-slate-200">
+                            Laporan Umum
+                          </span>
+                        )}
+
+                        <span className="text-[#787680] flex items-center gap-1 text-xs">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                          {formatDate(act.activityDate)}
+                        </span>
+                      </div>
+
+                      <span className="text-[11px] text-[#787680]">
+                        Oleh <strong className="text-[#181343] font-bold">{act.submitterName || "Mitra Pelaksana"}</strong>
+                      </span>
+                    </div>
+
+                    {/* Judul & Ringkasan Deskripsi (Maksimal 2-3 baris) */}
+                    <div className="space-y-1">
+                      <h4 className="text-sm sm:text-base font-bold text-[#181343] leading-snug">
+                        {act.title}
+                      </h4>
+
+                      {act.description && (
+                        <div className="text-xs text-[#5F5D6B] leading-relaxed">
+                          <p className={isExpanded ? "whitespace-pre-line" : "line-clamp-2 sm:line-clamp-3"}>
+                            {act.description}
+                          </p>
+                          {act.description.length > 130 && (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpand(act.id)}
+                              className="text-xs font-bold text-[#009E75] hover:underline mt-0.5 cursor-pointer"
+                            >
+                              {isExpanded ? "Ciutkan deskripsi" : "Lihat selengkapnya"}
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
 
-                  {/* Photo Gallery Grid */}
-                  {photos.length > 0 && (
-                    <div className="space-y-2 pt-1">
-                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                        Galeri Bukti Foto ({photos.length} Foto):
-                      </span>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        {photos.slice(0, 4).map((url, idx) => {
-                          const isLastSlot = idx === 3 && photos.length > 4;
+                    {/* Stat Pills Compact */}
+                    {(act.beneficiariesReached || numFunds > 0 || photos.length > 0 || act.documentUrl) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                        {act.beneficiariesReached && (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F9F9FB] border border-[#E8E8EA] text-[#181343]">
+                            <Users className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Penerima: <strong>{act.beneficiariesReached}</strong></span>
+                          </div>
+                        )}
+                        {numFunds > 0 && (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F9F9FB] border border-[#E8E8EA] text-[#181343]">
+                            <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Dana: <strong>{formatRupiah(act.fundsSpent)}</strong></span>
+                          </div>
+                        )}
+                        {act.documentUrl && (
+                          <a
+                            href={act.documentUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F9F9FB] hover:bg-emerald-50 border border-[#E8E8EA] hover:border-emerald-300 text-[#181343] transition"
+                          >
+                            <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Berkas BAST</span>
+                            <ExternalLink className="w-3 h-3 text-[#787680]" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Galeri Thumbnail Kecil (Uniform 56-64px) */}
+                    {photos.length > 0 && (
+                      <div className="flex items-center gap-2 pt-1">
+                        {photos.slice(0, 3).map((url, idx) => {
+                          const isLastSlot = idx === 2 && photos.length > 3;
                           return (
                             <div
                               key={idx}
                               onClick={() => handleOpenLightbox(photos, idx, act.title)}
-                              className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 cursor-pointer group shadow-2xs hover:shadow-md transition-all"
+                              className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border border-[#E8E8EA] cursor-pointer group shadow-2xs hover:shadow-xs transition-all shrink-0"
                             >
                               <img
                                 src={url}
                                 alt={`Dokumentasi ${idx + 1}`}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                               />
-                              <div className="absolute inset-0 bg-slate-950/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                <Maximize2 className="w-4 h-4 drop-shadow-md" />
+                              <div className="absolute inset-0 bg-[#181343]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                                <Maximize2 className="w-3.5 h-3.5 drop-shadow-xs" />
                               </div>
 
                               {isLastSlot && (
-                                <div className="absolute inset-0 bg-slate-900/70 text-white font-extrabold text-xs flex items-center justify-center backdrop-blur-2xs">
-                                  +{photos.length - 3} Foto
+                                <div className="absolute inset-0 bg-[#181343]/85 text-white font-bold text-[11px] flex items-center justify-center">
+                                  +{photos.length - 2}
                                 </div>
                               )}
                             </div>
                           );
                         })}
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Document Attachment Link */}
-                  {act.documentUrl && (
-                    <div className="pt-1">
-                      <a
-                        href={act.documentUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200 hover:border-emerald-300 transition"
-                      >
-                        <FileCheck2 className="w-4 h-4 text-emerald-600" />
-                        <span>Unduh / Buka Berkas Berita Acara (BAST)</span>
-                        <ExternalLink className="w-3 h-3 ml-0.5" />
-                      </a>
-                    </div>
-                  )}
-
-                  {/* Company Feedback Box */}
-                  {act.companyFeedback && (
-                    <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-1 text-xs">
-                      <div className="flex items-center gap-1.5 text-amber-900 font-bold">
-                        <MessageSquare className="w-3.5 h-3.5 text-amber-700" />
-                        <span>Catatan Evaluasi Perusahaan Sponsor</span>
-                        {act.verifierName && (
-                          <span className="text-[10px] text-amber-700 font-normal">
-                            (oleh {act.verifierName})
-                          </span>
-                        )}
+                    {/* Catatan Feedback CSR Admin */}
+                    {act.companyFeedback && (
+                      <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs space-y-1">
+                        <div className="flex items-center gap-1.5 text-amber-900 font-bold">
+                          <MessageSquare className="w-3.5 h-3.5 text-amber-700" />
+                          <span>Catatan Evaluasi Verifikator:</span>
+                          {act.verifierName && (
+                            <span className="text-[11px] text-amber-800 font-normal">
+                              ({act.verifierName})
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-slate-700 leading-relaxed italic pl-5">
+                          "{act.companyFeedback}"
+                        </p>
                       </div>
-                      <p className="text-slate-700 leading-relaxed pl-5 italic">
-                        "{act.companyFeedback}"
-                      </p>
-                    </div>
-                  )}
+                    )}
 
-                  {/* Actions Bar */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
-                    <span className="text-[10px] text-slate-400">
-                      Diunggah pada {formatDate(act.createdAt)}
-                    </span>
-
-                    <div className="flex items-center gap-2">
-                      {role === "COMPANY" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedActivityForVerify(act)}
-                          leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />}
-                          className="text-xs border-emerald-300 hover:bg-emerald-50 text-emerald-800 font-semibold"
-                        >
-                          {act.status === "VERIFIED" ? "Ubah Status Verifikasi" : "Verifikasi & Beri Masukan"}
-                        </Button>
-                      )}
-
-                      {role === "PARTNER" && act.status !== "VERIFIED" && (
+                    {/* Indikator Riwayat Versi / Audit Trail (Requirement 7) */}
+                    {history.length > 0 && (
+                      <div className="pt-2 border-t border-[#F4F4F6]">
                         <button
                           type="button"
-                          onClick={() => handleDeleteActivity(act.id, act.title)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                          title="Hapus Laporan Ini"
+                          onClick={() => toggleAuditTrail(act.id)}
+                          className="text-[11px] font-bold text-slate-500 hover:text-[#181343] flex items-center gap-1.5 transition cursor-pointer"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <History className="w-3.5 h-3.5 text-slate-400" />
+                          <span>
+                            {history.length} Riwayat Pengajuan / Versi Terdahulu
+                          </span>
+                          {isAuditTrailExpanded ? (
+                            <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                          )}
                         </button>
-                      )}
+
+                        {isAuditTrailExpanded && (
+                          <div className="mt-2 space-y-2 pl-4 border-l-2 border-slate-200">
+                            {history.map((hist) => (
+                              <div
+                                key={hist.id}
+                                className="p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs space-y-1"
+                              >
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-semibold text-slate-700">
+                                    Versi diajukan {formatDate(hist.createdAt)}
+                                  </span>
+                                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200">
+                                    {hist.status}
+                                  </span>
+                                </div>
+                                <p className="text-[11px] text-[#787680] line-clamp-1">
+                                  {hist.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Footer Row: Actions */}
+                    <div className="flex items-center justify-between pt-2.5 border-t border-[#F4F4F6] text-xs">
+                      <span className="text-[11px] text-[#787680]">
+                        Diunggah {formatDate(act.createdAt)}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        {/* Tombol Lihat Detail Laporan (Requirement 5) */}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedActivityForDetail(act)}
+                          leftIcon={<Eye className="w-3.5 h-3.5 text-slate-500" />}
+                          className="text-xs h-7.5 px-3 rounded-lg border-[#E8E8EA] text-[#181343] font-bold cursor-pointer"
+                        >
+                          Lihat Detail Laporan
+                        </Button>
+
+                        {/* Verifikasi oleh Perusahaan */}
+                        {role === "COMPANY" && !isManagement && (
+                          <Button
+                            type="button"
+                            variant="primary"
+                            size="sm"
+                            onClick={() => setSelectedActivityForVerify(act)}
+                            leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />}
+                            className="text-xs h-7.5 px-3 rounded-lg bg-[#009E75] hover:bg-[#008764] text-white font-bold cursor-pointer"
+                          >
+                            {act.status === "VERIFIED" ? "Perbarui Verifikasi" : "Verifikasi & Evaluasi"}
+                          </Button>
+                        )}
+
+                        {role === "PARTNER" && act.status !== "VERIFIED" && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteActivity(act.id, act.title)}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                            title="Hapus Laporan Ini"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MODAL: DETAIL LENGKAP LAPORAN (Requirement 5)                             */}
+      {/* ========================================================================= */}
+      {selectedActivityForDetail && (
+        <Modal
+          isOpen={Boolean(selectedActivityForDetail)}
+          onClose={() => setSelectedActivityForDetail(null)}
+          title="Detail Laporan Kegiatan Lapangan"
+          description={`Dokumentasi pelaksanaan untuk: ${selectedActivityForDetail.title}`}
+          maxWidth="lg"
+        >
+          <div className="space-y-5 py-2">
+            {/* Header info */}
+            <div className="p-4 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-bold text-[#181343]">
+                  {selectedActivityForDetail.title}
+                </span>
+
+                {selectedActivityForDetail.status === "VERIFIED" ? (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#EDF9F3] text-[#009E75] border border-[#35B98E]">
+                    Terverifikasi
+                  </span>
+                ) : selectedActivityForDetail.status === "REVISION_REQUESTED" ? (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                    Perlu Perbaikan
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                    Menunggu Verifikasi
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#787680]">
+                <span>Tanggal: {formatDate(selectedActivityForDetail.activityDate)}</span>
+                {selectedActivityForDetail.location && (
+                  <span>Lokasi: {selectedActivityForDetail.location}</span>
+                )}
+                <span>Pelapor: {selectedActivityForDetail.submitterName || "Mitra"}</span>
+                {selectedActivityForDetail.stageTitle && (
+                  <span>
+                    Tahapan: Tahap {selectedActivityForDetail.stageOrderIndex} ({selectedActivityForDetail.stageTitle})
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Narasi Penuh */}
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-[#181343] block">
+                Deskripsi Lengkap Kegiatan:
+              </span>
+              <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed whitespace-pre-line p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                {selectedActivityForDetail.description}
+              </p>
+            </div>
+
+            {/* Capaian & Anggaran */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs">
+                <span className="text-[11px] font-semibold text-[#787680] block">
+                  Penerima Manfaat:
+                </span>
+                <span className="font-bold text-[#181343] text-sm mt-0.5 block">
+                  {selectedActivityForDetail.beneficiariesReached || "-"}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs">
+                <span className="text-[11px] font-semibold text-[#787680] block">
+                  Realisasi Dana:
+                </span>
+                <span className="font-bold text-[#009E75] text-sm mt-0.5 block">
+                  {formatRupiah(selectedActivityForDetail.fundsSpent)}
+                </span>
+              </div>
+            </div>
+
+            {/* Galeri Lengkap */}
+            {parsePhotos(selectedActivityForDetail.mediaUrls).length > 0 && (
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-[#181343] block">
+                  Dokumentasi Foto ({parsePhotos(selectedActivityForDetail.mediaUrls).length} Foto):
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {parsePhotos(selectedActivityForDetail.mediaUrls).map((url, idx) => (
+                    <div
+                      key={idx}
+                      onClick={() =>
+                        handleOpenLightbox(
+                          parsePhotos(selectedActivityForDetail.mediaUrls),
+                          idx,
+                          selectedActivityForDetail.title
+                        )
+                      }
+                      className="relative h-24 rounded-xl overflow-hidden border border-[#E8E8EA] cursor-pointer group shadow-2xs hover:shadow-xs transition"
+                    >
+                      <img
+                        src={url}
+                        alt={`Dokumentasi ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                      />
+                      <div className="absolute inset-0 bg-[#181343]/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+                        <Maximize2 className="w-4 h-4" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            );
-          })}
-        </div>
+            )}
+
+            {/* Berkas BAST */}
+            {selectedActivityForDetail.documentUrl && (
+              <div className="p-3 rounded-xl bg-[#EDF9F3] border border-[#35B98E]/40 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                  <FileCheck2 className="w-4 h-4 text-emerald-600" />
+                  <span>Lampiran Dokumen BAST / Legalitas Terlampir</span>
+                </div>
+                <a
+                  href={selectedActivityForDetail.documentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1 rounded-lg bg-white border border-[#35B98E] text-emerald-700 font-bold hover:bg-emerald-50 transition flex items-center gap-1.5"
+                >
+                  <span>Buka Berkas</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            )}
+
+            {/* Catatan Feedback */}
+            {selectedActivityForDetail.companyFeedback && (
+              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1">
+                <span className="font-bold text-amber-900 block">
+                  Catatan Evaluasi Verifikator ({selectedActivityForDetail.verifierName || "CSR Admin"}):
+                </span>
+                <p className="text-slate-700 italic">
+                  "{selectedActivityForDetail.companyFeedback}"
+                </p>
+              </div>
+            )}
+
+            {/* Close Button */}
+            <div className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setSelectedActivityForDetail(null)}
+                className="w-full font-bold"
+              >
+                Tutup Detail
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
 
-      {/* --- Modals --- */}
+      {/* --- Modals Tambah, Verifikasi, Lightbox, AI --- */}
       <AddActivityModal
         isOpen={isAddModalOpen}
         onClose={() => {
@@ -748,18 +1075,6 @@ export function ActivityTimeline({
         }}
       />
 
-      <AiMilestonesModal
-        isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
-        programId={programId}
-        programTitle={programTitle}
-        onSuccess={() => {
-          fetchStages();
-          fetchActivities();
-          if (onActivityChanged) onActivityChanged();
-        }}
-      />
-
       <VerifyActivityModal
         isOpen={Boolean(selectedActivityForVerify)}
         activity={selectedActivityForVerify}
@@ -773,10 +1088,21 @@ export function ActivityTimeline({
 
       <PhotoLightboxModal
         isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
         photos={lightboxPhotos}
         initialIndex={lightboxIndex}
         title={lightboxTitle}
-        onClose={() => setIsLightboxOpen(false)}
+      />
+
+      <AiMilestonesModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        programId={programId}
+        programTitle={programTitle}
+        onSuccess={() => {
+          fetchStages();
+          if (onActivityChanged) onActivityChanged();
+        }}
       />
     </div>
   );

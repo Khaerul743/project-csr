@@ -203,4 +203,22 @@ export class InvitationRepository {
       .set({ status: "CANCELLED" })
       .where(and(eq(invitations.id, id), eq(invitations.companyId, companyId)));
   }
+
+  async resendInvitation(id: string, token: string, expiresAt: Date): Promise<Invitation> {
+    await db
+      .update(invitations)
+      .set({
+        token,
+        expiresAt,
+        status: "PENDING",
+        updatedAt: new Date(),
+      })
+      .where(eq(invitations.id, id));
+
+    const updated = await this.findById(id);
+    if (!updated) {
+      throw new Error("Undangan tidak ditemukan setelah diperbarui");
+    }
+    return updated;
+  }
 }

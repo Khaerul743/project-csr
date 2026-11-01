@@ -25,34 +25,46 @@ export function WorkflowSection() {
   const steps = [
     {
       num: "01",
-      title: "Inisiasi Program & Pengajuan",
-      companyText: "Perusahaan mempublikasikan inisiatif CSR dengan alokasi anggaran, target kota sasaran, dan pilar ESG yang diinginkan.",
-      partnerText: "Yayasan/NGO menemukan peluang kemitraan yang relevan dan mengajukan proposal resmi lengkap dengan dokumen legalitas.",
-      communityText: "Kebutuhan mendesak wilayah teridentifikasi melalui pemetaan awal kebutuhan warga setempat.",
-      tag: "Fase Awal",
+      title: "Perencanaan Program",
+      companyText:
+        "Perusahaan menganalisis prioritas kebutuhan masyarakat, menentukan sasaran program, dan membuka peluang kerja sama CSR.",
+      partnerText:
+        "Mitra meninjau peluang kerja sama CSR yang relevan dan memberikan respons terhadap penawaran perusahaan.",
+      communityText:
+        "Kebutuhan masyarakat menjadi pertimbangan dalam penentuan prioritas program CSR berdasarkan informasi wilayah.",
+      tag: "Perencanaan",
     },
     {
       num: "02",
-      title: "Kurasi AI & Finalisasi MoU",
-      companyText: "Sistem AI merekomendasikan tahapan kerja logis; perusahaan dan mitra menyepakati nilai MoU dan target capaian.",
-      partnerText: "Mitra meninjau draf tahapan hasil ekstraksi AI, menyelaraskan linimasa kerja, dan menandatangani kesepakatan.",
-      communityText: "Tokoh masyarakat dilibatkan dalam rembug warga awal penentuan zonasi dan daftar penerima manfaat.",
+      title: "Kemitraan & Persetujuan",
+      companyText:
+        "Perusahaan meninjau proposal dan RAB mitra, meminta revisi jika diperlukan, serta menyetujui kerja sama dan dokumen perjanjian.",
+      partnerText:
+        "Mitra mengajukan proposal dan RAB, menindaklanjuti revisi, serta menyepakati dokumen kerja sama.",
+      communityText:
+        "Program dan sasaran penerima manfaat ditetapkan melalui kesepakatan perusahaan dan mitra dengan mempertimbangkan kebutuhan masyarakat.",
       tag: "Kesepakatan",
     },
     {
       num: "03",
-      title: "Penyaluran Bertahap & Aksi Lapangan",
-      companyText: "Pencairan dana dilakukan bertahap per termin berdasarkan verifikasi bukti pemakaian termin sebelumnya.",
-      partnerText: "Mitra mengeksekusi kegiatan riil di lapangan dan mengunggah foto progres serta nota belanja fisik secara berkala.",
-      communityText: "Masyarakat menerima manfaat langsung (alat, bibit, pelatihan, renovasi sanitasi, atau fasilitas umum).",
-      tag: "Eksekusi Riil",
+      title: "Pelaksanaan & Monitoring",
+      companyText:
+        "Perusahaan memantau progres kegiatan, memeriksa laporan mitra, serta mencatat status pencairan dan realisasi anggaran.",
+      partnerText:
+        "Mitra melaksanakan kegiatan sesuai proposal, memperbarui progres, dan melaporkan penggunaan anggaran.",
+      communityText:
+        "Masyarakat mengikuti kegiatan atau menerima manfaat dari program CSR yang dilaksanakan.",
+      tag: "Pelaksanaan",
     },
     {
       num: "04",
-      title: "Verifikasi, Survei Warga & Laporan Dampak",
-      companyText: "Manajemen memvalidasi keabsahan dokumen BAST dan mengunduh laporan dampak ESG untuk Laporan Keberlanjutan.",
-      partnerText: "Mitra memperoleh riwayat kinerja terverifikasi dan testimoni resmi dari perusahaan sponsor.",
-      communityText: "Warga memindai QR code di lokasi untuk memberikan ulasan kepuasan dan testimoni independen.",
+      title: "Evaluasi & Dampak",
+      companyText:
+        "Perusahaan mengevaluasi pencapaian indikator, laporan akhir, umpan balik penerima manfaat, dan kontribusi SDGs/ESG.",
+      partnerText:
+        "Mitra menyampaikan laporan hasil kegiatan dan bukti pelaksanaan untuk mendukung evaluasi perusahaan.",
+      communityText:
+        "Masyarakat memberikan penilaian dan umpan balik melalui tautan atau QR Code tanpa perlu membuat akun.",
       tag: "Evaluasi & Dampak",
     },
   ];
@@ -71,7 +83,7 @@ export function WorkflowSection() {
               className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Empat Langkah Menuju Program CSR yang Akuntabel.
+              Empat Langkah Menuju Program CSR yang Akuntabel
             </h2>
 
             <p className="text-sm sm:text-base text-[#47464F] leading-relaxed">
@@ -87,11 +99,10 @@ export function WorkflowSection() {
               <button
                 type="button"
                 onClick={() => setRole("company")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  role === "company"
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "company"
                     ? "bg-[#181343] text-white shadow-xs"
                     : "text-[#47464F] hover:text-[#181343]"
-                }`}
+                  }`}
               >
                 <Building2 className="w-4 h-4" />
                 <span>Sudut Pandang Perusahaan</span>
@@ -100,11 +111,10 @@ export function WorkflowSection() {
               <button
                 type="button"
                 onClick={() => setRole("partner")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  role === "partner"
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "partner"
                     ? "bg-[#181343] text-white shadow-xs"
                     : "text-[#47464F] hover:text-[#181343]"
-                }`}
+                  }`}
               >
                 <Users2 className="w-4 h-4" />
                 <span>Sudut Pandang Yayasan / NGO</span>
@@ -113,11 +123,10 @@ export function WorkflowSection() {
               <button
                 type="button"
                 onClick={() => setRole("community")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-                  role === "community"
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "community"
                     ? "bg-[#181343] text-white shadow-xs"
                     : "text-[#47464F] hover:text-[#181343]"
-                }`}
+                  }`}
               >
                 <HeartHandshake className="w-4 h-4" />
                 <span>Masyarakat Penerima Manfaat</span>
@@ -135,7 +144,7 @@ export function WorkflowSection() {
           {steps.map((st, idx) => (
             <div
               key={st.num}
-              className="p-6 sm:p-7 rounded-2xl border border-[#C8C5D0]/80 bg-[#FFFFFF] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group h-full"
+              className="p-6 sm:p-7 rounded-2xl border border-[#C8C5D0]/80 bg-[#FFFFFF] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group h-full min-h-[270px] sm:min-h-[285px] lg:min-h-[305px]"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -151,7 +160,7 @@ export function WorkflowSection() {
                   {st.title}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed min-h-[4.5rem] sm:min-h-[5rem] lg:min-h-[5.75rem]">
                   {role === "company" && st.companyText}
                   {role === "partner" && st.partnerText}
                   {role === "community" && st.communityText}

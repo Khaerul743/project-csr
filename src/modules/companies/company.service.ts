@@ -11,6 +11,7 @@ import {
   CompanyDetailedProfile,
 } from "./company.interface";
 import { Company } from "@/db/schema/companies";
+import { UserRole, UserStatus } from "@/db/schema/users";
 
 export class CompanyService {
   private readonly logger = new AppLogger("CompanyService");
@@ -29,20 +30,26 @@ export class CompanyService {
       throw new NotFoundError("User not found");
     }
 
-    // User must be in STAGING role
+    // Role check: Only STAGING users can create a company
     if (user.role !== "STAGING") {
-      throw new ConflictError(`User already has role '${user.role}' and cannot create a new company`);
+      throw new ConflictError("User already belongs to an organization or has an active role");
     }
 
-    if (user.companyId || user.partnerId) {
-      throw new ConflictError("User is already associated with an organization");
+    // Check duplicate name
+    const existing = await this.companyRepository.findByName(dto.name);
+    if (existing) {
+      throw new ConflictError("A company with this name already exists");
     }
 
-    const { company, updatedUser } = await this.companyRepository.createCompanyWithAdmin(dto, userId);
+    // Execute transaction: create company + promote user to MANAGEMENT
+    const { company, updatedUser } = await this.companyRepository.createCompanyWithAdmin(
+      dto,
+      userId
+    );
 
-    this.logger.info(`Company ${company.id} created successfully, user ${userId} promoted to MANAGEMENT`);
+    this.logger.info(`Company ${company.id} created successfully by user ${userId}`);
 
-    // Generate refreshed access token with new role and companyId
+    // Issue updated token with new role and companyId
     const accessToken = JwtService.sign({
       sub: updatedUser.id,
       email: updatedUser.email,
@@ -70,10 +77,11 @@ export class CompanyService {
       throw new NotFoundError("Company profile not found");
     }
 
-    const [members, metrics, openOpportunities] = await Promise.all([
+    const [members, metrics, openOpportunities, companyPrograms] = await Promise.all([
       this.companyRepository.findMembers(companyId),
       this.companyRepository.getMetrics(companyId),
       this.companyRepository.getOpenOpportunities(companyId),
+      this.companyRepository.getCompanyPrograms(companyId),
     ]);
 
     return {
@@ -81,6 +89,7 @@ export class CompanyService {
       members,
       metrics,
       openOpportunities,
+      programs: companyPrograms,
     };
   }
 
@@ -90,15 +99,17 @@ export class CompanyService {
       throw new NotFoundError("Company not found");
     }
 
-    const [metrics, openOpportunities] = await Promise.all([
+    const [metrics, openOpportunities, companyPrograms] = await Promise.all([
       this.companyRepository.getMetrics(id),
       this.companyRepository.getOpenOpportunities(id),
+      this.companyRepository.getCompanyPrograms(id),
     ]);
 
     return {
       ...company,
       metrics,
       openOpportunities,
+      programs: companyPrograms,
     };
   }
 
@@ -118,5 +129,47 @@ export class CompanyService {
 
     await this.companyRepository.updateCompany(companyId, dto);
     return this.getCurrentCompany(companyId);
+  }
+
+  async updateMember(
+    currentUserId: string,
+    companyId: string | null,
+    memberId: string,
+    data: { role?: UserRole; status?: UserStatus }
+  ) {
+    if (!companyId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan perusahaan manapun");
+    }
+
+    const member = await this.companyRepository.findMemberById(companyId, memberId);
+    if (!member) {
+      throw new NotFoundError("Anggota tim tidak ditemukan");
+    }
+
+    // 1. Tidak boleh menonaktifkan diri sendiri
+    if (data.status === "INACTIVE" && memberId === currentUserId) {
+      throw new BadRequestError("Anda tidak dapat menonaktifkan akun Anda sendiri.");
+    }
+
+    // 2. Tidak boleh mengubah role atau menonaktifkan satu-satunya akun Management yang masih aktif
+    if (
+      member.role === "MANAGEMENT" &&
+      member.status === "ACTIVE" &&
+      (data.role === "CSR_ADMIN" || data.status === "INACTIVE")
+    ) {
+      const otherActiveManagementCount = await this.companyRepository.countActiveManagement(
+        companyId,
+        memberId
+      );
+      if (otherActiveManagementCount === 0) {
+        throw new BadRequestError(
+          "Tidak dapat mengubah role atau menonaktifkan satu-satunya akun Management yang masih aktif."
+        );
+      }
+    }
+
+    const updated = await this.companyRepository.updateMember(companyId, memberId, data);
+    this.logger.info(`Member ${memberId} in company ${companyId} updated: ${JSON.stringify(data)}`);
+    return updated;
   }
 }

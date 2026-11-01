@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   X,
   FileText,
@@ -29,6 +29,33 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CompanyProposalItem } from "./types";
 import { PROPOSAL_STATUS_CONFIG, FOCUS_AREA_CONFIG, formatRupiah, formatDate } from "./helpers";
+
+
+function PartnerModalLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
+  const [hasError, setHasError] = useState(false);
+  const initials = useMemo(() => {
+    if (!name) return "MP";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  }, [name]);
+
+  if (logoUrl && !hasError) {
+    return (
+      <img
+        src={logoUrl}
+        alt={name}
+        onError={() => setHasError(true)}
+        className="w-11 h-11 rounded-2xl object-cover border border-slate-200 shrink-0"
+      />
+    );
+  }
+  return (
+    <div className="w-11 h-11 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+      {initials}
+    </div>
+  );
+}
 
 interface ReviewProposalModalProps {
   isOpen: boolean;
@@ -606,8 +633,44 @@ export function ReviewProposalModal({
             )}
           </div>
 
-          {/* FORM EVALUASI & KEPUTUSAN */}
-          {!isWithdrawn ? (
+          {/* FORM EVALUASI & KEPUTUSAN ATAU STATUS DETAIL */}
+          {isAlreadyAccepted ? (
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-emerald-900">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>Proposal Telah Disetujui</span>
+              </div>
+              <p className="text-emerald-800 leading-relaxed">
+                Proposal ini telah disetujui dan telah dialihkan ke tahap penyusunan kesepakatan kolaborasi kerja sama CSR.
+              </p>
+              {proposal.feedback && (
+                <div className="pt-2 border-t border-emerald-200/60 mt-2">
+                  <span className="font-semibold text-emerald-950 block mb-0.5">Catatan Persetujuan:</span>
+                  <p className="text-emerald-900 italic">"{proposal.feedback}"</p>
+                </div>
+              )}
+            </div>
+          ) : proposal.status === "REJECTED" ? (
+            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs space-y-2">
+              <div className="flex items-center gap-2 font-bold text-rose-900">
+                <XCircle className="w-4 h-4 text-rose-600" />
+                <span>Proposal Tidak Disetujui</span>
+              </div>
+              <p className="text-rose-800 leading-relaxed">
+                Proposal ini telah dievaluasi dan belum memenuhi kriteria inisiatif CSR yang dibutuhkan perusahaan.
+              </p>
+              {proposal.feedback && (
+                <div className="pt-2 border-t border-rose-200/60 mt-2">
+                  <span className="font-semibold text-rose-950 block mb-0.5">Alasan Keputusan:</span>
+                  <p className="text-rose-900 italic">"{proposal.feedback}"</p>
+                </div>
+              )}
+            </div>
+          ) : isWithdrawn ? (
+            <div className="p-4 rounded-2xl bg-slate-100 text-slate-600 text-xs italic">
+              Proposal ini telah ditarik oleh pihak mitra, sehingga tidak dapat dievaluasi lebih lanjut.
+            </div>
+          ) : (
             <form id="review-form" onSubmit={handleSubmit} className="pt-4 border-t border-slate-100 space-y-4">
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
@@ -745,10 +808,6 @@ export function ReviewProposalModal({
                 </span>
               </div>
             </form>
-          ) : (
-            <div className="p-4 rounded-2xl bg-slate-100 text-slate-600 text-xs italic">
-              Proposal ini telah ditarik oleh pihak mitra, sehingga tidak dapat dievaluasi lebih lanjut.
-            </div>
           )}
         </div>
 
@@ -758,7 +817,7 @@ export function ReviewProposalModal({
             Tutup
           </Button>
 
-          {!isWithdrawn && (
+          {!isWithdrawn && !isAlreadyAccepted && proposal.status !== "REJECTED" && (
             <Button
               type="submit"
               form="review-form"

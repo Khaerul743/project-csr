@@ -83,7 +83,7 @@ export function LandingNavbar() {
           onClick={(e) => handleNavClick(e, "#beranda")}
           className="flex items-center gap-3 select-none group focus:outline-hidden"
         >
-          <div className="relative w-11 h-11 rounded-xl p-0.5 bg-white shadow-2xs border border-[#C8C5D0]/60 overflow-hidden flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
             <Image
               src="/LOGO SIPENA.png"
               alt="Logo SIPENA"
@@ -106,7 +106,7 @@ export function LandingNavbar() {
               </span>
             </div>
             <span className="text-[11px] font-medium text-[#47464F] block tracking-tight">
-              Sistem Tata Kelola & Kolaborasi CSR
+              Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR
             </span>
           </div>
         </Link>

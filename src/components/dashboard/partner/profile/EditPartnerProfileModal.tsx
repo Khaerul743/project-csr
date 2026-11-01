@@ -726,9 +726,9 @@ export function EditPartnerProfileModal({
                   type="button"
                   size="sm"
                   onClick={handleAddActivity}
+                  leftIcon={<Plus className="w-3.5 h-3.5 shrink-0" />}
                   className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold"
                 >
-                  <Plus className="w-3.5 h-3.5 mr-1" />
                   Tambah Kegiatan
                 </Button>
               </div>
@@ -903,9 +903,9 @@ export function EditPartnerProfileModal({
                   type="button"
                   size="sm"
                   onClick={handleAddTeamMember}
+                  leftIcon={<Plus className="w-3.5 h-3.5 shrink-0" />}
                   className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold"
                 >
-                  <Plus className="w-3.5 h-3.5 mr-1" />
                   Tambah Anggota
                 </Button>
               </div>

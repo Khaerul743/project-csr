@@ -22,7 +22,8 @@ export interface CreateActivityDTO {
 }
 
 export interface ReviewActivityDTO {
-  status: "VERIFIED" | "REVISION_REQUESTED";
+  status?: "VERIFIED" | "REVISION_REQUESTED";
+  stageId?: string | null;
   companyFeedback?: string | null;
 }
 
