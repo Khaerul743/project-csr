@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
   HeartHandshake,
+  ChevronRight,
   Sparkles,
   Search,
   Filter,
@@ -37,6 +38,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { DashboardHeader, BreadcrumbItem } from "../DashboardHeader";
 import { PartnerSidebar } from "./PartnerSidebar";
 import { SubmitProposalModal } from "./SubmitProposalModal";
 import { ProposalDetailModal } from "./ProposalDetailModal";
@@ -435,6 +437,98 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
 
   const partnerFocus = partner ? FOCUS_AREA_CONFIG[partner.focusArea] : null;
 
+  // Standardized SIPENA Dynamic Breadcrumbs for Partner Dashboard
+  const headerBreadcrumbs: BreadcrumbItem[] = useMemo(() => {
+    if (activeMenu === "explore" && selectedCompanyForDetail) {
+      return [
+        { label: "Dashboard", onClick: () => { setSelectedCompanyForDetail(null); setActiveMenu("overview"); } },
+        { label: "Eksplorasi Peluang", onClick: () => setSelectedCompanyForDetail(null) },
+        { label: selectedCompanyForDetail.name },
+      ];
+    }
+    if (activeMenu === "explore") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Eksplorasi Peluang" },
+      ];
+    }
+    if (activeMenu === "invitations") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Undangan Masuk" },
+      ];
+    }
+    if (activeMenu === "proposals") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Proposal Saya" },
+      ];
+    }
+    if (activeMenu === "collaborations") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Kolaborasi Aktif" },
+      ];
+    }
+    if (activeMenu === "conversations") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Pesan & Negosiasi" },
+      ];
+    }
+    if (activeMenu === "programs") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Pelaksanaan Program" },
+      ];
+    }
+    if (activeMenu === "analytics") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Laporan & Dampak ESG" },
+      ];
+    }
+    if (activeMenu === "profile") {
+      return [
+        { label: "Dashboard", onClick: () => setActiveMenu("overview") },
+        { label: "Profil Lembaga" },
+      ];
+    }
+    return [{ label: "Dashboard" }, { label: "Ringkasan Aktivitas" }];
+  }, [activeMenu, selectedCompanyForDetail]);
+
+  // Standardized SIPENA Right Action for Partner Dashboard Header
+  const headerRightAction = (
+    <div className="flex items-center gap-2 sm:gap-2.5">
+      {/* Subtle Aligned Refresh Button */}
+      <button
+        type="button"
+        onClick={handleRefreshAll}
+        className="p-2 rounded-xl border border-[#E8E8EA] bg-white hover:bg-[#F4F4F6] text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+        title="Segarkan data workspace"
+      >
+        <RefreshCw
+          className={`w-4 h-4 ${
+            isLoadingOpportunities || isLoadingProposals || isLoadingCollaborations || isLoadingPrograms
+              ? "animate-spin text-emerald-600"
+              : ""
+          }`}
+        />
+      </button>
+
+      {/* Sleek Workspace Chip / Role Badge */}
+      <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs">
+        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="truncate max-w-[140px] font-medium text-slate-700">
+          {partner?.name || "Workspace Mitra"}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-md border border-teal-200/60">
+          Mitra Pelaksana
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans">
       {/* 1. Sidebar */}
@@ -455,48 +549,33 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
 
       {/* 2. Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-        {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 py-3.5 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsMobileSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition"
-              aria-label="Buka Menu"
-            >
-              <Inbox className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-slate-900 text-sm tracking-tight hidden sm:inline">
-                {partner?.name || "Workspace Mitra"}
-              </span>
-              <span className="text-slate-300 hidden sm:inline">/</span>
-              <span className="text-xs font-semibold text-teal-600 capitalize">
-                {activeMenu === "overview" && "Ringkasan Aktivitas"}
-                {activeMenu === "explore" && "Eksplorasi Peluang CSR"}
-                {activeMenu === "invitations" && "Undangan Masuk"}
-                {activeMenu === "proposals" && "Pengajuan Proposal"}
-                {activeMenu === "collaborations" && "Kolaborasi & Kontrak MoU"}
-                {activeMenu === "conversations" && "Pesan & Negosiasi"}
-                {activeMenu === "programs" && "Pelaksanaan Program & Monitoring"}
-                {activeMenu === "analytics" && "Laporan & Dampak ESG"}
-                {activeMenu === "profile" && "Profil Lembaga"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={handleRefreshAll}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition"
-              title="Perbarui Data"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-            <Badge variant="purple" size="sm">
-              Mitra Pelaksana
-            </Badge>
-          </div>
-        </header>
+        {/* Top Header - Standardized SIPENA DashboardHeader */}
+        <DashboardHeader
+          breadcrumbs={headerBreadcrumbs}
+          title={
+            activeMenu === "explore"
+              ? "Eksplorasi Peluang CSR"
+              : activeMenu === "invitations"
+              ? "Undangan Masuk"
+              : activeMenu === "proposals"
+              ? "Pengajuan Proposal"
+              : activeMenu === "collaborations"
+              ? "Kolaborasi & Kontrak MoU"
+              : activeMenu === "conversations"
+              ? "Pesan & Negosiasi"
+              : activeMenu === "programs"
+              ? "Pelaksanaan Program & Monitoring"
+              : activeMenu === "analytics"
+              ? "Laporan & Dampak ESG"
+              : activeMenu === "profile"
+              ? "Profil Lembaga"
+              : "Ringkasan Aktivitas"
+          }
+          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+          rightAction={headerRightAction}
+          onNavigateMenu={(menu) => setActiveMenu(menu as PartnerNavMenu)}
+          organizationName={partner?.name}
+        />
 
         {/* Dynamic Subviews Content */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
@@ -859,45 +938,75 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
             />
           ) : activeMenu === "explore" && (
             <div className="space-y-6">
-              {/* Header Title & Filter */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                    Eksplorasi Peluang CSR Perusahaan
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Temukan program inisiatif CSR terbuka dan ajukan proposal penawaran kegiatan
+              {/* ========================================================================= */}
+              {/* 1. Page Header: Eksplorasi Peluang CSR (Company Design System Consistent) */}
+              {/* ========================================================================= */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      Katalog Inisiatif
+                    </span>
+                  </div>
+
+                  <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Eksplorasi Peluang CSR
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                    Temukan inisiatif CSR perusahaan yang terbuka dan ajukan proposal sesuai kapasitas lembaga Anda.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-slate-500">
-                    {filteredOpportunities.length} Inisiatif Tersedia
-                  </span>
+                {/* Sisi Kanan: Action & Ringkasan Inisiatif */}
+                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+                  <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs flex items-center gap-1.5">
+                    <span>Menampilkan</span>
+                    <span className="font-bold text-[#009E75]">{filteredOpportunities.length}</span>
+                    <span>Inisiatif Tersedia</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleRefreshAll}
+                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+                    title="Segarkan data peluang"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isLoadingOpportunities ? "animate-spin text-emerald-600" : ""}`} />
+                  </button>
                 </div>
               </div>
 
-              {/* Search & Focus Area Filter Pills */}
-              <div className="space-y-3">
+              {/* 2. Search & Focus Area Filter Toolbar */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3.5">
                 <div className="relative">
-                  <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-400" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#787680] pointer-events-none" />
                   <input
                     type="text"
                     value={exploreSearch}
                     onChange={(e) => setExploreSearch(e.target.value)}
                     placeholder="Cari berdasarkan judul inisiatif, nama perusahaan, atau target kota..."
-                    className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 shadow-xs"
+                    className="w-full bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[#1A1C1D] placeholder:text-[#9A98A6] outline-none transition-colors focus:bg-white focus:border-[#181343]/40 focus:ring-2 focus:ring-[#181343]/8 shadow-2xs"
                   />
                 </div>
 
                 {/* Focus Area Filter Chips */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs scrollbar-none">
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none pt-0.5">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#181343] shrink-0 mr-1">
+                    <Filter className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="hidden sm:inline">Bidang:</span>
+                  </div>
+
                   <button
                     onClick={() => setExploreFocusFilter("ALL")}
-                    className={`px-3 py-1.5 rounded-xl font-semibold transition shrink-0 ${
+                    className={`px-3 py-1.5 rounded-xl font-semibold transition shrink-0 cursor-pointer ${
                       exploreFocusFilter === "ALL"
-                        ? "bg-slate-900 text-white shadow-xs"
-                        : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                        ? "bg-[#181343] text-white shadow-xs"
+                        : "bg-[#F9F9FB] text-[#47464F] hover:bg-[#EEEEF0] border border-[#E8E8EA]"
                     }`}
                   >
                     Semua Kategori
@@ -909,10 +1018,10 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                       <button
                         key={focus}
                         onClick={() => setExploreFocusFilter(focus)}
-                        className={`px-3 py-1.5 rounded-xl font-semibold transition shrink-0 ${
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition shrink-0 cursor-pointer ${
                           isSelected
-                            ? "bg-teal-600 text-white shadow-xs"
-                            : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+                            ? "bg-emerald-600 text-white shadow-xs"
+                            : "bg-[#F9F9FB] text-[#47464F] hover:bg-[#EEEEF0] border border-[#E8E8EA]"
                         }`}
                       >
                         {cfg.label}
@@ -1057,13 +1166,34 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* ========================================================================= */}
           {activeMenu === "invitations" && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                  Undangan Kolaborasi dari Perusahaan
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Perusahaan secara langsung mengundang yayasan/organisasi Anda untuk mengajukan proposal ke inisiatif mereka
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+                <div className="space-y-1">
+                                    <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Undangan Kolaborasi dari Perusahaan
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                    Perusahaan secara langsung mengundang yayasan/organisasi Anda untuk mengajukan proposal ke inisiatif mereka.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+                  <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs flex items-center gap-1.5">
+                    <span>Total</span>
+                    <span className="font-bold text-[#009E75]">{invitations.length}</span>
+                    <span>Undangan</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRefreshAll}
+                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+                    title="Segarkan undangan"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isLoadingInvitations ? "animate-spin text-emerald-600" : ""}`} />
+                  </button>
+                </div>
               </div>
 
               {isLoadingInvitations ? (
@@ -1196,25 +1326,38 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* ========================================================================= */}
           {activeMenu === "proposals" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+                <div className="space-y-1">
+                                    <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
                     Daftar Proposal Inisiatif Saya
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Riwayat seluruh proposal yang diajukan beserta status peninjauan dari perusahaan
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                    Riwayat seluruh proposal yang diajukan beserta status peninjauan resmi dari perusahaan mitra.
                   </p>
                 </div>
 
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="bg-teal-600 hover:bg-teal-700 text-white text-xs shadow-sm self-start sm:self-auto"
-                  leftIcon={<Compass className="w-3.5 h-3.5" />}
-                  onClick={() => setActiveMenu("explore")}
-                >
-                  Cari Peluang Baru
-                </Button>
+                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="bg-[#181343] hover:bg-[#26224C] text-white text-xs font-bold shadow-2xs"
+                    leftIcon={<Compass className="w-3.5 h-3.5" />}
+                    onClick={() => setActiveMenu("explore")}
+                  >
+                    Cari Peluang Baru
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={handleRefreshAll}
+                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+                    title="Segarkan proposal"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isLoadingProposals ? "animate-spin text-emerald-600" : ""}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Status Filter Chips */}
@@ -1341,13 +1484,34 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* ========================================================================= */}
           {activeMenu === "collaborations" && (
             <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                  Kontrak Kolaborasi & Perjanjian MoU
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Daftar resmi kesepakatan kerja sama program CSR antara organisasi Anda dan perusahaan sponsor
-                </p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+                <div className="space-y-1">
+                                    <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Kontrak Kolaborasi & Perjanjian MoU
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                    Daftar resmi kesepakatan kerja sama program CSR antara organisasi Anda dan perusahaan sponsor.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+                  <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs flex items-center gap-1.5">
+                    <span>Total</span>
+                    <span className="font-bold text-[#009E75]">{collaborations.length}</span>
+                    <span>Kontrak / MoU</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRefreshAll}
+                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+                    title="Segarkan kolaborasi"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isLoadingCollaborations ? "animate-spin text-emerald-600" : ""}`} />
+                  </button>
+                </div>
               </div>
 
               {/* Summary Metrics */}
@@ -1671,6 +1835,37 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* ========================================================================= */}
           {activeMenu === "programs" && (
             <div className="space-y-6">
+              {/* Page Header: Pelaksanaan Program & Monitoring */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+                <div className="space-y-1">
+                                    <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Pelaksanaan Program & Monitoring
+                  </h1>
+                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                    Pantau realisasi milestone lapangan, penyaluran & serapan termin dana, serta pelaporan akuntabilitas kegiatan.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+                  <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs flex items-center gap-1.5">
+                    <span>Total</span>
+                    <span className="font-bold text-[#009E75]">{programs.length}</span>
+                    <span>Program Berjalan</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRefreshAll}
+                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+                    title="Segarkan program"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isLoadingPrograms ? "animate-spin text-emerald-600" : ""}`} />
+                  </button>
+                </div>
+              </div>
+
               {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten) */}
               {(() => {
                 const opStats = {
@@ -2067,6 +2262,8 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {activeMenu === "profile" && partner && (
             <PartnerFullProfileView
               partner={partner}
+              programs={programs}
+              collaborations={collaborations}
               isOwner={true}
               onProfileUpdated={(updated) => {
                 setPartner(updated);

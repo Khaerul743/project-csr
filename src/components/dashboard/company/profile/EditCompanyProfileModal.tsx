@@ -25,6 +25,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { INDONESIAN_REGIONS } from "../opportunities/indonesian-regions";
 import { CsrLeaderItem, CompanyDetailedProfile } from "@/modules/companies/company.interface";
 
 interface EditCompanyProfileModalProps {
@@ -81,6 +83,21 @@ export function EditCompanyProfileModal({
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
+
+  const provinceOptions = React.useMemo(() => {
+    return INDONESIAN_REGIONS.map((p) => p.name);
+  }, []);
+
+  const cityOptions = React.useMemo(() => {
+    if (!province) return [];
+    const found = INDONESIAN_REGIONS.find((p) => p.name.toLowerCase() === province.toLowerCase());
+    return found ? found.cities : [];
+  }, [province]);
+
+  const handleProvinceChange = (prov: string) => {
+    setProvince(prov);
+    setCity("");
+  };
   const [website, setWebsite] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
@@ -476,27 +493,22 @@ export function EditCompanyProfileModal({
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    Kota Domisili Kantor Pusat
-                  </label>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Jakarta Selatan"
-                  />
-                </div>
+                <SearchableSelect
+                  label="Provinsi Domisili"
+                  placeholder="Pilih Provinsi..."
+                  value={province}
+                  onChange={handleProvinceChange}
+                  options={provinceOptions}
+                />
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                    Provinsi
-                  </label>
-                  <Input
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                    placeholder="DKI Jakarta"
-                  />
-                </div>
+                <SearchableSelect
+                  label="Kota Domisili Kantor Pusat"
+                  placeholder={province ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
+                  value={city}
+                  onChange={setCity}
+                  options={cityOptions}
+                  disabled={!province}
+                />
               </div>
 
               <div>

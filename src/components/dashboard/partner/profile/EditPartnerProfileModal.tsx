@@ -21,6 +21,8 @@ import {
   Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { INDONESIAN_REGIONS } from "../../company/opportunities/indonesian-regions";
 import { Badge } from "@/components/ui/badge";
 import { csrFocusAreaEnum, CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { FOCUS_AREA_CONFIG } from "../helpers";
@@ -71,6 +73,21 @@ export function EditPartnerProfileModal({
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [province, setProvince] = useState("");
+
+  const provinceOptions = React.useMemo(() => {
+    return INDONESIAN_REGIONS.map((p) => p.name);
+  }, []);
+
+  const cityOptions = React.useMemo(() => {
+    if (!province) return [];
+    const found = INDONESIAN_REGIONS.find((p) => p.name.toLowerCase() === province.toLowerCase());
+    return found ? found.cities : [];
+  }, [province]);
+
+  const handleProvinceChange = (prov: string) => {
+    setProvince(prov);
+    setCity("");
+  };
   const [website, setWebsite] = useState("");
   const [instagramUrl, setInstagramUrl] = useState("");
   const [linkedinUrl, setLinkedinUrl] = useState("");
@@ -577,27 +594,22 @@ export function EditPartnerProfileModal({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Kota / Kabupaten</label>
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Surabaya"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none"
-                  />
-                </div>
+                <SearchableSelect
+                  label="Provinsi"
+                  placeholder="Pilih Provinsi..."
+                  value={province}
+                  onChange={handleProvinceChange}
+                  options={provinceOptions}
+                />
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">Provinsi</label>
-                  <input
-                    type="text"
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                    placeholder="Jawa Timur"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none"
-                  />
-                </div>
+                <SearchableSelect
+                  label="Kota / Kabupaten"
+                  placeholder={province ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
+                  value={city}
+                  onChange={setCity}
+                  options={cityOptions}
+                  disabled={!province}
+                />
               </div>
 
               {/* Tautan Media Sosial & Website */}

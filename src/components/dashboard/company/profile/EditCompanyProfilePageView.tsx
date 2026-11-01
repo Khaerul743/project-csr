@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Building2,
   Palette,
@@ -32,6 +32,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { INDONESIAN_REGIONS } from "../opportunities/indonesian-regions";
 import { CsrLeaderItem, CompanyDetailedProfile } from "@/modules/companies/company.interface";
 
 export type ProfileCategoryTab = "info" | "branding" | "csr" | "legal";
@@ -133,6 +135,23 @@ export function EditCompanyProfilePageView({
     // If company has focus areas or infer from vision/industry
     return ["PENDIDIKAN", "LINGKUNGAN", "PEMBERDAYAAN_EKONOMI"];
   });
+
+  // Available provinces list
+  const provinceOptions = useMemo(() => {
+    return INDONESIAN_REGIONS.map((p) => p.name);
+  }, []);
+
+  // Available cities based on selected province
+  const cityOptions = useMemo(() => {
+    if (!province) return [];
+    const found = INDONESIAN_REGIONS.find((p) => p.name.toLowerCase() === province.toLowerCase());
+    return found ? found.cities : [];
+  }, [province]);
+
+  const handleProvinceChange = (prov: string) => {
+    setProvince(prov);
+    setCity("");
+  };
 
   // Track initial state for dirty detection
   const initialState = useRef({
@@ -733,31 +752,24 @@ export function EditCompanyProfilePageView({
 
                 <div className="space-y-4 text-xs sm:text-sm">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="font-bold text-slate-800 block mb-1.5">
-                        Kota / Kabupaten
-                      </label>
-                      <input
-                        type="text"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="Contoh: Jakarta Selatan"
-                        className="w-full h-11 px-4 text-xs sm:text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] transition-all"
-                      />
-                    </div>
+                    <SearchableSelect
+                      label="Provinsi Kantor Pusat"
+                      placeholder="Pilih Provinsi..."
+                      value={province}
+                      onChange={handleProvinceChange}
+                      options={provinceOptions}
+                      helperText="Pilih provinsi domisili kantor pusat"
+                    />
 
-                    <div>
-                      <label className="font-bold text-slate-800 block mb-1.5">
-                        Provinsi
-                      </label>
-                      <input
-                        type="text"
-                        value={province}
-                        onChange={(e) => setProvince(e.target.value)}
-                        placeholder="Contoh: DKI Jakarta"
-                        className="w-full h-11 px-4 text-xs sm:text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] transition-all"
-                      />
-                    </div>
+                    <SearchableSelect
+                      label="Kota / Kabupaten"
+                      placeholder={province ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
+                      value={city}
+                      onChange={setCity}
+                      options={cityOptions}
+                      disabled={!province}
+                      helperText="Pilih kota/kabupaten kantor pusat"
+                    />
                   </div>
 
                   <div>
