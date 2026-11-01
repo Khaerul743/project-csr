@@ -86,7 +86,7 @@ Pengelolaan basis data menggunakan Drizzle ORM:
 
 ### 📁 `src/modules/`
 Modul fitur bisnis aplikasi yang memisahkan tanggung jawab kode ke dalam 3 lapisan (*3-Tier Pattern*), meliputi modul `auth/`, `companies/`, `partners/`, `invitations/`, `opportunities/`, `proposals/`, `collaborations/`, `conversations/`, `programs/`, `activities/`, `reviews/`, `finances/`, serta modul kecerdasan buatan `ai/`:
-- **`ai/`**: Modul integrasi Generative AI (LangChain + OpenAI GPT-4o-mini & PDF Document Parser) yang terbagi menjadi sub-layanan fungsional (`config/`, `services/document-parser/`, `services/milestone-extraction/`).
+- **`ai/`**: Modul integrasi Generative AI (LangChain + OpenAI GPT-4o-mini & PDF Document Parser) yang terbagi menjadi sub-layanan fungsional (`config/`, `services/document-parser/`, `services/milestone-extraction/`, `services/proposal-screener/`, `services/esg-report/`).
 - **`Controller`**: Menerima request HTTP, memvalidasi guard autentikasi/RBAC, dan memanggil service.
 - **`Service`**: Tempat logika bisnis utama dijalankan (misal: onboarding organisasi, undangan tim, promosi role, hashing password, review proposal, inisiasi kolaborasi, finalisasi MoU & pembuatan program otomatis, dekonstruksi proposal menjadi tahapan terstruktur oleh AI, penyaluran dana termin & verifikasi rekening mitra, pelaporan belanja fisik & sinkronisasi otomatis serapan pagu, survei kepuasan masyarakat & anti-spam rate limiting).
 - **`Repository`**: Tempat penulisan query langsung ke database menggunakan Drizzle ORM (termasuk *database transactions*, rekapitulasi ringkasan kas, dan agregasi skor rating).

@@ -19,6 +19,7 @@ Setiap dokumen di bawah ini memiliki fokus teknis yang spesifik:
 | **[`api-documentation.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)** | Kontrak lengkap REST API (request body, parameter URL, response JSON, dan status code). | Saat menghubungkan frontend ke backend atau integrasi pihak ketiga. |
 | **[`ai-service-milestone-extraction.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-milestone-extraction.md)** | Dokumentasi dekonstruksi proposal PDF menjadi tahapan otomatis berbasis LangChain & GPT-4o-mini. | Saat memodifikasi atau memperbaiki fitur AI ekstraksi TOR/proposal. |
 | **[`ai-service-proposal-screener.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-proposal-screener.md)** | Dokumentasi AI Proposal Screener & Scoring Assistant (skor kelayakan, audit anggaran, dan deteksi risiko). | Saat memodifikasi atau memperluas fitur AI evaluasi proposal. |
+| **[`ai-service-sustainability-report.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-sustainability-report.md)** | Dokumentasi AI Sustainability & ESG Report Generator (sintesis POJK 51, GRI Standards, pemetaan SDG, dan PDF). | Saat memodifikasi fitur AI pelaporan keberlanjutan & dampak ESG. |
 | **[`postman_collection.json`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/postman_collection.json)** | Koleksi endpoint Postman siap pakai untuk pengujian API. | Saat melakukan manual testing API di Postman/Insomnia. |
 
 ---

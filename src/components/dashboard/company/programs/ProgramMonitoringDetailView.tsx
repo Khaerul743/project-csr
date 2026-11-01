@@ -41,6 +41,7 @@ import { ProgramStatus } from "@/db/schema/programs";
 import { ActivityTimeline } from "../../activities/ActivityTimeline";
 import { BeneficiaryReviewsTab } from "../../reviews/BeneficiaryReviewsTab";
 import { ProgramFinancesTab } from "../../finances/ProgramFinancesTab";
+import { EsgSustainabilityReportTab } from "./EsgSustainabilityReportTab";
 
 interface ProgramMonitoringDetailViewProps {
   program: CompanyProgramItem;
@@ -58,7 +59,9 @@ export function ProgramMonitoringDetailView({
   isManagement = false,
 }: ProgramMonitoringDetailViewProps) {
   const [currentProgram, setCurrentProgram] = useState<CompanyProgramItem>(initialProgram);
-  const [activeTab, setActiveTab] = useState<"activities" | "finances" | "reviews" | "settings">("activities");
+  const [activeTab, setActiveTab] = useState<
+    "activities" | "finances" | "reviews" | "esg-report" | "settings"
+  >("activities");
   const [partnerLogoError, setPartnerLogoError] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
@@ -198,6 +201,17 @@ export function ProgramMonitoringDetailView({
               Pesan Mitra
             </Button>
           )}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setActiveTab("esg-report")}
+            leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-600" />}
+            className="text-xs font-extrabold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-300 rounded-xl cursor-pointer shadow-2xs"
+          >
+            Laporan ESG (AI)
+          </Button>
 
           <Badge variant={statusConfig.variant} size="md" hasDot className="shadow-2xs">
             {statusConfig.label}
@@ -471,6 +485,19 @@ export function ProgramMonitoringDetailView({
 
           <button
             type="button"
+            onClick={() => setActiveTab("esg-report")}
+            className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+              activeTab === "esg-report"
+                ? "border-[#009E75] text-[#009E75] font-extrabold"
+                : "border-transparent text-[#787680] hover:text-[#181343]"
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span>Laporan Keberlanjutan &amp; ESG (AI)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setActiveTab("settings")}
             className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "settings"
@@ -509,6 +536,14 @@ export function ProgramMonitoringDetailView({
             <BeneficiaryReviewsTab
               programId={program.id}
               programTitle={program.title}
+            />
+          )}
+
+          {activeTab === "esg-report" && (
+            <EsgSustainabilityReportTab
+              program={program}
+              onProgramUpdated={onProgramUpdated}
+              isManagement={isManagement}
             />
           )}
 

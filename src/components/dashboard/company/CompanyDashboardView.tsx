@@ -1811,6 +1811,12 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                             <Badge variant={statusConfig.variant} size="md" hasDot>
                               {statusConfig.label}
                             </Badge>
+                            {prog.sustainabilityReport && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-xs">
+                                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Laporan ESG Siap</span>
+                              </span>
+                            )}
                             {prog.targetCity && (
                               <span className="text-xs text-slate-500 flex items-center gap-1 font-medium">
                                 <MapPin className="w-3.5 h-3.5 text-slate-400" />

@@ -346,4 +346,16 @@ export class ProgramRepository {
 
     return updated;
   }
+
+  async saveEsgReport(id: string, reportJson: string): Promise<void> {
+    await db
+      .update(programs)
+      .set({
+        sustainabilityReport: reportJson,
+        reportGeneratedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(programs.id, id));
+  }
 }
+

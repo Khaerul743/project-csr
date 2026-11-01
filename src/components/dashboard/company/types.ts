@@ -242,6 +242,8 @@ export interface CompanyProgramItem {
   nextActivityDate?: string | null;
   lastReportStatus?: string | null;
   lastReportDate?: string | null;
+  sustainabilityReport?: string | null;
+  reportGeneratedAt?: string | null;
 }
 
 

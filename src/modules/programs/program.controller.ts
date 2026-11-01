@@ -71,4 +71,55 @@ export class ProgramController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async generateEsgReport(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const result = await this.programService.generateEsgReport(id, {
+        companyId: authUser.companyId,
+        partnerId: authUser.partnerId,
+      });
+
+      return ApiResponse.success(
+        result,
+        "Laporan Keberlanjutan & Dampak ESG berhasil disusun oleh AI"
+      );
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async getEsgReport(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      const program = await this.programService.getProgramById(id, {
+        companyId: authUser.companyId,
+        partnerId: authUser.partnerId,
+      });
+
+      if (!program.sustainabilityReport) {
+        return ApiResponse.success(null, "Laporan ESG belum pernah disusun untuk program ini");
+      }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(program.sustainabilityReport);
+      } catch {
+        parsed = program.sustainabilityReport;
+      }
+
+      return ApiResponse.success(
+        {
+          report: parsed,
+          generatedAt: program.reportGeneratedAt,
+        },
+        "Laporan Keberlanjutan & Dampak ESG berhasil diambil"
+      );
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }
+

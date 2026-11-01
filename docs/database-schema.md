@@ -174,15 +174,19 @@ Menyimpan kredensial autentikasi pengguna dan pemetaan ke organisasi.
 - `collaborationId` (VARCHAR(36), FK $\rightarrow$ `collaborations.id`, NOT NULL).
 - `companyId` (VARCHAR(36), FK $\rightarrow$ `companies.id`, NOT NULL).
 - `partnerId` (VARCHAR(36), FK $\rightarrow$ `partners.id`, NOT NULL).
-- `name` (VARCHAR(255), NOT NULL): Nama program lapangan.
-- `description` (TEXT, NOT NULL): Latar belakang program.
+- `title` (VARCHAR(255), NOT NULL): Nama program lapangan.
+- `description` (TEXT, NULLABLE): Latar belakang program.
 - `focusArea` (ENUM `csrFocusAreaEnum`, NOT NULL).
-- `targetBeneficiaries` (VARCHAR(255), NULLABLE): Target warga terdampak.
-- `totalBudget` (DECIMAL(15,2), NOT NULL): Komitmen pagu anggaran.
-- `allocatedBudget` (DECIMAL(15,2), DEFAULT `'0.00'`): Total dana yang sudah dialokasikan/diserap.
+- `budget` (DECIMAL(15,2), NOT NULL): Komitmen pagu anggaran.
+- `spentBudget` (DECIMAL(15,2), DEFAULT `'0.00'`): Total dana belanja lapangan yang terserap.
+- `targetBeneficiaries` (VARCHAR(255), NULLABLE): Sasaran target warga terdampak.
+- `actualBeneficiaries` (VARCHAR(255), NULLABLE): Realisasi jiwa penerima manfaat langsung.
 - `startDate`, `endDate` (TIMESTAMP, NULLABLE): Tanggal kick-off & target penutupan.
-- `locationProvince`, `locationCity` (VARCHAR, NULLABLE): Koordinat wilayah kerja.
-- `status` (ENUM: `'PLANNING'`, `'ACTIVE'`, `'ON_HOLD'`, `'COMPLETED'`, `'CANCELLED'`).
+- `targetCity`, `targetProvince` (VARCHAR, NULLABLE): Wilayah kerja program.
+- `status` (ENUM: `'PLANNED'`, `'IN_PROGRESS'`, `'COMPLETED'`, `'ON_HOLD'`, `'CANCELLED'`).
+- `sustainabilityReport` (TEXT, NULLABLE): 🆕 Serialisasi JSON hasil analisis Laporan Keberlanjutan & Dampak ESG resmi dari AI.
+- `reportGeneratedAt` (TIMESTAMP, NULLABLE): 🆕 Waktu laporan ESG terakhir disusun oleh AI.
+
 
 ### 11. `program_stages` — Tahapan Kerja / Milestone Program
 - `id` (VARCHAR(36), PK): UUID tahapan.

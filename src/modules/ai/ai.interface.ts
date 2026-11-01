@@ -1,4 +1,6 @@
 import { ProposalScreeningResult } from "./services/proposal-screener/proposal-screener.schema";
+import { EsgReportResult } from "./services/esg-report/esg-report.schema";
+
 
 export interface ProposalMilestoneInput {
   title: string;
@@ -45,3 +47,51 @@ export interface ProposalScreeningInput {
 export interface ProposalScreeningResponse extends ProposalScreeningResult {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
 }
+
+export interface ProgramStageSummaryItem {
+  title: string;
+  orderIndex: number;
+  status?: string;
+  targetTimeline?: string | null;
+}
+
+export interface ProgramActivitySummaryItem {
+  title: string;
+  activityDate?: string | Date | null;
+  beneficiariesCount?: number | null;
+  status: string;
+  location?: string | null;
+  description?: string | null;
+}
+
+export interface ProgramReviewSummaryItem {
+  reviewerName?: string | null;
+  rating: number;
+  reviewText?: string | null;
+  createdAt?: string | Date | null;
+}
+
+export interface EsgReportInput {
+  programTitle: string;
+  description?: string | null;
+  focusArea: string;
+  location: string;
+  timeline: string;
+  status: string;
+  companyName: string;
+  companyIndustry?: string | null;
+  partnerName: string;
+  budget: string | number;
+  spentBudget: string | number;
+  targetBeneficiaries?: string | null;
+  actualBeneficiaries?: string | null;
+  verifiedExpensesCount?: number;
+  stages?: ProgramStageSummaryItem[];
+  activities?: ProgramActivitySummaryItem[];
+  reviews?: ProgramReviewSummaryItem[];
+}
+
+export interface EsgReportResponse extends EsgReportResult {
+  source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
+}
+
