@@ -38,6 +38,8 @@ import {
   PlanMilestoneItem,
   MilestonePlanStatus,
 } from "../common/collaboration-plan";
+import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
+
 
 interface CollaborationDetailModalProps {
   isOpen: boolean;
@@ -134,6 +136,7 @@ export function CollaborationDetailModal({
 
   if (!isOpen || !collaboration) return null;
 
+  const aiEnabled = isAiFeatureEnabled();
   const isAgreed = collaboration.status === "AGREED";
   const isCancelled = collaboration.status === "CANCELLED";
   const isNegotiation = collaboration.status === "NEGOTIATION";
@@ -744,26 +747,28 @@ export function CollaborationDetailModal({
                 {!isAgreed && !isCancelled && (
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleExtractWithAi}
-                        disabled={isExtractingAi || isSubmitting}
-                        className="text-xs bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 border-indigo-200 rounded-xl flex items-center gap-1.5 cursor-pointer"
-                      >
-                        {isExtractingAi ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            <span>Mengekstrak Dokumen...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                            <span>Bantu Ekstraksi dengan AI</span>
-                          </>
-                        )}
-                      </Button>
+                      {aiEnabled && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleExtractWithAi}
+                          disabled={isExtractingAi || isSubmitting}
+                          className="text-xs bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 border-indigo-200 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                        >
+                          {isExtractingAi ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Mengekstrak Dokumen...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                              <span>Bantu Ekstraksi dengan AI</span>
+                            </>
+                          )}
+                        </Button>
+                      )}
 
                       <Button
                         type="button"

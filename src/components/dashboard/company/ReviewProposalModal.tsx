@@ -31,6 +31,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CompanyProposalItem } from "./types";
 import { PROPOSAL_STATUS_CONFIG, FOCUS_AREA_CONFIG, formatRupiah, formatDate } from "./helpers";
+import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
+
+
 
 
 function PartnerModalLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
@@ -72,6 +75,7 @@ export function ReviewProposalModal({
   proposal,
   onSuccess,
 }: ReviewProposalModalProps) {
+  const aiEnabled = isAiFeatureEnabled();
   const [decisionStatus, setDecisionStatus] = useState<
     "UNDER_REVIEW" | "REVISION_REQUESTED" | "ACCEPTED" | "REJECTED"
   >("ACCEPTED");
@@ -527,7 +531,7 @@ export function ReviewProposalModal({
                   Evaluasi Cerdas AI (Sipena Proposal Screener)
                 </h4>
               </div>
-              {aiResult && (
+              {aiResult && aiEnabled && (
                 <button
                   type="button"
                   onClick={handleRunAiScreening}
@@ -729,6 +733,14 @@ export function ReviewProposalModal({
                     </Button>
                   </div>
                 )}
+              </div>
+            ) : !aiEnabled ? (
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-slate-600 flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <AlertCircle className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span>Fitur evaluasi AI proposal saat ini dinonaktifkan oleh administrator sistem (<code>ENABLE_AI_FEATURES=false</code>).</span>
+                </div>
+                <Badge variant="slate" size="sm">AI Nonaktif</Badge>
               </div>
             ) : (
               <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-[#181343] p-5 rounded-3xl border border-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">

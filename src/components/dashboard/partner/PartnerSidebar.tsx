@@ -50,6 +50,8 @@ interface PartnerSidebarProps {
   onLogout: () => void;
 }
 
+import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
+
 export function PartnerSidebar({
   user,
   organizationName,
@@ -60,22 +62,28 @@ export function PartnerSidebar({
   onCloseMobile,
   onLogout,
 }: PartnerSidebarProps) {
+  const aiEnabled = isAiFeatureEnabled();
+
   const navigationSections: NavSection[] = [
     {
       title: "UTAMA",
       items: [
         {
-          id: "overview",
+          id: "overview" as PartnerNavMenu,
           label: "Ringkasan",
           icon: LayoutDashboard,
         },
+        ...(aiEnabled
+          ? [
+              {
+                id: "chat" as PartnerNavMenu,
+                label: "AI CSR Advisor",
+                icon: Sparkles,
+              },
+            ]
+          : []),
         {
-          id: "chat",
-          label: "AI CSR Advisor",
-          icon: Sparkles,
-        },
-        {
-          id: "explore",
+          id: "explore" as PartnerNavMenu,
           label: "Eksplorasi Peluang",
           icon: Compass,
         },

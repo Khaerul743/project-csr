@@ -62,6 +62,8 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
+import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
+
 export function Sidebar({
   user,
   organizationName,
@@ -73,6 +75,7 @@ export function Sidebar({
   onLogout,
 }: SidebarProps) {
   const isManagement = user.role === "MANAGEMENT";
+  const aiEnabled = isAiFeatureEnabled();
 
   const navigationSections: NavSection[] = [
     {
@@ -83,11 +86,15 @@ export function Sidebar({
           label: "Ringkasan",
           icon: LayoutDashboard,
         },
-        {
-          id: "chat" as CompanyNavMenu,
-          label: "AI CSR Advisor",
-          icon: Sparkles,
-        },
+        ...(aiEnabled
+          ? [
+              {
+                id: "chat" as CompanyNavMenu,
+                label: "AI CSR Advisor",
+                icon: Sparkles,
+              },
+            ]
+          : []),
         {
           id: "opportunities" as CompanyNavMenu,
           label: "Peluang CSR",

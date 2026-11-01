@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
 
 export interface ChatMessage {
   id: string;
@@ -55,6 +56,7 @@ export function ChatbotView({
   onNavigate,
 }: ChatbotViewProps) {
   const isPartner = role === "PARTNER_ADMIN";
+  const aiEnabled = isAiFeatureEnabled();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -344,10 +346,17 @@ export function ChatbotView({
                 SIPENA AI Advisor
               </h2>
               {/* Indikator Ketersediaan Layanan (Clean & Nyata) */}
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200/60 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Siap Membantu
-              </span>
+              {aiEnabled ? (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200/60 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  Siap Membantu
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px] font-semibold border border-amber-200/60 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  Fitur AI Nonaktif
+                </span>
+              )}
             </div>
             <p className="text-xs text-slate-500 truncate mt-0.5">
               {isPartner
@@ -684,6 +693,14 @@ export function ChatbotView({
       {/* 3. INPUT COMPOSER (Tersemat di Bagian Bawah, Selalu Terjangkau) */}
       {/* ========================================================================= */}
       <footer className="p-3 sm:p-4 border-t border-slate-200/80 bg-white shrink-0">
+        {!aiEnabled && (
+          <div className="mb-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center gap-2.5 text-xs text-amber-800">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <span className="leading-snug">
+              Fitur AI Advisor saat ini dinonaktifkan oleh administrator melalui konfigurasi lingkungan (<code>ENABLE_AI_FEATURES=false</code>).
+            </span>
+          </div>
+        )}
         <div className="rounded-xl bg-slate-50/90 border border-slate-200 focus-within:border-[#009E75] focus-within:ring-1 focus-within:ring-[#009E75]/30 transition-all p-2 space-y-1.5">
           <textarea
             ref={textareaRef}
@@ -691,12 +708,15 @@ export function ChatbotView({
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={!aiEnabled}
             placeholder={
-              isPartner
+              !aiEnabled
+                ? "Fitur AI saat ini sedang dinonaktifkan via environment variable..."
+                : isPartner
                 ? "Tanyakan peluang CSR, bantuan draf proposal, atau status pengajuan..."
                 : "Tanyakan ide program baru, rekapitulasi data program, atau kriteria evaluasi..."
             }
-            className="w-full bg-transparent resize-none border-none focus:outline-hidden text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 px-2 py-1 leading-relaxed max-h-32"
+            className="w-full bg-transparent resize-none border-none focus:outline-hidden text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 px-2 py-1 leading-relaxed max-h-32 disabled:opacity-60 disabled:cursor-not-allowed"
           />
 
           <div className="flex items-center justify-between pt-1 border-t border-slate-200/50 px-1">
@@ -715,7 +735,7 @@ export function ChatbotView({
             <button
               type="button"
               onClick={() => handleSendMessage()}
-              disabled={!inputText.trim() || isLoading}
+              disabled={!inputText.trim() || isLoading || !aiEnabled}
               className="px-4 py-1.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
             >
               <span>Kirim</span>
