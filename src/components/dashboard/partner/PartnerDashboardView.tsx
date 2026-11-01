@@ -1238,67 +1238,58 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                 {/* ========================================================================= */}
                 {/* SECTION 1: WELCOME BANNER (Ringkas, Elegan, Navy-Emerald Subtle) */}
                 {/* ========================================================================= */}
-                <div className="relative p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-[#181343] via-[#1E1B4B] to-[#122A2F] text-white shadow-xs overflow-hidden border border-[#26224C]">
+                <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#181343] via-[#1E1B4B] to-[#122A2F] text-white shadow-xs overflow-hidden border border-[#26224C]">
                   {/* Hero Corner Soft Data Grid */}
                   <SoftDataGrid variant="hero" />
 
                   {/* Subtle flowing lines background ornament */}
-                <svg
-                  className="absolute right-0 top-0 bottom-0 h-full w-1/2 opacity-10 pointer-events-none"
-                  viewBox="0 0 500 200"
-                  preserveAspectRatio="none"
-                  fill="none"
-                >
-                  <path
-                    d="M0,100 C150,180 350,20 500,100 L500,200 L0,200 Z"
-                    fill="currentColor"
-                    className="text-emerald-400"
-                  />
-                  <path
-                    d="M0,130 C120,50 380,180 500,120 L500,200 L0,200 Z"
-                    fill="currentColor"
-                    className="text-teal-300"
-                  />
-                </svg>
+                  <svg
+                    className="absolute right-0 top-0 bottom-0 h-full w-1/2 opacity-10 pointer-events-none"
+                    viewBox="0 0 500 200"
+                    preserveAspectRatio="none"
+                    fill="none"
+                  >
+                    <path
+                      d="M0,100 C150,180 350,20 500,100 L500,200 L0,200 Z"
+                      fill="currentColor"
+                      className="text-emerald-400"
+                    />
+                    <path
+                      d="M0,130 C120,50 380,180 500,120 L500,200 L0,200 Z"
+                      fill="currentColor"
+                      className="text-teal-300"
+                    />
+                  </svg>
 
-                <div className="relative z-10 space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-300 border border-emerald-400/20 text-[10px] font-semibold tracking-wider uppercase">
-                        WORKSPACE MITRA
-                      </span>
-                      {partnerFocus && (
-                        <Badge variant={partnerFocus.variant} size="sm">
-                          {partnerFocus.label}
-                        </Badge>
-                      )}
+                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
+                    <div className="space-y-1.5 sm:space-y-2 max-w-2xl">
+                      <h1
+                        className="text-2xl sm:text-[28px] lg:text-[32px] font-extrabold text-white tracking-tight leading-tight"
+                        style={{ fontFamily: "var(--font-display)" }}
+                      >
+                        Selamat Datang, {partner?.name || user.name}
+                      </h1>
+                      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal max-w-xl">
+                        Pantau peluang kolaborasi, perkembangan proposal, dan pelaksanaan program CSR lembaga Anda.
+                      </p>
                     </div>
 
                     {partner?.status && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/25 text-[11px] font-medium inline-flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        {partner.status === "VERIFIED"
-                          ? "Mitra Terverifikasi"
-                          : partner.status === "PENDING"
-                            ? "Menunggu Verifikasi Administratif"
-                            : partner.status}
-                      </span>
+                      <div className="shrink-0 self-start md:self-center">
+                        <span className="px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/25 text-xs font-medium inline-flex items-center gap-1.5 backdrop-blur-xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>
+                            {partner.status === "VERIFIED"
+                              ? "Mitra Terverifikasi"
+                              : partner.status === "PENDING"
+                                ? "Menunggu Verifikasi Administratif"
+                                : partner.status}
+                          </span>
+                        </span>
+                      </div>
                     )}
                   </div>
-
-                  <div>
-                    <h1
-                      className="text-xl sm:text-2xl font-bold text-white tracking-tight"
-                      style={{ fontFamily: "var(--font-display)" }}
-                    >
-                      Selamat Datang, {partner?.name || user.name}
-                    </h1>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl font-normal leading-relaxed">
-                      Pantau peluang kolaborasi, perkembangan proposal, dan pelaksanaan program CSR lembaga Anda.
-                    </p>
-                  </div>
                 </div>
-              </div>
 
               {/* ========================================================================= */}
               {/* SECTION 2: OPERATIONAL KPI (4 Indikator Operasional Sejajar) */}
