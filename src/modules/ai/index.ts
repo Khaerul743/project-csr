@@ -10,4 +10,10 @@ export * from "./services/proposal-screener/proposal-screener.service";
 export * from "./services/esg-report/esg-report.schema";
 export * from "./services/esg-report/esg-report.prompt";
 export * from "./services/esg-report/esg-report.service";
+export * from "./services/chatbot";
 
+import { ChatbotService } from "./services/chatbot/chatbot.service";
+import { ChatbotController } from "./services/chatbot/chatbot.controller";
+
+export const chatbotService = new ChatbotService();
+export const chatbotController = new ChatbotController(chatbotService);

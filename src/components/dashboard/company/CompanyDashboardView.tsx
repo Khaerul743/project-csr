@@ -73,6 +73,7 @@ import { CollaborationDetailModal } from "./CollaborationDetailModal";
 import { ProgramMonitoringDetailView } from "./programs/ProgramMonitoringDetailView";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
+import { ChatbotView } from "../chat/ChatbotView";
 import { PartnerFullProfileView } from "../partner/profile/PartnerFullProfileView";
 import { CompanyFullProfileView } from "./profile/CompanyFullProfileView";
 import { ExecutiveOverviewView } from "./overview/ExecutiveOverviewView";
@@ -740,6 +741,10 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       title: "Profil Perusahaan",
       subtitle: "Informasi legalitas, domisili, dan profil publik organisasi",
     },
+    chat: {
+      title: "AI CSR Advisor",
+      subtitle: "Asisten cerdas perencanaan inisiatif, monitoring portofolio, dan konsultasi ESG",
+    },
   };
 
   return (
@@ -806,6 +811,11 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
               ? [
                   { label: "Pengaturan & Akses" },
                   { label: "Anggota Tim & Akses" },
+                ]
+              : activeMenu === "chat"
+              ? [
+                  { label: "AI & Asisten" },
+                  { label: "AI CSR Advisor" },
                 ]
               : undefined
           }
@@ -2027,6 +2037,18 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
               onProfileUpdated={(updated) => {
                 setCompany(updated);
               }}
+            />
+          )}
+
+          {/* ============================================================ */}
+          {/* VIEW: AI CHATBOT (FULL-SCREEN AI ADVISOR) */}
+          {/* ============================================================ */}
+          {activeMenu === "chat" && (
+            <ChatbotView
+              role={user.role}
+              userName={user.name}
+              organizationName={company?.name}
+              onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
             />
           )}
         </main>

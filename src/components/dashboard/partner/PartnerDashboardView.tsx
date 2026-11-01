@@ -47,6 +47,7 @@ import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
 import { PartnerFullProfileView } from "./profile/PartnerFullProfileView";
 import { CompanyFullProfileView } from "../company/profile/CompanyFullProfileView";
+import { ChatbotView } from "../chat/ChatbotView";
 import {
   PartnerNavMenu,
   PartnerProfile,
@@ -472,6 +473,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
               <span className="text-slate-300 hidden sm:inline">/</span>
               <span className="text-xs font-semibold text-teal-600 capitalize">
                 {activeMenu === "overview" && "Ringkasan Aktivitas"}
+                {activeMenu === "chat" && "AI CSR Advisor (Asisten Cerdas)"}
                 {activeMenu === "explore" && "Eksplorasi Peluang CSR"}
                 {activeMenu === "invitations" && "Undangan Masuk"}
                 {activeMenu === "proposals" && "Pengajuan Proposal"}
@@ -2088,6 +2090,18 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                 }}
               />
             </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* SUBVIEW: AI CHATBOT (FULL-SCREEN AI ADVISOR) */}
+          {/* ========================================================================= */}
+          {activeMenu === "chat" && (
+            <ChatbotView
+              role={user.role}
+              userName={user.name}
+              organizationName={partner?.name}
+              onNavigate={(menu) => setActiveMenu(menu as PartnerNavMenu)}
+            />
           )}
         </main>
       </div>

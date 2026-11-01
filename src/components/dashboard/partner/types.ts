@@ -5,6 +5,7 @@ import { OpportunityInvitationStatus } from "@/db/schema/opportunity-invitations
 
 export type PartnerNavMenu =
   | "overview"
+  | "chat"
   | "explore"
   | "invitations"
   | "proposals"

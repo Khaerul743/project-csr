@@ -14,12 +14,14 @@ import {
   Activity,
   BarChart3,
   MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AppLogo } from "@/components/ui/app-logo";
 
 export type CompanyNavMenu =
   | "overview"
+  | "chat"
   | "opportunities"
   | "partners"
   | "proposals"
@@ -80,6 +82,11 @@ export function Sidebar({
           id: "overview" as CompanyNavMenu,
           label: "Ringkasan",
           icon: LayoutDashboard,
+        },
+        {
+          id: "chat" as CompanyNavMenu,
+          label: "AI CSR Advisor",
+          icon: Sparkles,
         },
         {
           id: "opportunities" as CompanyNavMenu,

@@ -13,6 +13,7 @@ import {
   Activity,
   BarChart3,
   MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AppLogo } from "@/components/ui/app-logo";
@@ -67,6 +68,11 @@ export function PartnerSidebar({
           id: "overview",
           label: "Ringkasan",
           icon: LayoutDashboard,
+        },
+        {
+          id: "chat",
+          label: "AI CSR Advisor",
+          icon: Sparkles,
         },
         {
           id: "explore",
