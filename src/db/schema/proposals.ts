@@ -36,6 +36,9 @@ export const proposals = mysqlTable("proposals", {
   status: mysqlEnum("status", proposalStatusEnum).notNull().default("SUBMITTED"),
   reviewedBy: varchar("reviewed_by", { length: 36 }).references(() => users.id),
   reviewedAt: timestamp("reviewed_at"),
+  aiScore: int("ai_score"),
+  aiScreeningResult: text("ai_screening_result"),
+  aiScreenedAt: timestamp("ai_screened_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

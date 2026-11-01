@@ -145,6 +145,9 @@ Menyimpan kredensial autentikasi pengguna dan pemetaan ke organisasi.
 - `status` (ENUM: `'SUBMITTED'`, `'UNDER_REVIEW'`, `'REVISION_REQUESTED'`, `'ACCEPTED'`, `'REJECTED'`, `'WITHDRAWN'`).
 - `reviewedBy` (VARCHAR(36), FK $\rightarrow$ `users.id`, NULLABLE): PIC peninjau.
 - `reviewedAt` (TIMESTAMP, NULLABLE): Waktu peninjauan terakhir.
+- `aiScore` (INT, NULLABLE): Skor kelayakan total AI (0–100).
+- `aiScreeningResult` (TEXT, NULLABLE): Serialisasi JSON hasil evaluasi multi-aspek AI.
+- `aiScreenedAt` (TIMESTAMP, NULLABLE): Waktu analisis AI dijalankan.
 
 ### 8. `collaborations` — Kemitraan & Perjanjian Kerjasama (MoU)
 - `id` (VARCHAR(36), PK): UUID kolaborasi.

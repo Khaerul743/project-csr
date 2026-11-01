@@ -39,6 +39,7 @@ Pusat dokumentasi lengkap proyek untuk pengembang & AI:
 - **[design-system.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)**: Panduan palet warna (Emerald & Slate Navy), tipografi, dan komponen UI.
 - **[api-documentation.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)**: Dokumentasi kontrak lengkap seluruh endpoint REST API.
 - **[ai-service-milestone-extraction.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-milestone-extraction.md)**: Dokumentasi teknis ekstraksi milestone otomatis dari proposal PDF via LangChain.
+- **[ai-service-proposal-screener.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-proposal-screener.md)**: Dokumentasi AI Proposal Screener & Scoring Assistant (skor kelayakan, audit anggaran, dan deteksi risiko).
 - **[postman_collection.json](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/postman_collection.json)**: Koleksi Postman siap pakai untuk pengujian API.
 
 ### 📁 `drizzle/`

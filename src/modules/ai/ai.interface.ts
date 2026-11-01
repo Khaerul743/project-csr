@@ -1,3 +1,5 @@
+import { ProposalScreeningResult } from "./services/proposal-screener/proposal-screener.schema";
+
 export interface ProposalMilestoneInput {
   title: string;
   summary: string;
@@ -20,5 +22,26 @@ export interface ExtractedStageItem {
 export interface MilestoneExtractionResponse {
   summaryRationale: string;
   stages: ExtractedStageItem[];
+  source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
+}
+
+export interface ProposalScreeningInput {
+  opportunityTitle: string;
+  opportunityDescription: string;
+  opportunityFocusArea?: string | null;
+  opportunityTargetBeneficiaries?: string | null;
+  opportunityEstimatedBudget?: string | number | null;
+  opportunityLocation?: string | null;
+  proposalTitle: string;
+  partnerName: string;
+  partnerFocusArea?: string | null;
+  proposedBudget: string | number;
+  durationMonths?: number | null;
+  proposalTargetBeneficiaries?: string | null;
+  proposalSummary: string;
+  documentUrl?: string | null;
+}
+
+export interface ProposalScreeningResponse extends ProposalScreeningResult {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
 }

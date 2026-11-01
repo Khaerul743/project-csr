@@ -895,6 +895,12 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                           </div>
 
                           <div className="flex items-center gap-2">
+                            {prop.aiScore != null && (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-xs">
+                                <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Skor AI: {prop.aiScore}/100</span>
+                              </span>
+                            )}
                             <Badge variant={statusCfg.variant} size="sm" hasDot>
                               {statusCfg.label}
                             </Badge>

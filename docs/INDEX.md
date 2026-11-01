@@ -18,6 +18,7 @@ Setiap dokumen di bawah ini memiliki fokus teknis yang spesifik:
 | **[`folder-structure.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/folder-structure.md)** | Rincian direktori dan peran setiap file di dalam `app/`, `src/`, `public/`, dan `drizzle/`. | Saat mencari lokasi kode atau file komponen tertentu. |
 | **[`api-documentation.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)** | Kontrak lengkap REST API (request body, parameter URL, response JSON, dan status code). | Saat menghubungkan frontend ke backend atau integrasi pihak ketiga. |
 | **[`ai-service-milestone-extraction.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-milestone-extraction.md)** | Dokumentasi dekonstruksi proposal PDF menjadi tahapan otomatis berbasis LangChain & GPT-4o-mini. | Saat memodifikasi atau memperbaiki fitur AI ekstraksi TOR/proposal. |
+| **[`ai-service-proposal-screener.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-proposal-screener.md)** | Dokumentasi AI Proposal Screener & Scoring Assistant (skor kelayakan, audit anggaran, dan deteksi risiko). | Saat memodifikasi atau memperluas fitur AI evaluasi proposal. |
 | **[`postman_collection.json`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/postman_collection.json)** | Koleksi endpoint Postman siap pakai untuk pengujian API. | Saat melakukan manual testing API di Postman/Insomnia. |
 
 ---

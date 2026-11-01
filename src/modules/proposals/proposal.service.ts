@@ -15,6 +15,7 @@ import {
   ProposalWithDetails,
 } from "./proposal.interface";
 import { Proposal, NewProposal } from "@/db/schema/proposals";
+import { proposalScreenerService } from "@/modules/ai";
 
 export class ProposalService {
   private readonly logger = new AppLogger("ProposalService");
@@ -260,6 +261,60 @@ export class ProposalService {
     return this.proposalRepository.update(proposalId, {
       status: "WITHDRAWN",
     });
+  }
+
+  async screenProposalWithAi(
+    proposalId: string,
+    companyId: string | null
+  ) {
+    if (!companyId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan perusahaan manapun");
+    }
+
+    const proposal = await this.proposalRepository.findById(proposalId);
+    if (!proposal) {
+      throw new NotFoundError("Proposal tidak ditemukan");
+    }
+
+    if (proposal.companyId !== companyId) {
+      throw new ForBiddenError("Proposal ini bukan ditujukan untuk inisiatif perusahaan Anda");
+    }
+
+    const opportunity = await opportunityRepository.findById(proposal.opportunityId);
+    if (!opportunity) {
+      throw new NotFoundError("Inisiatif CSR terkait tidak ditemukan");
+    }
+
+    this.logger.info(`Menjalankan AI Screening untuk proposal ${proposalId}`);
+
+    const screeningResult = await proposalScreenerService.screenProposal({
+      opportunityTitle: opportunity.title,
+      opportunityDescription: opportunity.description,
+      opportunityFocusArea: opportunity.focusArea,
+      opportunityTargetBeneficiaries: proposal.targetBeneficiaries || "Masyarakat sasaran",
+      opportunityEstimatedBudget: opportunity.estimatedBudget,
+      opportunityLocation: [opportunity.targetCity, opportunity.targetProvince].filter(Boolean).join(", "),
+      proposalTitle: proposal.title,
+      partnerName: proposal.partnerName || "Mitra Pelaksana",
+      partnerFocusArea: proposal.partnerFocusArea,
+      proposedBudget: proposal.proposedBudget,
+      durationMonths: proposal.durationMonths,
+      proposalTargetBeneficiaries: proposal.targetBeneficiaries,
+      proposalSummary: proposal.summary,
+      documentUrl: proposal.documentUrl,
+    });
+
+    // Simpan hasil ke database
+    const updated = await this.proposalRepository.update(proposalId, {
+      aiScore: screeningResult.overallScore,
+      aiScreeningResult: JSON.stringify(screeningResult),
+      aiScreenedAt: new Date(),
+    });
+
+    return {
+      proposal: updated,
+      screeningResult,
+    };
   }
 }
 

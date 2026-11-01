@@ -80,9 +80,9 @@
   --color-brand-slate-900: #0f172a;
 
   /* Typography fonts */
-  --font-display: var(--font-display), "Plus Jakarta Sans", sans-serif;
-  --font-body: var(--font-body), "Inter", sans-serif;
-  --font-sans: var(--font-body), "Inter", system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   /* Shapes */
   --radius-sm: 0.25rem;

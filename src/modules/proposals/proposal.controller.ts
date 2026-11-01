@@ -157,4 +157,20 @@ export class ProposalController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async screenWithAi(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const result = await this.proposalService.screenProposalWithAi(
+        id,
+        authUser.companyId
+      );
+
+      return ApiResponse.success(result, "Evaluasi AI proposal berhasil dilakukan");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }

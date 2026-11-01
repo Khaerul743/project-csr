@@ -151,6 +151,9 @@ export interface CompanyProposalItem {
   partnerLogo?: string | null;
   submittedByName?: string | null;
   reviewedByName?: string | null;
+  aiScore?: number | null;
+  aiScreeningResult?: string | null;
+  aiScreenedAt?: string | null;
 }
 
 export interface CompanyCollaborationItem {

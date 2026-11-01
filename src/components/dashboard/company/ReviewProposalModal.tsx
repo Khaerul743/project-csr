@@ -20,6 +20,10 @@ import {
   Check,
   Download,
   RotateCcw,
+  Sparkles,
+  RefreshCw,
+  Copy,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +50,11 @@ export function ReviewProposalModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // AI Screening states
+  const [isScreeningAi, setIsScreeningAi] = useState(false);
+  const [aiResult, setAiResult] = useState<any>(null);
+  const [isCopiedNotes, setIsCopiedNotes] = useState(false);
+
   useEffect(() => {
     if (proposal) {
       if (proposal.status === "UNDER_REVIEW") {
@@ -57,8 +66,58 @@ export function ReviewProposalModal({
       }
       setFeedback(proposal.feedback || "");
       setErrorMsg(null);
+
+      // Load parsed AI result if available
+      if (proposal.aiScreeningResult) {
+        try {
+          setAiResult(JSON.parse(proposal.aiScreeningResult));
+        } catch {
+          setAiResult(null);
+        }
+      } else {
+        setAiResult(null);
+      }
     }
   }, [proposal]);
+
+  const handleRunAiScreening = async () => {
+    if (!proposal) return;
+    setIsScreeningAi(true);
+    setErrorMsg(null);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Sesi login telah berakhir");
+
+      const res = await fetch(`/api/proposals/${proposal.id}/ai-screen`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal melakukan evaluasi AI");
+      }
+
+      setAiResult(json.data.screeningResult);
+      onSuccess();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Gagal menjalankan evaluasi AI untuk proposal ini");
+    } finally {
+      setIsScreeningAi(false);
+    }
+  };
+
+  const handleApplyAiFeedback = () => {
+    if (!aiResult?.suggestedRevisionNotes) return;
+    setFeedback((prev) =>
+      prev ? `${prev}\n\n${aiResult.suggestedRevisionNotes}` : aiResult.suggestedRevisionNotes
+    );
+    setDecisionStatus("REVISION_REQUESTED");
+    setIsCopiedNotes(true);
+    setTimeout(() => setIsCopiedNotes(false), 2000);
+  };
 
   if (!isOpen || !proposal) return null;
 
@@ -300,6 +359,252 @@ export function ReviewProposalModal({
               )}
             </div>
           )}
+
+          {/* ============================================================ */}
+          {/* PANEL ANALISIS CERDAS AI (SIPENA PROPOSAL SCREENER) */}
+          {/* ============================================================ */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <h4 className="font-extrabold text-slate-900 text-xs tracking-tight">
+                  Evaluasi Cerdas AI (Sipena Proposal Screener)
+                </h4>
+              </div>
+              {aiResult && (
+                <button
+                  type="button"
+                  onClick={handleRunAiScreening}
+                  disabled={isScreeningAi}
+                  className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 transition disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3 h-3 ${isScreeningAi ? "animate-spin" : ""}`} />
+                  <span>{isScreeningAi ? "Menganalisis..." : "Analisis Ulang AI"}</span>
+                </button>
+              )}
+            </div>
+
+            {aiResult ? (
+              <div className="bg-gradient-to-br from-slate-900 via-slate-850 to-[#181343] text-white rounded-3xl p-5 sm:p-6 shadow-md border border-slate-800 space-y-5">
+                {/* Header Skor & Rekomendasi */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+                      Rekomendasi Keputusan AI
+                    </span>
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-extrabold ${
+                          aiResult.overallScore >= 85
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : aiResult.overallScore >= 70
+                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                            : aiResult.overallScore >= 55
+                            ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                            : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                        }`}
+                      >
+                        {aiResult.recommendationLabel || aiResult.recommendation}
+                      </span>
+                      {proposal.aiScreenedAt && (
+                        <span className="text-[11px] text-slate-400">
+                          • Dianalisis {formatDate(proposal.aiScreenedAt)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2.5 rounded-2xl shrink-0">
+                    <div className="text-right">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-medium">
+                        Total Skor AI
+                      </span>
+                      <div className="text-2xl font-black tracking-tight text-emerald-400">
+                        {aiResult.overallScore}
+                        <span className="text-xs font-bold text-slate-400">/100</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 Pilar Evaluasi (Radar / Progress Bar Breakdown) */}
+                {aiResult.aspectScores && (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Rincian 4 Pilar Kelayakan
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                      {/* 1. Keselarasan Strategis */}
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-300">Keselarasan Strategis</span>
+                          <span className="font-extrabold text-emerald-400">
+                            {aiResult.aspectScores.strategicAlignment}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                            style={{ width: `${aiResult.aspectScores.strategicAlignment}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* 2. Kewajaran Anggaran */}
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-300">Kewajaran RAB</span>
+                          <span className="font-extrabold text-amber-400">
+                            {aiResult.aspectScores.budgetFeasibility}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-amber-500 rounded-full transition-all duration-500"
+                            style={{ width: `${aiResult.aspectScores.budgetFeasibility}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* 3. Kelayakan Operasional */}
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-300">Kelayakan Operasi</span>
+                          <span className="font-extrabold text-blue-400">
+                            {aiResult.aspectScores.operationalFeasibility}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                            style={{ width: `${aiResult.aspectScores.operationalFeasibility}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* 4. Keberlanjutan Dampak */}
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/5 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-300">Keberlanjutan ESG</span>
+                          <span className="font-extrabold text-purple-400">
+                            {aiResult.aspectScores.impactSustainability}%
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-purple-500 rounded-full transition-all duration-500"
+                            style={{ width: `${aiResult.aspectScores.impactSustainability}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Executive Summary */}
+                {aiResult.executiveSummary && (
+                  <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 text-xs text-slate-200 leading-relaxed space-y-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Ringkasan Eksekutif AI
+                    </span>
+                    <p className="italic text-slate-300">"{aiResult.executiveSummary}"</p>
+                  </div>
+                )}
+
+                {/* Strengths & Potential Risks Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  {/* Keunggulan */}
+                  {aiResult.keyStrengths && aiResult.keyStrengths.length > 0 && (
+                    <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/20 space-y-2">
+                      <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span>Keunggulan Utama Proposal</span>
+                      </div>
+                      <ul className="space-y-1 text-xs text-slate-300">
+                        {aiResult.keyStrengths.map((str: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-emerald-400 font-bold">•</span>
+                            <span className="leading-snug">{str}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Risiko / Catatan Kritis */}
+                  {aiResult.potentialRisks && aiResult.potentialRisks.length > 0 && (
+                    <div className="p-3.5 rounded-2xl bg-rose-950/30 border border-rose-500/20 space-y-2">
+                      <div className="flex items-center gap-1.5 text-rose-300 font-bold text-xs">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                        <span>Potensi Risiko & Catatan Evaluasi</span>
+                      </div>
+                      <ul className="space-y-1 text-xs text-slate-300">
+                        {aiResult.potentialRisks.map((risk: string, idx: number) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="text-rose-400 font-bold">•</span>
+                            <span className="leading-snug">{risk}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Tombol Salin Masukan Revisi ke Textarea */}
+                {aiResult.suggestedRevisionNotes && (
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="space-y-0.5 min-w-0">
+                      <span className="font-bold text-amber-300 block">
+                        Rekomendasi Masukan Revisi AI untuk Mitra:
+                      </span>
+                      <p className="text-slate-300 line-clamp-1 italic text-[11px]">
+                        "{aiResult.suggestedRevisionNotes}"
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleApplyAiFeedback}
+                      className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold border-none shrink-0 text-xs shadow-xs"
+                      leftIcon={isCopiedNotes ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    >
+                      {isCopiedNotes ? "Tersalin ke Form!" : "Terapkan ke Catatan Revisi"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-gradient-to-r from-slate-900 via-slate-850 to-[#181343] p-5 rounded-3xl border border-slate-800 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                <div className="space-y-1 min-w-0 text-center sm:text-left">
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <h5 className="font-extrabold text-xs text-white">
+                      Proposal Belum Dievaluasi AI
+                    </h5>
+                  </div>
+                  <p className="text-xs text-slate-300 max-w-md">
+                    Gunakan algoritma AI Screener untuk mengaudit kesesuaian pilar inisiatif, kewajaran RAB, dan mendeteksi potensi risiko secara otomatis.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={handleRunAiScreening}
+                  disabled={isScreeningAi}
+                  isLoading={isScreeningAi}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shrink-0 text-xs shadow-md"
+                  leftIcon={<Sparkles className="w-3.5 h-3.5" />}
+                >
+                  Jalankan Analisis Cerdas AI
+                </Button>
+              </div>
+            )}
+          </div>
 
           {/* FORM EVALUASI & KEPUTUSAN */}
           {!isWithdrawn ? (
