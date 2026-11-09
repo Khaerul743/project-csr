@@ -142,4 +142,8 @@ export interface ProgramSentimentAnalysisResponse {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
 }
 
+export * from "./services/proposal-optimizer/proposal-optimizer.service";
+export * from "./services/proposal-optimizer/proposal-optimizer.schema";
+
+
 

@@ -7,6 +7,7 @@ import {
   createProposalSchema,
   updateProposalSchema,
   reviewProposalSchema,
+  optimizeProposalSchema,
 } from "./proposal.validation";
 
 export class ProposalController {
@@ -169,6 +170,25 @@ export class ProposalController {
       );
 
       return ApiResponse.success(result, "Evaluasi AI proposal berhasil dilakukan");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async optimize(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["PARTNER_ADMIN"]);
+
+      const body = await request.json();
+      const validatedInput = optimizeProposalSchema.parse(body);
+
+      const result = await this.proposalService.optimizeProposal(
+        authUser.partnerId,
+        validatedInput
+      );
+
+      return ApiResponse.success(result, "Rekomendasi optimasi proposal berhasil digenerate");
     } catch (error) {
       return ErrorHandler.handle(error);
     }

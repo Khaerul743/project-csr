@@ -49,3 +49,14 @@ export interface ProposalWithDetails extends Proposal {
   submittedByName?: string | null;
   reviewedByName?: string | null;
 }
+
+export interface OptimizeProposalDTO {
+  opportunityId: string;
+  proposalId?: string | null;
+  title: string;
+  summary: string;
+  proposedBudget: number | string;
+  durationMonths?: number | null;
+  targetBeneficiaries?: string | null;
+  documentUrl?: string | null;
+}

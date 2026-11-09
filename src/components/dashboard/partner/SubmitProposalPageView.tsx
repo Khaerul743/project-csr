@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OpportunityItem } from "./types";
 import { FOCUS_AREA_CONFIG, formatRupiah, formatDate } from "./helpers";
+import { ProposalOptimizerModal } from "./ProposalOptimizerModal";
 
 export interface SubmitProposalPageViewProps {
   opportunity: OpportunityItem;
@@ -111,6 +112,7 @@ export function SubmitProposalPageView({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showOptimizerModal, setShowOptimizerModal] = useState(false);
 
   // Parse numeric budget
   const numericBudget = useMemo(() => {
@@ -417,9 +419,19 @@ export function SubmitProposalPageView({
 
               {/* Ringkasan Teknis & Metodologi Pelaksanaan */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-slate-800">
-                  Ringkasan Teknis & Pendekatan Metodologi <span className="text-rose-500">*</span>
-                </label>
+                <div className="flex items-center justify-between gap-2">
+                  <label className="block text-xs font-semibold text-slate-800">
+                    Ringkasan Teknis & Pendekatan Metodologi <span className="text-rose-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowOptimizerModal(true)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                    <span>Optimalkan dengan AI</span>
+                  </button>
+                </div>
                 <textarea
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
@@ -893,7 +905,19 @@ export function SubmitProposalPageView({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 self-end sm:self-auto w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-2 self-end sm:self-auto w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            onClick={() => setShowOptimizerModal(true)}
+            disabled={isSubmitting || isUploading}
+            className="w-full sm:w-auto border-indigo-200 bg-indigo-50/60 hover:bg-indigo-100 text-indigo-900 text-xs sm:text-sm font-semibold rounded-xl px-4 py-2.5 shadow-2xs cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Sparkles className="w-4 h-4 text-indigo-600" />
+            <span>Optimalkan dengan AI</span>
+          </Button>
+
           <Button
             type="button"
             variant="primary"
@@ -985,6 +1009,25 @@ export function SubmitProposalPageView({
           </div>
         </div>
       )}
+
+      {/* Modal AI Proposal Optimizer */}
+      <ProposalOptimizerModal
+        isOpen={showOptimizerModal}
+        onClose={() => setShowOptimizerModal(false)}
+        opportunityId={opportunity.id}
+        opportunityTitle={opportunity.title}
+        proposalData={{
+          title,
+          summary,
+          proposedBudget: numericBudget,
+          durationMonths,
+          targetBeneficiaries,
+          documentUrl,
+        }}
+        onApplySuggestedSummary={(newSummary) => {
+          setSummary(newSummary);
+        }}
+      />
     </div>
   );
 }

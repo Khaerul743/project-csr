@@ -18,11 +18,13 @@ import {
   ExternalLink,
   RotateCcw,
   MessageSquareQuote,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProposalItem } from "./types";
 import { formatRupiah } from "./helpers";
+import { ProposalOptimizerModal } from "./ProposalOptimizerModal";
 
 interface EditProposalModalProps {
   isOpen: boolean;
@@ -57,6 +59,7 @@ export function EditProposalModal({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showOptimizerModal, setShowOptimizerModal] = useState(false);
 
   // Synchronize form when proposal opens
   useEffect(() => {
@@ -272,19 +275,31 @@ export function EditProposalModal({
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
           {/* Feedback Banner if available */}
           {hasFeedback && (
-            <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 space-y-2 animate-in fade-in">
-              <div className="flex items-center gap-2 font-bold text-xs text-amber-900">
-                <MessageSquareQuote className="w-4 h-4 text-amber-600 shrink-0" />
-                <span>
-                  {isRevisionRequested
-                    ? "Catatan Permintaan Revisi Perusahaan"
-                    : "Catatan Evaluasi Perusahaan"}
-                </span>
-                {isRevisionRequested && (
-                  <span className="text-[10px] bg-amber-200/80 text-amber-900 font-bold px-2 py-0.5 rounded-full">
-                    Perlu Revisi
+            <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 space-y-2.5 animate-in fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2 font-bold text-xs text-amber-900">
+                  <MessageSquareQuote className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>
+                    {isRevisionRequested
+                      ? "Catatan Permintaan Revisi Perusahaan"
+                      : "Catatan Evaluasi Perusahaan"}
                   </span>
-                )}
+                  {isRevisionRequested && (
+                    <span className="text-[10px] bg-amber-200/80 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+                      Perlu Revisi
+                    </span>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowOptimizerModal(true)}
+                  className="min-h-[36px] self-start sm:self-auto text-xs font-bold bg-amber-100 hover:bg-amber-200/90 border-amber-300 text-amber-950 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Bantu Revisi dengan AI</span>
+                </Button>
               </div>
               <p className="text-xs text-amber-800 italic leading-relaxed pl-6">
                 "{proposal.feedback}"
@@ -322,9 +337,19 @@ export function EditProposalModal({
 
           {/* Ringkasan & Metodologi */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Ringkasan Teknis & Metodologi Pelaksanaan <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Ringkasan Teknis & Metodologi Pelaksanaan <span className="text-rose-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowOptimizerModal(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200 transition cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Minta Saran AI</span>
+              </button>
+            </div>
             <textarea
               required
               rows={4}
@@ -584,6 +609,27 @@ export function EditProposalModal({
           </div>
         </form>
       </div>
+
+      {/* AI Proposal Optimizer & Revision Modal */}
+      <ProposalOptimizerModal
+        isOpen={showOptimizerModal}
+        onClose={() => setShowOptimizerModal(false)}
+        opportunityId={proposal.opportunityId}
+        opportunityTitle={proposal.opportunityTitle || "Inisiatif CSR"}
+        proposalId={proposal.id}
+        companyFeedback={proposal.feedback}
+        proposalData={{
+          title,
+          summary,
+          proposedBudget,
+          durationMonths,
+          targetBeneficiaries,
+          documentUrl,
+        }}
+        onApplySuggestedSummary={(newSummary) => {
+          setSummary(newSummary);
+        }}
+      />
     </div>
   );
 }

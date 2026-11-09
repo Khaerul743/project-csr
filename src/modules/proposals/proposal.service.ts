@@ -6,6 +6,7 @@ import {
 } from "@/common/errors/app-error";
 import { AppLogger } from "@/common/logger/app-logger";
 import { opportunityRepository } from "@/modules/opportunities";
+import { partnerRepository } from "@/modules/partners";
 import { ProposalRepository } from "./proposal.repository";
 import {
   CreateProposalDTO,
@@ -13,9 +14,14 @@ import {
   ReviewProposalDTO,
   ProposalListQuery,
   ProposalWithDetails,
+  OptimizeProposalDTO,
 } from "./proposal.interface";
 import { Proposal, NewProposal } from "@/db/schema/proposals";
-import { proposalScreenerService } from "@/modules/ai";
+import {
+  proposalScreenerService,
+  proposalOptimizerService,
+  ProposalOptimizationResponse,
+} from "@/modules/ai";
 
 export class ProposalService {
   private readonly logger = new AppLogger("ProposalService");
@@ -315,6 +321,64 @@ export class ProposalService {
       proposal: updated,
       screeningResult,
     };
+  }
+
+  async optimizeProposal(
+    partnerId: string | null,
+    dto: OptimizeProposalDTO
+  ): Promise<ProposalOptimizationResponse> {
+    if (!partnerId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan organisasi mitra manapun");
+    }
+
+    const opportunity = await opportunityRepository.findById(dto.opportunityId);
+    if (!opportunity) {
+      throw new NotFoundError("Inisiatif CSR terkait tidak ditemukan");
+    }
+
+    const partner = await partnerRepository.findById(partnerId);
+
+    let companyFeedback: string | null = null;
+    let existingDocUrl: string | null = null;
+
+    if (dto.proposalId) {
+      const existingProposal = await this.proposalRepository.findById(dto.proposalId);
+      if (!existingProposal) {
+        throw new NotFoundError("Proposal tidak ditemukan");
+      }
+      if (existingProposal.partnerId !== partnerId) {
+        throw new ForBiddenError("Anda bukan pemilik proposal ini");
+      }
+      companyFeedback = existingProposal.feedback || null;
+      if (!dto.documentUrl && existingProposal.documentUrl) {
+        existingDocUrl = existingProposal.documentUrl;
+      }
+    }
+
+    this.logger.info(
+      `Menjalankan optimasi proposal untuk mitra ${partnerId}, inisiatif ${dto.opportunityId} (Ada feedback: ${
+        companyFeedback ? "Ya" : "Tidak"
+      })`
+    );
+
+    return await proposalOptimizerService.optimizeProposal({
+      opportunityTitle: opportunity.title,
+      opportunityDescription: opportunity.description,
+      opportunityFocusArea: opportunity.focusArea,
+      opportunityEstimatedBudget: opportunity.estimatedBudget,
+      opportunityLocation: [opportunity.targetCity, opportunity.targetProvince].filter(Boolean).join(", "),
+      opportunityTargetBeneficiaries: dto.targetBeneficiaries || null,
+      partnerName: partner?.name || "Mitra Pelaksana",
+      partnerFocusArea: partner?.focusArea,
+      partnerCity: partner?.city,
+      proposalTitle: dto.title,
+      proposalSummary: dto.summary,
+      proposedBudget: dto.proposedBudget,
+      durationMonths: dto.durationMonths,
+      proposalTargetBeneficiaries: dto.targetBeneficiaries,
+      companyFeedback,
+      documentUrl: dto.documentUrl || existingDocUrl || null,
+    });
   }
 }
 
