@@ -1,7 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { HeartHandshake, Globe, Mail, MapPin, Phone, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  HeartHandshake,
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  AlertCircle,
+  CheckCircle2,
+  Users2,
+  Compass,
+} from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,7 +55,7 @@ export function PartnerRegisterModal({
     setErrorMessage(null);
 
     if (!formData.name.trim()) {
-      setErrorMessage("Nama mitra / lembaga wajib diisi.");
+      setErrorMessage("Nama resmi lembaga mitra wajib diisi.");
       return;
     }
 
@@ -65,10 +75,10 @@ export function PartnerRegisterModal({
       const json = await res.json();
 
       if (!res.ok) {
-        throw new Error(json.message || "Gagal mendaftarkan mitra");
+        throw new Error(json.message || "Gagal mendaftarkan lembaga mitra.");
       }
 
-      // Simpan access token baru & user data yang baru diperbarui
+      // Perbarui token sesi dan informasi user lokal
       if (json.data?.accessToken) {
         localStorage.setItem("accessToken", json.data.accessToken);
         document.cookie = `token=${json.data.accessToken}; path=/; max-age=86400`;
@@ -80,7 +90,9 @@ export function PartnerRegisterModal({
       onSuccess(json.data.user);
       onClose();
     } catch (err: any) {
-      setErrorMessage(err.message || "Terjadi kesalahan saat mendaftarkan mitra");
+      setErrorMessage(
+        err.message || "Terjadi kesalahan sistem saat mendaftarkan lembaga mitra."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -90,110 +102,139 @@ export function PartnerRegisterModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Daftarkan Mitra Pelaksana / NGO"
-      description="Lengkapi informasi dasar yayasan atau organisasi Anda. Anda akan otomatis dipromosikan menjadi Pimpinan Mitra (PARTNER_ADMIN)."
+      title="Daftarkan Lembaga Mitra Pelaksana (NGO)"
+      description="Lengkapi data dasar yayasan, organisasi nirlaba, atau komunitas pelaksana Anda untuk mulai mengajukan proposal inisiatif CSR."
       maxWidth="xl"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 flex items-start gap-2.5 text-xs text-rose-700">
-            <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
-            <span>{errorMessage}</span>
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/90 flex items-start gap-2.5 text-xs text-rose-800">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <span className="leading-relaxed">{errorMessage}</span>
           </div>
         )}
 
-        <div className="p-3 rounded-xl bg-teal-50/80 border border-teal-100 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-teal-600 text-white flex items-center justify-center shrink-0">
-            <HeartHandshake className="w-5 h-5" />
+        {/* Informasi Jalur Role */}
+        <div className="p-3.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#181343] text-white flex items-center justify-center shrink-0">
+            <HeartHandshake className="w-5 h-5 text-teal-300" />
           </div>
           <div className="text-xs">
-            <span className="font-bold text-teal-900 block">Jalur Mitra CSR / NGO</span>
-            <span className="text-teal-700">
-              Role akun Anda akan beralih menjadi <strong>PARTNER_ADMIN</strong>
+            <span className="font-bold text-[#181343] block">
+              Jalur Organisasi: Mitra Pelaksana CSR / NGO
+            </span>
+            <span className="text-slate-600">
+              Akun Anda akan otomatis ditetapkan sebagai peran <strong>PARTNER_ADMIN</strong>.
             </span>
           </div>
         </div>
 
-        <Input
-          label="Nama Yayasan / Komunitas / NGO *"
-          name="name"
-          placeholder="Contoh: Yayasan Lindungi Hutan Nusantara"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+        {/* Section 1: Profil Utama Lembaga */}
+        <div className="space-y-3 pt-1">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <Users2 className="w-3.5 h-3.5 text-[#181343]" />
+            <span>1. Profil Utama Lembaga</span>
+          </div>
 
-        <Textarea
-          label="Profil Singkat & Fokus Isu"
-          name="description"
-          placeholder="Jelaskan bidang fokus dampak sosial (misal: konservasi lingkungan, pendidikan anak, pemberdayaan ekonomi lokal)..."
-          rows={3}
-          value={formData.description}
-          onChange={handleChange}
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <Input
-            label="Email Kontak Resmi"
-            name="email"
-            type="email"
-            placeholder="kontak@lindungi-hutan.org"
-            leftIcon={<Mail className="w-4 h-4" />}
-            value={formData.email}
+            label="Nama Yayasan / Lembaga / Komunitas *"
+            name="name"
+            placeholder="Contoh: Yayasan Konservasi Bahari Nusantara"
+            value={formData.name}
             onChange={handleChange}
+            required
           />
-          <Input
-            label="Nomor Telepon / WhatsApp"
-            name="phone"
-            placeholder="+62 812 3456 7890"
-            leftIcon={<Phone className="w-4 h-4" />}
-            value={formData.phone}
+
+          <Textarea
+            label="Profil Singkat & Fokus Isu Dampak Sosial"
+            name="description"
+            placeholder="Jelaskan visi sosial lembaga, rekam jejak program, dan fokus isu (misalnya: pemberdayaan UMKM pesisir, pendidikan anak pelosok, penanaman mangrove)..."
+            rows={3}
+            value={formData.description}
             onChange={handleChange}
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* Section 2: Kontak Resmi */}
+        <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <Mail className="w-3.5 h-3.5 text-[#181343]" />
+            <span>2. Kontak & Komunikasi Resmi</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <Input
+              label="Email Resmi Lembaga"
+              name="email"
+              type="email"
+              placeholder="sekretariat@organisasi.id"
+              leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
+              value={formData.email}
+              onChange={handleChange}
+            />
+            <Input
+              label="Nomor Telepon / WhatsApp Resmi"
+              name="phone"
+              placeholder="+62 812 3456 7890"
+              leftIcon={<Phone className="w-4 h-4 text-slate-400" />}
+              value={formData.phone}
+              onChange={handleChange}
+            />
+          </div>
+
           <Input
-            label="Kota Domisili"
-            name="city"
-            placeholder="Semarang"
-            leftIcon={<MapPin className="w-4 h-4" />}
-            value={formData.city}
-            onChange={handleChange}
-          />
-          <Input
-            label="Provinsi"
-            name="province"
-            placeholder="Jawa Tengah"
-            value={formData.province}
+            label="Situs Web Resmi / Akun Media Sosial"
+            name="website"
+            placeholder="https://organisasi.id atau instagram.com/organisasi"
+            leftIcon={<Globe className="w-4 h-4 text-slate-400" />}
+            value={formData.website}
             onChange={handleChange}
           />
         </div>
 
-        <Input
-          label="Website / Akun Media Sosial"
-          name="website"
-          placeholder="https://lindungi-hutan.org"
-          leftIcon={<Globe className="w-4 h-4" />}
-          value={formData.website}
-          onChange={handleChange}
-        />
+        {/* Section 3: Domisili Sekretariat */}
+        <div className="space-y-3 pt-2 border-t border-slate-100">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <Compass className="w-3.5 h-3.5 text-[#181343]" />
+            <span>3. Domisili & Sekretariat</span>
+          </div>
 
-        <Input
-          label="Alamat Sekretariat"
-          name="address"
-          placeholder="Jl. Hutan Lestari No. 12..."
-          value={formData.address}
-          onChange={handleChange}
-        />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <Input
+              label="Kota / Kabupaten"
+              name="city"
+              placeholder="Surabaya"
+              leftIcon={<MapPin className="w-4 h-4 text-slate-400" />}
+              value={formData.city}
+              onChange={handleChange}
+            />
+            <Input
+              label="Provinsi"
+              name="province"
+              placeholder="Jawa Timur"
+              value={formData.province}
+              onChange={handleChange}
+            />
+          </div>
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+          <Input
+            label="Alamat Lengkap Sekretariat"
+            name="address"
+            placeholder="Jl. Dharmawangsa Indah No. 45, Kecamatan Gubeng..."
+            value={formData.address}
+            onChange={handleChange}
+          />
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
           <Button
             type="button"
             variant="outline"
             size="md"
             onClick={onClose}
             disabled={isLoading}
+            className="text-xs font-semibold cursor-pointer"
           >
             Batal
           </Button>
@@ -202,10 +243,10 @@ export function PartnerRegisterModal({
             variant="primary"
             size="md"
             isLoading={isLoading}
-            className="text-xs font-semibold"
-            leftIcon={<CheckCircle2 className="w-4 h-4" />}
+            className="text-xs font-bold px-5 bg-[#181343] hover:bg-[#231b5e] text-white border-[#181343] cursor-pointer"
+            leftIcon={<CheckCircle2 className="w-4 h-4 text-teal-300" />}
           >
-            Konfirmasi & Buat Mitra
+            Konfirmasi &amp; Daftarkan Mitra
           </Button>
         </div>
       </form>

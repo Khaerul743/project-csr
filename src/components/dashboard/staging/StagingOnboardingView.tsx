@@ -17,6 +17,12 @@ import {
   Check,
   X,
   AlertCircle,
+  ShieldCheck,
+  HelpCircle,
+  ChevronDown,
+  CheckCircle2,
+  FileText,
+  QrCode,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,11 +45,15 @@ export function StagingOnboardingView({
 }: StagingOnboardingViewProps) {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+  const [isRoleGuideOpen, setIsRoleGuideOpen] = useState(false);
 
-  // Undangan Pending
+  // Undangan Tim Pending
   const [pendingInvitations, setPendingInvitations] = useState<any[]>([]);
   const [isLoadingInvitations, setIsLoadingInvitations] = useState(false);
-  const [checkFeedback, setCheckFeedback] = useState<string | null>(null);
+  const [checkFeedback, setCheckFeedback] = useState<{
+    type: "info" | "success" | "error";
+    message: string;
+  } | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [invitationError, setInvitationError] = useState<string | null>(null);
 
@@ -66,15 +76,34 @@ export function StagingOnboardingView({
         setPendingInvitations(items);
         if (manualCheck) {
           if (items.length === 0) {
-            setCheckFeedback("Tidak ada undangan pending baru untuk akun Anda saat ini.");
+            setCheckFeedback({
+              type: "info",
+              message:
+                "Belum ada undangan tim baru yang ditujukan ke alamat email " +
+                user.email +
+                ".",
+            });
           } else {
-            setCheckFeedback(`Ditemukan ${items.length} undangan tim untuk Anda.`);
+            setCheckFeedback({
+              type: "success",
+              message: `Ditemukan ${items.length} undangan tim aktif untuk akun Anda.`,
+            });
           }
+        }
+      } else {
+        if (manualCheck) {
+          setCheckFeedback({
+            type: "error",
+            message: "Gagal memeriksa daftar undangan dari server.",
+          });
         }
       }
     } catch {
       if (manualCheck) {
-        setCheckFeedback("Gagal memeriksa undangan. Silakan coba beberapa saat lagi.");
+        setCheckFeedback({
+          type: "error",
+          message: "Koneksi bermasalah saat memeriksa undangan. Silakan coba kembali.",
+        });
       }
     } finally {
       if (manualCheck) {
@@ -106,7 +135,7 @@ export function StagingOnboardingView({
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.message || "Gagal menerima undangan");
+        throw new Error(json.message || "Gagal menerima undangan tim");
       }
 
       if (json.data?.accessToken) {
@@ -119,7 +148,7 @@ export function StagingOnboardingView({
 
       onRoleUpdated(json.data.user);
     } catch (err: any) {
-      setInvitationError(err.message || "Terjadi kesalahan saat menerima undangan");
+      setInvitationError(err.message || "Terjadi kendala saat menerima undangan.");
     } finally {
       setProcessingId(null);
     }
@@ -144,88 +173,47 @@ export function StagingOnboardingView({
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.message || "Gagal menolak undangan");
+        throw new Error(json.message || "Gagal menolak undangan tim");
       }
 
       await fetchPendingInvitations(false);
     } catch (err: any) {
-      setInvitationError(err.message || "Terjadi kesalahan saat menolak undangan");
+      setInvitationError(err.message || "Terjadi kendala saat menolak undangan.");
     } finally {
       setProcessingId(null);
     }
   };
 
   return (
-    <div className="min-h-full bg-[#F8F9FC] relative overflow-hidden select-none py-8 sm:py-12 px-4 sm:px-6">
-      {/* ========================================================================= */}
-      {/* DEKORASI CANVAS LUAR: ABSTRACT FLOWING WAVE LINES & AMBIENT GLOW           */}
-      {/* ========================================================================= */}
-      <div className="absolute -bottom-20 -left-20 w-[450px] h-[450px] pointer-events-none select-none z-0">
-        <div className="absolute bottom-12 left-12 w-64 h-64 rounded-full bg-emerald-400/[0.04] blur-[80px]" />
-        <div className="absolute bottom-20 left-20 w-60 h-60 rounded-full bg-[#181343]/[0.03] blur-[90px]" />
-        <svg viewBox="0 0 500 500" fill="none" className="w-full h-full opacity-40">
-          <path
-            d="M -30,420 C 110,440 150,290 270,260 C 370,230 430,290 520,240"
-            stroke="#10B981"
-            strokeWidth="1.75"
-            strokeOpacity="0.25"
-            strokeLinecap="round"
-          />
-          <path
-            d="M -40,370 C 90,390 130,240 240,210 C 340,180 410,240 500,190"
-            stroke="#60A5FA"
-            strokeWidth="1.5"
-            strokeOpacity="0.20"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-
-      <div className="absolute -top-16 -right-16 w-[420px] h-[420px] pointer-events-none select-none z-0">
-        <div className="absolute top-12 right-12 w-60 h-60 rounded-full bg-[#10B981]/[0.03] blur-[70px]" />
-        <div className="absolute top-20 right-20 w-52 h-52 rounded-full bg-[#38BDF8]/[0.02] blur-[80px]" />
-        <svg viewBox="0 0 500 500" fill="none" className="w-full h-full opacity-35">
-          <path
-            d="M 520,70 C 390,40 330,170 220,150 C 120,120 70,60 -20,100"
-            stroke="#10B981"
-            strokeWidth="1.75"
-            strokeOpacity="0.25"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* CONTAINER UTAMA ONBOARDING (MAX WIDTH 1020px)                              */}
-      {/* ========================================================================= */}
-      <div className="max-w-[1020px] mx-auto space-y-7 sm:space-y-8 relative z-10">
+    <div className="min-h-full bg-slate-50/60 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* ======================================================================= */}
-        {/* 1. WELCOME SECTION (CENTERED & COMPACT)                                  */}
+        {/* 1. ONBOARDING ORIENTATION & HEADER                                      */}
         {/* ======================================================================= */}
-        <div className="text-center max-w-2xl mx-auto space-y-2.5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-[11px] font-semibold tracking-wider uppercase">
-            <span>PENGATURAN AWAL AKUN</span>
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 text-emerald-800 text-xs font-semibold">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Langkah Awal: Pemilihan Peran Akun</span>
           </div>
 
-          <h1
-            className="text-2xl sm:text-[30px] font-bold text-slate-900 tracking-tight leading-tight"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Pilih Jenis Organisasi Anda
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Tentukan Peran Organisasi Anda di SIPENA
           </h1>
 
-          <p className="text-xs sm:text-[14px] text-slate-500 leading-relaxed font-normal max-w-xl mx-auto">
-            Pilih jenis organisasi yang akan Anda kelola untuk melanjutkan pengaturan profil dan mulai menggunakan SIPENA.
+          <p className="text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">
+            Selamat datang, <strong className="text-slate-800">{user.name}</strong>. Pilih
+            jalur organisasi yang ingin Anda kelola untuk mengaktifkan fitur dan ruang
+            kerja kolaborasi yang sesuai dengan kebutuhan operasional Anda.
           </p>
         </div>
 
         {/* ======================================================================= */}
-        {/* 2. BANNER UNDANGAN TIM AKTIF (JIKA TERSEDIA)                            */}
+        {/* 2. BANNER UNDANGAN TIM PENDING (JIKA TERSEDIA)                          */}
         {/* ======================================================================= */}
         {pendingInvitations.length > 0 && (
           <div className="space-y-3">
             {invitationError && (
-              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-start gap-2.5">
                 <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <span>{invitationError}</span>
               </div>
@@ -234,25 +222,34 @@ export function StagingOnboardingView({
             {pendingInvitations.map((inv) => (
               <div
                 key={inv.id}
-                className="p-5 sm:p-6 rounded-2xl bg-white border border-[#CBC8DB] shadow-[0_8px_24px_-4px_rgba(24,19,67,0.08)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                className="p-5 sm:p-6 rounded-2xl bg-white border border-amber-300 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 relative overflow-hidden"
               >
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-semibold flex items-center gap-1.5">
-                      <Bell className="w-3 h-3 text-emerald-600" />
-                      Undangan Tim
+                <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-amber-500" />
+
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center gap-1.5">
+                      <Bell className="w-3.5 h-3.5 text-amber-600" />
+                      Undangan Bergabung
                     </span>
-                    <Badge variant="blue" size="sm">
+                    <Badge variant="navy" size="sm">
                       Peran: {inv.role}
                     </Badge>
                   </div>
 
-                  <h3 className="text-base sm:text-lg font-bold text-[#181343] tracking-tight">
-                    Bergabung dengan {inv.companyName || "Perusahaan Mitra"}
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                    Bergabung dengan {inv.companyName || "Organisasi Terdaftar"}
                   </h3>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+
+                  <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
                     {inv.invitedByName ? `${inv.invitedByName} dari ` : ""}
-                    <strong>{inv.companyName || "Perusahaan"}</strong> mengundang Anda untuk bergabung ke dalam tim CSR sebagai <strong>{inv.role}</strong>.
+                    <strong className="text-slate-800">
+                      {inv.companyName || "Perusahaan"}
+                    </strong>{" "}
+                    mengundang Anda untuk bergabung ke dalam tim sebagai{" "}
+                    <strong className="text-slate-800">{inv.role}</strong>. Dengan
+                    menerima undangan ini, akun Anda otomatis terhubung ke organisasi
+                    tersebut.
                   </p>
                 </div>
 
@@ -262,7 +259,7 @@ export function StagingOnboardingView({
                     size="sm"
                     disabled={processingId === inv.id}
                     onClick={() => handleRejectInvitation(inv.id)}
-                    className="text-xs text-slate-700 hover:text-rose-600 hover:bg-rose-50 border-slate-200"
+                    className="text-xs text-slate-700 hover:text-rose-700 hover:bg-rose-50 border-slate-200 cursor-pointer min-h-[40px]"
                     leftIcon={<X className="w-3.5 h-3.5" />}
                   >
                     Tolak
@@ -272,10 +269,10 @@ export function StagingOnboardingView({
                     size="sm"
                     isLoading={processingId === inv.id}
                     onClick={() => handleAcceptInvitation(inv.id)}
-                    className="text-xs font-semibold px-4"
+                    className="text-xs font-bold px-4 cursor-pointer min-h-[40px]"
                     leftIcon={<Check className="w-3.5 h-3.5" />}
                   >
-                    Terima Undangan &amp; Masuk
+                    Terima &amp; Masuk Workspace
                   </Button>
                 </div>
               </div>
@@ -284,211 +281,320 @@ export function StagingOnboardingView({
         )}
 
         {/* ======================================================================= */}
-        {/* 3. DUA CARD PILIHAN UTAMA (PERUSAHAAN & MITRA/NGO) — SEJAJAR & SETARA     */}
+        {/* 3. DUA JALUR UTAMA (PERUSAHAAN SPONSOR VS MITRA PELAKSANA)              */}
         {/* ======================================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-6 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           {/* ------------------------------------------------------------------- */}
-          {/* CARD 1 — PERUSAHAAN                                                 */}
+          {/* CARD 1: PERUSAHAAN SPONSOR                                          */}
           {/* ------------------------------------------------------------------- */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_12px_28px_-6px_rgba(24,19,67,0.08),0_6px_12px_-4px_rgba(24,19,67,0.04)] hover:shadow-[0_20px_38px_-8px_rgba(24,19,67,0.12),0_10px_16px_-6px_rgba(24,19,67,0.06)] hover:border-[#181343]/30 hover:-translate-y-0.5 transition-all duration-200 p-7 sm:p-8 flex flex-col justify-between h-full group">
-            <div className="space-y-5">
-              {/* Top Row: Ikon Gedung dalam Rounded Square + Badge Kecil */}
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shrink-0 shadow-2xs">
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs hover:shadow-md hover:border-emerald-500/50 transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between h-full">
+            <div className="space-y-6">
+              {/* Header Card */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center text-emerald-700 shrink-0">
                   <Building2 className="w-6 h-6" />
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200/60 text-[10.5px] font-semibold tracking-wider uppercase">
-                  PERUSAHAAN
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-bold uppercase tracking-wider">
+                    Jalur Korporat
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Akses: MANAGEMENT
+                  </span>
+                </div>
               </div>
 
-              {/* Heading & Deskripsi */}
-              <div>
-                <h2
-                  className="text-xl font-bold text-slate-900 tracking-tight leading-snug group-hover:text-[#181343] transition-colors"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Kelola CSR Perusahaan
+              {/* Title & Deskripsi */}
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                  Perusahaan Sponsor CSR
                 </h2>
-                <p className="text-xs sm:text-[13px] text-slate-500 mt-1.5 leading-relaxed font-normal">
-                  Untuk perusahaan yang ingin merencanakan program CSR, berkolaborasi dengan mitra, dan mengevaluasi dampak kegiatan.
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Dirancang untuk korporasi, BUMN, atau perusahaan swasta yang
+                  mengalokasikan anggaran sosial, mempublikasikan inisiatif, dan
+                  memantau kepatuhan indikator keberlanjutan (ESG).
                 </p>
               </div>
 
-              {/* Tiga Keunggulan Perusahaan */}
+              {/* Fitur Utama */}
               <div className="pt-4 border-t border-slate-100 space-y-3.5">
-                {/* 1. Kelola Peluang CSR */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <Compass className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <Compass className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-tight">
-                      Kelola Peluang CSR
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Publikasi Peluang Inisiatif
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                      Rencanakan dan publikasikan peluang kolaborasi.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Buka program pendanaan dengan pagu anggaran dan kriteria sasaran.
                     </p>
                   </div>
                 </div>
 
-                {/* 2. Bangun Kemitraan */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <Users className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <Users className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-tight">
-                      Bangun Kemitraan
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Seleksi &amp; Skrining Proposal
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                      Tinjau proposal dan kelola kerja sama dengan NGO.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Tinjau proposal mitra, audit kewajaran RAB, dan tetapkan keputusan.
                     </p>
                   </div>
                 </div>
 
-                {/* 3. Pantau & Evaluasi Dampak */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <BarChart3 className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-tight">
-                      Pantau &amp; Evaluasi Dampak
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Kontrak MoU &amp; Kesepakatan
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                      Monitor pelaksanaan program serta kontribusi SDGs dan ESG.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Finalisasi jadwal tahapan kegiatan dan pengesahan berkas resmi.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <BarChart3 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Monitoring &amp; Pelaporan ESG
+                    </h4>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Pantau serapan dana riil dan hasilkan laporan kepatuhan POJK 51.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Tombol Aksi Bawah: Lanjutkan sebagai Perusahaan (Solid Navy) */}
+            {/* CTA Button */}
             <div className="pt-6">
               <Button
                 variant="primary"
                 size="md"
                 onClick={() => setIsCompanyModalOpen(true)}
-                className="w-full h-11 text-xs sm:text-sm font-semibold rounded-xl cursor-pointer"
+                className="w-full text-xs sm:text-sm font-bold min-h-[44px] rounded-xl cursor-pointer"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
-                Lanjutkan sebagai Perusahaan
+                Daftarkan Profil Perusahaan
               </Button>
             </div>
           </div>
 
           {/* ------------------------------------------------------------------- */}
-          {/* CARD 2 — MITRA / NGO                                                */}
+          {/* CARD 2: MITRA PELAKSANA / NGO                                       */}
           {/* ------------------------------------------------------------------- */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_12px_28px_-6px_rgba(24,19,67,0.08),0_6px_12px_-4px_rgba(24,19,67,0.04)] hover:shadow-[0_20px_38px_-8px_rgba(24,19,67,0.12),0_10px_16px_-6px_rgba(24,19,67,0.06)] hover:border-[#181343]/30 hover:-translate-y-0.5 transition-all duration-200 p-7 sm:p-8 flex flex-col justify-between h-full group">
-            <div className="space-y-5">
-              {/* Top Row: Ikon Handshake dalam Rounded Square + Badge Kecil */}
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center text-teal-700 shrink-0 shadow-2xs">
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs hover:shadow-md hover:border-[#181343]/50 transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between h-full">
+            <div className="space-y-6">
+              {/* Header Card */}
+              <div className="flex items-start justify-between gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-[#181343] shrink-0">
                   <HeartHandshake className="w-6 h-6" />
                 </div>
-                <span className="px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200/60 text-[10.5px] font-semibold tracking-wider uppercase">
-                  MITRA PELAKSANA
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-200 text-[11px] font-bold uppercase tracking-wider">
+                    Jalur Lembaga Mitra
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Akses: PARTNER_ADMIN
+                  </span>
+                </div>
               </div>
 
-              {/* Heading & Deskripsi */}
-              <div>
-                <h2
-                  className="text-xl font-bold text-slate-900 tracking-tight leading-snug group-hover:text-[#181343] transition-colors"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Kelola Aktivitas Lembaga
+              {/* Title & Deskripsi */}
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                  Lembaga Mitra Pelaksana
                 </h2>
-                <p className="text-xs sm:text-[13px] text-slate-500 mt-1.5 leading-relaxed font-normal">
-                  Untuk yayasan, NGO, atau komunitas pelaksana yang ingin menemukan peluang CSR dan membangun kemitraan bersama perusahaan.
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Dirancang untuk yayasan, Lembaga Swadaya Masyarakat (LSM/NGO), atau
+                  organisasi kemasyarakatan yang memiliki keahlian eksekusi kegiatan di
+                  lapangan.
                 </p>
               </div>
 
-              {/* Tiga Keunggulan Mitra / NGO */}
+              {/* Fitur Utama */}
               <div className="pt-4 border-t border-slate-100 space-y-3.5">
-                {/* 1. Temukan Peluang CSR */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <Search className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-[#181343] flex items-center justify-center shrink-0 mt-0.5">
+                    <Search className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-tight">
-                      Temukan Peluang CSR
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Eksplorasi Inisiatif Terbuka
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                      Jelajahi inisiatif perusahaan yang menerima proposal.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Cari peluang pendanaan CSR yang relevan dengan fokus keahlian Anda.
                     </p>
                   </div>
                 </div>
 
-                {/* 2. Ajukan Proposal */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <Send className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-[#181343] flex items-center justify-center shrink-0 mt-0.5">
+                    <Send className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-tight">
-                      Ajukan Proposal
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Pengajuan Proposal &amp; RAB
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                      Kembangkan usulan program dan kelola pengajuan.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Kembangkan usulan program digital lengkap dengan rencana anggaran.
                     </p>
                   </div>
                 </div>
 
-                {/* 3. Laporkan Pelaksanaan */}
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
-                    <ClipboardCheck className="w-3.5 h-3.5" />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-[#181343] flex items-center justify-center shrink-0 mt-0.5">
+                    <ClipboardCheck className="w-4 h-4" />
                   </div>
-                  <div className="space-y-0.5">
-                    <h4 className="text-xs sm:text-[13px] font-semibold text-slate-800 leading-tight">
-                      Laporkan Pelaksanaan
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Laporan Kemajuan Lapangan
                     </h4>
-                    <p className="text-[11px] sm:text-xs text-slate-500 leading-relaxed font-normal">
-                      Dokumentasikan kegiatan, progres, dan capaian program.
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Dokumentasikan aktivitas fisik, bukti foto kegiatan, dan kwitansi dana.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-[#181343] flex items-center justify-center shrink-0 mt-0.5">
+                    <QrCode className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                      Survei Penerima Manfaat
+                    </h4>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Kumpulkan ulasan langsung dari masyarakat lapangan melalui kode QR.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Tombol Aksi Bawah: Lanjutkan sebagai Mitra (Solid Navy Identik) */}
+            {/* CTA Button */}
             <div className="pt-6">
               <Button
-                variant="primary"
+                variant="secondary"
                 size="md"
                 onClick={() => setIsPartnerModalOpen(true)}
-                className="w-full h-11 text-xs sm:text-sm font-semibold rounded-xl cursor-pointer"
+                className="w-full text-xs sm:text-sm font-bold min-h-[44px] rounded-xl cursor-pointer bg-[#181343] hover:bg-[#231b5e] text-white"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
-                Lanjutkan sebagai Mitra
+                Daftarkan Lembaga Mitra
               </Button>
             </div>
           </div>
         </div>
 
         {/* ======================================================================= */}
-        {/* 4. SECTION UNDANGAN TIM (COMPACT HORIZONTAL INFO CARD)                  */}
+        {/* 4. PANDUAN PERBANDINGAN PERAN (ACCORDION / HELPER)                       */}
         {/* ======================================================================= */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_22px_-4px_rgba(24,19,67,0.06),0_4px_10px_-2px_rgba(24,19,67,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#181343] flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
-              <Mail className="w-5 h-5 text-slate-600" />
+        <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setIsRoleGuideOpen(!isRoleGuideOpen)}
+            className="w-full p-4 sm:p-5 flex items-center justify-between text-left hover:bg-slate-50/80 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <HelpCircle className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                  Panduan Perbandingan Peran Organisasi
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Klik untuk melihat ringkasan perbedaan wewenang dan hak akses masing-masing jalur.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-900 leading-snug">
-                Sudah Mendapat Undangan Organisasi?
+            <ChevronDown
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                isRoleGuideOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+
+          {isRoleGuideOpen && (
+            <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50/40 space-y-4 text-xs">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-white border border-slate-200/80 space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                    <Building2 className="w-4 h-4 text-emerald-600" />
+                    <span>Perusahaan Sponsor</span>
+                  </div>
+                  <ul className="space-y-1.5 text-slate-600 list-disc list-inside">
+                    <li>Sebagai pihak pendana dan pemilik inisiatif program sosial.</li>
+                    <li>Menyetujui atau menolak proposal kegiatan dari mitra.</li>
+                    <li>Memvalidasi bukti transfer dan termin penyaluran dana.</li>
+                    <li>Menerima ringkasan laporan dampak ESG untuk stakeholder korporat.</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-slate-200/80 space-y-2">
+                  <div className="flex items-center gap-2 text-[#181343] font-bold">
+                    <HeartHandshake className="w-4 h-4 text-[#181343]" />
+                    <span>Lembaga Mitra Pelaksana</span>
+                  </div>
+                  <ul className="space-y-1.5 text-slate-600 list-disc list-inside">
+                    <li>Sebagai pelaksana teknis yang bergerak langsung di masyarakat.</li>
+                    <li>Menyusun rancangan jadwal kerja, target penerima, dan rincian RAB.</li>
+                    <li>Mengunggah bukti kuitansi belanja riil dan Berita Acara Serah Terima (BAST).</li>
+                    <li>Memfasilitasi warga untuk memberikan feedback kepuasan secara transparan.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ======================================================================= */}
+        {/* 5. PEMERIKSAAN UNDANGAN TIM REKAN KERJA                                  */}
+        {/* ======================================================================= */}
+        <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+              <Mail className="w-5 h-5" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                Sudah Memiliki Undangan dari Rekan Kerja?
               </h3>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 leading-relaxed font-normal max-w-2xl">
-                Jika Anda diundang untuk bergabung dengan tim perusahaan atau lembaga yang sudah terdaftar, Anda tidak perlu membuat organisasi baru.
+              <p className="text-xs text-slate-600 leading-relaxed max-w-xl">
+                Jika rekan kerja telah mendaftarkan profil organisasi Anda, mintalah
+                administrator untuk mengirimkan undangan tim ke alamat email:{" "}
+                <span className="font-semibold text-slate-800">{user.email}</span>.
               </p>
               {checkFeedback && (
-                <p className="text-[11px] font-medium text-emerald-700 mt-1 animate-in fade-in">
-                  {checkFeedback}
-                </p>
+                <div
+                  className={`mt-2 p-2.5 rounded-lg text-xs flex items-center gap-2 ${
+                    checkFeedback.type === "success"
+                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                      : checkFeedback.type === "error"
+                      ? "bg-rose-50 text-rose-800 border border-rose-200"
+                      : "bg-slate-100 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  {checkFeedback.type === "success" ? (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  ) : checkFeedback.type === "error" ? (
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                  ) : (
+                    <ShieldCheck className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                  )}
+                  <span>{checkFeedback.message}</span>
+                </div>
               )}
             </div>
           </div>
@@ -499,17 +605,23 @@ export function StagingOnboardingView({
               size="sm"
               isLoading={isLoadingInvitations}
               onClick={() => fetchPendingInvitations(true)}
-              leftIcon={<RefreshCw className={`w-3.5 h-3.5 text-slate-500 ${isLoadingInvitations ? "animate-spin" : ""}`} />}
-              className="text-xs font-semibold text-[#181343] border-slate-200 hover:bg-slate-50 rounded-xl whitespace-nowrap cursor-pointer h-9 px-3.5"
+              leftIcon={
+                <RefreshCw
+                  className={`w-3.5 h-3.5 text-slate-600 ${
+                    isLoadingInvitations ? "animate-spin" : ""
+                  }`}
+                />
+              }
+              className="text-xs font-semibold text-slate-800 border-slate-200 hover:bg-slate-50 rounded-xl cursor-pointer min-h-[40px] px-4"
             >
-              Periksa Undangan
+              Periksa Undangan Masuk
             </Button>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 5. MODAL FORMULIR PENDAFTARAN DETAIL PERUSAHAAN / MITRA                   */}
+      {/* 6. MODAL PENDAFTARAN PROFIL ORGANISASI                                   */}
       {/* ========================================================================= */}
       <CompanyRegisterModal
         isOpen={isCompanyModalOpen}

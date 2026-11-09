@@ -23,6 +23,15 @@ import {
   Calendar,
   MapPin,
   ExternalLink,
+  Copy,
+  CheckCheck,
+  Coins,
+  FileText,
+  Target,
+  BarChart3,
+  BookmarkCheck,
+  Layers,
+  FileSpreadsheet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,13 +51,16 @@ export function EsgSustainabilityReportTab({
   isManagement = false,
 }: EsgSustainabilityReportTabProps) {
   const [report, setReport] = useState<EsgReportResult | null>(null);
-  const [generatedAt, setGeneratedAt] = useState<string | null>(program.reportGeneratedAt || null);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(
+    program.reportGeneratedAt || null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
-  // Load existing report
+  // Muat laporan yang sudah ada
   useEffect(() => {
     if (program.sustainabilityReport) {
       try {
@@ -58,7 +70,6 @@ export function EsgSustainabilityReportTab({
         setReport(null);
       }
     } else {
-      // Fetch from API
       fetchExistingReport();
     }
   }, [program.id, program.sustainabilityReport]);
@@ -80,7 +91,7 @@ export function EsgSustainabilityReportTab({
         }
       }
     } catch {
-      // Ignore initial load failure
+      // Abaikan kegagalan inisialisasi awal
     } finally {
       setIsLoading(false);
     }
@@ -93,7 +104,9 @@ export function EsgSustainabilityReportTab({
       setSuccessMsg(null);
 
       const token = localStorage.getItem("accessToken");
-      if (!token) throw new Error("Sesi login telah berakhir. Silakan masuk kembali.");
+      if (!token) {
+        throw new Error("Sesi login telah berakhir. Silakan masuk kembali.");
+      }
 
       const res = await fetch(`/api/programs/${program.id}/esg-report`, {
         method: "POST",
@@ -111,12 +124,27 @@ export function EsgSustainabilityReportTab({
       setReport(json.data);
       const now = new Date().toISOString();
       setGeneratedAt(now);
-      setSuccessMsg("Laporan Keberlanjutan & Dampak ESG berhasil disusun oleh AI!");
+      setSuccessMsg(
+        "Laporan Keberlanjutan & Dampak ESG resmi berhasil disusun dan diperbarui oleh AI!"
+      );
       if (onProgramUpdated) onProgramUpdated();
     } catch (err: any) {
       setErrorMsg(err.message || "Terjadi kendala saat menghubungi layanan AI.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleCopySummary = async () => {
+    if (!report?.executiveSummary) return;
+    try {
+      await navigator.clipboard.writeText(
+        `RINGKASAN EKSEKUTIF ESG - ${program.title}\n\n${report.executiveSummary}\n\nHighlight Utama: ${report.programHighlight}\nSkor ESG: ${report.metrics.overallEsgScore}/100\nTarget SDG: ${report.primarySdg.goalTitle}`
+      );
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    } catch {
+      // Clipboard fallback
     }
   };
 
@@ -130,16 +158,16 @@ export function EsgSustainabilityReportTab({
     }, 1000);
   };
 
-  // Helper warna badge SDG (PBB style)
+  // Helper warna badge SDG PBB
   const getSdgColor = (goalNumber: number) => {
     const colors: Record<number, { bg: string; text: string; border: string }> = {
-      1: { bg: "bg-red-500", text: "text-white", border: "border-red-600" },
+      1: { bg: "bg-red-600", text: "text-white", border: "border-red-700" },
       2: { bg: "bg-amber-600", text: "text-white", border: "border-amber-700" },
       3: { bg: "bg-emerald-600", text: "text-white", border: "border-emerald-700" },
       4: { bg: "bg-rose-600", text: "text-white", border: "border-rose-700" },
       5: { bg: "bg-orange-600", text: "text-white", border: "border-orange-700" },
-      6: { bg: "bg-cyan-500", text: "text-white", border: "border-cyan-600" },
-      7: { bg: "bg-yellow-500", text: "text-slate-900", border: "border-yellow-600" },
+      6: { bg: "bg-cyan-600", text: "text-white", border: "border-cyan-700" },
+      7: { bg: "bg-yellow-500", text: "text-slate-950", border: "border-yellow-600" },
       8: { bg: "bg-rose-800", text: "text-white", border: "border-rose-900" },
       9: { bg: "bg-orange-500", text: "text-white", border: "border-orange-600" },
       10: { bg: "bg-pink-600", text: "text-white", border: "border-pink-700" },
@@ -151,22 +179,26 @@ export function EsgSustainabilityReportTab({
       16: { bg: "bg-blue-800", text: "text-white", border: "border-blue-900" },
       17: { bg: "bg-indigo-900", text: "text-white", border: "border-indigo-950" },
     };
-    return colors[goalNumber] || { bg: "bg-emerald-700", text: "text-white", border: "border-emerald-800" };
+    return colors[goalNumber] || {
+      bg: "bg-emerald-700",
+      text: "text-white",
+      border: "border-emerald-800",
+    };
   };
 
   return (
     <div className="space-y-6">
       {/* Toast Notifikasi Feedback */}
       {errorMsg && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between gap-3 shadow-xs print:hidden">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200/90 text-rose-800 text-xs flex items-center justify-between gap-3 shadow-xs print:hidden">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
-            <p className="font-semibold">{errorMsg}</p>
+            <p className="font-semibold leading-relaxed">{errorMsg}</p>
           </div>
           <button
             type="button"
             onClick={() => setErrorMsg(null)}
-            className="text-rose-500 hover:text-rose-800 font-bold"
+            className="text-rose-600 hover:text-rose-900 font-bold px-2 py-1 rounded-md cursor-pointer"
           >
             Tutup
           </button>
@@ -174,15 +206,15 @@ export function EsgSustainabilityReportTab({
       )}
 
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-between gap-3 shadow-xs print:hidden">
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-emerald-900 text-xs flex items-center justify-between gap-3 shadow-xs print:hidden">
           <div className="flex items-center gap-2.5">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-            <p className="font-semibold">{successMsg}</p>
+            <p className="font-semibold leading-relaxed">{successMsg}</p>
           </div>
           <button
             type="button"
             onClick={() => setSuccessMsg(null)}
-            className="text-emerald-600 hover:text-emerald-900 font-bold"
+            className="text-emerald-700 hover:text-emerald-950 font-bold px-2 py-1 rounded-md cursor-pointer"
           >
             Tutup
           </button>
@@ -190,36 +222,55 @@ export function EsgSustainabilityReportTab({
       )}
 
       {/* Header Navigasi & Aksi Laporan */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-white border border-[#E8E8EA] shadow-2xs print:hidden">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs print:hidden">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
               <Sparkles className="w-4 h-4" />
             </div>
             <h3 className="text-base font-extrabold text-[#181343] tracking-tight">
               Laporan Keberlanjutan &amp; Dampak ESG
             </h3>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase tracking-wider">
-              POJK 51 &bull; GRI
+            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
+              Standar POJK 51 &bull; GRI
             </span>
           </div>
-          <p className="text-xs text-[#787680]">
-            Sintesis cerdas capaian aktivitas lapangan, serapan kuitansi, dan ulasan warga penerima manfaat.
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Sintesis formal berbasis bukti aktivitas lapangan, audit verifikasi kuitansi dana CSR, dan ulasan kepuasan warga.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           {report && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              leftIcon={<Printer className="w-3.5 h-3.5 text-[#181343]" />}
-              className="text-xs font-bold"
-            >
-              Cetak / PDF Resmi
-            </Button>
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCopySummary}
+                leftIcon={
+                  isCopied ? (
+                    <CheckCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5 text-slate-600" />
+                  )
+                }
+                className="text-xs font-semibold cursor-pointer"
+              >
+                {isCopied ? "Tersalin!" : "Salin Ringkasan"}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                leftIcon={<Printer className="w-3.5 h-3.5 text-[#181343]" />}
+                className="text-xs font-semibold cursor-pointer"
+              >
+                Cetak / PDF Resmi
+              </Button>
+            </>
           )}
 
           <Button
@@ -229,12 +280,12 @@ export function EsgSustainabilityReportTab({
             onClick={handleGenerateReport}
             disabled={isGenerating}
             isLoading={isGenerating}
-            className="text-xs font-semibold"
+            className="text-xs font-bold px-4 cursor-pointer"
             leftIcon={
               isGenerating ? (
                 <RefreshCw className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Sparkles className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
               )
             }
           >
@@ -243,84 +294,90 @@ export function EsgSustainabilityReportTab({
         </div>
       </div>
 
-      {/* JIKA LAPORAN BELUM ADA: STATE KOSONG DENGAN TEASER ELEGAN */}
+      {/* STATE KOSONG (JIKA BELUM DISINTESIS) */}
       {!report && !isGenerating && (
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-850 to-[#181343] text-white border border-slate-800 shadow-md text-center space-y-6">
-          <div className="w-16 h-16 rounded-3xl bg-white/10 text-emerald-400 mx-auto flex items-center justify-center border border-white/15 shadow-inner">
-            <Sparkles className="w-8 h-8" />
-          </div>
+        <div className="p-8 sm:p-10 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-6">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 mx-auto flex items-center justify-center border border-emerald-100 shadow-2xs">
+              <Sparkles className="w-7 h-7" />
+            </div>
 
-          <div className="max-w-xl mx-auto space-y-2">
-            <h4 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Laporan Keberlanjutan Belum Disusun
+            <h4 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+              Sintesis Laporan Keberlanjutan Belum Dibuat
             </h4>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Gunakan mesin AI Cerdas Sipena untuk mengekstrak seluruh log kegiatan lapangan, audit nota belanja, dan suara warga menjadi narasi Laporan Keberlanjutan berstandar <strong>GRI Standards</strong> dan <strong>POJK 51</strong> secara otomatis.
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              Platform Sipena siap mengompilasi seluruh catatan kemajuan inisiatif <strong>{program.title}</strong> menjadi dokumen Laporan Keberlanjutan resmi yang selaras dengan regulasi <strong>POJK 51/POJK.03/2017</strong> dan kerangka <strong>GRI Standards</strong>.
             </p>
           </div>
 
-          {/* 3 Keunggulan Fitur */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto text-left pt-2">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                <Leaf className="w-3.5 h-3.5" />
+          {/* 3 Sumber Data Riil yang Diagregasi */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 max-w-4xl mx-auto pt-2">
+            <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                <Leaf className="w-4 h-4" />
               </div>
-              <h5 className="font-bold text-xs text-white">Penyelarasan 3 Pilar ESG</h5>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Membedah dampak Lingkungan (E), Sosial (S), dan Tata Kelola (G).
+              <h5 className="font-bold text-xs text-slate-900">
+                1. Pemetaan 3 Pilar ESG
+              </h5>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Menakar dampak nyata pada Lingkungan Hidup (E), Kesejahteraan Sosial (S), serta Akuntabilitas Tata Kelola (G).
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
-                <Globe className="w-3.5 h-3.5" />
+            <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center">
+                <Globe className="w-4 h-4" />
               </div>
-              <h5 className="font-bold text-xs text-white">Pemetaan 17 UN SDGs</h5>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Menghubungkan capaian kegiatan dengan indikator tujuan global PBB.
+              <h5 className="font-bold text-xs text-slate-900">
+                2. Target 17 UN SDGs
+              </h5>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Menghubungkan target dan output kegiatan lapangan langsung ke indikator pembangunan berkelanjutan PBB.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1.5">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                <Award className="w-3.5 h-3.5" />
+            <div className="p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-2">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                <FileSpreadsheet className="w-4 h-4" />
               </div>
-              <h5 className="font-bold text-xs text-white">Format Laporan Eksekutif</h5>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Siap cetak ke PDF resmi untuk dipresentasikan ke Dewan Direksi.
+              <h5 className="font-bold text-xs text-slate-900">
+                3. Audit Kuitansi &amp; Warga
+              </h5>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Menghitung efisiensi anggaran per jiwa penerima manfaat serta mengagregasi ulasan kepuasan warga sekitar.
               </p>
             </div>
           </div>
 
-          <div className="pt-4">
+          <div className="pt-2 text-center">
             <Button
               type="button"
               variant="primary"
               size="lg"
               onClick={handleGenerateReport}
               disabled={isGenerating}
-              className="text-sm px-8 py-3.5 cursor-pointer font-semibold"
-              leftIcon={<Sparkles className="w-4 h-4" />}
+              className="text-xs sm:text-sm font-bold px-7 py-3 cursor-pointer"
+              leftIcon={<Sparkles className="w-4 h-4 text-emerald-200" />}
             >
-              🚀 Susun Laporan Keberlanjutan AI Sekarang
+              Mulai Penyusunan Laporan ESG (AI)
             </Button>
+            <p className="text-[11px] text-slate-400 mt-2">
+              Proses sintesis memerlukan waktu sekitar 5 hingga 10 detik.
+            </p>
           </div>
         </div>
       )}
 
       {/* STATE LOADING SAAT MEN-GENERATE */}
       {isGenerating && (
-        <div className="p-12 rounded-3xl bg-white border border-[#E8E8EA] shadow-2xs text-center space-y-4">
-          <div className="relative w-14 h-14 mx-auto">
-            <div className="absolute inset-0 rounded-full border-4 border-emerald-100 animate-ping opacity-60" />
-            <div className="w-14 h-14 rounded-full border-4 border-emerald-600 border-t-transparent animate-spin flex items-center justify-center" />
-          </div>
-          <div className="space-y-1">
+        <div className="p-10 rounded-2xl bg-white border border-slate-200/90 shadow-xs text-center space-y-4">
+          <div className="w-12 h-12 rounded-full border-3 border-emerald-600 border-t-transparent animate-spin mx-auto" />
+          <div className="space-y-1.5 max-w-md mx-auto">
             <h4 className="text-base font-extrabold text-[#181343]">
               Sedang Mengompilasi Laporan Dampak ESG...
             </h4>
-            <p className="text-xs text-[#787680] max-w-md mx-auto">
-              AI sedang mengaudit seluruh tahapan kegiatan, mengekstrak metrik penerima manfaat, dan menyusun narasi standar POJK 51. Mohon tunggu sekitar 5–10 detik.
+            <p className="text-xs text-slate-500 leading-relaxed">
+              AI sedang memeriksa data log lapangan, menghitung rasio anggaran terhadap penerima manfaat, dan menyusun narasi kepatuhan standar POJK 51.
             </p>
           </div>
         </div>
@@ -330,19 +387,19 @@ export function EsgSustainabilityReportTab({
       {/* TAMPILAN RESMI LAPORAN KEBERLANJUTAN (PRINT & SCREEN READY)   */}
       {/* ============================================================ */}
       {report && !isGenerating && (
-        <div id="printable-esg-report" className="space-y-6 print:m-0 print:p-0 bg-white">
+        <div id="printable-esg-report" className="space-y-6 bg-white">
           {/* Print-Only Header: Kop Laporan Resmi */}
           <div className="hidden print:block pb-4 mb-4 border-b-2 border-slate-900">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tight">
+                <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight">
                   Laporan Keberlanjutan &amp; Dampak ESG
                 </h1>
-                <p className="text-xs text-slate-600 font-semibold mt-0.5">
+                <p className="text-[11px] text-slate-600 font-semibold mt-0.5">
                   Standar POJK 51/POJK.03/2017 &bull; Global Reporting Initiative (GRI Standards)
                 </p>
               </div>
-              <div className="text-right text-xs text-slate-600">
+              <div className="text-right text-[11px] text-slate-600">
                 <p className="font-bold">{program.companyName || "Perusahaan Sponsor"}</p>
                 <p>Dokumen Resmi Platform Sipena</p>
                 <p>Dicetak: {formatDate(new Date().toISOString())}</p>
@@ -351,39 +408,45 @@ export function EsgSustainabilityReportTab({
           </div>
 
           {/* 1. HERO BANNER: SKOR ESG & RINGKASAN EKSEKUTIF */}
-          <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-[#181343] via-[#201B54] to-slate-900 text-white shadow-md border border-slate-800 space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-5 border-b border-white/10">
+          <div className="p-6 sm:p-7 rounded-2xl bg-[#181343] text-white shadow-sm border border-slate-800 space-y-6">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 pb-5 border-b border-white/10">
               <div className="space-y-2 max-w-2xl">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5 uppercase tracking-wider">
                     <Sparkles className="w-3 h-3" />
-                    Official Sustainability Synthesis
+                    Sintesis Keberlanjutan Resmi
                   </span>
                   {generatedAt && (
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
+                    <span className="text-xs text-slate-300 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" />
                       Disusun pada {formatDate(generatedAt)}
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-snug">
                   {program.title}
                 </h3>
 
-                <p className="text-xs text-slate-300 flex items-center gap-2 flex-wrap">
-                  <span>Sponsor: <strong>{program.companyName || "Perusahaan"}</strong></span>
+                <div className="flex flex-wrap items-center gap-y-1 gap-x-2 text-xs text-slate-300">
+                  <span>
+                    Sponsor: <strong className="text-white">{program.companyName || "Perusahaan"}</strong>
+                  </span>
                   <span>&bull;</span>
-                  <span>Mitra: <strong>{program.partnerName || "Mitra Pelaksana"}</strong></span>
+                  <span>
+                    Mitra: <strong className="text-white">{program.partnerName || "Mitra Pelaksana"}</strong>
+                  </span>
                   <span>&bull;</span>
-                  <span>Lokasi: <strong>{program.targetCity || "Nasional"}</strong></span>
-                </p>
+                  <span>
+                    Lokasi: <strong className="text-white">{program.targetCity || "Nasional"}</strong>
+                  </span>
+                </div>
               </div>
 
               {/* Skor Terpadu Performa ESG */}
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-4 shrink-0 shadow-inner">
+              <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center gap-4 shrink-0 shadow-inner">
                 <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
+                  <span className="text-[10px] uppercase font-bold text-slate-300 tracking-wider block">
                     Indeks Performa ESG
                   </span>
                   <div className="text-3xl font-black text-emerald-400">
@@ -391,7 +454,7 @@ export function EsgSustainabilityReportTab({
                     <span className="text-xs font-bold text-slate-400">/100</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-lg border border-emerald-500/30 shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-black text-lg border border-emerald-500/30 shrink-0">
                   <Award className="w-6 h-6" />
                 </div>
               </div>
@@ -408,7 +471,7 @@ export function EsgSustainabilityReportTab({
             </div>
 
             {/* Highlight Keberhasilan Utama */}
-            <div className="p-4 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-start gap-3 text-xs">
+            <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-start gap-3 text-xs">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 <span className="font-extrabold text-emerald-300 block">
@@ -422,18 +485,18 @@ export function EsgSustainabilityReportTab({
           </div>
 
           {/* 2. PENYELARASAN TARGET SDG (UN SUSTAINABLE DEVELOPMENT GOALS) */}
-          <div className="p-6 rounded-3xl bg-white border border-[#E8E8EA] shadow-2xs space-y-4">
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-100">
                   <Globe className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="text-sm font-extrabold text-[#181343]">
                     Penyelarasan UN Sustainable Development Goals (SDGs)
                   </h4>
-                  <p className="text-[11px] text-[#787680]">
-                    Pemetaan kontribusi inisiatif terhadap target pembangunan global
+                  <p className="text-[11px] text-slate-500">
+                    Pemetaan kontribusi program terhadap target pembangunan global Agenda 2030 PBB
                   </p>
                 </div>
               </div>
@@ -441,7 +504,7 @@ export function EsgSustainabilityReportTab({
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-1">
               {/* Primary SDG Card */}
-              <div className="lg:col-span-2 p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <div className="lg:col-span-2 p-5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-xs shrink-0 ${
@@ -452,7 +515,7 @@ export function EsgSustainabilityReportTab({
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                      Target SDG Utama
+                      Target SDG Prioritas Utama
                     </span>
                     <h5 className="font-extrabold text-slate-900 text-sm">
                       {report.primarySdg.goalTitle}
@@ -460,7 +523,7 @@ export function EsgSustainabilityReportTab({
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white border border-slate-100 text-xs text-slate-700 leading-relaxed">
+                <div className="p-3.5 rounded-lg bg-white border border-slate-200/60 text-xs text-slate-700 leading-relaxed">
                   <span className="font-bold text-slate-900 block mb-1">
                     Justifikasi Kontribusi Lapangan:
                   </span>
@@ -469,7 +532,7 @@ export function EsgSustainabilityReportTab({
               </div>
 
               {/* Secondary SDGs List */}
-              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <div className="p-5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
                   Target SDG Pendukung
                 </span>
@@ -479,17 +542,17 @@ export function EsgSustainabilityReportTab({
                     report.secondarySdgs.map((sdg, idx) => (
                       <div
                         key={idx}
-                        className="p-3 rounded-xl bg-white border border-slate-100 flex items-start gap-2.5 text-xs"
+                        className="p-3 rounded-lg bg-white border border-slate-200/60 flex items-start gap-2.5 text-xs"
                       >
                         <div
-                          className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 ${
+                          className={`w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs shrink-0 ${
                             getSdgColor(sdg.goalNumber).bg
                           } ${getSdgColor(sdg.goalNumber).text}`}
                         >
                           {sdg.goalNumber}
                         </div>
                         <div className="space-y-0.5 min-w-0">
-                          <p className="font-extrabold text-slate-900 truncate">
+                          <p className="font-bold text-slate-900 truncate">
                             {sdg.goalTitle}
                           </p>
                           <p className="text-[11px] text-slate-500 line-clamp-2">
@@ -500,7 +563,7 @@ export function EsgSustainabilityReportTab({
                     ))
                   ) : (
                     <p className="text-xs text-slate-500 italic">
-                      Tidak ada target sekunder tambahan.
+                      Tidak ada target sekunder tambahan yang terdeteksi.
                     </p>
                   )}
                 </div>
@@ -511,113 +574,132 @@ export function EsgSustainabilityReportTab({
           {/* 3. TRIDAYA PILAR ESG (ENVIRONMENT, SOCIAL, GOVERNANCE) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Environmental Pillar */}
-            <div className="p-5 rounded-3xl bg-emerald-50/50 border border-emerald-100 shadow-2xs space-y-3">
+            <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200/70 shadow-xs space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs shrink-0">
                   <Leaf className="w-4 h-4" />
                 </div>
                 <div>
                   <h5 className="font-extrabold text-emerald-950 text-sm">
                     Environmental (E)
                   </h5>
-                  <span className="text-[10px] font-semibold text-emerald-700 uppercase tracking-wider block">
-                    Kelestarian Lingkungan
+                  <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">
+                    Kelestarian Lingkungan Hidup
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-emerald-900 leading-relaxed font-normal">
+              <p className="text-xs text-emerald-950 leading-relaxed font-normal">
                 {report.esgBreakdown.environmentalImpact}
               </p>
             </div>
 
             {/* Social Pillar */}
-            <div className="p-5 rounded-3xl bg-blue-50/50 border border-blue-100 shadow-2xs space-y-3">
+            <div className="p-5 rounded-2xl bg-cyan-50/60 border border-cyan-200/70 shadow-xs space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+                <div className="w-8 h-8 rounded-lg bg-cyan-700 text-white flex items-center justify-center shadow-xs shrink-0">
                   <HeartHandshake className="w-4 h-4" />
                 </div>
                 <div>
-                  <h5 className="font-extrabold text-blue-950 text-sm">
+                  <h5 className="font-extrabold text-cyan-950 text-sm">
                     Social (S)
                   </h5>
-                  <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wider block">
-                    Kesejahteraan Masyarakat
+                  <span className="text-[10px] font-bold text-cyan-800 uppercase tracking-wider block">
+                    Pemberdayaan Masyarakat
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-blue-900 leading-relaxed font-normal">
+              <p className="text-xs text-cyan-950 leading-relaxed font-normal">
                 {report.esgBreakdown.socialImpact}
               </p>
             </div>
 
             {/* Governance Pillar */}
-            <div className="p-5 rounded-3xl bg-purple-50/50 border border-purple-100 shadow-2xs space-y-3">
+            <div className="p-5 rounded-2xl bg-indigo-50/60 border border-indigo-200/70 shadow-xs space-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
-                  <ShieldCheck className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-lg bg-[#181343] text-white flex items-center justify-center shadow-xs shrink-0">
+                  <ShieldCheck className="w-4 h-4 text-teal-300" />
                 </div>
                 <div>
-                  <h5 className="font-extrabold text-purple-950 text-sm">
+                  <h5 className="font-extrabold text-indigo-950 text-sm">
                     Governance (G)
                   </h5>
-                  <span className="text-[10px] font-semibold text-purple-700 uppercase tracking-wider block">
+                  <span className="text-[10px] font-bold text-indigo-800 uppercase tracking-wider block">
                     Tata Kelola &amp; Akuntabilitas
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-purple-900 leading-relaxed font-normal">
+              <p className="text-xs text-indigo-950 leading-relaxed font-normal">
                 {report.esgBreakdown.governanceTransparency}
               </p>
             </div>
           </div>
 
           {/* 4. SCORECARDS METRIK DAMPAK KUANTITATIF */}
-          <div className="p-6 rounded-3xl bg-white border border-[#E8E8EA] shadow-2xs space-y-4">
-            <h4 className="text-xs font-extrabold text-[#181343] uppercase tracking-wider">
-              Metrik Efisiensi &amp; Capaian Kuantitatif Lapangan
-            </h4>
+          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-extrabold text-[#181343] uppercase tracking-wider">
+                Metrik Efisiensi &amp; Capaian Kuantitatif Lapangan
+              </h4>
+              <span className="text-[11px] text-slate-500">
+                Audit Serapan Anggaran &bull; Data Terverifikasi
+              </span>
+            </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {/* Metrik 1: Jiwa Penerima */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Jiwa Terjangkau
-                </span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Penerima Manfaat
+                  </span>
+                  <Users className="w-3.5 h-3.5 text-slate-400" />
+                </div>
                 <p className="text-xl font-black text-[#181343]">
                   {report.metrics.beneficiariesReached.toLocaleString("id-ID")}{" "}
                   <span className="text-xs font-semibold text-slate-500">Jiwa</span>
                 </p>
+                <p className="text-[10px] text-slate-500">Capaian langsung lapangan</p>
               </div>
 
               {/* Metrik 2: Biaya per Jiwa */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Biaya per Penerima
-                </span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Biaya per Jiwa
+                  </span>
+                  <Coins className="w-3.5 h-3.5 text-slate-400" />
+                </div>
                 <p className="text-base font-black text-[#181343] truncate">
                   {report.metrics.costPerBeneficiaryFormatted}
                 </p>
+                <p className="text-[10px] text-slate-500">Rasio efisiensi serapan</p>
               </div>
 
               {/* Metrik 3: Kepuasan Warga */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Indeks Kepuasan Warga
-                </span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Indeks Kepuasan
+                  </span>
+                  <Award className="w-3.5 h-3.5 text-emerald-600" />
+                </div>
                 <p className="text-xl font-black text-emerald-700">
-                  {report.metrics.beneficiarySatisfactionScore}%{" "}
-                  <span className="text-xs font-semibold text-slate-500">Puas</span>
+                  {report.metrics.beneficiarySatisfactionScore}%
                 </p>
+                <p className="text-[10px] text-emerald-700 font-semibold">Ulasan warga positif</p>
               </div>
 
               {/* Metrik 4: Rating Efisiensi Budget */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Efisiensi Anggaran
-                </span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1">
+                <div className="flex items-center justify-between text-slate-500">
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Efisiensi Anggaran
+                  </span>
+                  <TrendingUp className="w-3.5 h-3.5 text-slate-400" />
+                </div>
                 <div className="pt-0.5">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-extrabold inline-block ${
+                    className={`px-2 py-0.5 rounded-md text-[11px] font-bold inline-block ${
                       report.metrics.budgetEfficiencyRating === "EXCELLENT"
                         ? "bg-emerald-100 text-emerald-800"
                         : report.metrics.budgetEfficiencyRating === "GOOD"
@@ -632,19 +714,20 @@ export function EsgSustainabilityReportTab({
                       : "Perlu Optimasi"}
                   </span>
                 </div>
+                <p className="text-[10px] text-slate-500">Audit kepatuhan belanja</p>
               </div>
             </div>
           </div>
 
           {/* 5. SUCCESS STORY & HUMAN INTEREST HIGHLIGHT */}
-          <div className="p-6 sm:p-7 rounded-3xl bg-amber-50/60 border border-amber-200/80 shadow-2xs space-y-4">
-            <div className="flex items-center gap-2 text-amber-900 font-extrabold text-sm">
-              <Quote className="w-4 h-4 text-amber-600" />
-              <span>Cerita Perubahan Nyata (Human Interest Story)</span>
+          <div className="p-6 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs space-y-3.5">
+            <div className="flex items-center gap-2 text-amber-900 font-extrabold text-xs uppercase tracking-wider">
+              <Quote className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Cerita Perubahan Nyata (Human Interest Chronicle)</span>
             </div>
 
-            <div className="space-y-2">
-              <h5 className="text-base font-extrabold text-slate-900">
+            <div className="space-y-1.5">
+              <h5 className="text-base font-extrabold text-slate-900 leading-snug">
                 {report.successStory.headline}
               </h5>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
@@ -653,7 +736,7 @@ export function EsgSustainabilityReportTab({
             </div>
 
             {report.successStory.beneficiaryQuote && (
-              <div className="p-4 rounded-2xl bg-white border border-amber-200/60 text-xs italic text-slate-800">
+              <div className="p-4 rounded-xl bg-white border border-amber-200/70 text-xs italic text-slate-800 leading-relaxed shadow-2xs">
                 "{report.successStory.beneficiaryQuote}"
               </div>
             )}
@@ -662,32 +745,32 @@ export function EsgSustainabilityReportTab({
           {/* 6. TANTANGAN OPERASIONAL & REKOMENDASI MASA DEPAN */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Tantangan Lapangan */}
-            <div className="p-5 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
               <div className="flex items-center gap-2 text-slate-800 font-bold text-xs uppercase tracking-wider">
-                <AlertCircle className="w-4 h-4 text-slate-500" />
+                <AlertCircle className="w-4 h-4 text-slate-500 shrink-0" />
                 <span>Tantangan &amp; Kendala Lapangan</span>
               </div>
               <ul className="space-y-2 text-xs text-slate-700">
                 {report.challengesFaced.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <span className="text-slate-400 font-bold">&bull;</span>
-                    <span className="leading-snug">{item}</span>
+                    <span className="leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Rekomendasi Keberlanjutan */}
-            <div className="p-5 rounded-3xl bg-emerald-50/60 border border-emerald-200/80 space-y-3">
-              <div className="flex items-center gap-2 text-emerald-900 font-bold text-xs uppercase tracking-wider">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
+            <div className="p-5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3">
+              <div className="flex items-center gap-2 text-emerald-950 font-bold text-xs uppercase tracking-wider">
+                <TrendingUp className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Rekomendasi Strategis Lanjutan</span>
               </div>
               <ul className="space-y-2 text-xs text-emerald-950">
                 {report.futureRecommendations.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <span className="text-emerald-600 font-bold">&bull;</span>
-                    <span className="leading-snug">{item}</span>
+                    <span className="leading-relaxed">{item}</span>
                   </li>
                 ))}
               </ul>
@@ -695,7 +778,7 @@ export function EsgSustainabilityReportTab({
           </div>
 
           {/* Print-Only Signature Section */}
-          <div className="hidden print:block pt-10 border-t border-slate-300 mt-8">
+          <div className="hidden print:block pt-8 border-t border-slate-300 mt-8">
             <div className="grid grid-cols-2 gap-12 text-center text-xs text-slate-700">
               <div className="space-y-16">
                 <p className="font-semibold">Mengetahui &amp; Mengesahkan,</p>
