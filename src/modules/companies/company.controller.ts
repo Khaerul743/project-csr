@@ -90,4 +90,28 @@ export class CompanyController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async getFinancialOversight(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const data = await this.companyService.getFinancialOversight(authUser.companyId);
+      return ApiResponse.success(data, "Data pengawasan keuangan perusahaan berhasil diambil");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async getPartnerEvaluations(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const data = await this.companyService.getPartnerEvaluations(authUser.companyId);
+      return ApiResponse.success(data, "Data evaluasi kinerja mitra berhasil diambil");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }

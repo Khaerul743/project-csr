@@ -15,6 +15,8 @@ import {
   BarChart3,
   MessageSquare,
   Sparkles,
+  Wallet,
+  Award,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AppLogo } from "@/components/ui/app-logo";
@@ -28,6 +30,8 @@ export type CompanyNavMenu =
   | "collaborations"
   | "conversations"
   | "programs"
+  | "finances"
+  | "partner-performance"
   | "analytics"
   | "team"
   | "profile";
@@ -77,93 +81,177 @@ export function Sidebar({
   const isManagement = user.role === "MANAGEMENT";
   const aiEnabled = isAiFeatureEnabled();
 
-  const navigationSections: NavSection[] = [
-    {
-      title: "UTAMA",
-      items: [
+  const navigationSections: NavSection[] = isManagement
+    ? [
         {
-          id: "overview" as CompanyNavMenu,
-          label: "Ringkasan",
-          icon: LayoutDashboard,
+          title: "PENGAWASAN EKSEKUTIF",
+          items: [
+            {
+              id: "overview" as CompanyNavMenu,
+              label: "Ringkasan",
+              icon: LayoutDashboard,
+            },
+            {
+              id: "programs" as CompanyNavMenu,
+              label: "Pengawasan Program",
+              icon: Activity,
+              count: counts?.programs,
+            },
+            {
+              id: "finances" as CompanyNavMenu,
+              label: "Pengawasan Anggaran",
+              icon: Wallet,
+            },
+            {
+              id: "partner-performance" as CompanyNavMenu,
+              label: "Kinerja Mitra",
+              icon: Award,
+            },
+            {
+              id: "analytics" as CompanyNavMenu,
+              label: "Laporan & Dampak ESG",
+              icon: BarChart3,
+            },
+          ],
+        },
+        {
+          title: "INISIATIF & MITRA",
+          items: [
+            {
+              id: "opportunities" as CompanyNavMenu,
+              label: "Katalog Peluang CSR",
+              icon: FileText,
+            },
+            {
+              id: "partners" as CompanyNavMenu,
+              label: "Direktori Mitra",
+              icon: HeartHandshake,
+            },
+          ],
         },
         ...(aiEnabled
           ? [
               {
-                id: "chat" as CompanyNavMenu,
-                label: "AI CSR Advisor",
-                icon: Sparkles,
+                title: "KONSULTASI STRATEGIS",
+                items: [
+                  {
+                    id: "chat" as CompanyNavMenu,
+                    label: "AI CSR Advisor",
+                    icon: Sparkles,
+                  },
+                ],
               },
             ]
           : []),
         {
-          id: "opportunities" as CompanyNavMenu,
-          label: "Peluang CSR",
-          icon: FileText,
+          title: "TATA KELOLA KORPORAT",
+          items: [
+            {
+              id: "team" as CompanyNavMenu,
+              label: "Anggota Tim",
+              icon: Users,
+            },
+            {
+              id: "profile" as CompanyNavMenu,
+              label: "Profil Perusahaan",
+              icon: Building2,
+            },
+          ],
         },
-      ],
-    },
-    {
-      title: "KOLABORASI & MITRA",
-      items: [
+      ]
+    : [
         {
-          id: "partners" as CompanyNavMenu,
-          label: "Kurasi Mitra",
-          icon: HeartHandshake,
-        },
-        {
-          id: "proposals" as CompanyNavMenu,
-          label: "Kelola Proposal",
-          icon: Inbox,
-          count: counts?.proposals,
-        },
-        {
-          id: "collaborations" as CompanyNavMenu,
-          label: "Kolaborasi & MoU",
-          icon: FileCheck2,
-        },
-        ...(!isManagement
-          ? [
-              {
-                id: "conversations" as CompanyNavMenu,
-                label: "Pesan & Negosiasi",
-                icon: MessageSquare,
-              },
-            ]
-          : []),
-      ],
-    },
-    {
-      title: "PELAKSANAAN & DAMPAK",
-      items: [
-        {
-          id: "programs" as CompanyNavMenu,
-          label: "Pelaksanaan Program",
-          icon: Activity,
-          count: counts?.programs,
+          title: "UTAMA",
+          items: [
+            {
+              id: "overview" as CompanyNavMenu,
+              label: "Ringkasan",
+              icon: LayoutDashboard,
+            },
+            ...(aiEnabled
+              ? [
+                  {
+                    id: "chat" as CompanyNavMenu,
+                    label: "AI CSR Advisor",
+                    icon: Sparkles,
+                  },
+                ]
+              : []),
+            {
+              id: "opportunities" as CompanyNavMenu,
+              label: "Peluang CSR",
+              icon: FileText,
+            },
+          ],
         },
         {
-          id: "analytics" as CompanyNavMenu,
-          label: "Laporan & Dampak ESG",
-          icon: BarChart3,
+          title: "KOLABORASI & MITRA",
+          items: [
+            {
+              id: "partners" as CompanyNavMenu,
+              label: "Kurasi Mitra",
+              icon: HeartHandshake,
+            },
+            {
+              id: "proposals" as CompanyNavMenu,
+              label: "Kelola Proposal",
+              icon: Inbox,
+              count: counts?.proposals,
+            },
+            {
+              id: "collaborations" as CompanyNavMenu,
+              label: "Kolaborasi & MoU",
+              icon: FileCheck2,
+            },
+            {
+              id: "conversations" as CompanyNavMenu,
+              label: "Pesan & Negosiasi",
+              icon: MessageSquare,
+            },
+          ],
         },
-      ],
-    },
-    {
-      title: "ORGANISASI",
-      items: [
         {
-          id: "team" as CompanyNavMenu,
-          label: "Anggota Tim",
-          icon: Users,
+          title: "PELAKSANAAN & DAMPAK",
+          items: [
+            {
+              id: "programs" as CompanyNavMenu,
+              label: "Pelaksanaan Program",
+              icon: Activity,
+              count: counts?.programs,
+            },
+            {
+              id: "finances" as CompanyNavMenu,
+              label: "Pengawasan Anggaran",
+              icon: Wallet,
+            },
+            {
+              id: "partner-performance" as CompanyNavMenu,
+              label: "Kinerja Mitra",
+              icon: Award,
+            },
+            {
+              id: "analytics" as CompanyNavMenu,
+              label: "Laporan & Dampak ESG",
+              icon: BarChart3,
+            },
+          ],
         },
         {
-          id: "profile" as CompanyNavMenu,
-          label: "Profil Perusahaan",
-          icon: Building2,
+          title: "ORGANISASI",
+          items: [
+            {
+              id: "team" as CompanyNavMenu,
+              label: "Anggota Tim",
+              icon: Users,
+            },
+            {
+              id: "profile" as CompanyNavMenu,
+              label: "Profil Perusahaan",
+              icon: Building2,
+            },
+          ],
         },
-      ],
-    },
-  ];
+      ];
 
   const handleItemClick = (id: CompanyNavMenu) => {
     onSelectMenu(id);

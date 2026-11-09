@@ -4,6 +4,10 @@ import { companies, Company } from "@/db/schema/companies";
 import { users, User, UserRole, UserStatus } from "@/db/schema/users";
 import { opportunities } from "@/db/schema/opportunities";
 import { programs } from "@/db/schema/programs";
+import { partners } from "@/db/schema/partners";
+import { programDisbursements } from "@/db/schema/program-disbursements";
+import { programExpenses } from "@/db/schema/program-expenses";
+import { programActivities } from "@/db/schema/program-activities";
 import { programReviews } from "@/db/schema/program-reviews";
 import {
   CreateCompanyDTO,
@@ -277,6 +281,101 @@ export class CompanyRepository {
       total,
       page,
       limit,
+    };
+  }
+
+  async getFinancialOversightRawData(companyId: string) {
+    const companyPrograms = await db
+      .select({
+        program: programs,
+        partnerName: partners.name,
+        partnerLogo: partners.logoUrl,
+        partnerCity: partners.city,
+        partnerProvince: partners.province,
+      })
+      .from(programs)
+      .leftJoin(partners, eq(programs.partnerId, partners.id))
+      .where(eq(programs.companyId, companyId));
+
+    if (companyPrograms.length === 0) {
+      return {
+        companyPrograms: [],
+        disbursements: [],
+        expenses: [],
+      };
+    }
+
+    const programIds = companyPrograms.map((p) => p.program.id);
+
+    const [disbursements, expenses] = await Promise.all([
+      db
+        .select()
+        .from(programDisbursements)
+        .where(inArray(programDisbursements.programId, programIds)),
+      db
+        .select()
+        .from(programExpenses)
+        .where(inArray(programExpenses.programId, programIds)),
+    ]);
+
+    return {
+      companyPrograms,
+      disbursements,
+      expenses,
+    };
+  }
+
+  async getPartnerEvaluationsRawData(companyId: string) {
+    const companyPrograms = await db
+      .select({
+        program: programs,
+        partner: partners,
+      })
+      .from(programs)
+      .innerJoin(partners, eq(programs.partnerId, partners.id))
+      .where(eq(programs.companyId, companyId));
+
+    if (companyPrograms.length === 0) {
+      return {
+        companyPrograms: [],
+        activities: [],
+        expenses: [],
+        reviews: [],
+        partnersList: [],
+      };
+    }
+
+    const programIds = companyPrograms.map((p) => p.program.id);
+
+    const [activities, expenses, reviews] = await Promise.all([
+      db
+        .select()
+        .from(programActivities)
+        .where(inArray(programActivities.programId, programIds)),
+      db
+        .select()
+        .from(programExpenses)
+        .where(inArray(programExpenses.programId, programIds)),
+      db
+        .select()
+        .from(programReviews)
+        .where(inArray(programReviews.programId, programIds)),
+    ]);
+
+    // Extract unique partners
+    const partnersMap = new Map<string, typeof partners.$inferSelect>();
+    for (const row of companyPrograms) {
+      if (row.partner && !partnersMap.has(row.partner.id)) {
+        partnersMap.set(row.partner.id, row.partner);
+      }
+    }
+
+    return {
+      companyPrograms,
+      activities,
+      expenses,
+      reviews,
+      partnersList: Array.from(partnersMap.values()),
     };
   }
 }

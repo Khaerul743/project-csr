@@ -49,6 +49,7 @@ interface ProgramMonitoringDetailViewProps {
   onProgramUpdated?: () => void;
   onOpenChat?: (collabId?: string | null) => void;
   isManagement?: boolean;
+  initialTab?: "activities" | "finances" | "reviews" | "esg-report" | "settings";
 }
 
 export function ProgramMonitoringDetailView({
@@ -57,11 +58,12 @@ export function ProgramMonitoringDetailView({
   onProgramUpdated,
   onOpenChat,
   isManagement = false,
+  initialTab,
 }: ProgramMonitoringDetailViewProps) {
   const [currentProgram, setCurrentProgram] = useState<CompanyProgramItem>(initialProgram);
   const [activeTab, setActiveTab] = useState<
     "activities" | "finances" | "reviews" | "esg-report" | "settings"
-  >("activities");
+  >(initialTab || "activities");
   const [partnerLogoError, setPartnerLogoError] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 

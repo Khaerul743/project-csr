@@ -80,6 +80,8 @@ import { ExecutiveOverviewView } from "./overview/ExecutiveOverviewView";
 import { OpportunitiesManagementView } from "./opportunities/OpportunitiesManagementView";
 import { PartnerCurationView } from "./partners/PartnerCurationView";
 import { TeamManagementView } from "./team/TeamManagementView";
+import { CompanyFinancialOversightView } from "./finances/CompanyFinancialOversightView";
+import { PartnerPerformanceEvaluationView } from "./partners/PartnerPerformanceEvaluationView";
 
 
 function ProposalPartnerLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
@@ -167,11 +169,26 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
   const [selectedProposalForReview, setSelectedProposalForReview] = useState<CompanyProposalItem | null>(null);
   const [selectedCollabForDetail, setSelectedCollabForDetail] = useState<CompanyCollaborationItem | null>(null);
   const [selectedProgramForDetail, setSelectedProgramForDetail] = useState<CompanyProgramItem | null>(null);
+  const [programInitialTab, setProgramInitialTab] = useState<
+    "activities" | "finances" | "reviews" | "esg-report" | "settings" | undefined
+  >(undefined);
   const [selectedPartnerForDetail, setSelectedPartnerForDetail] = useState<any | null>(null);
   const [isLoadingPartnerDetail, setIsLoadingPartnerDetail] = useState(false);
   const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const isManagement = user.role === "MANAGEMENT";
+
+  // Safeguard: Role MANAGEMENT tidak diperbolehkan mengakses menu operasional proposal/kolaborasi
+  useEffect(() => {
+    if (
+      isManagement &&
+      (activeMenu === "proposals" ||
+        activeMenu === "collaborations" ||
+        activeMenu === "conversations")
+    ) {
+      setActiveMenu("overview");
+    }
+  }, [isManagement, activeMenu]);
 
   const handleLogout = () => {
     if (onLogout) {
@@ -729,6 +746,14 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       title: "Pelaksanaan Program & Monitoring",
       subtitle: "Pantau progres eksekusi program di lapangan, realisasi serapan anggaran, dan capaian penerima manfaat riil",
     },
+    finances: {
+      title: "Pengawasan Anggaran & Keuangan CSR",
+      subtitle: "Audit komparasi pagu alokasi dana, realisasi belanja lapangan, dan rasio efisiensi penyerapan anggaran program CSR",
+    },
+    "partner-performance": {
+      title: "Evaluasi Kinerja & Indeks Akuntabilitas Mitra",
+      subtitle: "Audit kinerja operasional, kepatuhan laporan lapangan, dan integritas anggaran mitra pelaksana CSR perusahaan",
+    },
     analytics: {
       title: "Laporan & Dampak ESG",
       subtitle: "Analisis akuntabilitas dana CSR, pilar keberlanjutan (E-S-G), dan ekspor laporan resmi",
@@ -757,6 +782,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
         onSelectMenu={(menu) => {
           if (menu !== "programs") {
             setSelectedProgramForDetail(null);
+            setProgramInitialTab(undefined);
           }
           if (menu !== "partners") {
             setSelectedPartnerForDetail(null);
@@ -811,6 +837,16 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
               ? [
                   { label: "Pengaturan & Akses" },
                   { label: "Anggota Tim & Akses" },
+                ]
+              : activeMenu === "finances"
+              ? [
+                  { label: isManagement ? "Pengawasan Eksekutif" : "Pelaksanaan & Dampak" },
+                  { label: "Pengawasan Anggaran & Keuangan" },
+                ]
+              : activeMenu === "partner-performance"
+              ? [
+                  { label: isManagement ? "Pengawasan Eksekutif" : "Kolaborasi & Mitra" },
+                  { label: "Evaluasi Kinerja Mitra" },
                 ]
               : activeMenu === "chat"
               ? [
@@ -895,6 +931,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                 onOpenEditModal={(opp) => setSelectedOppForEdit(opp)}
                 onOpenDetailModal={(opp) => setSelectedOppForDetail(opp)}
                 onDeleteOpportunity={handleDeleteOpportunity}
+                isManagement={isManagement}
               />
             )
           )}
@@ -933,9 +970,9 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: PROPOSALS (KELOLA PROPOSAL) */}
+          {/* VIEW: PROPOSALS (KELOLA PROPOSAL - KHUSUS CSR_ADMIN) */}
           {/* ============================================================ */}
-          {activeMenu === "proposals" && (
+          {!isManagement && activeMenu === "proposals" && (
             <div className="w-full space-y-6 animate-in fade-in duration-300">
               {/* Header Identitas & Ringkasan Total */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
@@ -1091,7 +1128,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                         key={prop.id}
                         className="w-full bg-white rounded-2xl border border-[#E8E8EA] hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all p-5 sm:p-6 space-y-4 group"
                       >
-                        {/* Baris 1 — Informasi Mitra */}
+                        {/* Baris 1: Informasi Mitra */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
                           <div className="flex items-center gap-3.5 min-w-0">
                             <ProposalPartnerLogo logoUrl={prop.partnerLogo} name={prop.partnerName || "Mitra Pelaksana"} />
@@ -1125,7 +1162,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                           </div>
                         </div>
 
-                        {/* Baris 2 — Identitas Proposal */}
+                        {/* Baris 2: Identitas Proposal */}
                         <div className="space-y-1">
                           <h3 className="text-base sm:text-lg font-bold text-[#181343] leading-snug group-hover:text-[#25205c] transition-colors">
                             {prop.title}
@@ -1135,7 +1172,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                           </p>
                         </div>
 
-                        {/* Baris 3 — Informasi Proposal (Area abu-abu sangat muda, 3 kolom) */}
+                        {/* Baris 3: Informasi Proposal (Area abu-abu sangat muda, 3 kolom) */}
                         <div className="p-4 sm:p-5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] grid grid-cols-1 md:grid-cols-3 gap-4 text-xs w-full">
                           <div>
                             <span className="text-[11px] uppercase font-bold text-[#787680] tracking-wider block">
@@ -1165,7 +1202,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                           </div>
                         </div>
 
-                        {/* Baris 4 — Aksi (Tombol di kanan bawah, dan subtle status feedback jika ada di kiri) */}
+                        {/* Baris 4: Aksi (Tombol di kanan bawah, dan subtle status feedback jika ada di kiri) */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 w-full">
                           <div>
                             {prop.feedback && prop.status !== "ACCEPTED" ? (
@@ -1198,9 +1235,9 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: COLLABORATIONS (KELOLA KERJA SAMA & MOU) */}
+          {/* VIEW: COLLABORATIONS (KELOLA KERJA SAMA & MOU - KHUSUS CSR_ADMIN) */}
           {/* ============================================================ */}
-          {activeMenu === "collaborations" && (
+          {!isManagement && activeMenu === "collaborations" && (
             <div className="w-full space-y-6 animate-in fade-in duration-300">
               {/* Header Identitas & Ringkasan Total */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
@@ -1584,18 +1621,23 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
             selectedProgramForDetail ? (
               <ProgramMonitoringDetailView
                 program={selectedProgramForDetail}
-                onBack={() => setSelectedProgramForDetail(null)}
+                onBack={() => {
+                  setSelectedProgramForDetail(null);
+                  setProgramInitialTab(undefined);
+                }}
                 onProgramUpdated={() => {
                   fetchPrograms();
                 }}
                 onOpenChat={(collabId) => {
                   setSelectedProgramForDetail(null);
+                  setProgramInitialTab(undefined);
                   if (collabId) {
                     setActiveCollaborationChatId(collabId);
                   }
                   setActiveMenu("conversations");
                 }}
                 isManagement={isManagement}
+                initialTab={programInitialTab}
               />
             ) : (
             <div className="space-y-6">
@@ -1981,7 +2023,41 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
             )
           )}
 
-                    {/* ============================================================ */}
+          {/* ============================================================ */}
+          {/* VIEW: FINANCES (PENGAWASAN ANGGARAN & KEUANGAN CSR) */}
+          {/* ============================================================ */}
+          {activeMenu === "finances" && (
+            <CompanyFinancialOversightView
+              programs={programs}
+              company={company}
+              isLoading={isLoadingPrograms}
+              onRefresh={fetchPrograms}
+              onSelectProgramFinances={(prog) => {
+                setSelectedProgramForDetail(prog);
+                setProgramInitialTab("finances");
+                setActiveMenu("programs");
+              }}
+            />
+          )}
+
+          {/* ============================================================ */}
+          {/* VIEW: PARTNER PERFORMANCE (EVALUASI KINERJA & AKUNTABILITAS MITRA) */}
+          {/* ============================================================ */}
+          {activeMenu === "partner-performance" && (
+            <PartnerPerformanceEvaluationView
+              programs={programs}
+              partners={partners}
+              company={company}
+              isLoading={isLoadingPartners || isLoadingPrograms}
+              onRefresh={() => {
+                fetchPartners();
+                fetchPrograms();
+              }}
+              onViewPartnerDetail={(partner) => setSelectedPartnerForDetail(partner)}
+            />
+          )}
+
+          {/* ============================================================ */}
           {/* VIEW: ANALYTICS (LAPORAN & DAMPAK ESG) */}
           {/* ============================================================ */}
           {activeMenu === "analytics" && (
@@ -2012,9 +2088,9 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
           )}
 
           {/* ============================================================ */}
-          {/* VIEW: CONVERSATIONS (PESAN & NEGOSIASI) */}
+          {/* VIEW: CONVERSATIONS (PESAN & NEGOSIASI - KHUSUS CSR_ADMIN) */}
           {/* ============================================================ */}
-          {activeMenu === "conversations" && (
+          {!isManagement && activeMenu === "conversations" && (
             <div className="space-y-4">
               <ConversationCenterView
                 userRole="CSR_ADMIN"

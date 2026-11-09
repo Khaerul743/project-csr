@@ -36,6 +36,7 @@ interface OpportunitiesManagementViewProps {
   onOpenEditModal: (opp: OpportunityItem) => void;
   onOpenDetailModal: (opp: OpportunityItem) => void;
   onDeleteOpportunity: (oppId: string, oppTitle: string) => void;
+  isManagement?: boolean;
 }
 
 function OpportunityCover({
@@ -106,6 +107,7 @@ export function OpportunitiesManagementView({
   onOpenEditModal,
   onOpenDetailModal,
   onDeleteOpportunity,
+  isManagement = false,
 }: OpportunitiesManagementViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -195,24 +197,35 @@ export function OpportunitiesManagementView({
       {/* 1. Header Identitas & Satu Tombol Utama */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
-            Kelola Peluang CSR
-          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+              {isManagement ? "Katalog Peluang CSR" : "Kelola Peluang CSR"}
+            </h2>
+            {isManagement && (
+              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
+                Akses Tinjauan (Read-Only)
+              </span>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-[#787680] mt-1">
-            Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat.
+            {isManagement
+              ? "Tinjau daftar peluang inisiatif CSR yang dibuka oleh tim operasional perusahaan untuk kolaborasi mitra."
+              : "Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat."}
           </p>
         </div>
 
-        {/* Satu Tombol Utama: Buat Peluang CSR */}
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={onOpenCreateModal}
-          leftIcon={<Plus className="w-4 h-4" />}
-          className="bg-[#181343] hover:bg-[#25205c] text-white font-bold rounded-xl text-xs sm:text-sm py-2.5 px-4 cursor-pointer shadow-2xs shrink-0 self-start sm:self-auto"
-        >
-          Buat Peluang CSR
-        </Button>
+        {/* Tombol Buat Peluang CSR (Khusus CSR_ADMIN) */}
+        {!isManagement && (
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={onOpenCreateModal}
+            leftIcon={<Plus className="w-4 h-4" />}
+            className="bg-[#181343] hover:bg-[#25205c] text-white font-bold rounded-xl text-xs sm:text-sm py-2.5 px-4 cursor-pointer shadow-2xs shrink-0 self-start sm:self-auto"
+          >
+            Buat Peluang CSR
+          </Button>
+        )}
       </div>
 
       {/* 2. Informasi Status Compact (Read-Only) */}
@@ -491,7 +504,17 @@ export function OpportunitiesManagementView({
 
                 {/* Card Action Row */}
                 <div className="p-5 pt-0 border-t border-[#F4F4F6] mt-2 flex items-center justify-between gap-2">
-                  {opp.status === "DRAFT" ? (
+                  {isManagement ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onOpenDetailModal(opp)}
+                      leftIcon={<Eye className="w-3.5 h-3.5" />}
+                      className="w-full text-xs font-bold text-[#181343] hover:text-[#181343] hover:bg-slate-50 border-[#E8E8EA] rounded-xl shadow-2xs cursor-pointer"
+                    >
+                      Lihat Rincian Peluang
+                    </Button>
+                  ) : opp.status === "DRAFT" ? (
                     <Button
                       variant="primary"
                       size="sm"
@@ -513,36 +536,38 @@ export function OpportunitiesManagementView({
                     </Button>
                   )}
 
-                  <div className="flex items-center gap-1">
-                    {opp.status === "DRAFT" ? (
-                      <button
-                        type="button"
-                        onClick={() => onOpenDetailModal(opp)}
-                        title="Lihat Pratinjau Draf"
-                        className="p-2 rounded-xl text-[#787680] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => onOpenEditModal(opp)}
-                        title="Edit Peluang"
-                        className="p-2 rounded-xl text-[#787680] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                    )}
+                  {!isManagement && (
+                    <div className="flex items-center gap-1">
+                      {opp.status === "DRAFT" ? (
+                        <button
+                          type="button"
+                          onClick={() => onOpenDetailModal(opp)}
+                          title="Lihat Pratinjau Draf"
+                          className="p-2 rounded-xl text-[#787680] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onOpenEditModal(opp)}
+                          title="Edit Peluang"
+                          className="p-2 rounded-xl text-[#787680] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
 
-                    <button
-                      type="button"
-                      onClick={() => onDeleteOpportunity(opp.id, opp.title)}
-                      title="Hapus Peluang"
-                      className="p-2 rounded-xl text-[#787680] hover:text-[#BA1A1A] hover:bg-rose-50 transition-colors cursor-pointer"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => onDeleteOpportunity(opp.id, opp.title)}
+                        title="Hapus Peluang"
+                        className="p-2 rounded-xl text-[#787680] hover:text-[#BA1A1A] hover:bg-rose-50 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
