@@ -1,5 +1,8 @@
-import { mysqlTable, varchar, text, timestamp, int } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, text, timestamp, int, mysqlEnum } from "drizzle-orm/mysql-core";
 import { programs } from "./programs";
+
+export const reviewSentimentEnum = ["POSITIVE", "NEUTRAL", "NEGATIVE"] as const;
+export type ReviewSentiment = (typeof reviewSentimentEnum)[number];
 
 export const programReviews = mysqlTable("program_reviews", {
   id: varchar("id", { length: 36 })
@@ -13,6 +16,7 @@ export const programReviews = mysqlTable("program_reviews", {
   reviewerCity: varchar("reviewer_city", { length: 100 }),
   rating: int("rating").notNull(), // 1 to 5
   comment: text("comment").notNull(),
+  sentiment: mysqlEnum("sentiment", reviewSentimentEnum),
   photoUrl: varchar("photo_url", { length: 500 }),
   ipAddress: varchar("ip_address", { length: 100 }),
   userAgent: varchar("user_agent", { length: 255 }),

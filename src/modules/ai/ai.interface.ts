@@ -95,3 +95,51 @@ export interface EsgReportResponse extends EsgReportResult {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
 }
 
+export interface BeneficiaryReviewItemForAi {
+  id: string;
+  reviewerName: string;
+  reviewerRole: string;
+  reviewerCity?: string | null;
+  rating: number;
+  comment: string;
+  createdAt?: string | Date | null;
+}
+
+export interface ProgramSentimentAnalysisInput {
+  programId: string;
+  programTitle: string;
+  focusArea: string;
+  targetCity?: string | null;
+  partnerName?: string | null;
+  reviews: BeneficiaryReviewItemForAi[];
+}
+
+export interface ProgramSentimentAnalysisResponse {
+  overallSentiment: "POSITIVE" | "NEUTRAL" | "NEGATIVE";
+  netSentimentScore: number;
+  positivePercentage: number;
+  neutralPercentage: number;
+  criticalPercentage: number;
+  totalReviewsAnalyzed: number;
+  averageRating: number;
+  executiveSummary: string;
+  highlights: string[];
+  concerns: string[];
+  recommendations: string[];
+  themes: Array<{
+    tag: string;
+    sentiment: "POSITIVE" | "NEUTRAL" | "NEGATIVE";
+    mentionsCount: number;
+    description: string;
+  }>;
+  classifiedReviews: Array<{
+    reviewId: string;
+    sentiment: "POSITIVE" | "NEUTRAL" | "NEGATIVE";
+    confidenceScore: number;
+    reasoning?: string;
+  }>;
+  analyzedAt: string;
+  source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
+}
+
+

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ApiResponse } from "@/common/utils/api-response";
 import { ErrorHandler } from "@/common/utils/error-handler";
+import { AuthGuard } from "@/common/guards/auth.guard";
 import { ReviewService } from "./review.service";
 import { createReviewSchema } from "./review.validation";
 
@@ -43,6 +44,32 @@ export class ReviewController {
         created,
         "Terima kasih atas aspirasi dan penilaian Anda! Ulasan berhasil dikirim."
       );
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async analyzeProgramSentiment(request: Request, programId: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const result = await this.reviewService.analyzeProgramSentiment(programId, authUser);
+      return ApiResponse.success(result, "Analisis sentimen AI untuk program berhasil dijalankan");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async getCompanySentimentOverview(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const result = await this.reviewService.getCompanyBeneficiarySentimentOverview(
+        authUser.companyId
+      );
+      return ApiResponse.success(result, "Data intelijen sentimen warga berhasil diambil");
     } catch (error) {
       return ErrorHandler.handle(error);
     }

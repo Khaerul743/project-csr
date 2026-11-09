@@ -3,8 +3,11 @@ import {
   programReviews,
   ProgramReview,
   NewProgramReview,
+  ReviewSentiment,
 } from "@/db/schema/program-reviews";
-import { eq, desc, and, gte, sql } from "drizzle-orm";
+import { programs } from "@/db/schema/programs";
+import { partners } from "@/db/schema/partners";
+import { eq, desc, and, gte, inArray, sql } from "drizzle-orm";
 import { ReviewStats } from "./review.interface";
 
 export class ReviewRepository {
@@ -102,5 +105,60 @@ export class ReviewRepository {
       .limit(1);
 
     return rows[0] || null;
+  }
+
+  async updateReviewSentiment(
+    reviewId: string,
+    sentiment: ReviewSentiment
+  ): Promise<void> {
+    await db
+      .update(programReviews)
+      .set({ sentiment })
+      .where(eq(programReviews.id, reviewId));
+  }
+
+  async saveProgramSentimentAnalysis(
+    programId: string,
+    sentimentJson: string
+  ): Promise<void> {
+    await db
+      .update(programs)
+      .set({
+        sentimentAnalysis: sentimentJson,
+        sentimentAnalyzedAt: new Date(),
+      })
+      .where(eq(programs.id, programId));
+  }
+
+  async getCompanyProgramsAndReviews(companyId: string) {
+    const companyPrograms = await db
+      .select({
+        program: programs,
+        partnerName: partners.name,
+        partnerLogo: partners.logoUrl,
+      })
+      .from(programs)
+      .leftJoin(partners, eq(programs.partnerId, partners.id))
+      .where(eq(programs.companyId, companyId));
+
+    if (companyPrograms.length === 0) {
+      return {
+        companyPrograms: [],
+        reviews: [],
+      };
+    }
+
+    const programIds = companyPrograms.map((cp) => cp.program.id);
+
+    const reviews = await db
+      .select()
+      .from(programReviews)
+      .where(inArray(programReviews.programId, programIds))
+      .orderBy(desc(programReviews.createdAt));
+
+    return {
+      companyPrograms,
+      reviews,
+    };
   }
 }

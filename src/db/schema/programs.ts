@@ -44,6 +44,8 @@ export const programs = mysqlTable("programs", {
   status: mysqlEnum("status", programStatusEnum).notNull().default("PLANNED"),
   sustainabilityReport: text("sustainability_report"),
   reportGeneratedAt: timestamp("report_generated_at"),
+  sentimentAnalysis: text("sentiment_analysis"),
+  sentimentAnalyzedAt: timestamp("sentiment_analyzed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

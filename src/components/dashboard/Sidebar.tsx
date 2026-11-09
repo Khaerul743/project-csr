@@ -17,6 +17,7 @@ import {
   Sparkles,
   Wallet,
   Award,
+  MessageSquareHeart,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AppLogo } from "@/components/ui/app-logo";
@@ -32,6 +33,7 @@ export type CompanyNavMenu =
   | "programs"
   | "finances"
   | "partner-performance"
+  | "sentiment"
   | "analytics"
   | "team"
   | "profile";
@@ -106,6 +108,11 @@ export function Sidebar({
               id: "partner-performance" as CompanyNavMenu,
               label: "Kinerja Mitra",
               icon: Award,
+            },
+            {
+              id: "sentiment" as CompanyNavMenu,
+              label: "Suara Warga & Sentimen",
+              icon: MessageSquareHeart,
             },
             {
               id: "analytics" as CompanyNavMenu,
@@ -228,6 +235,11 @@ export function Sidebar({
               id: "partner-performance" as CompanyNavMenu,
               label: "Kinerja Mitra",
               icon: Award,
+            },
+            {
+              id: "sentiment" as CompanyNavMenu,
+              label: "Suara Warga & Sentimen",
+              icon: MessageSquareHeart,
             },
             {
               id: "analytics" as CompanyNavMenu,

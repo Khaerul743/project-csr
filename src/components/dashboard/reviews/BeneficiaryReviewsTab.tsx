@@ -15,6 +15,9 @@ import {
   Image as ImageIcon,
   X,
   CheckCircle2,
+  ArrowUpRight,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +40,7 @@ export function BeneficiaryReviewsTab({
   const [selectedRating, setSelectedRating] = useState<number | "ALL">("ALL");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState<string | null>(null);
+  const [sentimentAnalysis, setSentimentAnalysis] = useState<any | null>(null);
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -48,6 +52,13 @@ export function BeneficiaryReviewsTab({
         throw new Error(json.message || "Gagal memuat ulasan");
       }
       setData(json.data);
+      if (json.data?.program?.sentimentAnalysis) {
+        try {
+          setSentimentAnalysis(JSON.parse(json.data.program.sentimentAnalysis));
+        } catch {
+          setSentimentAnalysis(null);
+        }
+      }
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat memuat ulasan masyarakat");
     } finally {
@@ -154,22 +165,87 @@ export function BeneficiaryReviewsTab({
             })}
           </div>
 
-          {/* Action Button: QR Code Share */}
-          <div className="md:col-span-3 flex flex-col items-center md:items-end justify-center">
+          {/* Action Button: QR Code Share & Real-time AI Indicator */}
+          <div className="md:col-span-3 flex flex-col items-center md:items-end justify-center gap-2">
             <Button
               type="button"
               onClick={() => setIsShareModalOpen(true)}
               leftIcon={<QrCode className="w-4 h-4 shrink-0" />}
-              className="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold text-xs py-3 px-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all active:scale-95"
+              className="w-full bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold text-xs py-2.5 px-4 rounded-2xl shadow-lg shadow-teal-500/20 transition-all active:scale-95 cursor-pointer"
             >
-              Bagikan Survei & QR
+              Bagikan Survei &amp; QR
             </Button>
-            <p className="text-[11px] text-slate-400 mt-2 text-center md:text-right">
-              Cetak QR Code untuk banner atau bagikan tautan kepada warga
+            <div className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-2xl bg-white/10 border border-white/15 text-teal-300 text-[11px] font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-teal-300 shrink-0" />
+              <span>AI Sentimen: Otomatis Real-time</span>
+            </div>
+            <p className="text-[10px] text-slate-400 text-center md:text-right">
+              Survei QR &amp; klasifikasi sentimen instan
             </p>
           </div>
         </div>
       </div>
+
+      {/* AI Sentiment Analysis Card (if available) */}
+      {sentimentAnalysis && (
+        <div className="p-5 rounded-3xl bg-gradient-to-br from-[#181343] via-[#1A1448] to-[#0A2E28] text-white border border-teal-500/30 shadow-md space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 flex items-center justify-center border border-teal-400/30">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <h4 className="text-sm font-bold text-white tracking-tight">
+                Hasil Analisis Sentimen &amp; Aspirasi Masyarakat (AI)
+              </h4>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-300">
+                NSS: <strong className="text-teal-300 font-extrabold">{sentimentAnalysis.netSentimentScore >= 0 ? `+${sentimentAnalysis.netSentimentScore}` : sentimentAnalysis.netSentimentScore}</strong>
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                {sentimentAnalysis.positivePercentage}% Positif
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                {sentimentAnalysis.criticalPercentage}% Kritis
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-200 leading-relaxed">
+            {sentimentAnalysis.executiveSummary}
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
+              <span className="font-bold text-emerald-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Hal yang Sangat Diapresiasi Warga
+              </span>
+              <ul className="space-y-1 text-slate-300 text-[11px]">
+                {sentimentAnalysis.highlights?.map((h: string, i: number) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-emerald-400">•</span>
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
+              <span className="font-bold text-blue-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                <ArrowUpRight className="w-3.5 h-3.5" /> Rekomendasi Tindak Lanjut Program
+              </span>
+              <ul className="space-y-1 text-slate-300 text-[11px]">
+                {sentimentAnalysis.recommendations?.map((r: string, i: number) => (
+                  <li key={i} className="flex items-start gap-1.5">
+                    <span className="text-blue-400">•</span>
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Filter and Feed Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
@@ -276,12 +352,31 @@ export function BeneficiaryReviewsTab({
                   </div>
                 </div>
 
-                {/* Rating Badge */}
-                <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-200/70 rounded-xl shrink-0">
-                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                  <span className="text-xs font-black text-amber-700">
-                    {review.rating}.0
-                  </span>
+                {/* Sentiment & Rating Badge */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {review.sentiment && (
+                    <span
+                      className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase ${
+                        review.sentiment === "POSITIVE"
+                          ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                          : review.sentiment === "NEGATIVE"
+                          ? "bg-rose-100 text-rose-800 border border-rose-200"
+                          : "bg-blue-100 text-blue-800 border border-blue-200"
+                      }`}
+                    >
+                      {review.sentiment === "POSITIVE"
+                        ? "Positif"
+                        : review.sentiment === "NEGATIVE"
+                        ? "Kritis"
+                        : "Netral"}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-200/70 rounded-xl shrink-0">
+                    <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                    <span className="text-xs font-black text-amber-700">
+                      {review.rating}.0
+                    </span>
+                  </div>
                 </div>
               </div>
 

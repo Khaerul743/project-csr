@@ -82,6 +82,7 @@ import { PartnerCurationView } from "./partners/PartnerCurationView";
 import { TeamManagementView } from "./team/TeamManagementView";
 import { CompanyFinancialOversightView } from "./finances/CompanyFinancialOversightView";
 import { PartnerPerformanceEvaluationView } from "./partners/PartnerPerformanceEvaluationView";
+import { BeneficiarySentimentDashboardView } from "./sentiment/BeneficiarySentimentDashboardView";
 
 
 function ProposalPartnerLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
@@ -754,6 +755,10 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
       title: "Evaluasi Kinerja & Indeks Akuntabilitas Mitra",
       subtitle: "Audit kinerja operasional, kepatuhan laporan lapangan, dan integritas anggaran mitra pelaksana CSR perusahaan",
     },
+    sentiment: {
+      title: "Intelijen Sentimen & Suara Warga",
+      subtitle: "Analisis kepuasan masyarakat penerima manfaat berbasis Natural Language Processing (AI), rating bintang, dan feedback langsung dari lapangan",
+    },
     analytics: {
       title: "Laporan & Dampak ESG",
       subtitle: "Analisis akuntabilitas dana CSR, pilar keberlanjutan (E-S-G), dan ekspor laporan resmi",
@@ -847,6 +852,11 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
               ? [
                   { label: isManagement ? "Pengawasan Eksekutif" : "Kolaborasi & Mitra" },
                   { label: "Evaluasi Kinerja Mitra" },
+                ]
+              : activeMenu === "sentiment"
+              ? [
+                  { label: isManagement ? "Pengawasan Eksekutif" : "Pelaksanaan & Dampak" },
+                  { label: "Intelijen Sentimen Warga" },
                 ]
               : activeMenu === "chat"
               ? [
@@ -2054,6 +2064,24 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
                 fetchPrograms();
               }}
               onViewPartnerDetail={(partner) => setSelectedPartnerForDetail(partner)}
+            />
+          )}
+
+          {/* ============================================================ */}
+          {/* VIEW: BENEFICIARY SENTIMENT (INTELIJEN SENTIMEN & SUARA WARGA) */}
+          {/* ============================================================ */}
+          {activeMenu === "sentiment" && (
+            <BeneficiarySentimentDashboardView
+              company={company}
+              onSelectProgram={(programId, tab) => {
+                const found = programs.find((item) => item.id === programId);
+                if (found) {
+                  setSelectedProgramForDetail(found);
+                  setProgramInitialTab(tab || "reviews");
+                  setActiveMenu("programs");
+                }
+              }}
+              onRefresh={fetchPrograms}
             />
           )}
 
