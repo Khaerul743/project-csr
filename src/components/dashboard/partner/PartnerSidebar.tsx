@@ -33,9 +33,13 @@ interface NavSection {
 
 interface PartnerSidebarProps {
   user: {
+    id?: string;
     name: string;
     email: string;
     role: string;
+    avatarUrl?: string | null;
+    phone?: string | null;
+    position?: string | null;
   };
   organizationName?: string;
   activeMenu: PartnerNavMenu;
@@ -48,6 +52,7 @@ interface PartnerSidebarProps {
   isOpenMobile: boolean;
   onCloseMobile: () => void;
   onLogout: () => void;
+  onOpenProfile?: () => void;
 }
 
 import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
@@ -61,6 +66,7 @@ export function PartnerSidebar({
   isOpenMobile,
   onCloseMobile,
   onLogout,
+  onOpenProfile,
 }: PartnerSidebarProps) {
   const aiEnabled = isAiFeatureEnabled();
 
@@ -231,13 +237,27 @@ export function PartnerSidebar({
 
       {/* 4. Footer User Info & Logout */}
       <div className="p-4 border-t border-[#E5E7EB] bg-white space-y-3">
-        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#F4F4F6] border border-[#E5E7EB] mb-2 shadow-xs">
-          <div className="w-9 h-9 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-            {user.name.charAt(0).toUpperCase()}
+        <div
+          onClick={onOpenProfile}
+          className={`flex items-center gap-3 p-2.5 rounded-xl bg-[#F4F4F6] border border-[#E5E7EB] mb-2 shadow-xs ${
+            onOpenProfile ? "hover:bg-[#ECEAF8]/60 hover:border-[#D8D2F2] cursor-pointer transition-colors group" : ""
+          }`}
+          title={onOpenProfile ? "Klik untuk mengedit profil akun Anda" : undefined}
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs overflow-hidden">
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              user.name ? user.name.charAt(0).toUpperCase() : "U"
+            )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-[#181343] truncate leading-tight">{user.name}</p>
-            <p className="text-[11px] text-[#787680] truncate mt-0.5">{user.email}</p>
+            <p className="text-xs font-bold text-[#181343] truncate leading-tight group-hover:text-indigo-950">
+              {user.name}
+            </p>
+            <p className="text-[11px] text-[#787680] truncate mt-0.5">
+              {user.position || user.email}
+            </p>
           </div>
           <Badge variant="purple" size="sm" className="shrink-0 text-[10px] font-bold">
             Mitra

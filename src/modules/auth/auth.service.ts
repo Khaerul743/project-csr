@@ -1,9 +1,21 @@
-import { ConflictError, NotFoundError, UnauthorizedError } from "@/common/errors/app-error";
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@/common/errors/app-error";
 import { AppLogger } from "@/common/logger/app-logger";
 import { PasswordUtil } from "@/common/utils/password";
 import { JwtService } from "@/common/jwt/jwt.service";
 import { AuthRepository } from "./auth.repository";
-import { AuthResponseData, LoginDTO, RegisterDTO, SafeUser } from "./auth.interface";
+import {
+  AuthResponseData,
+  ChangePasswordDTO,
+  LoginDTO,
+  RegisterDTO,
+  SafeUser,
+  UpdateProfileDTO,
+} from "./auth.interface";
 
 export class AuthService {
   private readonly logger = new AppLogger("AuthService");
@@ -93,5 +105,47 @@ export class AuthService {
 
     const { password: _, ...safeUser } = user;
     return safeUser;
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDTO): Promise<SafeUser> {
+    const user = await this.authRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundError("User account not found");
+    }
+
+    this.logger.info(`Updating profile for user: ${userId}`);
+
+    const updateData: Record<string, any> = {};
+    if (dto.name !== undefined) updateData.name = dto.name.trim();
+    if (dto.phone !== undefined) updateData.phone = dto.phone ? dto.phone.trim() : null;
+    if (dto.position !== undefined) updateData.position = dto.position ? dto.position.trim() : null;
+    if (dto.avatarUrl !== undefined) updateData.avatarUrl = dto.avatarUrl ? dto.avatarUrl.trim() : null;
+
+    const updated = await this.authRepository.updateUser(userId, updateData);
+    const { password: _, ...safeUser } = updated;
+    return safeUser;
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDTO): Promise<{ message: string }> {
+    const user = await this.authRepository.findById(userId);
+    if (!user) {
+      throw new NotFoundError("User account not found");
+    }
+
+    const isMatch = await PasswordUtil.compare(dto.currentPassword, user.password);
+    if (!isMatch) {
+      throw new BadRequestError("Kata sandi saat ini tidak sesuai");
+    }
+
+    const isSameAsOld = await PasswordUtil.compare(dto.newPassword, user.password);
+    if (isSameAsOld) {
+      throw new BadRequestError("Kata sandi baru tidak boleh sama dengan kata sandi saat ini");
+    }
+
+    const hashedPassword = await PasswordUtil.hash(dto.newPassword);
+    await this.authRepository.updateUser(userId, { password: hashedPassword });
+
+    this.logger.info(`Password successfully updated for user: ${userId}`);
+    return { message: "Kata sandi berhasil diperbarui" };
   }
 }

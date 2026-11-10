@@ -19,20 +19,15 @@ import { Button } from "@/components/ui/button";
 import { InviteMemberModal } from "./InviteMemberModal";
 import { CompanyDashboardView } from "./company/CompanyDashboardView";
 import { PartnerDashboardView } from "./partner/PartnerDashboardView";
+import { UserProfileData } from "./UserProfileModal";
 
 interface RoleDashboardViewProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    companyId?: string | null;
-    partnerId?: string | null;
-  };
+  user: UserProfileData;
   onLogout?: () => void;
+  onProfileUpdated?: (updatedUser: UserProfileData) => void;
 }
 
-export function RoleDashboardView({ user, onLogout }: RoleDashboardViewProps) {
+export function RoleDashboardView({ user, onLogout, onProfileUpdated }: RoleDashboardViewProps) {
   const [orgData, setOrgData] = useState<any>(null);
   const [isLoadingOrg, setIsLoadingOrg] = useState(false);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
@@ -76,11 +71,11 @@ export function RoleDashboardView({ user, onLogout }: RoleDashboardViewProps) {
   const isPartner = user.role === "PARTNER_ADMIN";
 
   if (isManagement || isCsrAdmin) {
-    return <CompanyDashboardView user={user} onLogout={onLogout} />;
+    return <CompanyDashboardView user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />;
   }
 
   if (isPartner) {
-    return <PartnerDashboardView user={user} onLogout={onLogout} />;
+    return <PartnerDashboardView user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />;
   }
 
   return (

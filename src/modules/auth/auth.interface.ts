@@ -13,6 +13,18 @@ export interface LoginDTO {
 
 export type SafeUser = Omit<User, "password">;
 
+export interface UpdateProfileDTO {
+  name?: string;
+  phone?: string | null;
+  position?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface ChangePasswordDTO {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface AuthResponseData {
   user: SafeUser;
   accessToken: string;

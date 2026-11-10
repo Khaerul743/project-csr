@@ -52,9 +52,13 @@ interface NavSection {
 
 interface SidebarProps {
   user: {
+    id?: string;
     name: string;
     email: string;
     role: string;
+    avatarUrl?: string | null;
+    phone?: string | null;
+    position?: string | null;
   };
   organizationName?: string;
   activeMenu: CompanyNavMenu;
@@ -66,6 +70,7 @@ interface SidebarProps {
   isOpenMobile: boolean;
   onCloseMobile: () => void;
   onLogout: () => void;
+  onOpenProfile?: () => void;
 }
 
 import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
@@ -79,6 +84,7 @@ export function Sidebar({
   isOpenMobile,
   onCloseMobile,
   onLogout,
+  onOpenProfile,
 }: SidebarProps) {
   const isManagement = user.role === "MANAGEMENT";
   const aiEnabled = isAiFeatureEnabled();
@@ -347,17 +353,27 @@ export function Sidebar({
 
       {/* 3. Footer: User Profile & Logout */}
       <div className="p-4 border-t border-[#E5E7EB] bg-white space-y-3">
-        <div className="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F4F4F6] border border-[#E5E7EB]">
+        <div
+          onClick={onOpenProfile}
+          className={`flex items-center justify-between gap-3 p-2.5 rounded-xl bg-[#F4F4F6] border border-[#E5E7EB] ${
+            onOpenProfile ? "hover:bg-[#ECEAF8]/60 hover:border-[#D8D2F2] cursor-pointer transition-colors group" : ""
+          }`}
+          title={onOpenProfile ? "Klik untuk mengedit profil akun Anda" : undefined}
+        >
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
-              {user.name.charAt(0).toUpperCase()}
+            <div className="w-9 h-9 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs overflow-hidden">
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                user.name ? user.name.charAt(0).toUpperCase() : "U"
+              )}
             </div>
             <div className="min-w-0">
-              <span className="text-xs font-bold text-[#181343] block truncate leading-tight">
+              <span className="text-xs font-bold text-[#181343] block truncate leading-tight group-hover:text-indigo-950">
                 {user.name}
               </span>
               <span className="text-[11px] text-[#787680] block truncate mt-0.5">
-                {user.email}
+                {user.position || user.email}
               </span>
             </div>
           </div>

@@ -83,6 +83,7 @@ import { TeamManagementView } from "./team/TeamManagementView";
 import { CompanyFinancialOversightView } from "./finances/CompanyFinancialOversightView";
 import { PartnerPerformanceEvaluationView } from "./partners/PartnerPerformanceEvaluationView";
 import { BeneficiarySentimentDashboardView } from "./sentiment/BeneficiarySentimentDashboardView";
+import { UserProfileModal, UserProfileData } from "../UserProfileModal";
 
 
 function ProposalPartnerLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
@@ -112,21 +113,22 @@ function ProposalPartnerLogo({ logoUrl, name }: { logoUrl?: string | null; name:
 }
 
 interface CompanyDashboardViewProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    companyId?: string | null;
-  };
+  user: UserProfileData;
   onLogout?: () => void;
+  onProfileUpdated?: (updatedUser: UserProfileData) => void;
 }
 
-export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewProps) {
+export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: CompanyDashboardViewProps) {
   // Navigation Menu state
+  const [currentUser, setCurrentUser] = useState<UserProfileData>(user);
+  const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<CompanyNavMenu>("overview");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeCollaborationChatId, setActiveCollaborationChatId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
 
   // Data states
   const [company, setCompany] = useState<CompanyProfile | null>(null);
@@ -781,7 +783,7 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
     <div className={`min-h-screen bg-[#F9F9FB] flex ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
       {/* 1. Sidebar Navigation */}
       <Sidebar
-        user={user}
+        user={currentUser}
         organizationName={company?.name}
         activeMenu={activeMenu}
         onSelectMenu={(menu) => {
@@ -805,12 +807,15 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onLogout={handleLogout}
+        onOpenProfile={() => setIsUserProfileModalOpen(true)}
       />
 
       {/* 2. Main Workspace Layout */}
       <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" ? "h-screen overflow-hidden" : "overflow-y-auto"}`}>
         {/* Sticky Dashboard Header */}
         <DashboardHeader
+          user={currentUser}
+          onOpenProfile={() => setIsUserProfileModalOpen(true)}
           breadcrumbs={
             activeMenu === "opportunities" && isCreatingOpportunity
               ? [
@@ -2220,7 +2225,16 @@ export function CompanyDashboardView({ user, onLogout }: CompanyDashboardViewPro
         }}
       />
 
-
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={isUserProfileModalOpen}
+        onClose={() => setIsUserProfileModalOpen(false)}
+        user={currentUser}
+        onProfileUpdated={(updated) => {
+          setCurrentUser(updated);
+          onProfileUpdated?.(updated);
+        }}
+      />
     </div>
   );
 }

@@ -3,7 +3,12 @@ import { ApiResponse } from "@/common/utils/api-response";
 import { ErrorHandler } from "@/common/utils/error-handler";
 import { AuthGuard } from "@/common/guards/auth.guard";
 import { AuthService } from "./auth.service";
-import { loginSchema, registerSchema } from "./auth.validation";
+import {
+  changePasswordSchema,
+  loginSchema,
+  registerSchema,
+  updateProfileSchema,
+} from "./auth.validation";
 
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -37,6 +42,32 @@ export class AuthController {
       const user = AuthGuard.authenticate(request);
       const profile = await this.authService.getProfile(user.sub);
       return ApiResponse.success(profile, "User profile retrieved successfully");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async updateProfile(request: Request): Promise<NextResponse> {
+    try {
+      const user = AuthGuard.authenticate(request);
+      const body = await request.json();
+      const validatedInput = updateProfileSchema.parse(body);
+
+      const result = await this.authService.updateProfile(user.sub, validatedInput);
+      return ApiResponse.success(result, "Profil berhasil diperbarui");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async changePassword(request: Request): Promise<NextResponse> {
+    try {
+      const user = AuthGuard.authenticate(request);
+      const body = await request.json();
+      const validatedInput = changePasswordSchema.parse(body);
+
+      const result = await this.authService.changePassword(user.sub, validatedInput);
+      return ApiResponse.success(result, "Kata sandi berhasil diperbarui");
     } catch (error) {
       return ErrorHandler.handle(error);
     }

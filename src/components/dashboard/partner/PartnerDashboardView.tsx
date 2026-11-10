@@ -54,12 +54,13 @@ import { SubmitProposalPageView } from "./SubmitProposalPageView";
 import { ProposalDetailModal } from "./ProposalDetailModal";
 import { PartnerOpportunityDetailPageView } from "./PartnerOpportunityDetailPageView";
 import { PartnerCollaborationDetailModal } from "./PartnerCollaborationDetailModal";
-import { PartnerProgramDetailModal } from "./PartnerProgramDetailModal";
+import { PartnerProgramDetailPageView } from "./PartnerProgramDetailPageView";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
 import { PartnerFullProfileView } from "./profile/PartnerFullProfileView";
 import { CompanyFullProfileView } from "../company/profile/CompanyFullProfileView";
 import { ChatbotView } from "../chat/ChatbotView";
+import { UserProfileModal, UserProfileData } from "../UserProfileModal";
 import {
   PartnerNavMenu,
   PartnerProfile,
@@ -82,14 +83,9 @@ import {
 import { csrFocusAreaEnum, CsrFocusArea } from "@/db/schema/csr-focus-areas";
 
 interface PartnerDashboardViewProps {
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    partnerId?: string | null;
-  };
+  user: UserProfileData;
   onLogout?: () => void;
+  onProfileUpdated?: (updatedUser: UserProfileData) => void;
 }
 
 
@@ -323,11 +319,17 @@ function OpportunityCard({
   );
 }
 
-export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewProps) {
+export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: PartnerDashboardViewProps) {
   // Navigation Menu state
+  const [currentUser, setCurrentUser] = useState<UserProfileData>(user);
+  const [isUserProfileModalOpen, setIsUserProfileModalOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<PartnerNavMenu>("overview");
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeCollaborationChatId, setActiveCollaborationChatId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
 
   // Data states
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
@@ -408,6 +410,9 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
     setSelectedOppForProposal(null);
     setSelectedOppForDetail(null);
     setSelectedCompanyForDetail(null);
+    if (menu !== "programs") {
+      setSelectedProgramForDetail(null);
+    }
     setActiveMenu(menu as PartnerNavMenu);
   };
 
@@ -1165,6 +1170,13 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
       ];
     }
     if (activeMenu === "programs") {
+      if (selectedProgramForDetail) {
+        return [
+          { label: "Dashboard", onClick: () => { setSelectedProgramForDetail(null); setActiveMenu("overview"); } },
+          { label: "Pelaksanaan Program", onClick: () => setSelectedProgramForDetail(null) },
+          { label: selectedProgramForDetail.title },
+        ];
+      }
       return [
         { label: "Dashboard", onClick: () => setActiveMenu("overview") },
         { label: "Pelaksanaan Program" },
@@ -1183,7 +1195,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
       ];
     }
     return [{ label: "Dashboard" }, { label: "Ringkasan Aktivitas" }];
-  }, [activeMenu, selectedCompanyForDetail, selectedOppForProposal, selectedOppForDetail]);
+  }, [activeMenu, selectedCompanyForDetail, selectedOppForProposal, selectedOppForDetail, selectedProgramForDetail]);
 
   // Standardized SIPENA Right Action for Partner Dashboard Header
   const headerRightAction = (
@@ -1220,7 +1232,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
     <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans ${activeMenu === "chat" ? "lg:h-screen lg:overflow-hidden" : ""}`}>
       {/* 1. Sidebar */}
       <PartnerSidebar
-        user={user}
+        user={currentUser}
         organizationName={partner?.name}
         activeMenu={activeMenu}
         onSelectMenu={(menu) => handleSelectMenu(menu)}
@@ -1232,18 +1244,23 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
         isOpenMobile={isMobileSidebarOpen}
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
         onLogout={handleLogout}
+        onOpenProfile={() => setIsUserProfileModalOpen(true)}
       />
 
       {/* 2. Main Content Area */}
       <div className={`flex-1 flex flex-col min-w-0 lg:pl-64 ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
         {/* Top Header - Standardized SIPENA DashboardHeader */}
         <DashboardHeader
+          user={currentUser}
+          onOpenProfile={() => setIsUserProfileModalOpen(true)}
           breadcrumbs={headerBreadcrumbs}
           title={
             selectedOppForProposal
               ? "Ajukan Proposal CSR" :
             selectedOppForDetail
               ? "Detail Peluang CSR" :
+            activeMenu === "programs" && selectedProgramForDetail
+              ? "Monitoring Pelaksanaan Program" :
             activeMenu === "chat"
               ? "AI CSR Advisor"
               : activeMenu === "explore"
@@ -1263,6 +1280,11 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                             : activeMenu === "profile"
                               ? "Profil Lembaga"
                               : "Ringkasan Aktivitas"
+          }
+          subtitle={
+            activeMenu === "programs" && selectedProgramForDetail
+              ? `Detail pelaporan lapangan, keuangan, dan evaluasi: ${selectedProgramForDetail.title}`
+              : undefined
           }
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           rightAction={headerRightAction}
@@ -2964,6 +2986,22 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
           {/* SUBVIEW: PROGRAMS (PELAKSANAAN PROGRAM & IMPACT TRACKING) */}
           {/* ========================================================================= */}
           {activeMenu === "programs" && (
+            selectedProgramForDetail ? (
+              <PartnerProgramDetailPageView
+                program={selectedProgramForDetail}
+                onBack={() => setSelectedProgramForDetail(null)}
+                onProgramUpdated={() => {
+                  fetchPrograms();
+                }}
+                onOpenChat={(collabId) => {
+                  setSelectedProgramForDetail(null);
+                  if (collabId) {
+                    setActiveCollaborationChatId(collabId);
+                  }
+                  setActiveMenu("conversations");
+                }}
+              />
+            ) : (
             <div className="space-y-6">
               {/* Page Header: Pelaksanaan Program & Monitoring */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
@@ -3368,6 +3406,7 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
                 </div>
               )}
             </div>
+            )
           )}
 
           {/* ========================================================================= */}
@@ -3380,7 +3419,10 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
               programs={programs}
               onOpenProgramDetail={(p) => {
                 const found = programs.find((item) => item.id === p.id);
-                if (found) setSelectedProgramForDetail(found);
+                if (found) {
+                  setSelectedProgramForDetail(found);
+                  setActiveMenu("programs");
+                }
               }}
             />
           )}
@@ -3462,13 +3504,14 @@ export function PartnerDashboardView({ user, onLogout }: PartnerDashboardViewPro
         }}
       />
 
-      {/* 5. Modal Detail Pelaksanaan Program */}
-      <PartnerProgramDetailModal
-        isOpen={Boolean(selectedProgramForDetail)}
-        program={selectedProgramForDetail}
-        onClose={() => setSelectedProgramForDetail(null)}
-        onSuccess={() => {
-          fetchPrograms();
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={isUserProfileModalOpen}
+        onClose={() => setIsUserProfileModalOpen(false)}
+        user={currentUser}
+        onProfileUpdated={(updated) => {
+          setCurrentUser(updated);
+          onProfileUpdated?.(updated);
         }}
       />
     </div>

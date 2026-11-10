@@ -21,6 +21,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { UserProfileData } from "./UserProfileModal";
 
 export interface BreadcrumbItem {
   label: string;
@@ -45,6 +46,8 @@ export interface DashboardHeaderProps {
   rightAction?: React.ReactNode;
   onNavigateMenu?: (menu: string) => void;
   organizationName?: string;
+  user?: UserProfileData;
+  onOpenProfile?: () => void;
 }
 
 const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
@@ -83,6 +86,8 @@ export function DashboardHeader({
   onOpenMobileSidebar,
   rightAction,
   onNavigateMenu,
+  user,
+  onOpenProfile,
 }: DashboardHeaderProps) {
   // Popover States
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -488,6 +493,34 @@ export function DashboardHeader({
               </div>
             )}
           </div>
+
+          {/* Quick Action 3: Profil Pengguna */}
+          {user && (
+            <div className="relative pl-1 sm:pl-2 border-l border-slate-200">
+              <button
+                type="button"
+                onClick={onOpenProfile}
+                className="flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-xl hover:bg-[#F4F4F6] transition-colors cursor-pointer group"
+                title="Buka Pengaturan Profil Akun"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs overflow-hidden border border-slate-200">
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
+                  )}
+                </div>
+                <div className="hidden md:block text-left max-w-[130px]">
+                  <span className="text-xs font-bold text-[#181343] block truncate leading-tight group-hover:text-indigo-950">
+                    {user.name}
+                  </span>
+                  <span className="text-[10px] text-slate-500 block truncate">
+                    {user.position || user.role}
+                  </span>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
       </header>
 

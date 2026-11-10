@@ -5,20 +5,11 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/dashboard/Navbar";
 import { StagingOnboardingView } from "@/components/dashboard/staging/StagingOnboardingView";
 import { RoleDashboardView } from "@/components/dashboard/RoleDashboardView";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  status: string;
-  companyId?: string | null;
-  partnerId?: string | null;
-}
+import { UserProfileData } from "@/components/dashboard/UserProfileModal";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<UserProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -78,8 +69,13 @@ export default function DashboardPage() {
     router.push("/login");
   };
 
-  const handleRoleUpdated = (updatedUser: UserProfile) => {
+  const handleRoleUpdated = (updatedUser: UserProfileData) => {
     setUser(updatedUser);
+  };
+
+  const handleProfileUpdated = (updatedUser: UserProfileData) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
   if (isLoading) {
@@ -103,7 +99,7 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
         {/* Sticky Top Navbar for Onboarding */}
-        <Navbar user={user} onLogout={handleLogout} />
+        <Navbar user={user} onLogout={handleLogout} onProfileUpdated={handleProfileUpdated} />
 
         {/* Staging Onboarding Hub */}
         <main className="flex-1">
@@ -116,5 +112,5 @@ export default function DashboardPage() {
     );
   }
 
-  return <RoleDashboardView user={user} onLogout={handleLogout} />;
+  return <RoleDashboardView user={user} onLogout={handleLogout} onProfileUpdated={handleProfileUpdated} />;
 }

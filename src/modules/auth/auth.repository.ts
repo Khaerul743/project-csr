@@ -29,4 +29,21 @@ export class AuthRepository {
 
     return created;
   }
+
+  async updateUser(id: string, data: Partial<NewUser>): Promise<User> {
+    await db
+      .update(users)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+
+    const updated = await this.findById(id);
+    if (!updated) {
+      throw new Error("Failed to retrieve updated user record");
+    }
+
+    return updated;
+  }
 }

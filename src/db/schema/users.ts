@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, mysqlEnum, timestamp, check } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, mysqlEnum, timestamp, check, text } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 import { companies } from "./companies";
 import { partners } from "./partners";
@@ -27,6 +27,9 @@ export const users = mysqlTable(
     password: varchar("password", { length: 255 }).notNull(),
     role: mysqlEnum("role", userRoleEnum).notNull().default("STAGING"),
     status: mysqlEnum("status", userStatusEnum).notNull().default("ACTIVE"),
+    avatarUrl: text("avatar_url"),
+    phone: varchar("phone", { length: 30 }),
+    position: varchar("position", { length: 100 }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   },
