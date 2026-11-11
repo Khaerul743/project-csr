@@ -115,6 +115,26 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
 }
 
+@layer base {
+  a[href],
+  button,
+  summary,
+  select,
+  label[for],
+  label:has(> input[type="checkbox"], > input[type="radio"]),
+  [role="button"],
+  [role="tab"],
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer;
+  }
+
+  :disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
 @layer components {
   .headline-xl {
     font-family: var(--font-display);

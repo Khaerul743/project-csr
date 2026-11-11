@@ -48,6 +48,7 @@ export interface DashboardHeaderProps {
   organizationName?: string;
   user?: UserProfileData;
   onOpenProfile?: () => void;
+  notifications?: NotificationItem[];
 }
 
 const DEFAULT_NOTIFICATIONS: NotificationItem[] = [
@@ -88,6 +89,7 @@ export function DashboardHeader({
   onNavigateMenu,
   user,
   onOpenProfile,
+  notifications: customNotifications,
 }: DashboardHeaderProps) {
   // Popover States
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -96,7 +98,15 @@ export function DashboardHeader({
   const [activeHelpTab, setActiveHelpTab] = useState<"flow" | "verification" | "monitoring" | "support">("flow");
 
   // Notifications State
-  const [notifications, setNotifications] = useState<NotificationItem[]>(DEFAULT_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(
+    customNotifications !== undefined ? customNotifications : DEFAULT_NOTIFICATIONS
+  );
+
+  useEffect(() => {
+    if (customNotifications !== undefined) {
+      setNotifications(customNotifications);
+    }
+  }, [customNotifications]);
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
@@ -514,8 +524,8 @@ export function DashboardHeader({
                   <span className="text-xs font-bold text-[#181343] block truncate leading-tight group-hover:text-indigo-950">
                     {user.name}
                   </span>
-                  <span className="text-[10px] text-slate-500 block truncate">
-                    {user.position || user.role}
+                  <span className="text-[10px] text-slate-600 block truncate">
+                    {user.position || (user.role === "SUPER_ADMIN" ? "Super Admin" : user.role)}
                   </span>
                 </div>
               </button>

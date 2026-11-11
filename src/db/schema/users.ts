@@ -4,6 +4,7 @@ import { companies } from "./companies";
 import { partners } from "./partners";
 
 export const userRoleEnum = [
+  "SUPER_ADMIN",
   "CSR_ADMIN",
   "MANAGEMENT",
   "PARTNER_ADMIN",

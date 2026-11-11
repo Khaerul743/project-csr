@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { InviteMemberModal } from "./InviteMemberModal";
 import { CompanyDashboardView } from "./company/CompanyDashboardView";
 import { PartnerDashboardView } from "./partner/PartnerDashboardView";
+import { AdminDashboardView } from "./admin/AdminDashboardView";
 import { UserProfileData } from "./UserProfileModal";
 
 interface RoleDashboardViewProps {
@@ -66,9 +67,14 @@ export function RoleDashboardView({ user, onLogout, onProfileUpdated }: RoleDash
     fetchOrgData();
   }, [user.role, user.companyId, user.partnerId]);
 
+  const isSuperAdmin = user.role === "SUPER_ADMIN";
   const isManagement = user.role === "MANAGEMENT";
   const isCsrAdmin = user.role === "CSR_ADMIN";
   const isPartner = user.role === "PARTNER_ADMIN";
+
+  if (isSuperAdmin) {
+    return <AdminDashboardView user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />;
+  }
 
   if (isManagement || isCsrAdmin) {
     return <CompanyDashboardView user={user} onLogout={onLogout} onProfileUpdated={onProfileUpdated} />;

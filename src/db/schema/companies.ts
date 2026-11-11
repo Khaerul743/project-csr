@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, text, mysqlEnum, timestamp, int } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, text, mysqlEnum, timestamp, int, boolean } from "drizzle-orm/mysql-core";
 
 export const companyStatusEnum = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
 export type CompanyStatus = (typeof companyStatusEnum)[number];
@@ -29,6 +29,11 @@ export const companies = mysqlTable("companies", {
   linkedinUrl: varchar("linkedin_url", { length: 255 }),
   csrLeaders: text("csr_leaders"), // JSON: [{ id, name, role, email, phone, photoUrl }]
   status: mysqlEnum("status", companyStatusEnum).notNull().default("ACTIVE"),
+  isVerified: boolean("is_verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at"),
+  // Disimpan sebagai UUID tanpa inline FK untuk menghindari circular reference dengan users.ts
+  verifiedBy: varchar("verified_by", { length: 36 }),
+  verificationNotes: text("verification_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });

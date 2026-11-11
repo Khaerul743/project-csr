@@ -11,6 +11,7 @@ erDiagram
     users ||--o| companies : "companyId"
     users ||--o| partners : "partnerId"
     users ||--o{ teamInvitations : "invitedBy"
+    users ||--o{ adminAuditLogs : "executedBy"
 
     companies ||--o{ opportunities : "creates"
     companies ||--o{ collaborations : "party_1"
@@ -46,59 +47,86 @@ Seluruh enum didefinisikan secara type-safe di `src/db/schema/`:
 ### A. Role Pengguna (`src/db/schema/users.ts`)
 | Enum Value | Deskripsi |
 | :--- | :--- |
-| `STAGING` | Akun baru terdaftar (belum memilih atau terhubung ke organisasi). |
+| `SUPER_ADMIN` | Pengelola platform tingkat global (*platform-wide*) untuk verifikasi organisasi, moderasi peluang, audit program, dan tata kelola user (`companyId` dan `partnerId` wajib `null`). |
 | `CSR_ADMIN` | Staf operasional CSR perusahaan. |
 | `MANAGEMENT` | Pimpinan/Direksi eksekutif perusahaan sponsor. |
 | `PARTNER_ADMIN` | Pengelola yayasan/organisasi nirlaba/mitra pelaksana. |
+| `STAGING` | Akun baru terdaftar (belum memilih atau terhubung ke organisasi). |
 
 ### B. Bidang Fokus CSR (`src/db/schema/csr-focus-areas.ts`)
 | Enum Value | Label Tampilan | Keterangan SDG / Pilar CSR |
 | :--- | :--- | :--- |
-| `POVERTY` | Pengentasan Kemiskinan | SDG 1: No Poverty |
-| `EDUCATION` | Pendidikan Berkualitas | SDG 4: Quality Education |
-| `HEALTH` | Kesehatan & Kesejahteraan | SDG 3: Good Health and Well-being |
-| `ENVIRONMENT` | Lingkungan & Energi Hijau | SDG 13, 14, 15: Climate Action & Life On Land/Water |
-| `EMPOWERMENT` | Pemberdayaan Ekonomi & UMKM | SDG 8: Decent Work and Economic Growth |
-| `INFRASTRUCTURE`| Sarana & Infrastruktur Sosial | SDG 9: Industry, Innovation, and Infrastructure |
-| `DISASTER` | Tanggap Darurat & Bencana | Bantuan logistik & rehabilitasi bencana |
-| `OTHER` | Inisiatif Keberlanjutan Lainnya| Kategori program umum |
+| `LINGKUNGAN` | Lingkungan & Energi Hijau | SDG 13, 14, 15: Climate Action & Life On Land/Water |
+| `PENDIDIKAN` | Pendidikan Berkualitas | SDG 4: Quality Education |
+| `KESEHATAN` | Kesehatan & Kesejahteraan | SDG 3: Good Health and Well-being |
+| `PEMBERDAYAAN_EKONOMI` | Pemberdayaan Ekonomi & UMKM | SDG 8: Decent Work and Economic Growth |
+| `INFRASTRUKTUR_SOSIAL` | Sarana & Infrastruktur Sosial | SDG 9: Industry, Innovation, and Infrastructure |
+| `TANGGAP_BENCANA` | Tanggap Darurat & Bencana | Bantuan logistik & rehabilitasi bencana |
+| `LAINNYA` | Inisiatif Keberlanjutan Lainnya | Kategori program umum |
+
+### C. Target Sasaran Audit Admin (`src/db/schema/admin-audit-logs.ts`)
+| Enum Value | Keterangan Entitas |
+| :--- | :--- |
+| `COMPANY` | Perusahaan sponsor (`companies`). |
+| `PARTNER` | Mitra pelaksana / NGO (`partners`). |
+| `USER` | Akun pengguna sistem (`users`), termasuk pembuatan `SUPER_ADMIN`. |
+| `OPPORTUNITY` | Peluang CSR yang dimoderasi (`opportunities`). |
+| `PROGRAM` | Program CSR (`programs`). |
+| `SYSTEM` | Operasi tata kelola tingkat sistem. |
 
 ---
 
 ## 3. Rincian Tabel Database (`src/db/schema/`)
 
-### 1. `users` — Data Pengguna Sistem
-Menyimpan kredensial autentikasi pengguna dan pemetaan ke organisasi.
+### 1. `users` - Data Pengguna Sistem
+Menyimpan kredensial autentikasi pengguna dan pemetaan ke organisasi. Dilengkapi SQL Check Constraint `chk_user_company_or_partner` (`company_id IS NULL OR partner_id IS NULL`); akun `SUPER_ADMIN` dan `STAGING` memiliki keduanya bernilai `NULL`.
 - `id` (VARCHAR(36), PK): UUID unik.
-- `name` (VARCHAR(255), NOT NULL): Nama lengkap pengguna.
-- `email` (VARCHAR(255), NOT NULL, UNIQUE): Email untuk login.
-- `password` (VARCHAR(255), NOT NULL): Password hash (Bcrypt).
-- `role` (ENUM, NOT NULL, DEFAULT `'STAGING'`): Role RBAC pengguna.
 - `companyId` (VARCHAR(36), FK $\rightarrow$ `companies.id`, NULLABLE): ID perusahaan (jika role CSR).
 - `partnerId` (VARCHAR(36), FK $\rightarrow$ `partners.id`, NULLABLE): ID mitra (jika role mitra).
-- `status` (VARCHAR(50), NOT NULL, DEFAULT `'ACTIVE'`): Status aktif pengguna.
+- `name` (VARCHAR(150), NOT NULL): Nama lengkap pengguna.
+- `email` (VARCHAR(255), NOT NULL, UNIQUE): Email untuk login.
+- `password` (VARCHAR(255), NOT NULL): Password hash (Bcrypt).
+- `role` (ENUM `'SUPER_ADMIN' | 'CSR_ADMIN' | 'MANAGEMENT' | 'PARTNER_ADMIN' | 'STAGING'`, NOT NULL, DEFAULT `'STAGING'`): Role RBAC pengguna.
+- `status` (ENUM `'ACTIVE' | 'INACTIVE' | 'SUSPENDED'`, NOT NULL, DEFAULT `'ACTIVE'`): Status aktif pengguna.
+- `avatarUrl` (TEXT, NULLABLE): URL foto profil.
+- `phone` (VARCHAR(30), NULLABLE): Nomor telepon kontak.
+- `position` (VARCHAR(100), NULLABLE): Jabatan di organisasi/platform.
 - `createdAt`, `updatedAt` (TIMESTAMP).
 
-### 2. `companies` — Profil Perusahaan Sponsor
+### 2. `companies` - Profil Perusahaan Sponsor
 - `id` (VARCHAR(36), PK): UUID unik perusahaan.
-- `name` (VARCHAR(255), NOT NULL): Nama resmi perseroan.
-- `email`, `phone` (VARCHAR(255), NULLABLE): Kontak korporat.
-- `address`, `city`, `province` (VARCHAR, NULLABLE): Domisili kantor pusat.
-- `website`, `logoUrl`, `coverUrl` (TEXT, NULLABLE): Identitas visual korporat.
-- `description`, `industry` (TEXT, VARCHAR): Sektor industri & visi keberlanjutan.
-- `npwpNumber`, `foundedYear` (VARCHAR, INT): Legalitas korporat.
-- `status` (VARCHAR(50), DEFAULT `'ACTIVE'`).
+- `name` (VARCHAR(150), NOT NULL): Nama resmi perseroan.
+- `tagline`, `description`, `csrVision` (VARCHAR/TEXT, NULLABLE): Deskripsi & visi CSR perusahaan.
+- `industry`, `companySize`, `foundedYear` (VARCHAR/INT, NULLABLE): Sektor industri, skala, dan tahun berdiri.
+- `email`, `phone` (VARCHAR, NULLABLE): Kontak korporat.
+- `address`, `city`, `province` (TEXT/VARCHAR, NULLABLE): Domisili kantor pusat.
+- `website`, `logoUrl`, `coverUrl`, `instagramUrl`, `linkedinUrl` (VARCHAR/TEXT, NULLABLE): Identitas & tautan korporat.
+- `nibNumber`, `npwpNumber`, `sustainabilityReportUrl` (VARCHAR/TEXT, NULLABLE): Dokumen legalitas & laporan keberlanjutan.
+- `csrLeaders` (TEXT, NULLABLE): Serialisasi JSON daftar pimpinan/PIC CSR.
+- `status` (ENUM `'ACTIVE' | 'INACTIVE' | 'SUSPENDED'`, NOT NULL, DEFAULT `'ACTIVE'`).
+- `isVerified` (BOOLEAN, NOT NULL, DEFAULT `false`): Status verifikasi legalitas resmi oleh Super Admin.
+- `verifiedAt` (TIMESTAMP, NULLABLE): Waktu verifikasi legalitas disetujui.
+- `verifiedBy` (VARCHAR(36), NULLABLE): UUID akun `SUPER_ADMIN` pemverifikasi (tanpa inline FK untuk menghindari circular reference dengan `users.ts`).
+- `verificationNotes` (TEXT, NULLABLE): Catatan hasil telaah dokumen atau alasan suspensi.
+- `createdAt`, `updatedAt` (TIMESTAMP).
 
-### 3. `partners` — Profil Mitra Pelaksana / Lembaga NGO
+### 3. `partners` - Profil Mitra Pelaksana / Lembaga NGO
 - `id` (VARCHAR(36), PK): UUID unik lembaga mitra.
-- `name` (VARCHAR(255), NOT NULL): Nama yayasan/komunitas.
-- `email`, `phone`, `address`, `city`, `province` (VARCHAR, NULLABLE): Kontak & domisili.
-- `website`, `logoUrl`, `coverUrl` (TEXT, NULLABLE): Branding lembaga.
-- `description`, `organizationType` (TEXT, VARCHAR): Jenis lembaga (`YAYASAN`, `KOMUNITAS`, `LSM`).
-- `foundedYear`, `legalNumber`, `npwpNumber` (INT, VARCHAR): Bukti legalitas Kemenkumham & NPWP.
-- `instagramUrl`, `linkedinUrl`, `youtubeUrl`, `portfolioDocUrl` (TEXT, NULLABLE): Tautan sosial & berkas rekam jejak.
-- `focusArea` (ENUM `csrFocusAreaEnum`, NOT NULL, DEFAULT `'OTHER'`): Fokus utama lembaga.
-- `status` (VARCHAR(50), DEFAULT `'ACTIVE'`).
+- `name` (VARCHAR(150), NOT NULL): Nama yayasan/komunitas.
+- `tagline`, `description` (VARCHAR/TEXT, NULLABLE): Profil lembaga.
+- `email`, `phone`, `address`, `city`, `province` (VARCHAR/TEXT, NULLABLE): Kontak & domisili.
+- `website`, `logoUrl`, `coverUrl` (VARCHAR/TEXT, NULLABLE): Branding lembaga.
+- `organizationType` (VARCHAR(100), NULLABLE): Jenis lembaga (misal: `"Yayasan"`, `"Perkumpulan / NGO"`, `"Komunitas Sosial"`).
+- `foundedYear`, `legalNumber`, `npwpNumber` (INT, VARCHAR): Tahun berdiri dan bukti legalitas Kemenkumham/Dinsos & NPWP.
+- `instagramUrl`, `linkedinUrl`, `youtubeUrl`, `portfolioDocUrl` (VARCHAR, NULLABLE): Tautan sosial & berkas portofolio PDF.
+- `pastActivities`, `teamMembers` (TEXT, NULLABLE): Serialisasi JSON portofolio kegiatan & struktur tim.
+- `focusArea` (ENUM `csrFocusAreaEnum`, NOT NULL, DEFAULT `'LAINNYA'`): Fokus utama lembaga.
+- `status` (ENUM `'ACTIVE' | 'INACTIVE' | 'SUSPENDED'`, NOT NULL, DEFAULT `'ACTIVE'`).
+- `isVerified` (BOOLEAN, NOT NULL, DEFAULT `false`): Status verifikasi legalitas resmi oleh Super Admin.
+- `verifiedAt` (TIMESTAMP, NULLABLE): Waktu verifikasi legalitas disetujui.
+- `verifiedBy` (VARCHAR(36), NULLABLE): UUID akun `SUPER_ADMIN` pemverifikasi (tanpa inline FK untuk menghindari circular reference dengan `users.ts`).
+- `verificationNotes` (TEXT, NULLABLE): Catatan pemeriksaan dokumen atau alasan suspensi.
+- `createdAt`, `updatedAt` (TIMESTAMP).
 
 ### 4. `team_invitations` — Undangan Bergabung Anggota Tim
 - `id` (VARCHAR(36), PK): UUID undangan.
@@ -244,15 +272,30 @@ Menyimpan kredensial autentikasi pengguna dan pemetaan ke organisasi.
 
 ### 15. `program_reviews` — Survei Kepuasan Masyarakat Penerima Manfaat
 - `id` (VARCHAR(36), PK): UUID ulasan publik.
-- `programId` (VARCHAR(36), FK $\rightarrow$ `programs.id`, NOT NULL).
-- `reviewerName` (VARCHAR(255), NOT NULL): Nama warga penerima manfaat.
-- `reviewerRole` (VARCHAR(255), NULLABLE): Profesi warga (misal: "Ketua RT 03", "Petani Tambak").
+- `programId` (VARCHAR(36), FK $\rightarrow$ `programs.id`, NOT NULL, ON DELETE CASCADE).
+- `reviewerName` (VARCHAR(100), NOT NULL): Nama warga penerima manfaat.
+- `reviewerRole` (VARCHAR(100), NOT NULL): Peran/profesi warga (misal: `"Penerima Manfaat Langsung"`, `"Tokoh Masyarakat"`).
+- `reviewerCity` (VARCHAR(100), NULLABLE): Kota/wilayah responden warga.
 - `rating` (INT, NOT NULL): Skor bintang (1 hingga 5).
 - `comment` (TEXT, NOT NULL): Testimoni kualitatif warga.
-- `photoProofUrl` (TEXT, NULLABLE): Foto warga dengan sarana bantuan.
+- `sentiment` (ENUM `'POSITIVE' | 'NEUTRAL' | 'NEGATIVE'`, NULLABLE): Klasifikasi sentimen hasil analisis AI.
+- `photoUrl` (VARCHAR(500), NULLABLE): Foto warga dengan sarana bantuan.
 - `ipAddress` (VARCHAR(100), NULLABLE): Hash/IP untuk rate limiting anti-spam.
-- `userAgent` (TEXT, NULLABLE): Metadata browser/smartphone.
-- `isVerified` (TINYINT, DEFAULT 1): Status moderasi ulasan.
+- `userAgent` (VARCHAR(255), NULLABLE): Metadata browser/smartphone.
+- `createdAt`, `updatedAt` (TIMESTAMP).
+
+### 16. `admin_audit_logs` - Rekam Jejak Audit Super Admin
+Menyimpan catatan mutasi administratif yang dieksekusi oleh `SUPER_ADMIN` demi transparansi dan tata kelola platform.
+- `id` (VARCHAR(36), PK): UUID unik log audit.
+- `adminId` (VARCHAR(36), FK $\rightarrow$ `users.id`, NOT NULL): ID akun Super Admin eksekutor aksi.
+- `action` (VARCHAR(100), NOT NULL): Jenis aksi (misal: `VERIFY_COMPANY`, `REVOKE_COMPANY_VERIFICATION`, `UPDATE_COMPANY_STATUS`, `VERIFY_PARTNER`, `UPDATE_PARTNER_STATUS`, `CREATE_SUPER_ADMIN`, `UPDATE_USER_STATUS`, `SUSPEND_USER`, `FORCE_CLOSE_OPPORTUNITY`, `REOPEN_OPPORTUNITY`).
+- `targetType` (ENUM `'COMPANY' | 'PARTNER' | 'USER' | 'OPPORTUNITY' | 'PROGRAM' | 'SYSTEM'`, NOT NULL): Kategori entitas sasaran.
+- `targetId` (VARCHAR(36), NOT NULL): UUID entitas yang dimodifikasi.
+- `targetLabel` (VARCHAR(255), NULLABLE): Label/nama entitas saat aksi dilakukan agar mudah dibaca.
+- `previousValue` (TEXT, NULLABLE): Serialisasi JSON status/nilai sebelum perubahan.
+- `newValue` (TEXT, NULLABLE): Serialisasi JSON status/nilai setelah perubahan.
+- `reason` (TEXT, NULLABLE): Catatan verifikasi, alasan penangguhan, atau dasar moderasi.
+- `createdAt` (TIMESTAMP, DEFAULT NOW(), NOT NULL): Waktu eksekusi aksi.
 
 ---
 

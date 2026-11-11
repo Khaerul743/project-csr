@@ -263,6 +263,8 @@ export function UserProfileModal({
 
   const getRoleBadge = (role: string) => {
     switch (role) {
+      case "SUPER_ADMIN":
+        return <Badge variant="navy" hasDot>Super Admin</Badge>;
       case "CSR_ADMIN":
         return <Badge variant="navy">CSR Admin</Badge>;
       case "MANAGEMENT":

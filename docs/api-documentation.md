@@ -10,7 +10,7 @@ Dokumentasi ringkas REST API Project CSR. Didesain modular agar mudah diperluas 
 - **Headers:**
   - `Content-Type: application/json`
   - `Authorization: Bearer <TOKEN>` (untuk route terproteksi)
-- **Roles (RBAC):** `CSR_ADMIN` | `MANAGEMENT` | `PARTNER_ADMIN` | `STAGING`
+- **Roles (RBAC):** `SUPER_ADMIN` | `CSR_ADMIN` | `MANAGEMENT` | `PARTNER_ADMIN` | `STAGING`
 
 ### Format Response
 ```typescript
@@ -1492,7 +1492,230 @@ Menghapus tahapan tertentu jika belum memiliki log aktivitas terkait.
 
 ---
 
-## 15. Contoh Implementasi RBAC Guard
+## 15. Modul Super Admin & Tata Kelola Platform (`/api/admin/*`)
+
+Seluruh endpoint pada namespace ini terproteksi ketat oleh `AuthGuard.authorize(request, ["SUPER_ADMIN"])`. Token milik role lain (`CSR_ADMIN`, `MANAGEMENT`, `PARTNER_ADMIN`, `STAGING`) ditolak dengan status `403 Forbidden`. Super Admin beroperasi dalam mode **Read-Only Audit** atas transaksi program/keuangan dan hanya mengeksekusi **Kontrol Status, Verifikasi Legalitas, Moderasi Peluang, serta Penciptaan Super Admin Internal**, yang seluruhnya dicatat ke `admin_audit_logs`.
+
+### 15.1 Ringkasan Eksekutif Platform
+Mengambil KPI makro lintas ekosistem, tren pertumbuhan bulanan (6 bulan terakhir), distribusi fokus CSR, funnel konversi kolaborasi, serta daftar antrean perhatian (*unverified orgs*, program `ON_HOLD`/`CANCELLED`, dan program berating rendah).
+
+- **Method / Path:** `GET /api/admin/overview`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Ringkasan metrik platform berhasil diambil",
+  "data": {
+    "kpis": {
+      "totalCompanies": 12,
+      "verifiedCompanies": 9,
+      "activeCompanies": 11,
+      "suspendedCompanies": 1,
+      "totalPartners": 18,
+      "verifiedPartners": 14,
+      "totalUsers": 45,
+      "stagingUsers": 3,
+      "superAdmins": 1,
+      "totalPrograms": 10,
+      "totalCommittedBudget": 2500000000,
+      "totalDisbursedFunds": 1400000000,
+      "totalVerifiedExpenses": 1150000000,
+      "averageRating": 4.6
+    },
+    "monthlyTrends": [
+      {
+        "monthKey": "2026-11",
+        "label": "Nov 2026",
+        "newCompanies": 2,
+        "newPartners": 3,
+        "newUsers": 8,
+        "newPrograms": 2
+      }
+    ],
+    "focusAreaDistribution": [],
+    "conversionFunnel": {
+      "openOpportunities": 8,
+      "submittedProposals": 24,
+      "agreedCollaborations": 11,
+      "activeOrCompletedPrograms": 9
+    },
+    "escalationQueue": {
+      "unverifiedCompanies": [],
+      "unverifiedPartners": [],
+      "flaggedPrograms": [],
+      "lowRatedPrograms": []
+    }
+  }
+}
+```
+
+### 15.2 Daftar Perusahaan Sponsor
+Mengambil daftar perusahaan lintas platform beserta agregasi jumlah anggota, peluang, dan program.
+
+- **Method / Path:** `GET /api/admin/companies`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page` (default `1`), `limit` (default `12`), `search`, `status` (`ACTIVE|INACTIVE|SUSPENDED`), `isVerified` (`true|false`)
+
+### 15.3 Detail Perusahaan Sponsor
+Mengambil profil lengkap perusahaan termasuk NIB/NPWP/laporan keberlanjutan, daftar user internal, peluang CSR, dan riwayat program.
+
+- **Method / Path:** `GET /api/admin/companies/:id`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- *Error:* `404 Not Found` jika perusahaan tidak ditemukan.
+
+### 15.4 Pembaruan Status & Verifikasi Perusahaan
+Memverifikasi legalitas (`isVerified`), mencabut verifikasi, atau mengubah status operasional perusahaan (`ACTIVE`, `INACTIVE`, `SUSPENDED`). Minimal salah satu dari `status` atau `isVerified` wajib dikirim.
+
+- **Method / Path:** `PATCH /api/admin/companies/:id/status`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "status": "ACTIVE",
+  "isVerified": true,
+  "verificationNotes": "NIB dan NPWP korporat tervalidasi melalui OSS.",
+  "reason": "Verifikasi legalitas perdana disetujui"
+}
+```
+> *Aturan Validasi:* Jika `status` diisi `"SUSPENDED"`, field `reason` atau `verificationNotes` wajib memiliki panjang minimal 5 karakter (`400 Bad Request` jika kosong).
+
+### 15.5 Daftar Mitra Pelaksana (NGO)
+Mengambil daftar lembaga mitra NGO/yayasan beserta metrik proposal dan program.
+
+- **Method / Path:** `GET /api/admin/partners`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page`, `limit`, `search`, `status` (`ACTIVE|INACTIVE|SUSPENDED`), `focusArea`, `isVerified` (`true|false`)
+
+### 15.6 Detail Mitra Pelaksana (NGO)
+Mengambil profil lengkap yayasan/NGO, nomor SK Kemenkumham/Dinsos, portofolio PDF, daftar pengurus/user, proposal, dan program.
+
+- **Method / Path:** `GET /api/admin/partners/:id`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- *Error:* `404 Not Found` jika mitra tidak ditemukan.
+
+### 15.7 Pembaruan Status & Verifikasi Mitra (NGO)
+Mengubah `status` dan/atau `isVerified` mitra NGO serta mencatat log audit.
+
+- **Method / Path:** `PATCH /api/admin/partners/:id/status`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "isVerified": true,
+  "verificationNotes": "SK Kemenkumham & NPWP yayasan lengkap."
+}
+```
+> *Aturan Validasi:* Sama dengan endpoint perusahaan, status `"SUSPENDED"` mewajibkan `reason` atau `verificationNotes` minimal 5 karakter.
+
+### 15.8 Daftar Pengguna Lintas Sistem
+Mengambil seluruh akun `users` lintas role (termasuk `STAGING` dan `SUPER_ADMIN`) beserta informasi organisasi terhubung.
+
+- **Method / Path:** `GET /api/admin/users`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page`, `limit`, `search`, `role` (`SUPER_ADMIN|CSR_ADMIN|MANAGEMENT|PARTNER_ADMIN|STAGING`), `status` (`ACTIVE|INACTIVE|SUSPENDED`)
+
+### 15.9 Buat Akun Super Admin Baru
+Menciptakan akun `SUPER_ADMIN` baru secara internal (`companyId = null`, `partnerId = null`, `status = "ACTIVE"`).
+
+- **Method / Path:** `POST /api/admin/users/super-admin`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "name": "Auditor Tata Kelola",
+  "email": "auditor@sipena.id",
+  "password": "StrongPassword123!",
+  "phone": "081234567890",
+  "position": "Lead Platform Auditor"
+}
+```
+> *Aturan Validasi:* `name` min 2 maks 150 karakter, `password` min 8 maks 100 karakter.
+- **Response (`201 Created`):** Mengembalikan objek user tanpa field `password`.
+- *Error:* `409 Conflict` jika email sudah terdaftar.
+
+### 15.10 Pembaruan Status Akun Pengguna
+Mengubah status akun pengguna ke `ACTIVE`, `INACTIVE`, atau `SUSPENDED`.
+
+- **Method / Path:** `PATCH /api/admin/users/:id/status`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "status": "SUSPENDED",
+  "reason": "Indikasi penyalahgunaan kredensial akses organisasi"
+}
+```
+> *Proteksi Keamanan:*
+> - Alasan `reason` minimal 5 karakter wajib diisi saat `status = "SUSPENDED"`.
+> - **Anti-Self-Lockout:** Super Admin ditolak (`400 Bad Request`) jika mencoba menonaktifkan/menangguhkan akunnya sendiri.
+> - **Last Active Admin Protection:** Menolak (`400 Bad Request`) penonaktifan satu-satunya akun `SUPER_ADMIN` yang masih berstatus `ACTIVE`.
+
+### 15.11 Daftar Peluang CSR Platform
+Mengambil seluruh peluang CSR (`opportunities`) lintas perusahaan.
+
+- **Method / Path:** `GET /api/admin/opportunities`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page`, `limit`, `search`, `status` (`DRAFT|OPEN|IN_REVIEW|CLOSED`), `focusArea`
+
+### 15.12 Moderasi Peluang CSR (Tutup Paksa / Buka Kembali)
+Mengintervensi peluang CSR bermasalah dengan mengubah status menjadi `CLOSED` (*Force Close*) atau mengembalikannya menjadi `OPEN`.
+
+- **Method / Path:** `PATCH /api/admin/opportunities/:id/moderate`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "status": "CLOSED",
+  "reason": "Konten peluang melanggar ketentuan keterbukaan program CSR."
+}
+```
+> *Aturan Validasi:* `status` wajib `"CLOSED"` atau `"OPEN"`, dan `reason` wajib 5 hingga 500 karakter.
+
+### 15.13 Daftar Proposal Lintas Platform (Read-Only)
+Memantau arus proposal dari seluruh mitra beserta skor kelayakan AI (`aiScore`), perusahaan tujuan, dan status tinjauan.
+
+- **Method / Path:** `GET /api/admin/proposals`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page`, `limit`, `search`, `status` (`SUBMITTED|UNDER_REVIEW|REVISION_REQUESTED|ACCEPTED|REJECTED|WITHDRAWN`)
+
+### 15.14 Pengawasan Program & Keuangan Lintas Tenant (Read-Only)
+Mengambil daftar seluruh program beserta metrik progres aktivitas, total pencairan termin (`disbursedAmount`), dan nota pengeluaran terverifikasi (`verifiedExpensesAmount`).
+
+- **Method / Path:** `GET /api/admin/programs`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page`, `limit`, `search`, `status` (`PLANNED|IN_PROGRESS|COMPLETED|ON_HOLD|CANCELLED`), `focusArea`
+
+### 15.15 Detail Audit Program (Read-Only)
+Mengambil data audit komprehensif satu program: identitas & MoU kolaborasi, milestone (`stages`), log kegiatan & bukti foto (`activities`), ringkasan keuangan (`financialSummary`), daftar termin pencairan (`disbursements`), nota belanja (`expenses`), ulasan warga (`reviews`), serta statistik sentimen (`reviewStats`).
+
+- **Method / Path:** `GET /api/admin/programs/:id`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- *Error:* `404 Not Found` jika program tidak ditemukan.
+
+### 15.16 Agregasi Suara Warga & Dampak ESG (Read-Only)
+Mengambil statistik evaluasi warga lintas program: ringkasan rating & sentimen (`POSITIVE`, `NEUTRAL`, `NEGATIVE`), sebaran kota/provinsi (`geoDistribution`), perbandingan antar bidang fokus (`focusAreaImpact`), daftar program berating rendah/bersentimen negatif (`lowRatedOrNegativePrograms`), dan umpan ulasan terbaru (`recentReviews`).
+
+- **Method / Path:** `GET /api/admin/impact`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+
+### 15.17 Status Sistem, Layanan AI & Log Audit Admin
+Mengambil status toggle & konfigurasi OpenAI (`aiConfig`), metrik pemanfaatan fitur AI (`aiMetrics`), serta riwayat log audit admin terpaginasi (`auditLogs`).
+
+- **Method / Path:** `GET /api/admin/system`
+- **Auth:** Bearer Token (`SUPER_ADMIN`)
+- **Query Params:** `page`, `limit`, `search`, `targetType` (`COMPANY|PARTNER|USER|OPPORTUNITY|PROGRAM|SYSTEM`)
+
+---
+
+## 16. Contoh Implementasi RBAC Guard
 
 Untuk memproteksi endpoint baru dengan role tertentu:
 
@@ -1514,7 +1737,7 @@ export async function GET(request: Request) {
 
 ---
 
-## 15. Ringkasan Status Code
+## 17. Ringkasan Status Code
 
 | Code | Status | Keterangan |
 | :--- | :--- | :--- |

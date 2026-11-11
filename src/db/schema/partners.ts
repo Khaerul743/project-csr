@@ -1,4 +1,4 @@
-import { mysqlTable, varchar, text, mysqlEnum, timestamp, int } from "drizzle-orm/mysql-core";
+import { mysqlTable, varchar, text, mysqlEnum, timestamp, int, boolean } from "drizzle-orm/mysql-core";
 import { csrFocusAreaEnum } from "./csr-focus-areas";
 
 export const partnerStatusEnum = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
@@ -31,6 +31,11 @@ export const partners = mysqlTable("partners", {
   teamMembers: text("team_members"), // JSON stringified array of { id, name, role, photoUrl }
   focusArea: mysqlEnum("focus_area", csrFocusAreaEnum).notNull().default("LAINNYA"),
   status: mysqlEnum("status", partnerStatusEnum).notNull().default("ACTIVE"),
+  isVerified: boolean("is_verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at"),
+  // Disimpan sebagai UUID tanpa inline FK untuk menghindari circular reference dengan users.ts
+  verifiedBy: varchar("verified_by", { length: 36 }),
+  verificationNotes: text("verification_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
