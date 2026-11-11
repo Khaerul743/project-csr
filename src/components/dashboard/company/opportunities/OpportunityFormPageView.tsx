@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   ArrowLeft,
-  Sparkles,
   MapPin,
   Calendar,
   AlertCircle,
@@ -14,7 +13,6 @@ import {
   X,
   Loader2,
   ChevronDown,
-  ChevronUp,
   Info,
   Check,
   Search,
@@ -31,6 +29,7 @@ import { OpportunityItem } from "../types";
 import { ALL_17_SDGS, getProgramSdgs } from "@/components/dashboard/analytics/helpers";
 import { SdgGoal } from "@/components/dashboard/analytics/types";
 import { INDONESIAN_REGIONS } from "./indonesian-regions";
+import { AiNeedPrioritizationPanel } from "./AiNeedPrioritizationPanel";
 
 export interface OpportunityFormPageViewProps {
   mode: "create" | "edit";
@@ -262,9 +261,36 @@ export function OpportunityFormPageView({
     }
   }, [opportunity, isEdit]);
 
-  // AI Need Prioritization & UI states
-  const [isAiNeedOpen, setIsAiNeedOpen] = useState(true);
+  // UI & submission states
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleApplyAiRecommendation = ({
+    focusArea: nextFocusArea,
+    sdgs: nextSdgs,
+    descriptionSnippet,
+  }: {
+    focusArea?: CsrFocusArea;
+    sdgs?: number[];
+    descriptionSnippet?: string;
+  }) => {
+    const focusChanged = Boolean(nextFocusArea && nextFocusArea !== focusArea);
+    if (nextFocusArea) {
+      setFocusArea(nextFocusArea);
+    }
+    if (nextSdgs && nextSdgs.length > 0) {
+      setSelectedSdgs((prev) => {
+        const base = focusChanged ? [] : prev;
+        return Array.from(new Set([...base, ...nextSdgs])).sort((a, b) => a - b);
+      });
+    }
+    if (descriptionSnippet) {
+      setDescription((prev) => {
+        const trimmed = prev.trim();
+        if (trimmed.includes(descriptionSnippet.trim())) return prev;
+        return trimmed ? `${trimmed}\n\n${descriptionSnippet}` : descriptionSnippet;
+      });
+    }
+  };
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -820,99 +846,17 @@ export function OpportunityFormPageView({
               />
             </div>
 
-            {/* AI Need Prioritization Assistant (Expandable) */}
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 space-y-3">
-              <div
-                className="flex items-center justify-between cursor-pointer"
-                onClick={() => setIsAiNeedOpen(!isAiNeedOpen)}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center">
-                    <Sparkles className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-emerald-950">
-                      AI Need Prioritization &amp; Analisis Kebutuhan Wilayah
-                    </h4>
-                    <span className="text-[11px] text-emerald-700">
-                      Rekomendasi prioritas masalah dan intervensi berbasis data wilayah.
-                    </span>
-                  </div>
-                </div>
-                <button type="button" className="text-emerald-700 p-1">
-                  {isAiNeedOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-              </div>
-
-              {isAiNeedOpen && (
-                <div className="pt-2 border-t border-emerald-200/60 space-y-3 text-xs animate-in fade-in">
-                  {targetProvince && targetCity ? (
-                    <div className="space-y-3 bg-white p-3.5 rounded-xl border border-emerald-100">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800">
-                          Profil Kebutuhan: {targetCity}, {targetProvince}
-                        </span>
-                        <Badge variant="emerald" size="sm">
-                          Prioritas Wilayah Tinggi
-                        </Badge>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-600 text-[11px]">
-                        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
-                          <span className="font-semibold text-slate-800 block">
-                            Tantangan Sosial-Ekonomi Dominan:
-                          </span>
-                          <p>
-                            Kebutuhan peningkatan sarana pemberdayaan kelompok rentan dan fasilitasi infrastruktur ramah lingkungan di wilayah sasaran {targetCity}.
-                          </p>
-                        </div>
-                        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
-                          <span className="font-semibold text-slate-800 block">
-                            Rekomendasi Intervensi CSR:
-                          </span>
-                          <p>
-                            Program penguatan kapasitas komunitas lokal, pendampingan berkelanjutan, dan kemitraan dengan NGO lokal bersertifikasi.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] text-slate-400 italic">
-                          Sumber data: Indeks Kebutuhan Wilayah &amp; AI Analytics SIPENA
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const snippet = `\n\nFokus Wilayah (${targetCity}): Program ini difokuskan untuk menjawab tantangan peningkatan sarana dan kapasitas masyarakat setempat melalui intervensi berkelanjutan.`;
-                            setDescription((prev) => prev + snippet);
-                          }}
-                          className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
-                        >
-                          + Terapkan Rekomendasi ke Deskripsi
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-4 rounded-xl bg-white/80 border border-emerald-100 text-center text-slate-500 space-y-1">
-                      <p className="font-semibold text-xs text-slate-700">
-                        Pilih Provinsi dan Kota/Kabupaten Sasaran
-                      </p>
-                      <p className="text-[11px] text-slate-500">
-                        Modul AI akan otomatis menganalisis urgensi kebutuhan masyarakat dan merekomendasikan intervensi yang paling tepat sasaran.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Disclaimer */}
-                  <div className="flex items-start gap-2 text-[10px] text-slate-500 bg-white/60 p-2.5 rounded-lg border border-emerald-100/60">
-                    <Info className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                    <span>
-                      <strong>Pemberitahuan:</strong> Rekomendasi AI Need Prioritization berfungsi sebagai bahan pertimbangan strategis perusahaan (decision support), bukan merupakan ketetapan otomatis sistem.
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* AI Need Prioritization Assistant */}
+            <AiNeedPrioritizationPanel
+              targetProvince={targetProvince}
+              targetCity={targetCity}
+              focusArea={focusArea}
+              title={title}
+              description={description}
+              estimatedBudget={estimatedBudget}
+              excludeOpportunityId={isEdit ? opportunity?.id : null}
+              onApplyRecommendation={handleApplyAiRecommendation}
+            />
           </div>
 
           {/* SECTION 3: Sasaran SDGs & Pemetaan ESG (Prioritas Arahan Dosen) */}

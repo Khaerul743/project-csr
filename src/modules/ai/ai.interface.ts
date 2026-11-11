@@ -1,5 +1,7 @@
 import { ProposalScreeningResult } from "./services/proposal-screener/proposal-screener.schema";
 import { EsgReportResult } from "./services/esg-report/esg-report.schema";
+import { NeedPrioritizationResult } from "./services/need-prioritization/need-prioritization.schema";
+import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 
 
 export interface ProposalMilestoneInput {
@@ -144,6 +146,109 @@ export interface ProgramSentimentAnalysisResponse {
 
 export * from "./services/proposal-optimizer/proposal-optimizer.service";
 export * from "./services/proposal-optimizer/proposal-optimizer.schema";
+
+export type TerritoryDataCoverage = "RICH_DATA" | "LIMITED_DATA" | "COLD_START";
+
+export interface TerritoryProgramAggregateItem {
+  focusArea: CsrFocusArea;
+  cityProgramsCount: number;
+  provinceProgramsCount: number;
+  activeOrPlannedCount: number;
+  completedCount: number;
+  sampleThemes: string[];
+  sampleBeneficiaries: string[];
+}
+
+export interface TerritoryOpenOpportunityItem {
+  id: string;
+  title: string;
+  focusArea: CsrFocusArea;
+  targetCity: string | null;
+  targetProvince: string | null;
+  status: string;
+  isExactCityMatch: boolean;
+}
+
+export interface TerritoryReviewSampleItem {
+  rating: number;
+  comment: string;
+  sentiment: string | null;
+  reviewerRole: string;
+  reviewerCity: string | null;
+  programFocusArea: CsrFocusArea;
+}
+
+export interface TerritoryPartnerSectorCount {
+  focusArea: CsrFocusArea;
+  activeCount: number;
+  verifiedCount: number;
+}
+
+export interface TerritoryDataSnapshot {
+  targetProvince: string;
+  targetCity: string;
+  dataCoverage: TerritoryDataCoverage;
+  companyContext: {
+    name: string;
+    industry: string | null;
+    csrVision: string | null;
+    ownOpportunitiesCount: number;
+    ownProgramsCount: number;
+    ownProgramFocusAreas: CsrFocusArea[];
+  };
+  regionalStats: {
+    programsInCity: number;
+    programsInProvince: number;
+    openOpportunitiesInCity: number;
+    openOpportunitiesInProvince: number;
+    totalReviewsInProvince: number;
+    averageRatingInProvince: number;
+    negativeReviewsCount: number;
+    positiveReviewsCount: number;
+    activePartnersInCity: number;
+    activePartnersInProvince: number;
+    verifiedPartnersInProvince: number;
+  };
+  programsBySector: TerritoryProgramAggregateItem[];
+  openOpportunities: TerritoryOpenOpportunityItem[];
+  reviewSamples: TerritoryReviewSampleItem[];
+  activityLocations: Array<{
+    locationName: string;
+    focusArea: CsrFocusArea;
+    title: string;
+  }>;
+  partnersBySector: TerritoryPartnerSectorCount[];
+}
+
+export interface NeedPrioritizationInput {
+  targetProvince: string;
+  targetCity: string;
+  selectedFocusArea?: CsrFocusArea | null;
+  draftTitle?: string | null;
+  draftDescription?: string | null;
+  estimatedBudget?: string | number | null;
+  fieldContextNotes?: string | null;
+  territoryData: TerritoryDataSnapshot;
+}
+
+export interface NeedPrioritizationResponse extends NeedPrioritizationResult {
+  regionalSnapshot: {
+    targetProvince: string;
+    targetCity: string;
+    dataCoverage: TerritoryDataCoverage;
+    programsInCity: number;
+    programsInProvince: number;
+    openOpportunitiesInRegion: number;
+    totalReviewsInRegion: number;
+    averageRatingInRegion: number;
+    negativeReviewsCount: number;
+    localPartnersReady: number;
+    verifiedPartnersReady: number;
+  };
+  source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
+  analyzedAt: string;
+}
+
 
 
 

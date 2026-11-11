@@ -12,6 +12,7 @@ export * from "./services/esg-report/esg-report.prompt";
 export * from "./services/esg-report/esg-report.service";
 export * from "./services/sentiment-analysis";
 export * from "./services/proposal-optimizer";
+export * from "./services/need-prioritization";
 export * from "./services/chatbot";
 
 import { ChatbotService } from "./services/chatbot/chatbot.service";

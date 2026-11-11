@@ -37,6 +37,42 @@ export const invitePartnerSchema = z.object({
   message: z.string().max(1000).optional().nullable(),
 });
 
+export const needPrioritizationRequestSchema = z.object({
+  targetProvince: z
+    .string()
+    .trim()
+    .min(2, "Provinsi sasaran wajib dipilih")
+    .max(100, "Provinsi sasaran maksimal 100 karakter"),
+  targetCity: z
+    .string()
+    .trim()
+    .min(2, "Kota/Kabupaten sasaran wajib dipilih")
+    .max(100, "Kota/Kabupaten sasaran maksimal 100 karakter"),
+  focusArea: z
+    .enum(csrFocusAreaEnum, {
+      message: "Bidang fokus CSR tidak valid",
+    })
+    .optional()
+    .nullable(),
+  title: z.string().max(255).optional().nullable(),
+  description: z.string().max(5000).optional().nullable(),
+  estimatedBudget: z
+    .union([z.number(), z.string()])
+    .optional()
+    .nullable()
+    .transform((val) => {
+      if (val === undefined || val === null || val === "") return null;
+      return typeof val === "number" ? val.toString() : val;
+    }),
+  fieldContextNotes: z
+    .string()
+    .max(1500, "Catatan lapangan maksimal 1500 karakter")
+    .optional()
+    .nullable(),
+  excludeOpportunityId: z.string().optional().nullable(),
+});
+
 export type CreateOpportunityInput = z.infer<typeof createOpportunitySchema>;
 export type UpdateOpportunityInput = z.infer<typeof updateOpportunitySchema>;
 export type InvitePartnerInput = z.infer<typeof invitePartnerSchema>;
+export type NeedPrioritizationRequestInput = z.infer<typeof needPrioritizationRequestSchema>;

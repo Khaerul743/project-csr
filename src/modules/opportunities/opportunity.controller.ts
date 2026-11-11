@@ -8,6 +8,7 @@ import {
   createOpportunitySchema,
   updateOpportunitySchema,
   invitePartnerSchema,
+  needPrioritizationRequestSchema,
 } from "./opportunity.validation";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { OpportunityStatus } from "@/db/schema/opportunities";
@@ -192,6 +193,28 @@ export class OpportunityController {
 
       const msg = status === "ACCEPTED" ? "Undangan inisiatif diterima" : "Undangan inisiatif ditolak";
       return ApiResponse.success(result, msg);
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async analyzeNeedPrioritization(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const body = await request.json();
+      const validatedInput = needPrioritizationRequestSchema.parse(body);
+
+      const result = await this.opportunityService.analyzeNeedPrioritization(
+        authUser.companyId,
+        validatedInput
+      );
+
+      return ApiResponse.success(
+        result,
+        "Analisis prioritas kebutuhan wilayah berhasil dibuat"
+      );
     } catch (error) {
       return ErrorHandler.handle(error);
     }

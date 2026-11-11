@@ -5,6 +5,8 @@ import {
   NotFoundError,
 } from "@/common/errors/app-error";
 import { AppLogger } from "@/common/logger/app-logger";
+import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
+import { needPrioritizationService, NeedPrioritizationResponse } from "@/modules/ai";
 import { partnerRepository } from "@/modules/partners";
 import { OpportunityRepository } from "./opportunity.repository";
 import {
@@ -15,6 +17,7 @@ import {
   OpportunityWithDetails,
   OpportunityInvitationWithDetails,
   PartnerOpportunityInvitation,
+  NeedPrioritizationRequestDTO,
 } from "./opportunity.interface";
 import { Opportunity } from "@/db/schema/opportunities";
 import { OpportunityInvitation } from "@/db/schema/opportunity-invitations";
@@ -242,5 +245,38 @@ export class OpportunityService {
     this.logger.info(`Partner ${partnerId} responded ${status} to invitation ${invitationId}`);
 
     return this.opportunityRepository.updateInvitationStatus(invitationId, status);
+  }
+
+  async analyzeNeedPrioritization(
+    companyId: string | null,
+    dto: NeedPrioritizationRequestDTO
+  ): Promise<NeedPrioritizationResponse> {
+    if (!companyId) {
+      throw new BadRequestError("Akun Anda tidak terhubung dengan perusahaan manapun");
+    }
+
+    if (!isAiFeatureEnabled()) {
+      throw new ForBiddenError(
+        "Fitur AI sedang dinonaktifkan oleh administrator sistem (ENABLE_AI_FEATURES / NEXT_PUBLIC_ENABLE_AI = false)"
+      );
+    }
+
+    const territoryData = await this.opportunityRepository.getTerritoryDataForPrioritization(
+      companyId,
+      dto.targetProvince,
+      dto.targetCity,
+      dto.excludeOpportunityId
+    );
+
+    return needPrioritizationService.analyze({
+      targetProvince: dto.targetProvince,
+      targetCity: dto.targetCity,
+      selectedFocusArea: dto.focusArea || null,
+      draftTitle: dto.title || null,
+      draftDescription: dto.description || null,
+      estimatedBudget: dto.estimatedBudget ?? null,
+      fieldContextNotes: dto.fieldContextNotes || null,
+      territoryData,
+    });
   }
 }

@@ -77,3 +77,15 @@ export interface PartnerOpportunityInvitation extends OpportunityInvitation {
   invitedByName?: string | null;
 }
 
+export interface NeedPrioritizationRequestDTO {
+  targetProvince: string;
+  targetCity: string;
+  focusArea?: CsrFocusArea | null;
+  title?: string | null;
+  description?: string | null;
+  estimatedBudget?: string | number | null;
+  fieldContextNotes?: string | null;
+  excludeOpportunityId?: string | null;
+}
+
+

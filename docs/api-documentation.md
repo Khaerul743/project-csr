@@ -666,6 +666,83 @@ Mengunggah file gambar (JPG, PNG, WEBP, GIF maks 5MB) dan menyimpannya secara lo
 }
 ```
 
+### 6.10 Analisis Prioritas Kebutuhan Wilayah (AI Need Prioritization)
+Menganalisis kondisi dan potensi wilayah sasaran, program CSR yang telah berjalan (diagregasi anonim lintas ekosistem), peluang aktif, ulasan warga, serta kesiapan mitra lokal menggunakan LangChain + GPT-4o-mini (atau fallback heuristik berbasis data DB) untuk menentukan kebutuhan prioritas dan menghindari program tumpang tindih.
+
+- **Method / Path:** `POST /api/opportunities/need-prioritization`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+
+**Request Body:**
+```json
+{
+  "targetProvince": "Jawa Tengah",
+  "targetCity": "Semarang",
+  "focusArea": "LINGKUNGAN",
+  "title": "Program Sanitasi & Ketahanan Pesisir",
+  "estimatedBudget": "150000000",
+  "fieldContextNotes": "Wilayah pesisir terdampak rob dan membutuhkan perbaikan akses air bersih."
+}
+```
+> *Catatan:* `targetProvince` dan `targetCity` wajib diisi (min 2 karakter). `excludeOpportunityId` opsional untuk mode edit peluang.
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Analisis prioritas kebutuhan wilayah berhasil dibuat",
+  "data": {
+    "regionalSnapshot": {
+      "targetProvince": "Jawa Tengah",
+      "targetCity": "Semarang",
+      "dataCoverage": "RICH_DATA",
+      "programsInCity": 2,
+      "programsInProvince": 4,
+      "openOpportunitiesInRegion": 1,
+      "totalReviewsInRegion": 5,
+      "averageRatingInRegion": 4.4,
+      "negativeReviewsCount": 1,
+      "localPartnersReady": 3,
+      "verifiedPartnersReady": 2
+    },
+    "overlapAssessment": {
+      "riskLevel": "MEDIUM",
+      "riskLabel": "Mulai Padat - Perlu Diferensiasi",
+      "summary": "Sektor lingkungan sudah memiliki beberapa program aktif di wilayah sasaran...",
+      "crowdedFocusAreas": ["LINGKUNGAN"],
+      "underservedFocusAreas": ["KESEHATAN", "PENDIDIKAN"]
+    },
+    "regionalPotentialSummary": {
+      "conditionsAndPotential": "...",
+      "socialNeedsGap": "...",
+      "basisNote": "..."
+    },
+    "priorityNeeds": [
+      {
+        "rank": 1,
+        "needTitle": "Akses Air Bersih & Sanitasi Pesisir",
+        "focusArea": "KESEHATAN",
+        "urgencyLevel": "CRITICAL",
+        "rationale": "...",
+        "recommendedIntervention": "...",
+        "suggestedBeneficiaries": "Rumah tangga pesisir rawan rob",
+        "suggestedSdgs": [6, 3, 13],
+        "evidenceBasis": "RESIDENT_FEEDBACK"
+      }
+    ],
+    "formSuggestions": {
+      "recommendedFocusArea": "KESEHATAN",
+      "recommendedSdgs": [6, 3, 13],
+      "draftDescriptionSnippet": "...",
+      "differentiationTip": "..."
+    },
+    "source": "AI_OPENAI",
+    "analyzedAt": "2026-11-11T13:30:00.000Z"
+  }
+}
+```
+*Error:* `400 Bad Request` (validasi wilayah gagal), `403 Forbidden` (role bukan perusahaan atau fitur AI dinonaktifkan melalui `ENABLE_AI_FEATURES=false`).
+
 ---
 
 ## 7. Modul Proposal (`/api/proposals`)
