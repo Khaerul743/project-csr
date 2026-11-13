@@ -465,7 +465,7 @@ export function PartnerOpportunityDetailPageView({
                 </div>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Pemetaan ini otomatis terhubung ke modul pelaporan POJK 51 dan evaluasi dampak pada monitoring SIPENA.
+                Pemetaan ini otomatis terhubung ke modul pelaporan dampak ESG dan monitoring SIPENA.
               </p>
             </div>
           </div>

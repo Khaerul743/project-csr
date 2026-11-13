@@ -2,6 +2,7 @@ import { User } from "@/db/schema/users";
 
 export interface RegisterDTO {
   name: string;
+  username?: string;
   email: string;
   password: string;
 }

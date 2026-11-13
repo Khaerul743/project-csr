@@ -116,7 +116,7 @@ export class ProposalController {
   async review(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = reviewProposalSchema.parse(body);
@@ -162,7 +162,7 @@ export class ProposalController {
   async screenWithAi(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const result = await this.proposalService.screenProposalWithAi(
         id,

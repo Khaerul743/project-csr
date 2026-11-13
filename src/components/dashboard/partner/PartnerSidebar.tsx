@@ -185,7 +185,7 @@ export function PartnerSidebar({
       </div>
 
       {/* 3. Navigation Sections */}
-      <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-6">
+      <div className="flex-1 overflow-y-auto px-3.5 py-4 pb-8 space-y-6">
         {navigationSections.map((section) => (
           <div key={section.title} className="space-y-1">
             <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">

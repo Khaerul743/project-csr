@@ -23,12 +23,22 @@ export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
 
   async register(dto: RegisterDTO): Promise<AuthResponseData> {
-    this.logger.info(`Attempting to register user: ${dto.email}`);
+    const normalizedEmail = dto.email.trim();
+    const normalizedUsername = dto.username?.trim();
+    this.logger.info(`Attempting to register user: ${normalizedEmail}`);
 
     // Check if email already registered
-    const existing = await this.authRepository.findByEmail(dto.email);
+    const existing = await this.authRepository.findByEmail(normalizedEmail);
     if (existing) {
-      throw new ConflictError("Email is already registered");
+      throw new ConflictError("Email sudah terdaftar");
+    }
+
+    // Check if username already taken
+    if (normalizedUsername) {
+      const existingUsername = await this.authRepository.findByUsername(normalizedUsername);
+      if (existingUsername) {
+        throw new ConflictError("Nama pengguna sudah digunakan");
+      }
     }
 
     // Hash the password
@@ -36,8 +46,9 @@ export class AuthService {
 
     // Create user in database
     const createdUser = await this.authRepository.createUser({
-      name: dto.name,
-      email: dto.email,
+      name: dto.name.trim(),
+      username: normalizedUsername || null,
+      email: normalizedEmail,
       password: hashedPassword,
       role: "STAGING",
       companyId: null,

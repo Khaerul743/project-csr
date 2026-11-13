@@ -52,7 +52,7 @@ export class ReviewController {
   async analyzeProgramSentiment(request: Request, programId: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const result = await this.reviewService.analyzeProgramSentiment(programId, authUser);
       return ApiResponse.success(result, "Analisis sentimen AI untuk program berhasil dijalankan");

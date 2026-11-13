@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { SearchableSelect } from "@/components/ui/searchable-select";
+import { RegionSelectGroup } from "@/components/ui/region-select-group";
 import { INDONESIAN_REGIONS } from "../opportunities/indonesian-regions";
 import { CsrLeaderItem, CompanyDetailedProfile } from "@/modules/companies/company.interface";
 
@@ -381,8 +381,8 @@ export function EditCompanyProfileModal({
                       placeholder="https://.../logo.png"
                     />
                     {logoUrl && (
-                      <div className="mt-2 w-16 h-16 rounded-xl border border-slate-200 overflow-hidden bg-white p-1">
-                        <img src={logoUrl} alt="Preview Logo" className="w-full h-full object-contain" />
+                      <div className="mt-2 w-16 h-16 rounded-full overflow-hidden bg-white shadow-xs">
+                        <img src={logoUrl} alt="Preview Logo" className="w-full h-full object-cover" />
                       </div>
                     )}
                   </div>
@@ -493,21 +493,18 @@ export function EditCompanyProfileModal({
                   />
                 </div>
 
-                <SearchableSelect
-                  label="Provinsi Domisili"
-                  placeholder="Pilih Provinsi..."
-                  value={province}
-                  onChange={handleProvinceChange}
-                  options={provinceOptions}
-                />
-
-                <SearchableSelect
-                  label="Kota Domisili Kantor Pusat"
-                  placeholder={province ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
-                  value={city}
-                  onChange={setCity}
-                  options={cityOptions}
-                  disabled={!province}
+                <RegionSelectGroup
+                  province={province}
+                  city={city}
+                  onProvinceChange={handleProvinceChange}
+                  onCityChange={setCity}
+                  provinceLabel="Provinsi Kantor Pusat"
+                  cityLabel="Kota / Kabupaten"
+                  provincePlaceholder="Pilih Provinsi..."
+                  cityPlaceholder="Pilih Kota / Kabupaten..."
+                  provinceHelperText="Pilih provinsi domisili kantor pusat"
+                  cityHelperText="Pilih kota/kabupaten kantor pusat"
+                  layout="vertical"
                 />
               </div>
 

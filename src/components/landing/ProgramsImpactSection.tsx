@@ -106,11 +106,11 @@ export function ProgramsImpactSection() {
       : SAMPLE_PROGRAMS.filter((p) => p.category === selectedCategory);
 
   return (
-    <section id="program-dampak" className="py-20 lg:py-28 bg-[#F4F4F6] relative overflow-hidden border-t border-[#EEEEF0]">
+    <section id="program-dampak" className="py-20 lg:py-28 bg-[#F4F4F6] relative overflow-hidden border-t border-[#E5E7EB]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <ScrollReveal animation="fade-up" delay={50}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-[#C8C5D0]/60">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-[#E5E7EB]">
             <div className="max-w-2xl space-y-3">
               <span className="px-3 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
                 Program & Dampak Lapangan
@@ -119,10 +119,10 @@ export function ProgramsImpactSection() {
                 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Bukti Nyata Kolaborasi Sosial yang Tercatat & Tervalidasi
+                Bukti Nyata Kolaborasi Sosial yang Tercatat &amp; Tervalidasi
               </h2>
             </div>
-            <p className="text-sm sm:text-base text-[#47464F] max-w-md leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 max-w-md leading-relaxed">
               Menampilkan contoh inisiatif kemitraan yang dikelola dengan mekanisme pemantauan berjenjang, pelaporan nota faktual, dan verifikasi langsung di lapangan.
             </p>
           </div>
@@ -136,7 +136,7 @@ export function ProgramsImpactSection() {
               onClick={() => setSelectedCategory("ALL")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${selectedCategory === "ALL"
                   ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
+                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
                 }`}
             >
               Semua Program ({SAMPLE_PROGRAMS.length})
@@ -146,7 +146,7 @@ export function ProgramsImpactSection() {
               onClick={() => setSelectedCategory("LINGKUNGAN")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "LINGKUNGAN"
                   ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
+                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
                 }`}
             >
               <TreePine className="w-3.5 h-3.5 text-emerald-600" />
@@ -157,7 +157,7 @@ export function ProgramsImpactSection() {
               onClick={() => setSelectedCategory("PENDIDIKAN")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "PENDIDIKAN"
                   ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
+                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
                 }`}
             >
               <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
@@ -168,7 +168,7 @@ export function ProgramsImpactSection() {
               onClick={() => setSelectedCategory("KESEHATAN")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "KESEHATAN"
                   ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
+                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
                 }`}
             >
               <Droplets className="w-3.5 h-3.5 text-cyan-600" />
@@ -179,7 +179,7 @@ export function ProgramsImpactSection() {
               onClick={() => setSelectedCategory("EKONOMI")}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "EKONOMI"
                   ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-[#47464F] hover:bg-[#EEEEF0] border border-[#C8C5D0]/70"
+                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
                 }`}
             >
               <Coins className="w-3.5 h-3.5 text-amber-600" />
@@ -198,7 +198,7 @@ export function ProgramsImpactSection() {
               className="h-full"
             >
               <div
-                className="p-7 sm:p-8 rounded-3xl bg-[#FFFFFF] border border-[#C8C5D0]/80 shadow-2xs hover:shadow-md transition-all space-y-5 flex flex-col justify-between h-full"
+                className="p-7 sm:p-8 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-5 flex flex-col justify-between h-full"
               >
                 <div className="space-y-3.5">
                   {/* Meta Row: Status & SDG Tag */}
@@ -224,25 +224,25 @@ export function ProgramsImpactSection() {
                   </h3>
 
                   {/* Narrative description */}
-                  <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {prog.description}
                   </p>
 
                   {/* Sponsoring Companies & NGO Partner */}
-                  <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#EEEEF0] text-xs space-y-1.5 text-[#47464F]">
+                  <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] text-xs space-y-1.5 text-slate-600">
                     <div className="flex items-center justify-between">
-                      <span className="text-[#787680]">Mitra Pelaksana:</span>
+                      <span className="text-slate-500">Mitra Pelaksana:</span>
                       <strong className="text-[#181343]">{prog.partnerName}</strong>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[#787680]">Sponsor Utama:</span>
+                      <span className="text-slate-500">Sponsor Utama:</span>
                       <strong className="text-[#181343]">{prog.companyName}</strong>
                     </div>
                   </div>
                 </div>
 
                 {/* Bottom Row: Location & Metrics */}
-                <div className="pt-4 border-t border-[#EEEEF0] flex flex-wrap items-center justify-between gap-3 text-xs text-[#787680]">
+                <div className="pt-4 border-t border-[#E5E7EB] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
                   <div className="flex items-center gap-1.5 font-medium">
                     <MapPin className="w-3.5 h-3.5 text-emerald-600" />
                     <span>{prog.location}</span>

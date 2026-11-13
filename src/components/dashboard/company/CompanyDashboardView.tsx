@@ -45,7 +45,7 @@ import { csrFocusAreaEnum, CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { opportunityStatusEnum, OpportunityStatus } from "@/db/schema/opportunities";
 import { InviteMemberModal } from "../InviteMemberModal";
 import { Sidebar, CompanyNavMenu } from "../Sidebar";
-import { DashboardHeader } from "../DashboardHeader";
+import { DashboardHeader, NotificationItem } from "../DashboardHeader";
 import { CreateOpportunityPageView } from "./opportunities/CreateOpportunityPageView";
 import { EditOpportunityPageView } from "./opportunities/EditOpportunityPageView";
 import { InvitePartnerModal } from "./InvitePartnerModal";
@@ -420,6 +420,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   };
 
   const handleDeleteOpportunity = async (oppId: string, oppTitle: string) => {
+    if (isManagement) return;
     const opp = opportunities.find((o) => o.id === oppId);
     if (opp?.stats?.proposalsCount && opp.stats.proposalsCount > 0) {
       alert(
@@ -719,19 +720,132 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
     }
   };
 
-  // Header Title & Subtitle based on activeMenu
+  // Role-aware notifications derived from live workspace data
+  const dashboardNotifications: NotificationItem[] = useMemo(() => {
+    const list: NotificationItem[] = [];
+    const pendingReportsCount = programs.reduce(
+      (acc, p) =>
+        acc +
+        (typeof p.pendingVerificationCount === "number"
+          ? p.pendingVerificationCount
+          : p.lastReportStatus === "SUBMITTED"
+          ? 1
+          : 0),
+      0
+    );
+    const esgReadyCount = programs.filter((p) => Boolean(p.sustainabilityReport)).length;
+
+    if (isManagement) {
+      if (pendingReportsCount > 0) {
+        list.push({
+          id: "mgmt-reports-monitoring",
+          title: "Pemantauan Laporan Lapangan",
+          description: `${pendingReportsCount} laporan aktivitas mitra sedang menunggu verifikasi tim CSR.`,
+          time: "Pantauan aktif",
+          type: "program",
+          actionMenu: "programs",
+          isRead: false,
+        });
+      }
+      if (esgReadyCount > 0) {
+        list.push({
+          id: "mgmt-esg-ready",
+          title: "Laporan Dampak ESG Tersedia",
+          description: `${esgReadyCount} program telah dilengkapi ringkasan keberlanjutan ESG.`,
+          time: "Portofolio program",
+          type: "collab",
+          actionMenu: "analytics",
+          isRead: false,
+        });
+      }
+      if (metrics.totalProgramsCount > 0) {
+        list.push({
+          id: "mgmt-budget-oversight",
+          title: "Ringkasan Pengawasan Anggaran",
+          description: `Serapan anggaran tercatat ${metrics.budgetAbsorptionRate}% dari total pagu program aktif.`,
+          time: "Pengawasan anggaran",
+          type: "system",
+          actionMenu: "finances",
+          isRead: false,
+        });
+      } else if (metrics.activeOpps > 0) {
+        list.push({
+          id: "mgmt-open-opps",
+          title: "Katalog Peluang CSR Aktif",
+          description: `${metrics.activeOpps} inisiatif peluang CSR perusahaan sedang dipublikasikan.`,
+          time: "Katalog inisiatif",
+          type: "system",
+          actionMenu: "opportunities",
+          isRead: false,
+        });
+      }
+      return list;
+    }
+
+    if (pendingActionProposalsCount > 0) {
+      list.push({
+        id: "csr-pending-proposals",
+        title: "Proposal Mitra Menunggu Tinjauan",
+        description: `${pendingActionProposalsCount} proposal pengajuan mitra memerlukan peninjauan atau tindak lanjut.`,
+        time: "Antrean proposal",
+        type: "proposal",
+        actionMenu: "proposals",
+        isRead: false,
+      });
+    }
+    if (pendingReportsCount > 0) {
+      list.push({
+        id: "csr-pending-reports",
+        title: "Laporan Aktivitas Butuh Verifikasi",
+        description: `${pendingReportsCount} laporan realisasi lapangan dari mitra menunggu verifikasi.`,
+        time: "Monitoring lapangan",
+        type: "program",
+        actionMenu: "programs",
+        isRead: false,
+      });
+    }
+    if (metrics.negotiatingCollabsCount > 0) {
+      list.push({
+        id: "csr-collabs-negotiation",
+        title: "Negosiasi & Pengesahan MoU",
+        description: `${metrics.negotiatingCollabsCount} kerja sama mitra masih dalam tahap kesepakatan MoU.`,
+        time: "Kolaborasi aktif",
+        type: "collab",
+        actionMenu: "collaborations",
+        isRead: false,
+      });
+    }
+
+    return list;
+  }, [
+    isManagement,
+    programs,
+    metrics.budgetAbsorptionRate,
+    metrics.totalProgramsCount,
+    metrics.activeOpps,
+    metrics.negotiatingCollabsCount,
+    pendingActionProposalsCount,
+  ]);
+
+  // Header Title & Subtitle based on activeMenu & role
   const headerMeta: Record<CompanyNavMenu, { title: string; subtitle: string }> = {
     overview: {
       title: "Ringkasan Eksekutif",
-      subtitle: "Ikhtisar portofolio inisiatif, realisasi anggaran, dan mitra CSR",
+      subtitle: isManagement
+        ? "Pantauan eksekutif atas portofolio inisiatif, serapan anggaran, dan kinerja mitra CSR"
+        : "Ikhtisar portofolio inisiatif, realisasi anggaran, dan mitra CSR",
     },
     opportunities: {
-      title: "Kelola Peluang CSR",
-      subtitle: "Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat.",
+      title: isManagement ? "Katalog Peluang CSR" : "Kelola Peluang CSR",
+      subtitle: isManagement
+        ? "Pantau daftar inisiatif peluang CSR perusahaan yang telah dipublikasikan."
+        : "Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat.",
     },
     partners: {
-      title: "Kurasi & Direktori Mitra",
-      subtitle: "Jelajahi yayasan dan NGO terverifikasi berdasarkan spesialisasi bidang",
+      title: isManagement ? "Direktori Mitra CSR" : "Kurasi & Direktori Mitra",
+      subtitle: isManagement
+        ? "Pantau profil, legalitas, dan spesialisasi yayasan serta NGO terverifikasi."
+        : "Jelajahi yayasan dan NGO terverifikasi berdasarkan spesialisasi bidang",
     },
     proposals: {
       title: "Kelola Proposal",
@@ -746,8 +860,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       subtitle: "Ruang komunikasi dan negosiasi teknis langsung bersama mitra pelaksana",
     },
     programs: {
-      title: "Pelaksanaan Program & Monitoring",
-      subtitle: "Pantau progres eksekusi program di lapangan, realisasi serapan anggaran, dan capaian penerima manfaat riil",
+      title: isManagement ? "Pengawasan Program CSR" : "Pelaksanaan Program & Monitoring",
+      subtitle: isManagement
+        ? "Pantau progres pelaksanaan di lapangan, serapan anggaran, dan capaian dampak program CSR"
+        : "Pantau progres eksekusi program di lapangan, realisasi serapan anggaran, dan capaian penerima manfaat riil",
     },
     finances: {
       title: "Pengawasan Anggaran & Keuangan CSR",
@@ -811,13 +927,21 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       />
 
       {/* 2. Main Workspace Layout */}
-      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" ? "h-screen overflow-hidden" : "overflow-y-auto"}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
         {/* Sticky Dashboard Header */}
         <DashboardHeader
           user={currentUser}
+          notifications={dashboardNotifications}
+          onNavigateMenu={(menu) => setActiveMenu(menu as CompanyNavMenu)}
           onOpenProfile={() => setIsUserProfileModalOpen(true)}
+          onLogout={onLogout}
           breadcrumbs={
-            activeMenu === "opportunities" && isCreatingOpportunity
+            activeMenu === "overview"
+              ? [
+                  { label: isManagement ? "Pengawasan Eksekutif" : "Utama" },
+                  { label: "Ringkasan Eksekutif" },
+                ]
+              : activeMenu === "opportunities" && isCreatingOpportunity
               ? [
                   { label: "Peluang CSR", onClick: () => setIsCreatingOpportunity(false) },
                   { label: "Buat Peluang Baru" },
@@ -827,6 +951,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                   { label: "Peluang CSR", onClick: () => setSelectedOppForEdit(null) },
                   { label: "Edit Peluang" },
                 ]
+              : activeMenu === "opportunities"
+              ? [
+                  { label: isManagement ? "Inisiatif & Mitra" : "Utama" },
+                  { label: isManagement ? "Katalog Peluang CSR" : "Peluang CSR" },
+                ]
               : activeMenu === "proposals"
               ? [
                   { label: "Kolaborasi & Mitra" },
@@ -835,18 +964,40 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               : activeMenu === "partners"
               ? selectedPartnerForDetail
                 ? [
-                    { label: "Kolaborasi & Mitra" },
-                    { label: "Kurasi Mitra", onClick: () => setSelectedPartnerForDetail(null) },
+                    { label: isManagement ? "Inisiatif & Mitra" : "Kolaborasi & Mitra" },
+                    {
+                      label: isManagement ? "Direktori Mitra" : "Kurasi Mitra",
+                      onClick: () => setSelectedPartnerForDetail(null),
+                    },
                     { label: selectedPartnerForDetail.name },
                   ]
                 : [
-                    { label: "Kolaborasi & Mitra" },
-                    { label: "Kurasi Mitra" },
+                    { label: isManagement ? "Inisiatif & Mitra" : "Kolaborasi & Mitra" },
+                    { label: isManagement ? "Direktori Mitra" : "Kurasi Mitra" },
+                  ]
+              : activeMenu === "programs"
+              ? selectedProgramForDetail
+                ? [
+                    { label: isManagement ? "Pengawasan Eksekutif" : "Pelaksanaan & Dampak" },
+                    {
+                      label: isManagement ? "Pengawasan Program" : "Pelaksanaan Program",
+                      onClick: () => setSelectedProgramForDetail(null),
+                    },
+                    { label: selectedProgramForDetail.title },
+                  ]
+                : [
+                    { label: isManagement ? "Pengawasan Eksekutif" : "Pelaksanaan & Dampak" },
+                    { label: isManagement ? "Pengawasan Program" : "Pelaksanaan Program" },
                   ]
               : activeMenu === "team"
               ? [
-                  { label: "Pengaturan & Akses" },
+                  { label: isManagement ? "Tata Kelola Korporat" : "Organisasi" },
                   { label: "Anggota Tim & Akses" },
+                ]
+              : activeMenu === "profile"
+              ? [
+                  { label: isManagement ? "Tata Kelola Korporat" : "Organisasi" },
+                  { label: "Profil Perusahaan" },
                 ]
               : activeMenu === "finances"
               ? [
@@ -861,11 +1012,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               : activeMenu === "sentiment"
               ? [
                   { label: isManagement ? "Pengawasan Eksekutif" : "Pelaksanaan & Dampak" },
-                  { label: "Intelijen Sentimen Warga" },
+                  { label: "Suara Warga & Sentimen" },
+                ]
+              : activeMenu === "analytics"
+              ? [
+                  { label: isManagement ? "Pengawasan Eksekutif" : "Pelaksanaan & Dampak" },
+                  { label: "Laporan & Dampak ESG" },
                 ]
               : activeMenu === "chat"
               ? [
-                  { label: "AI & Asisten" },
+                  { label: "Konsultasi Strategis" },
                   { label: "AI CSR Advisor" },
                 ]
               : undefined
@@ -908,10 +1064,14 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               programs={programs}
               metrics={metrics}
               onNavigateMenu={(menu) => setActiveMenu(menu)}
-              onOpenCreateOpportunity={() => {
-                setActiveMenu("opportunities");
-                setIsCreatingOpportunity(true);
-              }}
+              onOpenCreateOpportunity={
+                !isManagement
+                  ? () => {
+                      setActiveMenu("opportunities");
+                      setIsCreatingOpportunity(true);
+                    }
+                  : undefined
+              }
               onSelectOpportunityDetail={(opp) => setSelectedOppForDetail(opp)}
             />
           )}
@@ -920,7 +1080,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {/* VIEW: OPPORTUNITIES (PELUANG CSR & BI INITIATIVES) */}
           {/* ============================================================ */}
           {activeMenu === "opportunities" && (
-            isCreatingOpportunity ? (
+            !isManagement && isCreatingOpportunity ? (
               <CreateOpportunityPageView
                 onBack={() => setIsCreatingOpportunity(false)}
                 onSuccess={() => {
@@ -928,7 +1088,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                   fetchOpportunities();
                 }}
               />
-            ) : selectedOppForEdit ? (
+            ) : !isManagement && selectedOppForEdit ? (
               <EditOpportunityPageView
                 opportunity={selectedOppForEdit}
                 onBack={() => setSelectedOppForEdit(null)}
@@ -942,10 +1102,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 opportunities={opportunities}
                 isLoading={isLoadingOpportunities}
                 onRefresh={fetchOpportunities}
-                onOpenCreateModal={() => setIsCreatingOpportunity(true)}
-                onOpenEditModal={(opp) => setSelectedOppForEdit(opp)}
+                onOpenCreateModal={!isManagement ? () => setIsCreatingOpportunity(true) : undefined}
+                onOpenEditModal={!isManagement ? (opp) => setSelectedOppForEdit(opp) : undefined}
                 onOpenDetailModal={(opp) => setSelectedOppForDetail(opp)}
-                onDeleteOpportunity={handleDeleteOpportunity}
+                onDeleteOpportunity={!isManagement ? handleDeleteOpportunity : undefined}
                 isManagement={isManagement}
               />
             )
@@ -960,15 +1120,23 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 partner={selectedPartnerForDetail}
                 isOwner={false}
                 onBack={() => setSelectedPartnerForDetail(null)}
-                onInvitePitch={() => {
-                  const p = selectedPartnerForDetail;
-                  setSelectedPartnerForDetail(null);
-                  setSelectedPartnerForInvite(p);
-                }}
-                onOpenChat={() => {
-                  setSelectedPartnerForDetail(null);
-                  setActiveMenu("conversations");
-                }}
+                onInvitePitch={
+                  !isManagement
+                    ? () => {
+                        const p = selectedPartnerForDetail;
+                        setSelectedPartnerForDetail(null);
+                        setSelectedPartnerForInvite(p);
+                      }
+                    : undefined
+                }
+                onOpenChat={
+                  !isManagement
+                    ? () => {
+                        setSelectedPartnerForDetail(null);
+                        setActiveMenu("conversations");
+                      }
+                    : undefined
+                }
               />
             ) : (
               <PartnerCurationView
@@ -978,8 +1146,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 onFocusFilterChange={(focus) => setPartnerFocusFilter(focus)}
                 onRefresh={fetchPartners}
                 onViewPartnerDetail={handleViewPartnerDetail}
-                onInvitePitch={(partner) => setSelectedPartnerForInvite(partner)}
+                onInvitePitch={
+                  !isManagement ? (partner) => setSelectedPartnerForInvite(partner) : undefined
+                }
                 isLoadingDetail={isLoadingPartnerDetail}
+                isManagement={isManagement}
               />
             )
           )}
@@ -1820,24 +1991,24 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
               {/* 3. Sederhanakan Kartu Program: Fokus pada Monitoring Aktivitas & Bukti */}
               {isLoadingPrograms ? (
-                <div className="p-12 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-100">
-                  <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-teal-600" />
+                <div className="p-12 text-center text-xs text-slate-600 bg-white rounded-3xl border border-[#E5E7EB]">
+                  <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600" />
                   Memuat data pelaksanaan program...
                 </div>
               ) : filteredPrograms.length === 0 ? (
-                <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
+                <div className="p-12 text-center bg-white rounded-3xl border border-[#E5E7EB] shadow-2xs space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
                     <Activity className="w-6 h-6" />
                   </div>
-                  <h4 className="text-base font-bold text-slate-900">
+                  <h4 className="text-base font-bold text-[#181343]">
                     Tidak Ada Program Ditemukan
                   </h4>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  <p className="text-xs text-slate-600 max-w-md mx-auto">
                     {programSearch || programStatusFilter !== "ALL" || programFocusFilter !== "ALL"
                       ? "Tidak ada program yang sesuai dengan kriteria filter pencarian."
-                      : "Program pelaksanaan akan otomatis terbuat saat kontrak kolaborasi disepakati (status AGREED) bersama mitra."}
+                      : "Program pelaksanaan akan otomatis terbuat saat kontrak kolaborasi disepakati bersama mitra."}
                   </p>
-                  {collaborations.some((c) => c.status === "NEGOTIATION") && (
+                  {!isManagement && collaborations.some((c) => c.status === "NEGOTIATION") && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -1867,32 +2038,32 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                     return (
                       <div
                         key={prog.id}
-                        className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-5"
+                        className="p-6 rounded-3xl bg-white border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-5"
                       >
                         {/* Header Row: Focus area, status, location, period */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                           <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200/80">
+                            <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                               {focusConfig.label}
                             </span>
                             <Badge variant={statusConfig.variant} size="md" hasDot>
                               {statusConfig.label}
                             </Badge>
                             {prog.sustainabilityReport && (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-xs">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#EAF8F4] text-[#047857] border border-emerald-200/80 shadow-xs">
                                 <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                                 <span>Laporan ESG Siap</span>
                               </span>
                             )}
                             {prog.targetCity && (
-                              <span className="text-xs text-slate-500 flex items-center gap-1 font-medium">
-                                <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
+                                <MapPin className="w-3.5 h-3.5 text-slate-500" />
                                 {prog.targetCity}{prog.targetProvince ? `, ${prog.targetProvince}` : ""}
                               </span>
                             )}
                           </div>
 
-                          <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
+                          <div className="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
                             <Calendar className="w-3.5 h-3.5" />
                             {prog.startDate && prog.endDate
                               ? `${formatDate(prog.startDate)} s/d ${formatDate(prog.endDate)}`
@@ -1903,11 +2074,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                         {/* Title & Partner Information */}
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 text-xs">
-                            <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
+                            <span className="font-semibold text-slate-600 uppercase tracking-wider text-[10px]">
                               Mitra Pelaksana:
                             </span>
-                            <span className="font-bold text-slate-800 flex items-center gap-1">
-                              <Building2 className="w-3.5 h-3.5 text-teal-600" />
+                            <span className="font-bold text-[#181343] flex items-center gap-1">
+                              <Building2 className="w-3.5 h-3.5 text-emerald-600" />
                               {prog.partnerName || "Mitra Pelaksana"}
                             </span>
                             {prog.opportunityTitle && (
@@ -2068,7 +2239,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 fetchPartners();
                 fetchPrograms();
               }}
-              onViewPartnerDetail={(partner) => setSelectedPartnerForDetail(partner)}
+              onViewPartnerDetail={(partner) => {
+                setSelectedPartnerForDetail(partner);
+                setActiveMenu("partners");
+              }}
             />
           )}
 
@@ -2100,7 +2274,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               programs={programs}
               onOpenProgramDetail={(p) => {
                 const found = programs.find((item) => item.id === p.id);
-                if (found) setSelectedProgramForDetail(found);
+                if (found) {
+                  setSelectedProgramForDetail(found);
+                  setActiveMenu("programs");
+                }
               }}
             />
           )}
@@ -2167,25 +2344,36 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       <OpportunityDetailModal
         isOpen={!!selectedOppForDetail}
         opportunity={selectedOppForDetail}
+        isManagement={isManagement}
         onClose={() => setSelectedOppForDetail(null)}
-        onEdit={(opp) => {
-          setSelectedOppForDetail(null);
-          setSelectedOppForEdit(opp);
-        }}
-        onInvitePartner={(opp) => {
-          setActiveMenu("partners");
-        }}
+        onEdit={
+          !isManagement
+            ? (opp) => {
+                setSelectedOppForDetail(null);
+                setSelectedOppForEdit(opp);
+              }
+            : undefined
+        }
+        onInvitePartner={
+          !isManagement
+            ? () => {
+                setActiveMenu("partners");
+              }
+            : undefined
+        }
       />
 
-      <InvitePartnerModal
-        isOpen={!!selectedPartnerForInvite}
-        partner={selectedPartnerForInvite}
-        opportunities={opportunities}
-        onClose={() => setSelectedPartnerForInvite(null)}
-        onSuccess={() => {
-          fetchOpportunities();
-        }}
-      />
+      {!isManagement && (
+        <InvitePartnerModal
+          isOpen={!!selectedPartnerForInvite}
+          partner={selectedPartnerForInvite}
+          opportunities={opportunities}
+          onClose={() => setSelectedPartnerForInvite(null)}
+          onSuccess={() => {
+            fetchOpportunities();
+          }}
+        />
+      )}
 
       {isManagement && (
         <InviteMemberModal

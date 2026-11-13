@@ -24,6 +24,7 @@ export const users = mysqlTable(
     companyId: varchar("company_id", { length: 36 }).references(() => companies.id),
     partnerId: varchar("partner_id", { length: 36 }).references(() => partners.id),
     name: varchar("name", { length: 150 }).notNull(),
+    username: varchar("username", { length: 100 }).unique(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     password: varchar("password", { length: 255 }).notNull(),
     role: mysqlEnum("role", userRoleEnum).notNull().default("STAGING"),

@@ -223,12 +223,12 @@ export const INDONESIAN_REGIONS: ProvinceItem[] = [
     id: "dki",
     name: "DKI Jakarta",
     cities: [
-      "Jakarta Pusat",
-      "Jakarta Utara",
-      "Jakarta Barat",
-      "Jakarta Selatan",
-      "Jakarta Timur",
-      "Kab. Kepulauan Seribu",
+      "Kota Administrasi Jakarta Selatan",
+      "Kota Administrasi Jakarta Pusat",
+      "Kota Administrasi Jakarta Barat",
+      "Kota Administrasi Jakarta Timur",
+      "Kota Administrasi Jakarta Utara",
+      "Kab. Administrasi Kepulauan Seribu",
     ],
   },
   {

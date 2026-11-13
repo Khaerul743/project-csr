@@ -222,21 +222,13 @@ export function EsgSustainabilityReportTab({
       )}
 
       {/* Header Navigasi & Aksi Laporan */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs print:hidden">
-        <div className="space-y-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <h3 className="text-base font-extrabold text-[#181343] tracking-tight">
-              Laporan Keberlanjutan &amp; Dampak ESG
-            </h3>
-            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
-              Standar POJK 51 &bull; GRI
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Sintesis formal berbasis bukti aktivitas lapangan, audit verifikasi kuitansi dana CSR, dan ulasan kepuasan warga.
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#E5E7EB] print:hidden">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold text-[#181343] tracking-tight">
+            Laporan Keberlanjutan &amp; Dampak ESG
+          </h3>
+          <p className="text-xs text-slate-600 leading-relaxed">
+            Sintesis aktivitas lapangan, audit verifikasi dana CSR, dan ulasan warga (selaras standar ESG &amp; SDGs).
           </p>
         </div>
 
@@ -273,24 +265,26 @@ export function EsgSustainabilityReportTab({
             </>
           )}
 
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={handleGenerateReport}
-            disabled={isGenerating}
-            isLoading={isGenerating}
-            className="text-xs font-bold px-4 cursor-pointer"
-            leftIcon={
-              isGenerating ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-              )
-            }
-          >
-            {report ? "Analisis Ulang AI" : "Susun Laporan ESG (AI)"}
-          </Button>
+          {!isManagement && (
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={handleGenerateReport}
+              disabled={isGenerating}
+              isLoading={isGenerating}
+              className="text-xs font-bold px-4 cursor-pointer"
+              leftIcon={
+                isGenerating ? (
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
+                )
+              }
+            >
+              {report ? "Analisis Ulang AI" : "Susun Laporan ESG (AI)"}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -306,7 +300,7 @@ export function EsgSustainabilityReportTab({
               Sintesis Laporan Keberlanjutan Belum Dibuat
             </h4>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Platform Sipena siap mengompilasi seluruh catatan kemajuan inisiatif <strong>{program.title}</strong> menjadi dokumen Laporan Keberlanjutan resmi yang selaras dengan regulasi <strong>POJK 51/POJK.03/2017</strong> dan kerangka <strong>GRI Standards</strong>.
+              Platform Sipena siap mengompilasi seluruh catatan kemajuan inisiatif <strong>{program.title}</strong> menjadi dokumen Laporan Keberlanjutan resmi yang selaras dengan kerangka <strong>Environmental, Social, &amp; Governance (ESG)</strong> dan sasaran <strong>UN SDGs</strong>.
             </p>
           </div>
 
@@ -349,22 +343,30 @@ export function EsgSustainabilityReportTab({
             </div>
           </div>
 
-          <div className="pt-2 text-center">
-            <Button
-              type="button"
-              variant="primary"
-              size="lg"
-              onClick={handleGenerateReport}
-              disabled={isGenerating}
-              className="text-xs sm:text-sm font-bold px-7 py-3 cursor-pointer"
-              leftIcon={<Sparkles className="w-4 h-4 text-emerald-200" />}
-            >
-              Mulai Penyusunan Laporan ESG (AI)
-            </Button>
-            <p className="text-[11px] text-slate-400 mt-2">
-              Proses sintesis memerlukan waktu sekitar 5 hingga 10 detik.
-            </p>
-          </div>
+          {!isManagement ? (
+            <div className="pt-2 text-center">
+              <Button
+                type="button"
+                variant="primary"
+                size="lg"
+                onClick={handleGenerateReport}
+                disabled={isGenerating}
+                className="text-xs sm:text-sm font-bold px-7 py-3 cursor-pointer"
+                leftIcon={<Sparkles className="w-4 h-4 text-emerald-200" />}
+              >
+                Mulai Penyusunan Laporan ESG (AI)
+              </Button>
+              <p className="text-[11px] text-slate-400 mt-2">
+                Proses sintesis memerlukan waktu sekitar 5 hingga 10 detik.
+              </p>
+            </div>
+          ) : (
+            <div className="pt-2 text-center">
+              <p className="inline-block px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600">
+                Laporan keberlanjutan AI akan disusun oleh tim operasional (CSR Admin) untuk Anda pantau di sini.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -377,7 +379,7 @@ export function EsgSustainabilityReportTab({
               Sedang Mengompilasi Laporan Dampak ESG...
             </h4>
             <p className="text-xs text-slate-500 leading-relaxed">
-              AI sedang memeriksa data log lapangan, menghitung rasio anggaran terhadap penerima manfaat, dan menyusun narasi kepatuhan standar POJK 51.
+              AI sedang memeriksa data log lapangan, menghitung rasio anggaran terhadap penerima manfaat, dan menyusun narasi evaluasi dampak serta keberlanjutan ESG.
             </p>
           </div>
         </div>
@@ -396,7 +398,7 @@ export function EsgSustainabilityReportTab({
                   Laporan Keberlanjutan &amp; Dampak ESG
                 </h1>
                 <p className="text-[11px] text-slate-600 font-semibold mt-0.5">
-                  Standar POJK 51/POJK.03/2017 &bull; Global Reporting Initiative (GRI Standards)
+                  Kerangka Kerja ESG &bull; Global Reporting Initiative (GRI Standards) &bull; UN SDGs
                 </p>
               </div>
               <div className="text-right text-[11px] text-slate-600">

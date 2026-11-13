@@ -61,7 +61,7 @@ export class CompanyController {
   async update(request: Request): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT"]);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = updateCompanySchema.parse(body);

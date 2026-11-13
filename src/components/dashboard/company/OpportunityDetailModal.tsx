@@ -21,14 +21,16 @@ import { SdgGoal } from "@/components/dashboard/analytics/types";
 interface OpportunityDetailModalProps {
   isOpen: boolean;
   opportunity: OpportunityItem | null;
+  isManagement?: boolean;
   onClose: () => void;
-  onEdit: (opportunity: OpportunityItem) => void;
-  onInvitePartner: (opportunity: OpportunityItem) => void;
+  onEdit?: (opportunity: OpportunityItem) => void;
+  onInvitePartner?: (opportunity: OpportunityItem) => void;
 }
 
 export function OpportunityDetailModal({
   isOpen,
   opportunity,
+  isManagement = false,
   onClose,
   onEdit,
   onInvitePartner,
@@ -282,7 +284,7 @@ export function OpportunityDetailModal({
               </h4>
             </div>
 
-            {opportunity.status === "OPEN" && (
+            {!isManagement && onInvitePartner && opportunity.status === "OPEN" && (
               <Button
                 variant="outline"
                 size="sm"
@@ -354,18 +356,22 @@ export function OpportunityDetailModal({
 
         {/* Footer Actions */}
         <div className="flex items-center justify-between pt-4 border-t border-[#E8E8EA]">
-          <Button
-            variant="outline"
-            size="md"
-            onClick={() => {
-              onClose();
-              onEdit(opportunity);
-            }}
-            leftIcon={<Edit className="w-3.5 h-3.5" />}
-            className="rounded-xl border-[#E8E8EA] text-slate-700 text-xs font-semibold"
-          >
-            Edit Peluang
-          </Button>
+          {!isManagement && onEdit ? (
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => {
+                onClose();
+                onEdit(opportunity);
+              }}
+              leftIcon={<Edit className="w-3.5 h-3.5" />}
+              className="rounded-xl border-[#E8E8EA] text-slate-700 text-xs font-semibold"
+            >
+              Edit Peluang
+            </Button>
+          ) : (
+            <div />
+          )}
 
           <Button
             variant="primary"

@@ -150,6 +150,7 @@ export function StaggerContainer({
             animation={animation}
             delay={baseDelay + index * staggerDelay}
             duration={duration}
+            className="h-full"
           >
             {child}
           </ScrollReveal>

@@ -1,26 +1,20 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  Play,
-  X,
-  Sparkles,
   ShieldCheck,
   CheckCircle2,
   TrendingUp,
   Users2,
   ChevronRight,
-  Maximize2,
-  Globe2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 export function HeroSection() {
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -67,7 +61,6 @@ export function HeroSection() {
                 <span className="text-[11px] sm:text-xs font-bold tracking-tight text-[#181343] uppercase">
                   SINERGI CSR UNTUK PEMBANGUNAN BERKELANJUTAN
                 </span>
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5 shrink-0" />
               </div>
             </ScrollReveal>
 
@@ -111,17 +104,17 @@ export function HeroSection() {
                       window.scrollTo({ top: y, behavior: "smooth" });
                     }
                   }}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white border border-[#C8C5D0] hover:border-[#181343] text-xs sm:text-sm font-bold text-[#181343] shadow-2xs hover:bg-[#F9F9FB] transition-all cursor-pointer group"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#181343] text-xs sm:text-sm font-bold text-[#181343] shadow-2xs hover:bg-[#F9F9FB] transition-all cursor-pointer group"
                 >
                   <span>Pelajari Cara Kerja</span>
-                  <ChevronRight className="w-4 h-4 text-[#787680] group-hover:text-[#181343] group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-[#181343] group-hover:translate-x-0.5 transition-all" />
                 </a>
               </div>
             </ScrollReveal>
 
             {/* Quick Key Guarantees */}
             <ScrollReveal animation="fade-up" delay={200}>
-              <div className="pt-5 border-t border-[#E5E7EB] flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-[#787680] font-medium">
+              <div className="pt-5 border-t border-[#E5E7EB] flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-slate-600 font-medium">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Prioritas Kebutuhan</span>
@@ -176,7 +169,7 @@ export function HeroSection() {
                       SROI 3.8x Terukur
                     </span>
                   </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-[#C8C5D0]" />
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
                 </div>
 
                 {/* 2. Floating Photo Thumbnail: Indonesian Students & SDG 4 */}
@@ -221,7 +214,7 @@ export function HeroSection() {
                       Masyarakat Tervalidasi
                     </span>
                     <span className="text-[10px] text-[#47464F]">
-                      Survei QR & Respon Warga
+                      Survei QR &amp; Respon Warga
                     </span>
                   </div>
                 </div>
@@ -232,113 +225,6 @@ export function HeroSection() {
 
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* FULL-SIZE INTERACTIVE VIDEO MODAL                                         */}
-      {/* ========================================================================= */}
-      {isVideoModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={() => setIsVideoModalOpen(false)}
-        >
-          <div
-            className="relative w-full max-w-4xl bg-[#181343] border border-white/20 rounded-3xl overflow-hidden shadow-2xl text-white"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="h-14 px-6 bg-[#110D30] border-b border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <span className="text-xs sm:text-sm font-bold text-white tracking-wide">
-                  SIPENA — Showcase Video Animasi & Live Demo Platform
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsVideoModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
-                aria-label="Tutup Video Modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Video Player Display */}
-            <div className="relative aspect-video w-full bg-[#0D0A26] flex items-center justify-center overflow-hidden">
-              <video
-                src="/globe.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover opacity-35"
-              />
-
-              {/* Interactive Platform Live Simulation Feed */}
-              <div className="relative z-10 w-full h-full p-6 sm:p-8 flex flex-col justify-between">
-                <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-xl bg-white/15 backdrop-blur-md text-xs font-semibold">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>AI Milestone Extractor & Real-Time Geospatial</span>
-                  </div>
-                  <span className="text-xs font-mono text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                    Live Demo Active
-                  </span>
-                </div>
-
-                {/* 3 Step Live Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 my-auto">
-                  <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
-                    <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">
-                      Tahap 1 · AI Extractor
-                    </span>
-                    <h5 className="text-xs font-bold text-white mt-1">
-                      Dekonstruksi Dokumen PDF
-                    </h5>
-                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-                      Ekstraksi 4 milestone kegiatan dan rincian alokasi anggaran otomatis.
-                    </p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
-                    <span className="text-[10px] text-teal-400 font-bold uppercase tracking-wider block">
-                      Tahap 2 · Lapangan
-                    </span>
-                    <h5 className="text-xs font-bold text-white mt-1">
-                      Validasi Foto & GPS
-                    </h5>
-                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-                      Pencatatan koordinat titik tanam mangrove dan daftar presensi warga.
-                    </p>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/15">
-                    <span className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider block">
-                      Tahap 3 · Kepatuhan ESG
-                    </span>
-                    <h5 className="text-xs font-bold text-white mt-1">
-                      Audit Realisasi Kas
-                    </h5>
-                    <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">
-                      Verifikasi nota penyedia & pelaporan POJK 51 siap unduh.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bottom Status */}
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-300">
-                  <span className="font-mono">Ready for .mp4 looping video file source</span>
-                  <Link href="/register" onClick={() => setIsVideoModalOpen(false)}>
-                    <Button variant="accent" size="sm" className="text-xs font-bold">
-                      Daftar Akun Kemitraan
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

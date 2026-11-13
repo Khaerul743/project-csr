@@ -19,6 +19,9 @@ import {
   FileCheck2,
   Info,
   Sparkles,
+  User,
+  LogOut,
+  ChevronDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { UserProfileData } from "./UserProfileModal";
@@ -48,6 +51,7 @@ export interface DashboardHeaderProps {
   organizationName?: string;
   user?: UserProfileData;
   onOpenProfile?: () => void;
+  onLogout?: () => void;
   notifications?: NotificationItem[];
 }
 
@@ -89,27 +93,50 @@ export function DashboardHeader({
   onNavigateMenu,
   user,
   onOpenProfile,
+  onLogout,
   notifications: customNotifications,
 }: DashboardHeaderProps) {
   // Popover States
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [activeHelpTab, setActiveHelpTab] = useState<"flow" | "verification" | "monitoring" | "support">("flow");
 
   // Notifications State
+  const roleDefaultNotifications = React.useMemo(() => {
+    if (user?.role === "MANAGEMENT") {
+      return DEFAULT_NOTIFICATIONS.filter(
+        (n) => n.actionMenu !== "proposals" && n.actionMenu !== "collaborations"
+      ).map((n) =>
+        n.id === "notif-2"
+          ? {
+              ...n,
+              title: "Pemantauan Laporan Aktivitas",
+              description:
+                "Mitra pelaksana mengunggah bukti realisasi kegiatan yang sedang ditinjau tim CSR.",
+            }
+          : n
+      );
+    }
+    return DEFAULT_NOTIFICATIONS;
+  }, [user?.role]);
+
   const [notifications, setNotifications] = useState<NotificationItem[]>(
-    customNotifications !== undefined ? customNotifications : DEFAULT_NOTIFICATIONS
+    customNotifications !== undefined ? customNotifications : roleDefaultNotifications
   );
 
   useEffect(() => {
     if (customNotifications !== undefined) {
       setNotifications(customNotifications);
+    } else {
+      setNotifications(roleDefaultNotifications);
     }
-  }, [customNotifications]);
+  }, [customNotifications, roleDefaultNotifications]);
 
   const notificationRef = useRef<HTMLDivElement>(null);
   const helpRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -128,6 +155,12 @@ export function DashboardHeader({
       ) {
         setIsHelpOpen(false);
       }
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -142,6 +175,7 @@ export function DashboardHeader({
       if (event.key === "Escape") {
         setIsNotificationOpen(false);
         setIsHelpOpen(false);
+        setIsUserMenuOpen(false);
         setIsHelpModalOpen(false);
       }
     }
@@ -176,7 +210,7 @@ export function DashboardHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-20 w-full bg-white border-b border-[#E5E7EB] px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between select-none">
+      <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between select-none shadow-xs">
         {/* 1. Sisi Kiri: Hamburger Mobile & Dynamic Breadcrumbs */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
@@ -329,6 +363,11 @@ export function DashboardHeader({
                           {item.type === "collab" && (
                             <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                               <FileCheck2 className="w-4 h-4" />
+                            </div>
+                          )}
+                          {item.type === "system" && (
+                            <div className="w-8 h-8 rounded-xl bg-[#F0EFF8] text-[#181343] flex items-center justify-center">
+                              <Info className="w-4 h-4" />
                             </div>
                           )}
                         </div>
@@ -504,14 +543,15 @@ export function DashboardHeader({
             )}
           </div>
 
-          {/* Quick Action 3: Profil Pengguna */}
+          {/* Quick Action 3: Profil Pengguna Dropdown */}
           {user && (
-            <div className="relative pl-1 sm:pl-2 border-l border-slate-200">
+            <div ref={userMenuRef} className="relative pl-1 sm:pl-2 border-l border-slate-200">
               <button
                 type="button"
-                onClick={onOpenProfile}
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
                 className="flex items-center gap-2 p-1 sm:px-2 sm:py-1 rounded-xl hover:bg-[#F4F4F6] transition-colors cursor-pointer group"
-                title="Buka Pengaturan Profil Akun"
+                title="Buka Menu Akun"
+                aria-expanded={isUserMenuOpen}
               >
                 <div className="w-8 h-8 rounded-full bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs overflow-hidden border border-slate-200">
                   {user.avatarUrl ? (
@@ -520,15 +560,78 @@ export function DashboardHeader({
                     <span>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
                   )}
                 </div>
-                <div className="hidden md:block text-left max-w-[130px]">
+                <div className="hidden md:block text-left max-w-[140px]">
                   <span className="text-xs font-bold text-[#181343] block truncate leading-tight group-hover:text-indigo-950">
                     {user.name}
                   </span>
-                  <span className="text-[10px] text-slate-600 block truncate">
+                  <span className="text-[10px] text-slate-500 block truncate">
                     {user.position || (user.role === "SUPER_ADMIN" ? "Super Admin" : user.role)}
                   </span>
                 </div>
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`} />
               </button>
+
+              {/* User Account Dropdown Popover */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#E5E7EB] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                  {/* Account Summary */}
+                  <div className="p-4 bg-[#F9F9FB] border-b border-[#E5E7EB]">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#181343] text-white flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden border border-slate-200">
+                        {user.avatarUrl ? (
+                          <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span>{user.name ? user.name.charAt(0).toUpperCase() : "U"}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-xs font-bold text-[#181343] block truncate">
+                          {user.name}
+                        </span>
+                        <span className="text-[11px] text-slate-500 block truncate">
+                          {user.email}
+                        </span>
+                        <div className="mt-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#181343] text-white">
+                            {user.role}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="p-1.5 space-y-1">
+                    {onOpenProfile && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          onOpenProfile();
+                        }}
+                        className="w-full px-3 py-2 text-left rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-2.5 text-xs font-semibold text-[#181343] cursor-pointer"
+                      >
+                        <User className="w-4 h-4 text-slate-500" />
+                        <span>Pengaturan Akun</span>
+                      </button>
+                    )}
+
+                    {onLogout && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          onLogout();
+                        }}
+                        className="w-full px-3 py-2 text-left rounded-xl hover:bg-rose-50 transition-colors flex items-center gap-2.5 text-xs font-semibold text-rose-600 cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4 text-rose-500" />
+                        <span>Keluar dari Akun</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -334,7 +334,7 @@ export class ChatbotService {
     // Scenario 4: Brainstorming ide CSR / SDGs
     if (lower.includes("brainstorm") || lower.includes("ide") || lower.includes("sdg") || lower.includes("konsep")) {
       return {
-        reply: `Tentu! Mari kita rumuskan konsep program CSR berdampak tinggi dengan kerangka kerja standar **POJK 51 & UN SDGs**:\n\n### 📋 Kerangka Brainstorming Program CSR SIPENA:
+        reply: `Tentu! Mari kita rumuskan konsep program CSR berdampak tinggi dengan kerangka kerja standar **Pilar ESG & UN SDGs**:\n\n### 📋 Kerangka Brainstorming Program CSR SIPENA:
 1. **Identifikasi Masalah Nyata (Needs Assessment)**:
    - Wilayah sasaran spesifik (desa/kelurahan) & kelompok rentan penerima manfaat.
    - Baseline data (misal: tingkat putus sekolah, volume timbulan sampah harian).
@@ -369,7 +369,7 @@ ${
 • ✍️ **Brainstorming Proposal**: Buat draf judul, rincian aktivitas, target penerima, dan alokasi RAB.
 • 📊 **Status Proposal & Revisi**: Cek catatan reviewer dan rekomendasi perbaikan.
 • 🚀 **Monitoring Kegiatan**: Pantau tahapan aktivitas dan verifikasi dampak lapangan.`
-    : `• 💡 **Rancang Inisiatif CSR Baru**: Brainstorming program selaras UN SDGs & POJK 51.
+    : `• 💡 **Rancang Inisiatif CSR Baru**: Brainstorming program selaras UN SDGs & Pilar ESG.
 • 📈 **Monitoring Portofolio CSR**: Rekap serapan anggaran dan capaian penerima manfaat program berjalan.
 • 📑 **Evaluasi Proposal Mitra**: Tips kriteria penilaian proposal dan akuntabilitas anggaran.
 • 🌿 **Laporan Keberlanjutan (ESG)**: Rekomendasi indikator terukur untuk pelaporan tahunan.`
@@ -394,7 +394,7 @@ Silakan ketik pertanyaan Anda atau pilih salah satu topik cepat di bawah!`,
       "Berapa total serapan anggaran program CSR yang aktif?",
       "Ide program CSR ramah lingkungan selaras SDG 13 & 15",
       "Bagaimana progres capaian penerima manfaat program kami?",
-      "Panduan indikator keberlanjutan sesuai POJK 51",
+      "Panduan indikator keberlanjutan dan pilar ESG",
     ];
   }
 }

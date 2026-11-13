@@ -559,7 +559,7 @@ export function createChatbotTools(authUser: AuthUser, onToolExecuted?: (event: 
       ];
 
       return JSON.stringify({
-        guidance: "Standar Kerangka POJK 51 & UN SDGs untuk Program CSR Berdampak Tinggi",
+        guidance: "Standar Kerangka Pilar ESG & UN SDGs untuk Program CSR Berdampak Tinggi",
         query: input.topic || "Semua Fokus CSR",
         frameworks: benchmarks,
       });
@@ -567,7 +567,7 @@ export function createChatbotTools(authUser: AuthUser, onToolExecuted?: (event: 
     {
       name: "getCsrSdgsBenchmark",
       description:
-        "Mengambil panduan standar 17 UN SDGs, 7 Fokus Area CSR SIPENA, dan metrik indikator keberhasilan terukur (POJK 51) untuk brainstorming program CSR.",
+        "Mengambil panduan standar 17 UN SDGs, 7 Fokus Area CSR SIPENA, dan metrik indikator keberhasilan terukur (Pilar ESG) untuk brainstorming program CSR.",
       schema: getCsrSdgsBenchmarkInputSchema,
     }
   );

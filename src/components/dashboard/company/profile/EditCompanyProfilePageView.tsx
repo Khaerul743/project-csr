@@ -436,7 +436,7 @@ export function EditCompanyProfilePageView({
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Profil Perusahaan</span>
           </button>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight">
             Pengaturan & Edit Profil Perusahaan
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
@@ -568,7 +568,7 @@ export function EditCompanyProfilePageView({
             >
               <div
                 className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                  activeCategory === "csr" ? "bg-white/10 text-white" : "bg-slate-100 text-teal-700"
+                  activeCategory === "csr" ? "bg-white/10 text-white" : "bg-slate-100 text-emerald-700"
                 }`}
               >
                 <Award className="w-4 h-4" />
@@ -620,12 +620,12 @@ export function EditCompanyProfilePageView({
           </div>
 
           {/* Quick Informational Card on Sidebar */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white border border-emerald-200/80 shadow-2xs space-y-2">
-            <div className="flex items-center gap-1.5 text-emerald-800 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="p-4 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-2">
+            <div className="flex items-center gap-1.5 text-[#059669] text-xs font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-[#059669]" />
               <span>Kredibilitas Profil</span>
             </div>
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Profil institusi yang lengkap dengan logo beresolusi tinggi, narasi komitmen ESG, dan nomor legalitas resmi mendapatkan tingkat respons kemitraan 3x lebih tinggi dari mitra pelaksana SIPENA.
             </p>
           </div>
@@ -1078,7 +1078,7 @@ export function EditCompanyProfilePageView({
                     className="w-full p-4 text-xs sm:text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] transition-all leading-relaxed"
                   />
                   <span className="text-[11px] text-slate-400 mt-1.5 block">
-                    Visi ini akan ditampilkan secara menonjol pada tab "Profil & Informasi Perusahaan".
+                    Visi ini akan ditampilkan secara menonjol pada tab &ldquo;Profil &amp; Informasi Perusahaan&rdquo;.
                   </span>
                 </div>
               </div>
@@ -1254,13 +1254,13 @@ export function EditCompanyProfilePageView({
           {activeCategory === "legal" && (
             <div className="space-y-6 animate-in fade-in duration-150">
               {/* Notice Box: Re-verification Warning */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5 shadow-2xs">
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5">
                 <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-amber-900">
                   <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>Kepatuhan Verifikasi Administratif SIPENA</span>
                 </div>
                 <p className="text-xs leading-relaxed text-amber-800">
-                  Untuk menjaga integritas dan akuntabilitas platform, setiap perubahan nomor NIB, NPWP, atau dokumen laporan legalitas resmi akan secara otomatis mengubah status verifikasi administratif organisasi menjadi <strong>"Menunggu Verifikasi Legalitas"</strong>. Tim verifikator SIPENA akan meninjau ulang keabsahan berkas sebelum menerbitkan status <em>Terverifikasi Administratif</em>.
+                  Untuk menjaga integritas dan akuntabilitas platform, setiap perubahan nomor NIB, NPWP, atau dokumen laporan legalitas resmi akan secara otomatis mengubah status verifikasi administratif organisasi menjadi <strong>&ldquo;Menunggu Verifikasi Legalitas&rdquo;</strong>. Tim verifikator SIPENA akan meninjau ulang keabsahan berkas sebelum menerbitkan status <em>Terverifikasi Administratif</em>.
                 </p>
               </div>
 
@@ -1425,7 +1425,7 @@ export function EditCompanyProfilePageView({
               type="button"
               onClick={handleAttemptBack}
               disabled={isSubmitting}
-              className="h-10 px-4 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-slate-50 transition-colors text-xs sm:text-sm font-semibold cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center justify-center h-10 px-4 rounded-xl bg-white border border-[#E5E7EB] text-[#181343] hover:bg-slate-50 transition-colors text-xs sm:text-sm font-semibold cursor-pointer disabled:opacity-50"
             >
               Batal
             </button>
@@ -1434,7 +1434,7 @@ export function EditCompanyProfilePageView({
               type="button"
               onClick={() => handleSubmit()}
               disabled={isSubmitting}
-              className="h-10 px-6 rounded-lg bg-[#181343] hover:bg-[#211B58] text-white transition-all text-xs sm:text-sm font-bold shadow-sm flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center justify-center h-10 px-6 rounded-xl bg-[#181343] hover:bg-[#211B58] text-white transition-all text-xs sm:text-sm font-bold shadow-xs flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

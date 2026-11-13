@@ -11,7 +11,7 @@ interface RouteParams {
 export async function POST(request: Request, { params }: RouteParams) {
   try {
     const authUser = AuthGuard.authenticate(request);
-    AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+    AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
     const { id } = await params;
     const collaboration = await collaborationService.getCollaborationById(id, {

@@ -2,41 +2,28 @@
 
 import React, { useState, useMemo, useRef } from "react";
 import {
-  BarChart3,
   TrendingUp,
   Leaf,
   Users,
   ShieldCheck,
   Download,
   Printer,
-  Building2,
-  Calendar,
   MapPin,
   CheckCircle2,
   AlertCircle,
   FileText,
-  Sparkles,
-  Filter,
   ArrowUpRight,
   Search,
   X,
   Globe,
-  Layers,
   ArrowUpDown,
   RotateCcw,
-  Check,
   Info,
-  ChevronRight,
   Award,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SoftDataGrid } from "@/components/ui/soft-data-grid";
 import {
   ProgramAnalyticsData,
-  SdgGoal,
-  SdgContributionStats,
   EsgPillarCode,
 } from "./types";
 import {
@@ -46,7 +33,6 @@ import {
   computeSdgEsgAnalytics,
   exportSdgEsgCsv,
   formatRupiah,
-  formatCompactRupiah,
   formatDate,
 } from "./helpers";
 
@@ -97,11 +83,12 @@ export function EsgAnalyticsView({
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   // Sort & Display options for 17 SDGs chart
-  const [sdgSortOrder, setSdgSortOrder] = useState<"MOST_CONTRIBUTED" | "SDG_NUMBER">("MOST_CONTRIBUTED");
+  const [sdgSortOrder, setSdgSortOrder] = useState<"MOST_CONTRIBUTED" | "SDG_NUMBER">("SDG_NUMBER");
   const [sdgDisplayFilter, setSdgDisplayFilter] = useState<"ALL" | "COVERED" | "UNCOVERED">("ALL");
 
-  // Print modal state
+  // Print modal & view tab state
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"sdgs" | "pillars" | "programs">("sdgs");
 
   // Reference for scrolling to program details
   const programTableRef = useRef<HTMLDivElement>(null);
@@ -218,10 +205,7 @@ export function EsgAnalyticsView({
       setSelectedSdg("ALL");
     } else {
       setSelectedSdg(String(sdgId));
-      // Scroll smoothly down to the program list table
-      setTimeout(() => {
-        programTableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+      setActiveTab("programs");
     }
   };
 
@@ -231,9 +215,7 @@ export function EsgAnalyticsView({
       setSelectedPillar("ALL");
     } else {
       setSelectedPillar(pillarCode);
-      setTimeout(() => {
-        programTableRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
+      setActiveTab("programs");
     }
   };
 
@@ -244,87 +226,172 @@ export function EsgAnalyticsView({
   const displayName = organizationName || company?.name || "Organisasi Anda";
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
-      {/* ========================================================================= */}
-      {/* 1. HEADER BANNER: IDENTITAS HALAMAN */}
-      {/* ========================================================================= */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#181343] via-[#1a1c4b] to-[#0A6E51] text-white shadow-xl relative overflow-hidden">
-        {/* Soft Data Grid Corner Texture for Dark Hero Gradient */}
-        <SoftDataGrid variant="hero" />
-
-        {/* Soft decorative background glows */}
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/4 -mb-12 w-60 h-60 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 space-y-2 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-emerald-300 border border-white/15 text-xs font-semibold backdrop-blur-md">
-            <Globe className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Kerangka Keberlanjutan 17 SDGs & 3 Pilar ESG</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Analisis Kontribusi SDGs & ESG
+    <div className="space-y-8 animate-in fade-in duration-200 w-full">
+      {/* 1. Header Ringkas & Aksi (Selaras Halaman Kinerja Mitra) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1
+            className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            Laporan &amp; Analitik ESG
           </h1>
-          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">
-            Jelajahi kontribusi program CSR terhadap tujuan pembangunan berkelanjutan dan pilar ESG untuk mengidentifikasi capaian serta kesenjangan prioritas program bagi {displayName}.
+          <p className="text-xs sm:text-sm text-slate-600">
+            Pemetaan kontribusi program terhadap 17 SDGs dan 3 pilar Environmental, Social, Governance bagi {displayName}.
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="relative z-10 flex flex-wrap items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           <Button
-            variant="translucent-white"
+            type="button"
+            variant="outline"
             size="sm"
             onClick={() => exportSdgEsgCsv(filteredPrograms, displayName)}
-            leftIcon={<Download className="w-4 h-4 text-white shrink-0" />}
-            className="text-xs font-semibold rounded-xl h-10 px-4 cursor-pointer"
+            leftIcon={<Download className="w-3.5 h-3.5 text-[#059669]" />}
+            className="text-xs font-semibold text-[#181343] border-[#E5E7EB] hover:bg-slate-50 cursor-pointer"
           >
-            Ekspor Data (CSV)
+            Ekspor CSV
           </Button>
           <Button
-            variant="translucent-white"
+            type="button"
+            variant="outline"
             size="sm"
             onClick={() => setIsPrintModalOpen(true)}
-            leftIcon={<Printer className="w-4 h-4 text-white shrink-0" />}
-            className="text-xs font-semibold rounded-xl h-10 px-4 cursor-pointer"
+            leftIcon={<Printer className="w-3.5 h-3.5 text-slate-600" />}
+            className="text-xs font-semibold text-[#181343] border-[#E5E7EB] hover:bg-slate-50 cursor-pointer"
           >
-            Cetak Ringkasan Eksekutif
+            Pratinjau Cetak
           </Button>
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. FILTER & INTERAKTIVITAS BAR */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-2xs space-y-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Search Field */}
-          <div className="relative flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Cari nama program, mitra pelaksana, atau lokasi kota..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 h-10 text-xs sm:text-sm rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] transition-all"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+      {/* 2. Ringkasan 4 KPI Utama yang Lega */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">SDGs Tercakup</span>
+            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold text-[#059669] tabular-nums">
+              {kpis.coveredSdgsCount}
+            </span>
+            <span className="text-xs font-semibold text-slate-500">/ 17 sasaran</span>
+          </div>
+          <p className="text-xs text-slate-500">
+            {kpis.coveredPercentage}% cakupan sasaran global PBB
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Belum Tercakup</span>
+            <AlertCircle className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold text-[#181343] tabular-nums">
+              {kpis.uncoveredSdgsCount}
+            </span>
+            <span className="text-xs font-semibold text-slate-500">/ 17 sasaran</span>
+          </div>
+          <p className="text-xs text-slate-500">
+            Peluang diversifikasi fokus program
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">SDG Terbanyak</span>
+            <Award className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="text-2xl font-extrabold text-[#181343] truncate">
+            {kpis.topSdg ? kpis.topSdg.sdg.code : "-"}
+          </div>
+          <p className="text-xs text-slate-500 truncate" title={kpis.topSdg ? `${kpis.topSdg.sdg.name} (${kpis.topSdg.programCount} program)` : undefined}>
+            {kpis.topSdg
+              ? `${kpis.topSdg.sdg.name} (${kpis.topSdg.programCount} program)`
+              : "Belum ada program aktif"}
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Pilar Dominan</span>
+            <TrendingUp className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="text-2xl font-extrabold text-[#181343] truncate">
+            {kpis.dominantPillar ? `Pilar ${kpis.dominantPillar.pillar}` : "-"}
+          </div>
+          <p className="text-xs text-slate-500 truncate">
+            {kpis.dominantPillar
+              ? `${kpis.dominantPillar.name} (${kpis.dominantPillar.percentage}%)`
+              : "Belum ada klasifikasi pilar"}
+          </p>
+        </div>
+      </div>
+
+      {/* 3. Toolbar Terpadu: Tab Switcher + Filter Segaris */}
+      <div className="space-y-5">
+        <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-3.5">
+          {/* Pill Tabs */}
+          <div
+            className="flex items-center gap-2 shrink-0 whitespace-nowrap overflow-x-auto max-w-full"
+            role="tablist"
+            aria-label="Tampilan analitik ESG"
+          >
+            {[
+              { id: "sdgs" as const, label: "Peta 17 SDGs" },
+              { id: "pillars" as const, label: "Pilar ESG & Kesenjangan" },
+              { id: "programs" as const, label: "Daftar Program", count: filteredPrograms.length },
+            ].map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]/40 ${
+                    isSelected
+                      ? "bg-[#181343] text-white border-[#181343]"
+                      : "bg-white text-slate-700 border-[#E5E7EB] hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{tab.label}</span>
+                  {typeof tab.count === "number" && (
+                    <span
+                      className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
+                        isSelected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Dropdown Filters */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Filter Tahun */}
+          {/* Search & Filters Inline */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
+            <div className="relative w-full sm:w-44 lg:w-48 shrink-0">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                aria-label="Cari program, mitra, atau kota"
+                placeholder="Cari program atau mitra..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-[#E5E7EB] bg-white text-xs text-[#181343] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
+              />
+            </div>
+
             <select
+              aria-label="Filter tahun"
               value={selectedYear}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="h-10 text-xs rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 px-3 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] cursor-pointer"
+              className="shrink-0 px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25"
             >
               <option value="ALL">Semua Tahun</option>
               {availableYears.map((yr) => (
@@ -334,892 +401,625 @@ export function EsgAnalyticsView({
               ))}
             </select>
 
-            {/* Filter SDG */}
             <select
-              value={selectedSdg}
-              onChange={(e) => setSelectedSdg(e.target.value)}
-              className="h-10 text-xs rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 px-3 max-w-[190px] truncate focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] cursor-pointer"
-            >
-              <option value="ALL">Semua Kategori SDG</option>
-              {ALL_17_SDGS.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.code}: {g.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Filter Pilar ESG */}
-            <select
+              aria-label="Filter pilar ESG"
               value={selectedPillar}
               onChange={(e) => setSelectedPillar(e.target.value)}
-              className="h-10 text-xs rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 px-3 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] cursor-pointer"
+              className="shrink-0 max-w-[170px] px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25"
             >
-              <option value="ALL">Semua Pilar ESG</option>
+              <option value="ALL">Semua Pilar</option>
               <option value="E">Pilar E (Environmental)</option>
               <option value="S">Pilar S (Social)</option>
               <option value="G">Pilar G (Governance)</option>
             </select>
 
-            {/* Filter Status Program */}
             <select
+              aria-label="Filter status program"
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="h-10 text-xs rounded-xl border border-slate-200 bg-white font-semibold text-slate-700 px-3 focus:outline-none focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343] cursor-pointer"
+              className="shrink-0 px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25"
             >
               <option value="ALL">Semua Status</option>
-              <option value="PLANNED">Persiapan (Planned)</option>
+              <option value="PLANNED">Persiapan</option>
               <option value="IN_PROGRESS">Sedang Berjalan</option>
-              <option value="COMPLETED">Selesai (Completed)</option>
-              <option value="ON_HOLD">Ditunda (On Hold)</option>
+              <option value="COMPLETED">Selesai</option>
+              <option value="ON_HOLD">Ditunda</option>
               <option value="CANCELLED">Dibatalkan</option>
             </select>
 
-            {/* Reset Button */}
             {isAnyFilterActive && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleResetFilters}
-                className="h-10 px-3 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl border border-rose-200 flex items-center gap-1.5 transition-colors cursor-pointer"
-                title="Reset seluruh filter"
+                leftIcon={<RotateCcw className="w-3.5 h-3.5 text-rose-600" />}
+                className="shrink-0 whitespace-nowrap text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 cursor-pointer"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset</span>
-              </button>
+                Reset
+              </Button>
             )}
           </div>
         </div>
 
-        {/* Active Filter Indicators */}
+        {/* Active Filter Indicator Strip */}
         {isAnyFilterActive && (
-          <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 text-[11px]">
-            <span className="text-slate-400 font-medium">Filter aktif:</span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            <span className="font-medium">Filter aktif:</span>
             {selectedYear !== "ALL" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
-                Tahun {selectedYear}
-                <button type="button" onClick={() => setSelectedYear("ALL")}>
-                  <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
-                </button>
-              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedYear("ALL")}
+                className="px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] font-semibold text-[#181343] text-[11px] hover:border-rose-300 cursor-pointer"
+              >
+                Tahun {selectedYear} ×
+              </button>
             )}
             {selectedSdg !== "ALL" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
-                SDG {selectedSdg}
-                <button type="button" onClick={() => setSelectedSdg("ALL")}>
-                  <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
-                </button>
-              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedSdg("ALL")}
+                className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px] hover:border-rose-300 cursor-pointer"
+              >
+                SDG {selectedSdg} ×
+              </button>
             )}
             {selectedPillar !== "ALL" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
-                Pilar {selectedPillar}
-                <button type="button" onClick={() => setSelectedPillar("ALL")}>
-                  <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
-                </button>
-              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedPillar("ALL")}
+                className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px] hover:border-rose-300 cursor-pointer"
+              >
+                Pilar {selectedPillar} ×
+              </button>
             )}
             {selectedStatus !== "ALL" && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
-                Status: {selectedStatus}
-                <button type="button" onClick={() => setSelectedStatus("ALL")}>
-                  <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
-                </button>
-              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedStatus("ALL")}
+                className="px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] font-semibold text-[#181343] text-[11px] hover:border-rose-300 cursor-pointer"
+              >
+                Status: {selectedStatus} ×
+              </button>
             )}
-            {searchQuery && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-semibold">
-                Kata kunci: &ldquo;{searchQuery}&rdquo;
-                <button type="button" onClick={() => setSearchQuery("")}>
-                  <X className="w-3 h-3 text-slate-400 hover:text-slate-700" />
-                </button>
-              </span>
-            )}
-            <span className="text-slate-400 font-medium ml-auto">
-              Menampilkan {filteredPrograms.length} dari {safePrograms.length} program
+            <span className="text-[11px] text-slate-500 ml-auto tabular-nums">
+              {filteredPrograms.length} dari {safePrograms.length} program
             </span>
           </div>
         )}
-      </div>
 
-      {/* ========================================================================= */}
-      {/* 3. RINGKASAN KHUSUS SDGS & ESG (4 RELEVANT KPI CARDS) */}
-      {/* ========================================================================= */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: SDGs Tercakup */}
-        <Card className="hover:shadow-md transition-shadow border-slate-200/90 rounded-2xl">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                SDGs Tercakup
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4" />
+        {/* TAB 1: PETA 17 SDGS (Kompak 2-Kolom Tanpa 17 Kotak Bertumpuk) */}
+        {activeTab === "sdgs" && (
+          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-base font-bold text-[#181343]">
+                  Distribusi Kontribusi 17 SDGs
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Klik salah satu sasaran SDG untuk memfilter dan melihat program terkait.
+                </p>
               </div>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-slate-900">
-                {kpis.coveredSdgsCount}
-              </span>
-              <span className="text-sm font-bold text-slate-400">/ 17 Sasaran</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px] pt-0.5">
-              <span className="text-slate-400">Tingkat Cakupan:</span>
-              <span className="font-bold text-emerald-700 px-2 py-0.5 bg-emerald-50 rounded-md border border-emerald-200/60">
-                {kpis.coveredPercentage}% Terpenuhi
-              </span>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* KPI 2: SDGs Belum Tercakup */}
-        <Card className="hover:shadow-md transition-shadow border-slate-200/90 rounded-2xl">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                SDGs Belum Tercakup
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <AlertCircle className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-amber-600">
-                {kpis.uncoveredSdgsCount}
-              </span>
-              <span className="text-sm font-bold text-slate-400">/ 17 Sasaran</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px] pt-0.5">
-              <span className="text-slate-400">Peluang Sasaran Baru:</span>
-              <span className="font-semibold text-slate-600">
-                {17 - kpis.coveredSdgsCount} Kategori Terbuka
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* KPI 3: SDG Paling Banyak Didukung */}
-        <Card className="hover:shadow-md transition-shadow border-slate-200/90 rounded-2xl">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                SDG Terbanyak Didukung
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <Award className="w-4 h-4" />
-              </div>
-            </div>
-            {kpis.topSdg ? (
-              <>
-                <div className="text-lg font-black text-slate-900 truncate" title={`${kpis.topSdg.sdg.code}: ${kpis.topSdg.sdg.name}`}>
-                  {kpis.topSdg.sdg.code} • {kpis.topSdg.sdg.name}
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <div className="inline-flex rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] p-1 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setSdgDisplayFilter("ALL")}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      sdgDisplayFilter === "ALL"
+                        ? "bg-[#181343] text-white"
+                        : "text-slate-600 hover:text-[#181343]"
+                    }`}
+                  >
+                    Semua (17)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSdgDisplayFilter("COVERED")}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      sdgDisplayFilter === "COVERED"
+                        ? "bg-[#181343] text-white"
+                        : "text-slate-600 hover:text-[#181343]"
+                    }`}
+                  >
+                    Tercakup ({kpis.coveredSdgsCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSdgDisplayFilter("UNCOVERED")}
+                    className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                      sdgDisplayFilter === "UNCOVERED"
+                        ? "bg-[#181343] text-white"
+                        : "text-slate-600 hover:text-[#181343]"
+                    }`}
+                  >
+                    Belum ({kpis.uncoveredSdgsCount})
+                  </button>
                 </div>
-                <div className="flex items-center justify-between text-[11px] pt-0.5">
-                  <span className="text-slate-400">Total Program:</span>
-                  <span className="font-bold text-blue-700 px-2 py-0.5 bg-blue-50 rounded-md border border-blue-200/60">
-                    {kpis.topSdg.programCount} Program ({kpis.topSdg.percentage}%)
-                  </span>
-                </div>
-              </>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setSdgSortOrder((prev) =>
+                      prev === "MOST_CONTRIBUTED" ? "SDG_NUMBER" : "MOST_CONTRIBUTED"
+                    )
+                  }
+                  leftIcon={<ArrowUpDown className="w-3.5 h-3.5 text-slate-600" />}
+                  className="text-xs font-semibold border-[#E5E7EB] cursor-pointer"
+                >
+                  {sdgSortOrder === "MOST_CONTRIBUTED" ? "Terbanyak" : "SDG 1-17"}
+                </Button>
+              </div>
+            </div>
+
+            {displayedSdgDistributions.length === 0 ? (
+              <div className="py-12 text-center text-slate-500">
+                <Globe className="w-7 h-7 mx-auto mb-2 text-slate-400" />
+                <p className="text-xs font-medium">Tidak ada kategori SDG pada filter tampilan ini.</p>
+              </div>
             ) : (
-              <>
-                <div className="text-sm font-bold text-slate-400 italic">Belum Ada Data</div>
-                <div className="text-[11px] text-slate-400">Belum ada program CSR aktif</div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+              (() => {
+                const splitIndex = Math.ceil(displayedSdgDistributions.length / 2);
+                const sdgColumns = [
+                  displayedSdgDistributions.slice(0, splitIndex),
+                  displayedSdgDistributions.slice(splitIndex),
+                ].filter((col) => col.length > 0);
 
-        {/* KPI 4: Pilar ESG Dominan */}
-        <Card className="hover:shadow-md transition-shadow border-slate-200/90 rounded-2xl">
-          <CardContent className="p-5 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                Pilar ESG Dominan
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-            </div>
-            {kpis.dominantPillar ? (
-              <>
-                <div className="text-lg font-black text-slate-900 truncate">
-                  Pilar {kpis.dominantPillar.pillar} • {kpis.dominantPillar.name}
-                </div>
-                <div className="flex items-center justify-between text-[11px] pt-0.5">
-                  <span className="text-slate-400">Frekuensi Pilar:</span>
-                  <span className="font-bold text-purple-700 px-2 py-0.5 bg-purple-50 rounded-md border border-purple-200/60">
-                    {kpis.dominantPillar.programCount} Program ({kpis.dominantPillar.percentage}%)
-                  </span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="text-sm font-bold text-slate-400 italic">Belum Ada Data</div>
-                <div className="text-[11px] text-slate-400">Belum ada klasifikasi pilar</div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                return (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-2.5 items-start">
+                    {sdgColumns.map((columnItems, colIdx) => (
+                      <div key={colIdx} className="space-y-2.5">
+                        {columnItems.map((item) => {
+                          const isSelected = selectedSdg === String(item.sdg.id);
+                          const relativeWidth =
+                            item.programCount > 0
+                              ? Math.max(10, Math.round((item.programCount / maxSdgCount) * 100))
+                              : 0;
 
-      {/* ========================================================================= */}
-      {/* 4. DISTRIBUSI KONTRIBUSI 17 SDGS (VISUALISASI UTAMA HALAMAN) */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
-        {/* Section Header with Controls */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-                Distribusi Kontribusi 17 SDGs
-              </h2>
-              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                Visualisasi Utama
+                          return (
+                            <button
+                              type="button"
+                              key={item.sdg.id}
+                              onClick={() => handleSelectSdg(item.sdg.id)}
+                              className={`w-full p-3 rounded-xl text-left transition-colors cursor-pointer border space-y-2 ${
+                                isSelected
+                                  ? "bg-emerald-50/70 border-emerald-400"
+                                  : "bg-transparent border-transparent hover:bg-slate-50 hover:border-[#E5E7EB]"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex items-center gap-2.5 min-w-0">
+                                  <span
+                                    className="w-7 h-7 rounded-lg text-white font-bold text-xs flex items-center justify-center shrink-0 tabular-nums"
+                                    style={{ backgroundColor: item.sdg.color }}
+                                  >
+                                    {item.sdg.id}
+                                  </span>
+                                  <div className="min-w-0">
+                                    <p className="text-xs font-bold text-[#181343] truncate">
+                                      {item.sdg.code}: {item.sdg.name}
+                                    </p>
+                                    <p className="text-[11px] text-slate-500 truncate">
+                                      Pilar {item.sdg.esgPillars.join(", ")}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="text-right shrink-0 tabular-nums">
+                                  {item.isCovered ? (
+                                    <span className="text-xs font-bold text-[#181343]">
+                                      {item.programCount}{" "}
+                                      <span className="text-slate-500 font-medium">
+                                        ({item.percentage}%)
+                                      </span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-[11px] text-slate-400">0 program</span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                {item.isCovered ? (
+                                  <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{
+                                      width: `${relativeWidth}%`,
+                                      backgroundColor: item.sdg.color,
+                                    }}
+                                  />
+                                ) : null}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()
+            )}
+
+            <p className="pt-4 border-t border-slate-100 text-xs text-slate-500 flex items-start gap-2 leading-relaxed">
+              <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+              <span>
+                Satu program dapat berkontribusi pada beberapa sasaran SDGs secara bersamaan sesuai fokus intervensi lapangannya.
               </span>
-            </div>
-            <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-              Pemetaan interaktif kontribusi program terhadap 17 sasaran pembangunan global PBB. Klik pada salah satu baris SDG untuk meninjau rincian program terkait di bawah.
             </p>
           </div>
+        )}
 
-          {/* Interactive Chart Options */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {/* Filter Status Coverage */}
-            <div className="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-bold text-slate-600">
-              <button
-                type="button"
-                onClick={() => setSdgDisplayFilter("ALL")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  sdgDisplayFilter === "ALL" ? "bg-white text-slate-900 shadow-2xs" : "hover:text-slate-900"
-                }`}
-              >
-                Semua (17)
-              </button>
-              <button
-                type="button"
-                onClick={() => setSdgDisplayFilter("COVERED")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  sdgDisplayFilter === "COVERED" ? "bg-white text-emerald-800 shadow-2xs" : "hover:text-slate-900"
-                }`}
-              >
-                Tercakup ({kpis.coveredSdgsCount})
-              </button>
-              <button
-                type="button"
-                onClick={() => setSdgDisplayFilter("UNCOVERED")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  sdgDisplayFilter === "UNCOVERED" ? "bg-white text-amber-800 shadow-2xs" : "hover:text-slate-900"
-                }`}
-              >
-                Belum Ada ({kpis.uncoveredSdgsCount})
-              </button>
-            </div>
+        {/* TAB 2: PILAR ESG & ANALISIS KESENJANGAN */}
+        {activeTab === "pillars" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {esgPillars.map((p) => {
+                const isPillarActive = selectedPillar === p.pillar;
 
-            {/* Sort Toggle */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setSdgSortOrder((prev) =>
-                  prev === "MOST_CONTRIBUTED" ? "SDG_NUMBER" : "MOST_CONTRIBUTED"
-                )
-              }
-              leftIcon={<ArrowUpDown className="w-3.5 h-3.5" />}
-              className="text-xs font-bold rounded-xl border-slate-200 h-9 px-3 cursor-pointer"
-            >
-              {sdgSortOrder === "MOST_CONTRIBUTED"
-                ? "Urutan Terbanyak"
-                : "Urutan SDG 1–17"}
-            </Button>
-          </div>
-        </div>
-
-        {/* 17 SDGs Horizontal Bar Chart */}
-        <div className="space-y-3 pt-1">
-          {displayedSdgDistributions.length === 0 ? (
-            <div className="py-12 text-center text-slate-400">
-              <Globe className="w-8 h-8 mx-auto mb-2 opacity-40" />
-              <p className="text-xs font-semibold">Tidak ada kategori SDG yang cocok dengan filter tampilan.</p>
-            </div>
-          ) : (
-            displayedSdgDistributions.map((item) => {
-              const isSelected = selectedSdg === String(item.sdg.id);
-              const relativeWidth =
-                item.programCount > 0
-                  ? Math.max(12, Math.round((item.programCount / maxSdgCount) * 100))
-                  : 0;
-
-              return (
-                <div
-                  key={item.sdg.id}
-                  onClick={() => handleSelectSdg(item.sdg.id)}
-                  className={`group p-3 sm:p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                    isSelected
-                      ? "border-[#181343] bg-slate-50/90 ring-2 ring-[#181343]/10 shadow-xs"
-                      : "border-slate-200/80 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2">
-                    {/* SDG Identifier & Title */}
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      {/* SDG Official Number Badge */}
-                      <div
-                        className="w-8 h-8 rounded-lg text-white font-black text-xs flex items-center justify-center shrink-0 shadow-xs"
-                        style={{ backgroundColor: item.sdg.color }}
-                      >
-                        {item.sdg.id}
-                      </div>
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 truncate">
-                            {item.sdg.code}: {item.sdg.name}
-                          </h4>
-                          {/* ESG Pillars tags */}
-                          <div className="flex items-center gap-1 shrink-0">
-                            {item.sdg.esgPillars.map((p) => (
-                              <span
-                                key={p}
-                                className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
-                                  p === "E"
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : p === "S"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "bg-purple-100 text-purple-800"
-                                }`}
-                              >
-                                {p}
-                              </span>
-                            ))}
+                return (
+                  <div
+                    key={p.pillar}
+                    className={`p-6 rounded-2xl bg-white border transition-colors flex flex-col justify-between gap-5 ${
+                      isPillarActive
+                        ? "border-[#181343] ring-1 ring-[#181343]"
+                        : "border-[#E5E7EB] hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                              p.pillar === "E"
+                                ? "bg-emerald-50 text-[#059669]"
+                                : p.pillar === "S"
+                                ? "bg-[#F0EFF8] text-[#181343]"
+                                : "bg-slate-100 text-slate-700"
+                            }`}
+                          >
+                            {p.pillar === "E" ? (
+                              <Leaf className="w-4 h-4" />
+                            ) : p.pillar === "S" ? (
+                              <Users className="w-4 h-4" />
+                            ) : (
+                              <ShieldCheck className="w-4 h-4" />
+                            )}
+                          </div>
+                          <div>
+                            <span className="text-[11px] font-semibold text-slate-500 block">
+                              Pilar {p.pillar}
+                            </span>
+                            <h3 className="text-base font-bold text-[#181343] leading-tight">
+                              {p.name}
+                            </h3>
                           </div>
                         </div>
-                        <span className="text-[11px] text-slate-400 block truncate">
-                          {item.sdg.nameEn}
+
+                        <span className="text-sm font-extrabold text-[#181343] tabular-nums">
+                          {p.percentage}%
                         </span>
+                      </div>
+
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        {p.subtitle}
+                      </p>
+
+                      <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500">Program Terkait</span>
+                          <span className="font-bold text-[#181343] tabular-nums">
+                            {p.programCount} Program
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-slate-500 shrink-0">Fokus Utama</span>
+                          <span className="font-medium text-slate-700 truncate" title={p.focusSummary}>
+                            {p.focusSummary}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5">
+                        {p.linkedSdgs.map((sdgId) => {
+                          const sdgInfo = ALL_17_SDGS.find((g) => g.id === sdgId);
+                          return (
+                            <button
+                              key={sdgId}
+                              type="button"
+                              onClick={() => handleSelectSdg(sdgId)}
+                              className="text-[10px] font-bold px-2 py-0.5 rounded-md text-white hover:opacity-90 cursor-pointer"
+                              style={{ backgroundColor: sdgInfo?.color || "#475569" }}
+                              title={`${sdgInfo?.code}: ${sdgInfo?.name}`}
+                            >
+                              SDG {sdgId}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* Program Stats & Coverage Status */}
-                    <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
-                      {item.isCovered ? (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-extrabold text-slate-900">
-                            {item.programCount} Program
-                          </span>
-                          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                            {item.percentage}% Portofolio
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-[11px] font-semibold text-slate-400 bg-slate-100 px-2.5 py-0.5 rounded-md border border-slate-200">
-                          0 Program (Belum Tercakup)
-                        </span>
-                      )}
-
-                      <ChevronRight
-                        className={`w-4 h-4 text-slate-400 group-hover:text-slate-800 transition-transform ${
-                          isSelected ? "rotate-90 text-[#181343]" : ""
-                        }`}
-                      />
-                    </div>
+                    <Button
+                      type="button"
+                      variant={isPillarActive ? "primary" : "outline"}
+                      size="sm"
+                      onClick={() => handleSelectPillar(p.pillar)}
+                      className="w-full text-xs font-semibold cursor-pointer"
+                    >
+                      {isPillarActive ? `Hapus Filter Pilar ${p.pillar}` : `Lihat Program Pilar ${p.pillar}`}
+                    </Button>
                   </div>
+                );
+              })}
+            </div>
 
-                  {/* Horizontal Bar Graphic */}
-                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                    {item.isCovered ? (
-                      <div
-                        className="h-full rounded-full transition-all duration-500 shadow-2xs"
-                        style={{
-                          width: `${relativeWidth}%`,
-                          backgroundColor: item.sdg.color,
-                        }}
-                      />
+            {/* Analisis Kesenjangan (Clean 4-Col Grid Tanpa Kartu Pastel) */}
+            <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 space-y-5">
+              <div>
+                <h2 className="text-base font-bold text-[#181343]">
+                  Analisis Kesenjangan &amp; Wawasan Strategis
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Ringkasan sasaran yang paling terdukung, inisiatif rintisan, dan ruang diversifikasi program.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-3">
+                  <div>
+                    <span className="text-xs font-bold text-[#181343] block">Paling Banyak Didukung</span>
+                    <span className="text-[11px] text-slate-500">Kontribusi tertinggi saat ini</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {gapAnalysis.topSupportedSdgs.length > 0 ? (
+                      gapAnalysis.topSupportedSdgs.map((item) => (
+                        <button
+                          type="button"
+                          key={item.sdg.id}
+                          onClick={() => handleSelectSdg(item.sdg.id)}
+                          className="w-full flex items-center justify-between text-xs p-2 rounded-lg bg-white border border-[#E5E7EB] hover:border-slate-300 text-left cursor-pointer"
+                        >
+                          <span className="font-semibold text-[#181343] truncate pr-2">
+                            {item.sdg.code}: {item.sdg.name}
+                          </span>
+                          <span className="font-bold text-[#059669] shrink-0 tabular-nums">
+                            {item.programCount}
+                          </span>
+                        </button>
+                      ))
                     ) : (
-                      <div className="h-full w-full bg-slate-200/50" />
+                      <span className="text-xs text-slate-500">Belum ada data</span>
                     )}
                   </div>
                 </div>
-              );
-            })
-          )}
-        </div>
 
-        {/* Calculation Method Info Notice */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600 leading-relaxed">
-          <Info className="w-4 h-4 text-slate-500 shrink-0 mt-0.5" />
-          <div>
-            <strong className="text-slate-800">Metode Perhitungan & Penyelarasan:</strong> Satu program CSR dapat berkontribusi secara holistik pada beberapa SDGs secara bersamaan (misal program air bersih mendukung SDG 6 dan SDG 3). Akumulasi kontribusi dihitung berdasarkan pemetaan sasaran intervensi program, sehingga total frekuensi kontribusi pada grafik dapat melampaui jumlah program unik.
-          </div>
-        </div>
-      </div>
+                <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-3">
+                  <div>
+                    <span className="text-xs font-bold text-[#181343] block">Kontribusi Minimal</span>
+                    <span className="text-[11px] text-slate-500">Sasaran dengan frekuensi rendah</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {gapAnalysis.leastCoveredSdgs.length > 0 ? (
+                      gapAnalysis.leastCoveredSdgs.map((item) => (
+                        <button
+                          type="button"
+                          key={item.sdg.id}
+                          onClick={() => handleSelectSdg(item.sdg.id)}
+                          className="w-full flex items-center justify-between text-xs p-2 rounded-lg bg-white border border-[#E5E7EB] hover:border-slate-300 text-left cursor-pointer"
+                        >
+                          <span className="font-semibold text-[#181343] truncate pr-2">
+                            {item.sdg.code}: {item.sdg.name}
+                          </span>
+                          <span className="font-bold text-amber-700 shrink-0 tabular-nums">
+                            {item.programCount}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <span className="text-xs text-slate-500">Belum ada data</span>
+                    )}
+                  </div>
+                </div>
 
-      {/* ========================================================================= */}
-      {/* 5. PENGELOMPOKAN KE TIGA PILAR ESG (3 CARDS) */}
-      {/* ========================================================================= */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-lg font-black text-slate-900 tracking-tight">
-            Pengelompokan ke Tiga Pilar ESG
-          </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Portofolio program CSR dikelompokkan secara objektif mengikuti klasifikasi keterkaitan SDGs pada pilar Environmental, Social, dan Governance.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {esgPillars.map((p) => {
-            const isPillarActive = selectedPillar === p.pillar;
-
-            return (
-              <div
-                key={p.pillar}
-                className={`p-6 rounded-3xl bg-white border transition-all space-y-4 relative overflow-hidden flex flex-col justify-between ${
-                  isPillarActive
-                    ? "border-[#181343] ring-2 ring-[#181343]/15 shadow-md"
-                    : "border-slate-200/90 shadow-xs hover:shadow-md hover:border-slate-300"
-                }`}
-              >
-                {/* Accent top stripe */}
-                <div
-                  className={`w-full h-1.5 absolute left-0 top-0 ${
-                    p.pillar === "E"
-                      ? "bg-emerald-600"
-                      : p.pillar === "S"
-                      ? "bg-blue-600"
-                      : "bg-purple-600"
-                  }`}
-                />
-
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-sm ${
-                          p.pillar === "E"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : p.pillar === "S"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-purple-100 text-purple-800"
-                        }`}
-                      >
-                        {p.pillar === "E" ? (
-                          <Leaf className="w-4 h-4" />
-                        ) : p.pillar === "S" ? (
-                          <Users className="w-4 h-4" />
-                        ) : (
-                          <ShieldCheck className="w-4 h-4" />
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                          Pilar {p.pillar}
-                        </span>
-                        <h3 className="text-base font-black text-slate-900 leading-tight">
-                          {p.name}
-                        </h3>
-                      </div>
-                    </div>
-
-                    <span
-                      className={`text-xs font-black px-2.5 py-1 rounded-xl border ${p.badgeClass}`}
-                    >
-                      {p.percentage}% Program
+                <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-3">
+                  <div>
+                    <span className="text-xs font-bold text-[#181343] block">Belum Tercakup</span>
+                    <span className="text-[11px] text-slate-500">
+                      {gapAnalysis.uncoveredSdgs.length} sasaran belum teralokasi
                     </span>
                   </div>
+                  <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto">
+                    {gapAnalysis.uncoveredSdgs.map((item) => (
+                      <span
+                        key={item.sdg.id}
+                        className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-white border border-[#E5E7EB] text-slate-600"
+                      >
+                        SDG {item.sdg.id}
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed min-h-[36px]">
-                    {p.subtitle}
-                  </p>
-
-                  {/* Program stats bar */}
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
+                <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-3">
+                  <div>
+                    <span className="text-xs font-bold text-[#181343] block">Keseimbangan Pilar</span>
+                    <span className="text-[11px] text-slate-500">Distribusi program lintas pilar</span>
+                  </div>
+                  <div className="space-y-2 text-xs pt-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-medium">Program Terkait:</span>
-                      <span className="font-black text-slate-900">{p.programCount} Program</span>
+                      <span className="text-slate-600">Environmental (E)</span>
+                      <span className="font-bold text-[#181343] tabular-nums">
+                        {gapAnalysis.pillarDistribution.environmental} Program
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-medium">Fokus Kontribusi:</span>
-                      <span className="font-semibold text-slate-700 truncate max-w-[170px]" title={p.focusSummary}>
-                        {p.focusSummary}
+                      <span className="text-slate-600">Social (S)</span>
+                      <span className="font-bold text-[#181343] tabular-nums">
+                        {gapAnalysis.pillarDistribution.social} Program
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-600">Governance (G)</span>
+                      <span className="font-bold text-[#181343] tabular-nums">
+                        {gapAnalysis.pillarDistribution.governance} Program
                       </span>
                     </div>
                   </div>
-
-                  {/* Connected SDGs Badges */}
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
-                      SDGs Terhubung ({p.linkedSdgs.length} Sasaran):
-                    </span>
-                    <div className="flex flex-wrap gap-1">
-                      {p.linkedSdgs.map((sdgId) => {
-                        const sdgInfo = ALL_17_SDGS.find((g) => g.id === sdgId);
-                        return (
-                          <button
-                            key={sdgId}
-                            type="button"
-                            onClick={() => handleSelectSdg(sdgId)}
-                            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md text-white shadow-2xs hover:opacity-90 transition-opacity cursor-pointer"
-                            style={{ backgroundColor: sdgInfo?.color || "#475569" }}
-                            title={`${sdgInfo?.code}: ${sdgInfo?.name}`}
-                          >
-                            <span>SDG {sdgId}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
                 </div>
+              </div>
 
-                {/* Filter Action Button */}
-                <div className="pt-2">
+              <p className="pt-4 border-t border-slate-100 text-xs text-slate-500 leading-relaxed flex items-start gap-2">
+                <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                <span>
+                  Sasaran SDGs yang belum tercakup dapat dijadikan pertimbangan bersama hasil kajian kebutuhan wilayah untuk penyusunan prioritas CSR berikutnya.
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: DAFTAR PROGRAM TERKAIT SDGS & ESG */}
+        {activeTab === "programs" && (
+          <div ref={programTableRef} className="rounded-2xl bg-white border border-[#E5E7EB] overflow-hidden">
+            {filteredPrograms.length === 0 ? (
+              <div className="py-14 px-6 text-center space-y-3">
+                <FileText className="w-7 h-7 mx-auto text-slate-400" />
+                <p className="text-sm font-bold text-[#181343]">
+                  Tidak ada program yang sesuai dengan filter
+                </p>
+                <p className="text-xs text-slate-600">
+                  Ubah kata kunci pencarian atau pilih reset filter untuk menampilkan semua program.
+                </p>
+                {isAnyFilterActive && (
                   <Button
                     type="button"
-                    variant={isPillarActive ? "primary" : "outline"}
+                    variant="outline"
                     size="sm"
-                    onClick={() => handleSelectPillar(p.pillar)}
-                    className={`w-full text-xs font-bold rounded-xl h-9 cursor-pointer ${
-                      isPillarActive
-                        ? "bg-[#181343] text-white hover:bg-[#211a5b]"
-                        : "border-slate-200 text-slate-700 hover:bg-slate-50"
-                    }`}
+                    onClick={handleResetFilters}
+                    leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                    className="text-xs font-semibold cursor-pointer"
                   >
-                    {isPillarActive ? `Hapus Filter Pilar ${p.pillar}` : `Lihat Program Pilar ${p.pillar}`}
+                    Reset Filter
                   </Button>
-                </div>
+                )}
               </div>
-            );
-          })}
-        </div>
-      </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse min-w-[780px]">
+                  <thead>
+                    <tr className="border-b border-[#E5E7EB] text-slate-600 font-bold bg-slate-50/70">
+                      <th className="py-3.5 px-5">Program &amp; Lokasi</th>
+                      <th className="py-3.5 px-4">{role === "COMPANY" ? "Mitra Pelaksana" : "Perusahaan Sponsor"}</th>
+                      <th className="py-3.5 px-4">SDGs</th>
+                      <th className="py-3.5 px-4">Pilar</th>
+                      <th className="py-3.5 px-4 text-right">Pagu</th>
+                      <th className="py-3.5 px-4">Status</th>
+                      {onOpenProgramDetail && <th className="py-3.5 px-5 text-right">Aksi</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredPrograms.map((prog) => {
+                      const sdgIds = getProgramSdgs(prog);
+                      const pillars = getProgramEsgPillars(prog);
 
-      {/* ========================================================================= */}
-      {/* 6. ANALISIS KESENJANGAN KONTRIBUSI SDGS (STRATEGIC GAP ANALYSIS) */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
-        <div>
-          <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
-            Analisis Kesenjangan & Wawasan Sasaran SDGs
-          </h2>
-          <p className="text-xs text-slate-500 mt-1 max-w-2xl leading-relaxed">
-            Tinjauan berbasis data aktual untuk membantu perusahaan mempertimbangkan prioritas program CSR, mengidentifikasi capaian, serta memetakan peluang diversifikasi dampak.
-          </p>
-        </div>
-
-        {/* 4 Strategic Gap Insights Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Card 1: SDGs Paling Banyak Didukung */}
-          <div className="p-5 rounded-2xl border border-blue-200 bg-blue-50/40 space-y-3 flex flex-col justify-between">
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-blue-800 uppercase tracking-wider block">
-                Fokus Utama Tercakup
-              </span>
-              <h3 className="text-sm font-extrabold text-slate-900">
-                SDGs Paling Banyak Didukung
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Kategori sasaran dengan dukungan program CSR tertinggi:
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {gapAnalysis.topSupportedSdgs.length > 0 ? (
-                gapAnalysis.topSupportedSdgs.map((item) => (
-                  <div
-                    key={item.sdg.id}
-                    onClick={() => handleSelectSdg(item.sdg.id)}
-                    className="flex items-center justify-between text-xs p-2 rounded-xl bg-white border border-blue-100 shadow-2xs hover:border-blue-300 transition-colors cursor-pointer"
-                  >
-                    <span className="font-bold text-slate-800 truncate max-w-[140px]">
-                      {item.sdg.code}: {item.sdg.name}
-                    </span>
-                    <span className="font-extrabold text-blue-700 shrink-0">
-                      {item.programCount} Program
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <span className="text-xs text-slate-400 italic">Belum ada program</span>
-              )}
-            </div>
-          </div>
-
-          {/* Card 2: SDGs Masih Sedikit Kontribusi */}
-          <div className="p-5 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-3 flex flex-col justify-between">
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-amber-800 uppercase tracking-wider block">
-                Inisiatif Rintisan
-              </span>
-              <h3 className="text-sm font-extrabold text-slate-900">
-                SDGs Sedikit Kontribusi
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Sasaran yang telah tersentuh namun frekuensinya masih minimal:
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {gapAnalysis.leastCoveredSdgs.length > 0 ? (
-                gapAnalysis.leastCoveredSdgs.map((item) => (
-                  <div
-                    key={item.sdg.id}
-                    onClick={() => handleSelectSdg(item.sdg.id)}
-                    className="flex items-center justify-between text-xs p-2 rounded-xl bg-white border border-amber-100 shadow-2xs hover:border-amber-300 transition-colors cursor-pointer"
-                  >
-                    <span className="font-bold text-slate-800 truncate max-w-[140px]">
-                      {item.sdg.code}: {item.sdg.name}
-                    </span>
-                    <span className="font-extrabold text-amber-700 shrink-0">
-                      {item.programCount} Program
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <span className="text-xs text-slate-400 italic">Belum ada data</span>
-              )}
-            </div>
-          </div>
-
-          {/* Card 3: SDGs Belum Tercakup */}
-          <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3 flex flex-col justify-between">
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
-                Ruang Diversifikasi
-              </span>
-              <h3 className="text-sm font-extrabold text-slate-900">
-                SDGs Belum Tercakup
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Terdapat <strong>{gapAnalysis.uncoveredSdgs.length} sasaran</strong> tanpa alokasi program saat ini.
-              </p>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-1">
-                {gapAnalysis.uncoveredSdgs.map((item) => (
-                  <span
-                    key={item.sdg.id}
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600"
-                  >
-                    SDG {item.sdg.id}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: Distribusi Pilar ESG */}
-          <div className="p-5 rounded-2xl border border-purple-200 bg-purple-50/40 space-y-3 flex flex-col justify-between">
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold text-purple-800 uppercase tracking-wider block">
-                Keseimbangan Pilar
-              </span>
-              <h3 className="text-sm font-extrabold text-slate-900">
-                Distribusi 3 Pilar ESG
-              </h3>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Proporsi keterkaitan pilar pada keseluruhan portofolio:
-              </p>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-emerald-800">Environmental (E):</span>
-                <span className="font-bold text-slate-900">{gapAnalysis.pillarDistribution.environmental} Program</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-blue-800">Social (S):</span>
-                <span className="font-bold text-slate-900">{gapAnalysis.pillarDistribution.social} Program</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-purple-800">Governance (G):</span>
-                <span className="font-bold text-slate-900">{gapAnalysis.pillarDistribution.governance} Program</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Objective Strategic Consideration Notice */}
-        <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 flex items-start gap-3 text-xs text-amber-900 leading-relaxed">
-          <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-          <div>
-            <strong className="text-amber-950 font-bold">Catatan Pertimbangan Strategis:</strong> SDGs dengan jumlah kontribusi yang sedikit atau belum tercakup sama sekali bukan secara otomatis menandakan kebutuhan masyarakat paling mendesak di sektor tersebut. Jadikan hasil analisis kesenjangan ini sebagai bahan pertimbangan bersama data kajian kebutuhan wilayah (needs assessment) dan peta prioritas strategis CSR jangka menengah perusahaan Anda.
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 7. RINCIAN PROGRAM TERKAIT SDGS & PILAR ESG (DRILLDOWN TABLE) */}
-      {/* ========================================================================= */}
-      <div
-        ref={programTableRef}
-        className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 sm:p-8 space-y-6"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">
-              Rincian Program Terkait SDGs & Pilar ESG
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Daftar program CSR yang memenuhi kriteria filter dengan rincian keterkaitan sasaran SDGs dan pilar keberlanjutan.
-            </p>
-          </div>
-
-          <div className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl self-start sm:self-auto">
-            {filteredPrograms.length} Program Ditemukan
-          </div>
-        </div>
-
-        {/* Table of Filtered Programs */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-400 uppercase tracking-wider text-[10px]">
-                <th className="pb-3 font-bold">Nama Program & Lokasi</th>
-                <th className="pb-3 font-bold">{role === "COMPANY" ? "Mitra Pelaksana" : "Perusahaan Sponsor"}</th>
-                <th className="pb-3 font-bold">Keterkaitan SDGs</th>
-                <th className="pb-3 font-bold">Pilar ESG</th>
-                <th className="pb-3 font-bold">Anggaran Disepakati</th>
-                <th className="pb-3 font-bold">Status</th>
-                {onOpenProgramDetail && <th className="pb-3 font-bold text-right">Aksi</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredPrograms.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 space-y-2">
-                    <FileText className="w-8 h-8 mx-auto text-slate-300" />
-                    <p className="text-sm font-bold text-slate-700">
-                      Tidak Ada Program yang Cocok dengan Filter
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      Silakan sesuaikan kriteria pencarian atau klik reset filter.
-                    </p>
-                    {isAnyFilterActive && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleResetFilters}
-                        leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
-                        className="mt-2 text-xs font-bold"
-                      >
-                        Reset Filter
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              ) : (
-                filteredPrograms.map((prog) => {
-                  const sdgIds = getProgramSdgs(prog);
-                  const pillars = getProgramEsgPillars(prog);
-
-                  return (
-                    <tr key={prog.id} className="hover:bg-slate-50/70 transition-colors">
-                      {/* Program Title & Location */}
-                      <td className="py-3.5 pr-3 max-w-[240px]">
-                        <div className="font-bold text-slate-900 leading-snug truncate" title={prog.title}>
-                          {prog.title}
-                        </div>
-                        {(prog.targetCity || prog.targetProvince) && (
-                          <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5 truncate">
-                            <MapPin className="w-3 h-3 shrink-0" />
-                            {[prog.targetCity, prog.targetProvince].filter(Boolean).join(", ")}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Partner / Sponsor */}
-                      <td className="py-3.5 pr-3 text-slate-700 font-semibold max-w-[160px] truncate">
-                        {role === "COMPANY"
-                          ? prog.partnerName || "Mitra Pelaksana"
-                          : prog.companyName || "Perusahaan Donor"}
-                      </td>
-
-                      {/* Linked SDGs */}
-                      <td className="py-3.5 pr-3">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {sdgIds.map((id) => {
-                            const sdgInfo = ALL_17_SDGS.find((g) => g.id === id);
-                            return (
-                              <span
-                                key={id}
-                                className="text-[10px] font-bold px-1.5 py-0.5 rounded text-white shadow-2xs"
-                                style={{ backgroundColor: sdgInfo?.color || "#475569" }}
-                                title={`${sdgInfo?.code}: ${sdgInfo?.name}`}
-                              >
-                                SDG {id}
+                      return (
+                        <tr key={prog.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="py-4 px-5 max-w-[260px]">
+                            <p className="font-bold text-[#181343] truncate" title={prog.title}>
+                              {prog.title}
+                            </p>
+                            {(prog.targetCity || prog.targetProvince) && (
+                              <span className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+                                <MapPin className="w-3 h-3 shrink-0 text-slate-400" />
+                                {[prog.targetCity, prog.targetProvince].filter(Boolean).join(", ")}
                               </span>
-                            );
-                          })}
-                        </div>
-                      </td>
+                            )}
+                          </td>
 
-                      {/* ESG Pillars */}
-                      <td className="py-3.5 pr-3">
-                        <div className="flex items-center gap-1">
-                          {pillars.map((pil) => (
+                          <td className="py-4 px-4 text-slate-700 font-medium max-w-[170px] truncate">
+                            {role === "COMPANY"
+                              ? prog.partnerName || "Mitra Pelaksana"
+                              : prog.companyName || "Perusahaan Donor"}
+                          </td>
+
+                          <td className="py-4 px-4">
+                            <div className="flex flex-wrap gap-1 max-w-[180px]">
+                              {sdgIds.map((id) => {
+                                const sdgInfo = ALL_17_SDGS.find((g) => g.id === id);
+                                return (
+                                  <span
+                                    key={id}
+                                    className="text-[10px] font-bold px-1.5 py-0.5 rounded text-white"
+                                    style={{ backgroundColor: sdgInfo?.color || "#475569" }}
+                                    title={`${sdgInfo?.code}: ${sdgInfo?.name}`}
+                                  >
+                                    {id}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </td>
+
+                          <td className="py-4 px-4">
+                            <div className="flex items-center gap-1">
+                              {pillars.map((pil) => (
+                                <span
+                                  key={pil}
+                                  className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-[#181343]"
+                                >
+                                  {pil}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+
+                          <td className="py-4 px-4 text-right font-bold text-[#181343] tabular-nums">
+                            {formatRupiah(prog.budget)}
+                          </td>
+
+                          <td className="py-4 px-4">
                             <span
-                              key={pil}
-                              className={`text-[10px] font-black px-2 py-0.5 rounded-md ${
-                                pil === "E"
-                                  ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
-                                  : pil === "S"
-                                  ? "bg-blue-100 text-blue-800 border border-blue-200"
-                                  : "bg-purple-100 text-purple-800 border border-purple-200"
+                              className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-md ${
+                                prog.status === "COMPLETED"
+                                  ? "bg-emerald-50 text-[#047857]"
+                                  : prog.status === "IN_PROGRESS"
+                                  ? "bg-[#F0EFF8] text-[#181343]"
+                                  : "bg-slate-100 text-slate-600"
                               }`}
                             >
-                              Pilar {pil}
+                              {prog.status === "COMPLETED"
+                                ? "Selesai"
+                                : prog.status === "IN_PROGRESS"
+                                ? "Sedang Berjalan"
+                                : prog.status === "PLANNED"
+                                ? "Persiapan"
+                                : prog.status}
                             </span>
-                          ))}
-                        </div>
-                      </td>
+                          </td>
 
-                      {/* Budget */}
-                      <td className="py-3.5 pr-3 font-semibold text-slate-800">
-                        {formatRupiah(prog.budget)}
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3.5 pr-3">
-                        <span
-                          className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${
-                            prog.status === "COMPLETED"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : prog.status === "IN_PROGRESS"
-                              ? "bg-blue-50 text-blue-700 border border-blue-200"
-                              : "bg-slate-100 text-slate-600 border border-slate-200"
-                          }`}
-                        >
-                          {prog.status === "COMPLETED"
-                            ? "Selesai"
-                            : prog.status === "IN_PROGRESS"
-                            ? "Sedang Berjalan"
-                            : prog.status === "PLANNED"
-                            ? "Persiapan"
-                            : prog.status}
-                        </span>
-                      </td>
-
-                      {/* Action */}
-                      {onOpenProgramDetail && (
-                        <td className="py-3.5 text-right">
-                          <button
-                            type="button"
-                            onClick={() => onOpenProgramDetail(prog)}
-                            className="text-xs font-semibold text-[#181343] hover:text-[#26224C] hover:underline inline-flex items-center gap-1 cursor-pointer"
-                          >
-                            <span>Detail</span>
-                            <ArrowUpRight className="w-3.5 h-3.5" />
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                          {onOpenProgramDetail && (
+                            <td className="py-4 px-5 text-right">
+                              <button
+                                type="button"
+                                onClick={() => onOpenProgramDetail(prog)}
+                                className="text-xs font-semibold text-[#181343] hover:text-[#059669] inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>Detail</span>
+                                <ArrowUpRight className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}

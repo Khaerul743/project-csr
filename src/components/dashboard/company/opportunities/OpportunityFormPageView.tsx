@@ -837,7 +837,7 @@ export function OpportunityFormPageView({
 
               <SearchableSelect
                 label="Kota / Kabupaten Sasaran *"
-                placeholder={targetProvince ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
+                placeholder="Pilih Kota / Kabupaten..."
                 value={targetCity}
                 onChange={setTargetCity}
                 options={cityOptions}

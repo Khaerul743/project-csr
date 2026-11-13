@@ -907,7 +907,7 @@ export function EditPartnerProfilePageView({
                   {/* Kota / Kabupaten */}
                   <SearchableSelect
                     label="Kota / Kabupaten"
-                    placeholder={province ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
+                    placeholder="Pilih Kota / Kabupaten..."
                     value={city}
                     onChange={setCity}
                     options={cityOptions}

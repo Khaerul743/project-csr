@@ -51,7 +51,7 @@ export class CollaborationController {
   async update(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN", "PARTNER_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "PARTNER_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = updateCollaborationSchema.parse(body);
