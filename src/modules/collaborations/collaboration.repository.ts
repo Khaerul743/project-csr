@@ -17,6 +17,8 @@ export class CollaborationRepository {
         opportunityTitle: opportunities.title,
         opportunityFocusArea: opportunities.focusArea,
         opportunityTargetCity: opportunities.targetCity,
+        opportunityTargetProvince: opportunities.targetProvince,
+        opportunityDescription: opportunities.description,
         proposalTitle: proposals.title,
         proposalSummary: proposals.summary,
         proposedBudget: proposals.proposedBudget,
@@ -49,6 +51,8 @@ export class CollaborationRepository {
       opportunityTitle: r.opportunityTitle,
       opportunityFocusArea: r.opportunityFocusArea,
       opportunityTargetCity: r.opportunityTargetCity,
+      opportunityTargetProvince: r.opportunityTargetProvince,
+      opportunityDescription: r.opportunityDescription,
       proposalTitle: r.proposalTitle,
       proposalSummary: r.proposalSummary,
       proposedBudget: r.proposedBudget,
@@ -108,6 +112,8 @@ export class CollaborationRepository {
         opportunityTitle: opportunities.title,
         opportunityFocusArea: opportunities.focusArea,
         opportunityTargetCity: opportunities.targetCity,
+        opportunityTargetProvince: opportunities.targetProvince,
+        opportunityDescription: opportunities.description,
         proposalTitle: proposals.title,
         proposalSummary: proposals.summary,
         proposedBudget: proposals.proposedBudget,
@@ -139,6 +145,8 @@ export class CollaborationRepository {
       opportunityTitle: r.opportunityTitle,
       opportunityFocusArea: r.opportunityFocusArea,
       opportunityTargetCity: r.opportunityTargetCity,
+      opportunityTargetProvince: r.opportunityTargetProvince,
+      opportunityDescription: r.opportunityDescription,
       proposalTitle: r.proposalTitle,
       proposalSummary: r.proposalSummary,
       proposedBudget: r.proposedBudget,
@@ -200,6 +208,8 @@ export class CollaborationRepository {
         opportunityTitle: opportunities.title,
         opportunityFocusArea: opportunities.focusArea,
         opportunityTargetCity: opportunities.targetCity,
+        opportunityTargetProvince: opportunities.targetProvince,
+        opportunityDescription: opportunities.description,
         proposalTitle: proposals.title,
         proposalSummary: proposals.summary,
         proposedBudget: proposals.proposedBudget,
@@ -231,6 +241,8 @@ export class CollaborationRepository {
       opportunityTitle: r.opportunityTitle,
       opportunityFocusArea: r.opportunityFocusArea,
       opportunityTargetCity: r.opportunityTargetCity,
+      opportunityTargetProvince: r.opportunityTargetProvince,
+      opportunityDescription: r.opportunityDescription,
       proposalTitle: r.proposalTitle,
       proposalSummary: r.proposalSummary,
       proposedBudget: r.proposedBudget,
@@ -398,6 +410,16 @@ export class CollaborationRepository {
 
       return updated;
     });
+  }
+
+  async saveImpactPrediction(id: string, predictionJson: string): Promise<void> {
+    await db
+      .update(collaborations)
+      .set({
+        impactPrediction: predictionJson,
+        impactPredictedAt: new Date(),
+      })
+      .where(eq(collaborations.id, id));
   }
 }
 

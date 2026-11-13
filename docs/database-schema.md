@@ -187,6 +187,8 @@ Menyimpan kredensial autentikasi pengguna dan pemetaan ke organisasi. Dilengkapi
 - `agreedBudget` (DECIMAL(15,2), NULLABLE): Nilai anggaran final yang disepakati.
 - `startDate`, `endDate` (TIMESTAMP, NULLABLE): Jadwal resmi kemitraan.
 - `status` (ENUM: `'NEGOTIATION'`, `'MOU_DRAFTING'`, `'AGREED'`, `'REJECTED'`, `'TERMINATED'`).
+- `impactPrediction` (TEXT, NULLABLE): 🆕 Serialisasi JSON hasil estimasi output, proyeksi outcome, rekomendasi KPI MoU, dan risiko wilayah dari AI.
+- `impactPredictedAt` (TIMESTAMP, NULLABLE): 🆕 Waktu simulasi AI dampak dijalankan.
 - `finalizedBy` (VARCHAR(36), FK $\rightarrow$ `users.id`).
 - `finalizedAt` (TIMESTAMP).
 

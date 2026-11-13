@@ -75,5 +75,21 @@ export class CollaborationController {
       return ErrorHandler.handle(error);
     }
   }
+
+  async predictImpact(request: Request, id: string): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const result = await this.collaborationService.predictImpact(id, {
+        companyId: authUser.companyId,
+        role: authUser.role,
+      });
+
+      return ApiResponse.success(result, "Prediksi potensi dampak program berhasil dijalankan");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
 }
 

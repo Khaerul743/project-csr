@@ -33,6 +33,8 @@ export const collaborations = mysqlTable("collaborations", {
   endDate: timestamp("end_date"),
   mouDocumentUrl: text("mou_document_url"),
   notes: text("notes"),
+  impactPrediction: text("impact_prediction"),
+  impactPredictedAt: timestamp("impact_predicted_at"),
   status: mysqlEnum("status", collaborationStatusEnum).notNull().default("NEGOTIATION"),
   agreedAt: timestamp("agreed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

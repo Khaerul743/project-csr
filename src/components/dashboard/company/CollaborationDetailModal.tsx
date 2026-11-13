@@ -27,6 +27,9 @@ import {
   Loader2,
   ShieldCheck,
   Send,
+  Copy,
+  Target,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -112,6 +115,11 @@ export function CollaborationDetailModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // AI Impact Prediction States
+  const [isPredictingAi, setIsPredictingAi] = useState(false);
+  const [impactResult, setImpactResult] = useState<any>(null);
+  const [isKpiCopied, setIsKpiCopied] = useState(false);
+
   useEffect(() => {
     if (collaboration) {
       setFinalBudget(collaboration.finalBudget ? String(parseFloat(collaboration.finalBudget)) : "");
@@ -131,6 +139,17 @@ export function CollaborationDetailModal({
       setMilestones(plan.milestones || []);
       setMilestonePlanStatus(plan.milestonePlanStatus || "DRAFT");
       setPartnerFeedback(plan.partnerFeedback || "");
+
+      // Parse stored AI impact prediction if available
+      if (collaboration.impactPrediction) {
+        try {
+          setImpactResult(JSON.parse(collaboration.impactPrediction));
+        } catch {
+          setImpactResult(null);
+        }
+      } else {
+        setImpactResult(null);
+      }
     }
   }, [collaboration]);
 
@@ -299,6 +318,48 @@ export function CollaborationDetailModal({
         return filtered.map((m, idx) => ({ ...m, orderIndex: idx + 1 }));
       });
     }
+  };
+
+  // AI Impact Prediction Handlers
+  const handleRunImpactPrediction = async () => {
+    if (!collaboration) return;
+    setIsPredictingAi(true);
+    setErrorMsg(null);
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      if (!token) throw new Error("Sesi login telah berakhir");
+
+      const res = await fetch(`/api/collaborations/${collaboration.id}/impact-prediction`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message || "Gagal memproses simulasi dampak AI");
+      }
+
+      setImpactResult(json.data);
+      if (onSuccess) onSuccess();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Gagal menjalankan simulasi prediksi dampak AI");
+    } finally {
+      setIsPredictingAi(false);
+    }
+  };
+
+  const handleApplyKpiToNotes = () => {
+    if (!impactResult?.keySuccessIndicators || impactResult.keySuccessIndicators.length === 0) return;
+    const kpiText = impactResult.keySuccessIndicators
+      .map((k: any, i: number) => `${i + 1}. ${k.indicator}: Target ${k.target} (Verifikasi: ${k.verification})`)
+      .join("\n");
+
+    const header = "Indikator Keberhasilan (Target KPI Rekomendasi AI):";
+    setNotes((prev) => (prev ? `${prev}\n\n${header}\n${kpiText}` : `${header}\n${kpiText}`));
+    setIsKpiCopied(true);
+    setTimeout(() => setIsKpiCopied(false), 2000);
   };
 
   // Submit to Partner for Confirmation
@@ -915,6 +976,162 @@ export function CollaborationDetailModal({
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+              </div>
+
+              {/* ======================================================== */}
+              {/* SECTION: PREDIKSI POTENSI DAMPAK PROGRAM (AI IMPACT PREDICTION) */}
+              {/* ======================================================== */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3.5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-700 border border-teal-500/20 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-[#181343]">
+                          Prediksi Potensi Dampak AI
+                        </h4>
+                        {impactResult && (
+                          <span
+                            className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
+                              impactResult.overallImpactScore >= 80
+                                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                : impactResult.overallImpactScore >= 60
+                                ? "bg-amber-50 text-amber-800 border-amber-200"
+                                : "bg-rose-50 text-rose-800 border-rose-200"
+                            }`}
+                          >
+                            Skor: {impactResult.overallImpactScore}/100 • {impactResult.impactLevelLabel || impactResult.impactLevel}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-[#787680] truncate">
+                        Estimasi hasil terukur dan rekomendasi indikator keberhasilan sebelum pengesahan MoU.
+                      </p>
+                    </div>
+                  </div>
+
+                  {aiEnabled && !isAgreed && !isCancelled && (
+                    <Button
+                      type="button"
+                      variant={impactResult ? "outline" : "primary"}
+                      size="sm"
+                      disabled={isPredictingAi}
+                      onClick={handleRunImpactPrediction}
+                      className={`text-xs rounded-xl shrink-0 cursor-pointer ${
+                        impactResult
+                          ? "border-[#E8E8EA] text-slate-700 hover:bg-slate-50"
+                          : "bg-[#181343] hover:bg-[#25205c] text-white font-semibold shadow-2xs"
+                      }`}
+                      leftIcon={
+                        isPredictingAi ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : impactResult ? (
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        ) : (
+                          <Sparkles className="w-3.5 h-3.5" />
+                        )
+                      }
+                    >
+                      {isPredictingAi
+                        ? "Menganalisis..."
+                        : impactResult
+                        ? "Simulasi Ulang"
+                        : "Simulasikan Dampak AI"}
+                    </Button>
+                  )}
+                </div>
+
+                {impactResult ? (
+                  <div className="space-y-3 pt-1">
+                    {/* Ringkasan Eksekutif Super Padat (1-2 kalimat) */}
+                    {impactResult.executiveSummary && (
+                      <p className="text-xs text-slate-700 leading-relaxed bg-[#F9F9FB] p-3 rounded-xl border border-[#E8E8EA]">
+                        "{impactResult.executiveSummary}"
+                      </p>
+                    )}
+
+                    {/* Metrik Capaian Utama (Grid 3 Kolom Ringkas) */}
+                    {impactResult.projectedOutputs && impactResult.projectedOutputs.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {impactResult.projectedOutputs.slice(0, 3).map((out: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-0.5"
+                          >
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block truncate">
+                              {out.metric}
+                            </span>
+                            <span className="text-xs font-bold text-[#181343] block truncate">
+                              {out.estimate}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Rekomendasi Indikator Keberhasilan (KPI) */}
+                    {impactResult.keySuccessIndicators && impactResult.keySuccessIndicators.length > 0 && (
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            Indikator Keberhasilan (KPI Rekomendasi)
+                          </span>
+                          {!isAgreed && !isCancelled && (
+                            <button
+                              type="button"
+                              onClick={handleApplyKpiToNotes}
+                              className="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 transition cursor-pointer"
+                            >
+                              <Copy className="w-3 h-3" />
+                              <span>{isKpiCopied ? "Tersalin ke Catatan!" : "Terapkan ke Catatan MoU"}</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          {impactResult.keySuccessIndicators.slice(0, 3).map((kpi: any, idx: number) => (
+                            <div
+                              key={idx}
+                              className="p-2.5 rounded-xl bg-white border border-[#E8E8EA] flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 text-xs"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
+                                <span className="font-semibold text-slate-800 truncate">
+                                  {kpi.indicator}
+                                </span>
+                              </div>
+                              <span className="text-[11px] font-bold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-lg border border-teal-200/70 shrink-0">
+                                Target: {kpi.target}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Catatan Risiko Wilayah (1 Baris Ringkas) */}
+                    {impactResult.regionalRisks && impactResult.regionalRisks.length > 0 && (
+                      <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+                        <div className="min-w-0 leading-relaxed">
+                          <span className="font-bold">Perhatian Wilayah: </span>
+                          <span>{impactResult.regionalRisks[0].risk} </span>
+                          <span className="text-amber-800 font-semibold">
+                            (Mitigasi: {impactResult.regionalRisks[0].mitigation})
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs text-[#787680] flex items-center justify-between gap-3">
+                    <p>
+                      Jalankan simulasi AI untuk memproyeksikan estimasi capaian hasil, efisiensi pagu, dan indikator keberhasilan (KPI) sebelum mengesahkan kesepakatan MoU.
+                    </p>
                   </div>
                 )}
               </div>

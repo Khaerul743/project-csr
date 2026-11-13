@@ -21,6 +21,8 @@ export interface CollaborationWithDetails extends Collaboration {
   opportunityTitle?: string | null;
   opportunityFocusArea?: string | null;
   opportunityTargetCity?: string | null;
+  opportunityTargetProvince?: string | null;
+  opportunityDescription?: string | null;
   proposalTitle?: string | null;
   proposalSummary?: string | null;
   proposedBudget?: string | null;

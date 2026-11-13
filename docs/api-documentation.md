@@ -910,6 +910,85 @@ Memperbarui rincian negosiasi (anggaran akhir, tanggal kegiatan, dokumen MoU, ca
 
 ---
 
+### 8.4 Prediksi Potensi Dampak AI (AI Impact Prediction)
+Memperkirakan potensi capaian hasil terukur, proyeksi outcome jangka menengah, mitigasi risiko wilayah, serta merumuskan rekomendasi indikator keberhasilan (KPI) sebelum penandatanganan dan pengesahan akhir MoU. Hasil simulasi disimpan permanen ke kolom `impact_prediction` dan `impact_predicted_at`.
+
+- **Method / Path:** `POST /api/collaborations/:id/impact-prediction`
+- **Auth:** Bearer Token (Role: `MANAGEMENT` | `CSR_ADMIN`)
+- **Headers:** `Authorization: Bearer <token>`
+
+**Response (`200 OK`):**
+```json
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Prediksi potensi dampak program berhasil dijalankan",
+  "data": {
+    "overallImpactScore": 86,
+    "impactLevel": "TINGGI",
+    "impactLevelLabel": "Dampak Signifikan",
+    "executiveSummary": "Program memiliki efisiensi pagu yang kuat untuk memberdayakan 150 KK petani lokal di Karawang melalui transfer keahlian pertanian terpadu.",
+    "projectedOutputs": [
+      {
+        "metric": "Penerima Manfaat Langsung",
+        "estimate": "150 Kepala Keluarga",
+        "unit": "KK"
+      },
+      {
+        "metric": "Cakupan Intervensi Lapangan",
+        "estimate": "100% target wilayah Kab. Karawang",
+        "unit": "Wilayah"
+      },
+      {
+        "metric": "Efisiensi Pagu Dana",
+        "estimate": "Rp 75.000.000",
+        "unit": "Total Budget"
+      }
+    ],
+    "projectedOutcomes": [
+      {
+        "aspect": "EKONOMI",
+        "highlight": "Peningkatan pendapatan petani lokal melalui hilirisasi dan akses pasar mandiri."
+      },
+      {
+        "aspect": "SOSIAL",
+        "highlight": "Terbentuknya kelompok tani mandiri yang aktif membina regenerasi petani muda."
+      }
+    ],
+    "keySuccessIndicators": [
+      {
+        "indicator": "Tingkat Partisipasi & Kehadiran Sasaran",
+        "target": "Minimal 85% dari total sasaran",
+        "verification": "Daftar hadir fisik dan berita acara serah terima"
+      },
+      {
+        "indicator": "Penyelesaian Tahapan Milestone",
+        "target": "100% tahapan terselesaikan sesuai linimasa",
+        "verification": "Laporan progres berkala mitra dan bukti pengeluaran"
+      },
+      {
+        "indicator": "Tingkat Kepuasan Warga",
+        "target": "Rata-rata rating kepuasan minimal 4.0/5.0 bintang",
+        "verification": "Survei ulasan publik masyarakat berbasis QR Code"
+      }
+    ],
+    "regionalRisks": [
+      {
+        "risk": "Kendala distribusi bibit dan logistik saat puncak musim hujan di wilayah perbukitan.",
+        "mitigation": "Penjadwalan pengiriman logistik pada minggu pertama sebelum curah hujan ekstrem."
+      }
+    ],
+    "recommendation": "READY_TO_SIGN",
+    "recommendationLabel": "Siap Disahkan",
+    "recommendationNotes": "Parameter kesepakatan rasional dan terstruktur. Disarankan menyertakan 3 indikator KPI di atas ke dalam klausul monitoring MoU.",
+    "source": "AI_OPENAI",
+    "predictedAt": "2026-11-13T10:55:00.000Z"
+  }
+}
+```
+
+---
+
 ## 9. Modul Pelaksanaan Program (Programs & Impact Tracking)
 
 Modul ini mengelola siklus hidup eksekusi program di lapangan setelah kontrak kerja sama (MoU) disahkan, pelaporan realisasi penyerapan anggaran, dan pemantauan jumlah penerima manfaat riil.

@@ -1,6 +1,7 @@
 import { ProposalScreeningResult } from "./services/proposal-screener/proposal-screener.schema";
 import { EsgReportResult } from "./services/esg-report/esg-report.schema";
 import { NeedPrioritizationResult } from "./services/need-prioritization/need-prioritization.schema";
+import { ImpactPredictionResult } from "./services/impact-prediction/impact-prediction.schema";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 
 
@@ -248,6 +249,35 @@ export interface NeedPrioritizationResponse extends NeedPrioritizationResult {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
   analyzedAt: string;
 }
+
+export interface ImpactPredictionInput {
+  opportunityTitle: string;
+  focusArea: string;
+  targetCity?: string | null;
+  targetProvince?: string | null;
+  opportunityDescription?: string | null;
+  proposalTitle: string;
+  partnerName: string;
+  finalBudget: string | number;
+  targetBeneficiaries: string;
+  startDate?: string | Date | null;
+  endDate?: string | Date | null;
+  durationMonths?: number | null;
+  methodologySummary?: string | null;
+  milestones?: Array<{
+    title: string;
+    description?: string | null;
+    targetTimeline?: string | null;
+  }>;
+  existingProgramsCountInRegion?: number;
+  existingProgramsInSectorCount?: number;
+}
+
+export interface ImpactPredictionResponse extends ImpactPredictionResult {
+  source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
+  predictedAt: string;
+}
+
 
 
 

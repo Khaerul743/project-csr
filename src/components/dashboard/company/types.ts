@@ -170,6 +170,8 @@ export interface CompanyCollaborationItem {
   endDate?: string | null;
   mouDocumentUrl?: string | null;
   notes?: string | null;
+  impactPrediction?: string | null;
+  impactPredictedAt?: string | null;
   status: "NEGOTIATION" | "AGREED" | "CANCELLED";
   agreedAt?: string | null;
   createdAt: string;
