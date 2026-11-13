@@ -2,33 +2,25 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  Award,
   ShieldCheck,
-  CheckCircle2,
-  Users,
   Search,
-  Filter,
   Download,
-  AlertTriangle,
-  ArrowUpRight,
-  ExternalLink,
+  AlertCircle,
   Coins,
   MapPin,
-  Clock,
-  Sparkles,
-  BarChart3,
-  TrendingUp,
-  FileCheck,
   HeartHandshake,
   Star,
   RefreshCw,
-  Building2,
   Eye,
+  LayoutGrid,
+  Table2,
+  Info,
+  RotateCcw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PartnerItem, CompanyProgramItem, CompanyProfile } from "../types";
-import { FOCUS_AREA_CONFIG, formatRupiah, formatDate } from "../helpers";
+import { FOCUS_AREA_CONFIG, formatRupiah } from "../helpers";
 import { parseBeneficiariesCount } from "../../analytics/helpers";
 import { CompanyPartnerEvaluationsResponse } from "@/modules/companies/company.interface";
 
@@ -62,6 +54,37 @@ export interface PartnerEvaluationData {
   tierRecommendation: string;
 }
 
+function PartnerScoreAvatar({
+  logoUrl,
+  name,
+}: {
+  logoUrl?: string | null;
+  name: string;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  if (logoUrl && !imgError) {
+    return (
+      <div className="w-11 h-11 rounded-full overflow-hidden bg-slate-100 shrink-0">
+        <img
+          src={logoUrl}
+          alt={name}
+          width={44}
+          height={44}
+          onError={() => setImgError(true)}
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-11 h-11 rounded-full bg-[#181343] text-white flex items-center justify-center font-bold text-sm shrink-0">
+      {name.substring(0, 2).toUpperCase()}
+    </div>
+  );
+}
+
 export function PartnerPerformanceEvaluationView({
   programs,
   partners,
@@ -74,38 +97,60 @@ export function PartnerPerformanceEvaluationView({
   const [tierFilter, setTierFilter] = useState<string>("ALL");
   const [focusFilter, setFocusFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"score-desc" | "budget-desc" | "programs-desc" | "score-asc">("score-desc");
+  const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
+  const [showMethodology, setShowMethodology] = useState(false);
 
   // State sinkronisasi data dari backend API
   const [serverData, setServerData] = useState<CompanyPartnerEvaluationsResponse | null>(null);
   const [isFetchingServer, setIsFetchingServer] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const fetchPartnerEvaluations = useCallback(async () => {
-    try {
-      setIsFetchingServer(true);
-      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-      const res = await fetch("/api/companies/current/partner-evaluations", {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.data) {
-          setServerData(json.data);
-        }
-      }
-    } catch (err) {
-      console.error("Gagal memuat evaluasi mitra dari backend:", err);
-    } finally {
-      setIsFetchingServer(false);
+  const loadPartnerEvaluations = useCallback(async () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+    const res = await fetch("/api/companies/current/partner-evaluations", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    if (!res.ok) {
+      const json = await res.json().catch(() => null);
+      throw new Error(json?.message || "Gagal memuat evaluasi kinerja mitra.");
     }
+    const json = await res.json();
+    return json.success && json.data ? (json.data as CompanyPartnerEvaluationsResponse) : null;
   }, []);
 
   useEffect(() => {
-    fetchPartnerEvaluations();
-  }, [fetchPartnerEvaluations]);
+    let active = true;
+    loadPartnerEvaluations()
+      .then((data) => {
+        if (!active) return;
+        setFetchError(null);
+        if (data) setServerData(data);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setFetchError(
+          err instanceof Error ? err.message : "Gagal menyinkronkan data evaluasi terbaru."
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, [loadPartnerEvaluations]);
 
   const handleRefresh = async () => {
     if (onRefresh) onRefresh();
-    await fetchPartnerEvaluations();
+    try {
+      setIsFetchingServer(true);
+      setFetchError(null);
+      const data = await loadPartnerEvaluations();
+      if (data) setServerData(data);
+    } catch (err: unknown) {
+      setFetchError(
+        err instanceof Error ? err.message : "Gagal menyinkronkan data evaluasi terbaru."
+      );
+    } finally {
+      setIsFetchingServer(false);
+    }
   };
 
   // Komputasi Skor Evaluasi untuk Seluruh Mitra (Fallback Client-side)
@@ -257,9 +302,10 @@ export function PartnerPerformanceEvaluationView({
           city: item.partner.city ?? "",
           province: item.partner.province ?? "",
           logoUrl: item.partner.logoUrl ?? null,
-          status: item.partner.status as any,
-          focusArea: item.partner.focusArea as any,
-        } as PartnerItem,
+          status: item.partner.status ?? "",
+          focusArea: item.partner.focusArea as PartnerItem["focusArea"],
+          createdAt: "",
+        },
         programsCount: item.programsCount,
         totalBudget: item.totalBudget,
         totalSpent: item.totalSpent,
@@ -400,24 +446,24 @@ export function PartnerPerformanceEvaluationView({
     document.body.removeChild(link);
   };
 
+  const hasActiveFilters = searchQuery.trim() !== "" || tierFilter !== "ALL" || focusFilter !== "ALL";
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setTierFilter("ALL");
+    setFocusFilter("ALL");
+  };
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 w-full">
-      {/* 1. Header Identitas & Aksi Eksekutif */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+    <div className="space-y-8 w-full">
+      {/* 1. Header Ringkas & Aksi */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
-              <Award className="w-4 h-4" />
-            </div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#181343] tracking-tight">
-              Evaluasi Kinerja &amp; Indeks Akuntabilitas Mitra
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
-              Audit Portofolio Eksekutif
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Pengukuran objektif keandalan mitra pelaksana CSR berbasis disiplin laporan lapangan, kepatuhan kuitansi, dan kepuasan penerima manfaat.
+          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+            Evaluasi Kinerja Mitra
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Indeks akuntabilitas mitra berdasarkan pelaporan lapangan, kepatuhan anggaran, dan ulasan warga.
           </p>
         </div>
 
@@ -426,12 +472,29 @@ export function PartnerPerformanceEvaluationView({
             type="button"
             variant="outline"
             size="sm"
+            onClick={() => setShowMethodology((prev) => !prev)}
+            leftIcon={<Info className="w-3.5 h-3.5 text-slate-600" />}
+            className="text-xs font-semibold text-slate-700 border-slate-200 cursor-pointer"
+          >
+            Bobot Skor
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={isLoading || isFetchingServer}
-            leftIcon={<RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isLoading || isFetchingServer ? "animate-spin" : ""}`} />}
-            className="text-xs font-semibold cursor-pointer"
+            leftIcon={
+              <RefreshCw
+                className={`w-3.5 h-3.5 text-slate-600 ${
+                  isLoading || isFetchingServer ? "animate-spin" : ""
+                }`}
+              />
+            }
+            className="text-xs font-semibold text-slate-700 border-slate-200 cursor-pointer"
           >
-            Segarkan Data
+            Segarkan
           </Button>
 
           <Button
@@ -439,226 +502,180 @@ export function PartnerPerformanceEvaluationView({
             variant="outline"
             size="sm"
             onClick={handleExportCsv}
-            leftIcon={<Download className="w-3.5 h-3.5 text-emerald-700" />}
+            disabled={filteredEvaluations.length === 0}
+            leftIcon={<Download className="w-3.5 h-3.5 text-[#009E75]" />}
             className="text-xs font-semibold text-[#181343] hover:bg-slate-50 border-slate-200 cursor-pointer"
           >
-            Ekspor Rekap Mitra (CSV)
+            Ekspor CSV
           </Button>
         </div>
       </div>
 
-      {/* 2. 4 Kartu KPI Portofolio Mitra Eksekutif */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-        {/* KPI 1: Total Mitra */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold uppercase tracking-wider">
-              Total Lembaga Mitra
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-              <HeartHandshake className="w-4 h-4" />
-            </div>
+      {/* Collapsible Methodology Reference */}
+      {showMethodology && (
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-[#181343] block">Pelaporan Lapangan (35%)</span>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Ketuntasan log aktivitas serta kecepatan verifikasi bukti kegiatan.
+            </p>
           </div>
           <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-              {portfolioStats.totalPartners}
-            </div>
-            <p className="text-xs text-slate-500">
-              NGO / Yayasan terakreditasi di platform
+            <span className="text-xs font-bold text-[#181343] block">Integritas Finansial (30%)</span>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Kewajaran serapan anggaran dan keabsahan kuitansi belanja riil.
+            </p>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-[#181343] block">Kepuasan Warga (25%)</span>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Skor ulasan langsung dari penerima manfaat di lokasi program.
+            </p>
+          </div>
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-[#181343] block">Tata Kelola Legal (10%)</span>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Kelengkapan dokumen legalitas yayasan dan NPWP lembaga.
             </p>
           </div>
         </div>
+      )}
 
-        {/* KPI 2: Rata-rata Skor Akuntabilitas */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold uppercase tracking-wider">
-              Indeks Akuntabilitas
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
+      {/* Error Notice */}
+      {fetchError && (
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+            <span>{fetchError} Menampilkan kalkulasi lokal sementara.</span>
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#009E75] tracking-tight">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="font-bold underline hover:text-rose-950 shrink-0 cursor-pointer"
+          >
+            Coba Lagi
+          </button>
+        </div>
+      )}
+
+      {/* 2. Ringkasan 4 KPI Utama */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
+        <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Total Mitra</span>
+            <HeartHandshake className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+            {portfolioStats.totalPartners}
+          </div>
+          <p className="text-xs text-slate-500">Lembaga mitra terdaftar</p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Rata-rata Skor</span>
+            <ShieldCheck className="w-4 h-4 text-[#009E75]" />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold text-[#009E75] tabular-nums">
               {portfolioStats.avgScore}
-              <span className="text-xs font-bold text-slate-400">/100</span>
-            </div>
-            <p className="text-xs text-slate-500">
-              Rata-rata kepatuhan portofolio
-            </p>
+            </span>
+            <span className="text-xs font-semibold text-slate-500">/ 100</span>
           </div>
+          <p className="text-xs text-slate-500">Indeks akuntabilitas portofolio</p>
         </div>
 
-        {/* KPI 3: Rasio Mitra Unggulan (Tier 1) */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold uppercase tracking-wider">
-              Mitra Tier 1 (Unggulan)
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-              <Star className="w-4 h-4" />
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Mitra Unggulan</span>
+            <Star className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-[#181343] tabular-nums">
               {portfolioStats.tier1Percent}%
-              <span className="text-xs font-bold text-slate-400 ml-1.5">
-                ({portfolioStats.tier1Count} Mitra)
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">
-              Skor akuntabilitas di atas 88
-            </p>
-          </div>
-        </div>
-
-        {/* KPI 4: Total Pagu Dikelola */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold uppercase tracking-wider">
-              Pagu Dikelola Mitra
             </span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
-              <Coins className="w-4 h-4" />
-            </div>
+            <span className="text-xs font-semibold text-slate-500">
+              ({portfolioStats.tier1Count} lembaga)
+            </span>
           </div>
-          <div className="space-y-1">
-            <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight truncate">
-              {formatRupiah(portfolioStats.totalManagedBudget)}
-            </div>
-            <p className="text-xs text-slate-500">
-              Total alokasi program aktif &amp; tuntas
-            </p>
+          <p className="text-xs text-slate-500">Tier 1 dengan skor 88+</p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Pagu Dikelola</span>
+            <Coins className="w-4 h-4 text-slate-400" />
           </div>
+          <div className="text-2xl font-extrabold text-[#181343] tabular-nums truncate">
+            {formatRupiah(portfolioStats.totalManagedBudget)}
+          </div>
+          <p className="text-xs text-slate-500">Total alokasi program mitra</p>
         </div>
       </div>
 
-      {/* 3. Panel Distribusi Kuadran Kinerja (Performance Tier Breakdown) */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <h3 className="text-sm font-extrabold text-[#181343]">
-              Distribusi Klasifikasi Kinerja Kemitraan (Executive Tiering)
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Pembagian mitra ke dalam 4 kuadran akuntabilitas untuk rekomendasi alokasi CSR
-            </p>
-          </div>
-          <span className="text-xs font-bold text-slate-600">
-            Formula: 35% Lapangan &bull; 30% Finansial &bull; 25% Warga &bull; 10% Legalitas
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
-          {/* Tier 1 Card */}
-          <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-emerald-950">
-                Tier 1: Mitra Unggulan
-              </span>
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-200/70 text-emerald-900">
-                {portfolioStats.tier1Count} Lembaga
-              </span>
-            </div>
-            <p className="text-[11px] text-emerald-900 leading-relaxed font-medium">
-              Skor $\ge$ 88. Kepatuhan sangat tinggi, prioritas kerja sama strategis &amp; program multi-tahun.
-            </p>
-          </div>
-
-          {/* Tier 2 Card */}
-          <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-blue-950">
-                Tier 2: Mitra Teruji
-              </span>
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-blue-200/70 text-blue-900">
-                {portfolioStats.tier2Count} Lembaga
-              </span>
-            </div>
-            <p className="text-[11px] text-blue-900 leading-relaxed font-medium">
-              Skor 75–87. Kinerja stabil dan memenuhi standar operasional program CSR reguler.
-            </p>
+      {/* 3. Daftar Kinerja Mitra (Toolbar Terpadu + Kartu / Tabel) */}
+      <div className="space-y-5">
+        {/* Tier Filter Bar + View Switch */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Filter Tier Kinerja Mitra">
+            {[
+              { id: "ALL", label: "Semua Mitra", count: portfolioStats.totalPartners, dot: "bg-slate-400" },
+              { id: "TIER_1", label: "Unggulan (88+)", count: portfolioStats.tier1Count, dot: "bg-emerald-500" },
+              { id: "TIER_2", label: "Teruji (75-87)", count: portfolioStats.tier2Count, dot: "bg-blue-500" },
+              { id: "TIER_3", label: "Pendampingan (60-74)", count: portfolioStats.tier3Count, dot: "bg-amber-500" },
+              { id: "TIER_4", label: "Perhatian (<60)", count: portfolioStats.tier4Count, dot: "bg-rose-500" },
+            ].map((tab) => {
+              const isSelected = tierFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setTierFilter(tab.id)}
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009E75]/40 ${
+                    isSelected
+                      ? "bg-[#181343] text-white border-[#181343]"
+                      : "bg-white text-slate-700 border-[#E8E8EA] hover:bg-slate-50"
+                  }`}
+                >
+                  {tab.id !== "ALL" && (
+                    <span className={`w-2 h-2 rounded-full ${tab.dot} shrink-0`} />
+                  )}
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
+                      isSelected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Tier 3 Card */}
-          <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-amber-950">
-                Tier 3: Perlu Pendampingan
-              </span>
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-200/70 text-amber-900">
-                {portfolioStats.tier3Count} Lembaga
-              </span>
-            </div>
-            <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
-              Skor 60–74. Terdapat revisi berulang pada laporan kegiatan atau kelengkapan kuitansi.
-            </p>
-          </div>
-
-          {/* Tier 4 Card */}
-          <div className="p-4 rounded-xl bg-rose-50/70 border border-rose-200/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-rose-950">
-                Tier 4: Perhatian Khusus
-              </span>
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-rose-200/70 text-rose-900">
-                {portfolioStats.tier4Count} Lembaga
-              </span>
-            </div>
-            <p className="text-[11px] text-rose-900 leading-relaxed font-medium">
-              Skor &lt; 60. Rekomendasi penahanan termin baru dan audit mendalam sebelum MoU lanjutan.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Papan Peringkat Kinerja Mitra & Kartu Evaluasi */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-5">
-        {/* Toolbar Pencarian & Filter */}
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-extrabold text-[#181343]">
-              Papan Peringkat &amp; Scorecard Akuntabilitas Mitra
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Menampilkan {filteredEvaluations.length} dari {partners.length} mitra terdaftar
-            </p>
-          </div>
-
+          {/* Search, Focus, Sort & View Mode */}
           <div className="flex flex-wrap items-center gap-2.5">
-            {/* Search Input */}
-            <div className="relative min-w-[220px]">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="relative flex-1 sm:flex-initial min-w-[210px]">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
+                aria-label="Cari lembaga mitra atau kota"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari nama lembaga / kota..."
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-xs text-[#181343] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#181343]/10"
+                placeholder="Cari mitra atau kota..."
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-[#E8E8EA] bg-white text-xs text-[#181343] placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#009E75]/25 focus:border-[#009E75]"
               />
             </div>
 
-            {/* Filter Tier */}
             <select
-              value={tierFilter}
-              onChange={(e) => setTierFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#181343] bg-slate-50/50 cursor-pointer focus:outline-none"
-            >
-              <option value="ALL">Semua Tier Kinerja</option>
-              <option value="TIER_1">Tier 1: Mitra Unggulan</option>
-              <option value="TIER_2">Tier 2: Mitra Teruji</option>
-              <option value="TIER_3">Tier 3: Perlu Pendampingan</option>
-              <option value="TIER_4">Tier 4: Perhatian Khusus</option>
-            </select>
-
-            {/* Filter Fokus Area */}
-            <select
+              aria-label="Filter fokus bidang"
               value={focusFilter}
               onChange={(e) => setFocusFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#181343] bg-slate-50/50 cursor-pointer focus:outline-none"
+              className="px-3 py-2 rounded-xl border border-[#E8E8EA] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#009E75]/25"
             >
-              <option value="ALL">Semua Fokus Bidang</option>
+              <option value="ALL">Semua Fokus</option>
               {Object.keys(FOCUS_AREA_CONFIG).map((key) => (
                 <option key={key} value={key}>
                   {FOCUS_AREA_CONFIG[key as keyof typeof FOCUS_AREA_CONFIG].label}
@@ -666,255 +683,311 @@ export function PartnerPerformanceEvaluationView({
               ))}
             </select>
 
-            {/* Sort by */}
             <select
+              aria-label="Urutkan peringkat mitra"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#181343] bg-slate-50/50 cursor-pointer focus:outline-none"
+              onChange={(e) =>
+                setSortBy(
+                  e.target.value as "score-desc" | "budget-desc" | "programs-desc" | "score-asc"
+                )
+              }
+              className="px-3 py-2 rounded-xl border border-[#E8E8EA] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#009E75]/25"
             >
               <option value="score-desc">Skor Tertinggi</option>
               <option value="score-asc">Skor Terendah</option>
               <option value="budget-desc">Pagu Terbesar</option>
               <option value="programs-desc">Program Terbanyak</option>
             </select>
+
+            <div className="inline-flex items-center p-1 rounded-xl bg-white border border-[#E8E8EA]">
+              <button
+                type="button"
+                onClick={() => setViewMode("cards")}
+                aria-pressed={viewMode === "cards"}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009E75]/40 ${
+                  viewMode === "cards"
+                    ? "bg-[#181343] text-white"
+                    : "text-slate-600 hover:text-[#181343]"
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span>Kartu</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("table")}
+                aria-pressed={viewMode === "table"}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009E75]/40 ${
+                  viewMode === "table"
+                    ? "bg-[#181343] text-white"
+                    : "text-slate-600 hover:text-[#181343]"
+                }`}
+              >
+                <Table2 className="w-3.5 h-3.5" />
+                <span>Tabel</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Grid Scorecards Mitra */}
-        {filteredEvaluations.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 italic bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
-            Tidak ada lembaga mitra yang memenuhi filter kriteria saat ini.
+        {/* Loading, Empty, or Filtered Results */}
+        {(isLoading || isFetchingServer) && evaluations.length === 0 ? (
+          <div className="py-16 rounded-2xl bg-white border border-[#E8E8EA] flex flex-col items-center justify-center gap-3 text-slate-600">
+            <RefreshCw className="w-5 h-5 animate-spin text-[#009E75]" />
+            <span className="text-xs font-medium">Memuat data evaluasi kinerja mitra...</span>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        ) : evaluations.length === 0 ? (
+          <div className="py-16 px-6 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
+            <HeartHandshake className="w-8 h-8 text-slate-400 mx-auto" />
+            <h3 className="text-sm font-bold text-[#181343]">Belum Ada Mitra Terdaftar</h3>
+            <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+              Evaluasi akuntabilitas akan otomatis dihitung setelah mitra bergabung dan menjalankan program CSR bersama perusahaan.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+              className="text-xs font-semibold cursor-pointer"
+            >
+              Segarkan Data
+            </Button>
+          </div>
+        ) : filteredEvaluations.length === 0 ? (
+          <div className="py-14 px-6 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
+            <Search className="w-7 h-7 text-slate-400 mx-auto" />
+            <h3 className="text-sm font-bold text-[#181343]">Tidak Ada Mitra yang Cocok</h3>
+            <p className="text-xs text-slate-600 max-w-sm mx-auto">
+              Tidak ditemukan lembaga mitra yang sesuai dengan filter atau kata kunci pencarian saat ini.
+            </p>
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={resetFilters}
+                leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                className="text-xs font-semibold cursor-pointer"
+              >
+                Reset Filter
+              </Button>
+            )}
+          </div>
+        ) : viewMode === "cards" ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredEvaluations.map((item, idx) => {
               const focusConf =
                 FOCUS_AREA_CONFIG[item.partner.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
-                  label: item.partner.focusArea,
+                  label: item.partner.focusArea || "Umum",
                   variant: "slate",
                 };
+
+              const pillars = [
+                { label: "Laporan Lapangan", weight: "35%", value: item.fieldReportingScore, bar: "bg-[#009E75]" },
+                { label: "Audit Kuitansi", weight: "30%", value: item.financialIntegrityScore, bar: "bg-blue-600" },
+                { label: "Kepuasan Warga", weight: "25%", value: item.satisfactionScore, bar: "bg-indigo-600" },
+                { label: "Legalitas", weight: "10%", value: item.governanceScore, bar: "bg-slate-600" },
+              ];
 
               return (
                 <div
                   key={item.partner.id}
-                  className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-xs hover:border-slate-300 transition-all space-y-4 flex flex-col justify-between"
+                  className="p-6 rounded-2xl bg-white border border-[#E8E8EA] hover:border-slate-300 transition-colors flex flex-col justify-between gap-6"
                 >
-                  <div className="space-y-3">
-                    {/* Header Kartu: Peringkat, Logo, Nama, dan Skor */}
-                    <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
-                      <div className="flex items-center gap-3 min-w-0">
-                        {/* Avatar / Logo */}
-                        <div className="w-11 h-11 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
-                          {item.partner.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-slate-400">
-                              #{idx + 1}
-                            </span>
-                            <h4 className="font-extrabold text-sm text-[#181343] truncate">
-                              {item.partner.name}
-                            </h4>
-                          </div>
-                          <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 truncate">
-                            <span>{item.partner.organizationType || "Yayasan"}</span>
-                            <span>&bull;</span>
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                              {item.partner.city || "Nasional"}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Skor Lingkaran & Badge Tier */}
-                      <div className="text-right shrink-0">
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200">
-                          <Award className="w-3.5 h-3.5 text-emerald-600" />
-                          <span className="text-sm font-black text-[#181343]">
-                            {item.overallScore}
+                  {/* Card Top: Identity + Total Score */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <PartnerScoreAvatar
+                        logoUrl={item.partner.logoUrl}
+                        name={item.partner.name}
+                      />
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-500 tabular-nums shrink-0">
+                            #{idx + 1}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-400">/100</span>
+                          <h3 className="font-bold text-sm sm:text-base text-[#181343] truncate">
+                            {item.partner.name}
+                          </h3>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-600">
+                          <span className="inline-flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                            {item.partner.city || "Nasional"}
+                          </span>
+                          <span aria-hidden="true">&middot;</span>
+                          <span>{focusConf.label}</span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Predikat & Rekomendasi Eksekutif */}
-                    <div className="flex items-center justify-between gap-2">
-                      <Badge variant={item.tierBadgeVariant as any} size="sm">
-                        {item.tierLabel}
-                      </Badge>
-                      <Badge variant={focusConf.variant as any} size="sm">
-                        {focusConf.label}
-                      </Badge>
-                    </div>
-
-                    <p className="text-[11px] text-slate-600 leading-relaxed font-normal bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
-                      <strong>Catatan Pengawasan:</strong> {item.tierRecommendation}
-                    </p>
-
-                    {/* 3 Mini Bar Capaian Pilar */}
-                    <div className="space-y-2 pt-1 text-xs">
-                      {/* Pilar 1: Lapangan */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-500">Disiplin Laporan Lapangan (35%)</span>
-                          <span className="font-bold text-slate-900">{item.fieldReportingScore}%</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-emerald-600 h-full rounded-full"
-                            style={{ width: `${item.fieldReportingScore}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Pilar 2: Finansial */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-500">Integritas Audit Kuitansi (30%)</span>
-                          <span className="font-bold text-slate-900">{item.financialIntegrityScore}%</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-blue-600 h-full rounded-full"
-                            style={{ width: `${item.financialIntegrityScore}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Pilar 3: Kepuasan Warga */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-slate-500">Rating Kepuasan Warga (25%)</span>
-                          <span className="font-bold text-slate-900">{item.satisfactionScore}%</span>
-                        </div>
-                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className="bg-purple-600 h-full rounded-full"
-                            style={{ width: `${item.satisfactionScore}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Mini Data Ringkasan Finansial */}
-                    <div className="grid grid-cols-3 gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100 text-center">
-                      <div>
-                        <span className="text-[10px] text-slate-500 block">Program</span>
-                        <span className="font-black text-slate-900 text-xs">
-                          {item.programsCount} Inisiatif
+                    <div className="text-right shrink-0 space-y-1.5">
+                      <div className="inline-flex items-baseline gap-1 px-3 py-1 rounded-xl bg-slate-50 border border-slate-200">
+                        <span className="text-lg font-extrabold text-[#181343] tabular-nums">
+                          {item.overallScore}
                         </span>
+                        <span className="text-[11px] font-semibold text-slate-500">/100</span>
                       </div>
-                      <div>
-                        <span className="text-[10px] text-slate-500 block">Pagu Dikelola</span>
-                        <span className="font-black text-slate-900 text-xs truncate block">
-                          {formatRupiah(item.totalBudget)}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-500 block">Penerima</span>
-                        <span className="font-black text-emerald-700 text-xs">
-                          {item.totalBeneficiaries.toLocaleString("id-ID")} Jiwa
-                        </span>
+                      <div className="block">
+                        <Badge variant={item.tierBadgeVariant} size="sm">
+                          {item.tierLabel}
+                        </Badge>
                       </div>
                     </div>
                   </div>
 
-                  {/* Tombol Aksi */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-end">
+                  {/* Card Middle: Clean 2x2 Pillar Metrics */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5 py-4 border-y border-slate-100">
+                    {pillars.map((pillar) => (
+                      <div key={pillar.label} className="space-y-1.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-600">
+                            {pillar.label}{" "}
+                            <span className="text-slate-500">({pillar.weight})</span>
+                          </span>
+                          <span className="font-bold text-[#181343] tabular-nums">
+                            {pillar.value}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className={`${pillar.bar} h-full rounded-full`}
+                            style={{ width: `${pillar.value}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Card Bottom: 3 Key Figures + Action */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="grid grid-cols-3 gap-4 flex-1">
+                      <div>
+                        <span className="text-[11px] text-slate-500 block">Program</span>
+                        <span className="text-xs font-bold text-[#181343] tabular-nums">
+                          {item.programsCount} Inisiatif
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-slate-500 block">Pagu</span>
+                        <span className="text-xs font-bold text-[#181343] tabular-nums truncate block">
+                          {formatRupiah(item.totalBudget)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-slate-500 block">Penerima</span>
+                        <span className="text-xs font-bold text-[#009E75] tabular-nums">
+                          {item.totalBeneficiaries.toLocaleString("id-ID")} Jiwa
+                        </span>
+                      </div>
+                    </div>
+
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => onViewPartnerDetail(item.partner)}
                       leftIcon={<Eye className="w-3.5 h-3.5 text-slate-600" />}
-                      className="w-full text-xs font-semibold text-[#181343] hover:bg-slate-50 cursor-pointer shadow-2xs"
+                      className="text-xs font-semibold text-[#181343] border-slate-200 hover:bg-slate-50 shrink-0 cursor-pointer"
                     >
-                      Lihat Portofolio &amp; Legalitas Mitra
+                      Lihat Profil
                     </Button>
                   </div>
                 </div>
               );
             })}
           </div>
-        )}
-      </div>
-
-      {/* 5. Tabel Komparasi Efisiensi per Mitra */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-4">
-        <div>
-          <h3 className="text-sm font-extrabold text-[#181343]">
-            Tabel Komparasi Efisiensi &amp; Rekam Jejak Belanja per Mitra
-          </h3>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Komparasi efisiensi biaya per jiwa penerima manfaat dan kepatuhan realisasi dana CSR
-          </p>
-        </div>
-
-        <div className="overflow-x-auto -mx-5 sm:mx-0">
-          <table className="w-full text-left text-xs border-collapse min-w-[700px]">
-            <thead>
-              <tr className="border-b border-slate-200/90 text-slate-500 font-bold uppercase tracking-wider text-[10px] bg-slate-50/50">
-                <th className="py-3 px-4">Lembaga Mitra</th>
-                <th className="py-3 px-4">Fokus Bidang</th>
-                <th className="py-3 px-4 text-center">Skor Akuntabilitas</th>
-                <th className="py-3 px-4 text-right">Pagu Dikelola</th>
-                <th className="py-3 px-4 text-right">Realisasi Belanja</th>
-                <th className="py-3 px-4 text-right">Biaya / Jiwa</th>
-                <th className="py-3 px-4 text-center">Klasifikasi Tier</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredEvaluations.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-6 text-center text-slate-400 italic">
-                    Tidak ada data mitra yang tersedia.
-                  </td>
-                </tr>
-              ) : (
-                filteredEvaluations.map((item) => (
-                  <tr key={item.partner.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3.5 px-4 min-w-[180px]">
-                      <p className="font-extrabold text-slate-900">{item.partner.name}</p>
-                      <p className="text-[11px] text-slate-500">{item.partner.city || "Nasional"}</p>
-                    </td>
-
-                    <td className="py-3.5 px-4">
-                      <span className="font-semibold text-slate-700">
-                        {item.partner.focusArea || "-"}
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <span className="font-black text-slate-900 bg-slate-100 px-2 py-1 rounded-md">
-                        {item.overallScore} / 100
-                      </span>
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right font-extrabold text-[#181343]">
-                      {formatRupiah(item.totalBudget)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right font-extrabold text-[#009E75]">
-                      {formatRupiah(item.totalSpent)}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-right font-bold text-slate-700">
-                      {item.costPerBeneficiary > 0 ? formatRupiah(item.costPerBeneficiary) : "Rp 0"}
-                    </td>
-
-                    <td className="py-3.5 px-4 text-center">
-                      <Badge variant={item.tierBadgeVariant as any} size="sm">
-                        {item.tierLabel}
-                      </Badge>
-                    </td>
+        ) : (
+          /* Table View Mode */
+          <div className="rounded-2xl bg-white border border-[#E8E8EA] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse min-w-[780px]">
+                <thead>
+                  <tr className="border-b border-[#E8E8EA] text-slate-600 font-bold bg-slate-50/70">
+                    <th className="py-3.5 px-5">Lembaga Mitra</th>
+                    <th className="py-3.5 px-4">Fokus Bidang</th>
+                    <th className="py-3.5 px-4 text-center">Skor</th>
+                    <th className="py-3.5 px-4 text-right">Pagu Dikelola</th>
+                    <th className="py-3.5 px-4 text-right">Realisasi Belanja</th>
+                    <th className="py-3.5 px-4 text-right">Biaya / Jiwa</th>
+                    <th className="py-3.5 px-4 text-center">Tier</th>
+                    <th className="py-3.5 px-5 text-right">Profil</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredEvaluations.map((item) => {
+                    const focusLabel =
+                      FOCUS_AREA_CONFIG[item.partner.focusArea as keyof typeof FOCUS_AREA_CONFIG]
+                        ?.label ||
+                      item.partner.focusArea ||
+                      "-";
+
+                    return (
+                      <tr key={item.partner.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-4 px-5 min-w-[200px]">
+                          <div className="flex items-center gap-3">
+                            <PartnerScoreAvatar
+                              logoUrl={item.partner.logoUrl}
+                              name={item.partner.name}
+                            />
+                            <div className="min-w-0">
+                              <p className="font-bold text-[#181343] truncate">
+                                {item.partner.name}
+                              </p>
+                              <p className="text-[11px] text-slate-500">
+                                {item.partner.city || "Nasional"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="py-4 px-4 text-slate-700 font-medium">
+                          {focusLabel}
+                        </td>
+
+                        <td className="py-4 px-4 text-center">
+                          <span className="font-bold text-[#181343] bg-slate-100 px-2.5 py-1 rounded-lg tabular-nums">
+                            {item.overallScore} / 100
+                          </span>
+                        </td>
+
+                        <td className="py-4 px-4 text-right font-bold text-[#181343] tabular-nums">
+                          {formatRupiah(item.totalBudget)}
+                        </td>
+
+                        <td className="py-4 px-4 text-right font-bold text-[#009E75] tabular-nums">
+                          {formatRupiah(item.totalSpent)}
+                        </td>
+
+                        <td className="py-4 px-4 text-right font-semibold text-slate-700 tabular-nums">
+                          {item.costPerBeneficiary > 0 ? formatRupiah(item.costPerBeneficiary) : "Rp 0"}
+                        </td>
+
+                        <td className="py-4 px-4 text-center">
+                          <Badge variant={item.tierBadgeVariant} size="sm">
+                            {item.tierLabel}
+                          </Badge>
+                        </td>
+
+                        <td className="py-4 px-5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => onViewPartnerDetail(item.partner)}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#181343] hover:text-[#009E75] rounded-md px-1.5 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009E75]/40 cursor-pointer"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Lihat</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

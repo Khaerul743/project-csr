@@ -86,8 +86,8 @@ export function WorkflowSection() {
               Empat Langkah Menuju Program CSR yang Akuntabel
             </h2>
 
-            <p className="text-sm sm:text-base text-[#47464F] leading-relaxed">
-              Dari pembukaan inisiatif hingga verifikasi dampak akhir—setiap pihak memiliki peran transparan yang saling terhubung dalam satu ekosistem.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+              Dari pembukaan inisiatif hingga verifikasi dampak akhir, setiap pihak memiliki peran transparan yang saling terhubung dalam satu ekosistem.
             </p>
           </div>
         </ScrollReveal>
@@ -95,13 +95,13 @@ export function WorkflowSection() {
         {/* Interactive Role Perspective Switcher */}
         <ScrollReveal animation="fade-up" delay={150}>
           <div className="mt-10 flex items-center justify-center">
-            <div className="inline-flex p-1.5 rounded-2xl bg-[#F4F4F6] border border-[#C8C5D0]/60 max-w-full overflow-x-auto">
+            <div className="inline-flex p-1.5 rounded-2xl bg-[#F4F4F6] border border-[#E5E7EB] max-w-full overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setRole("company")}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "company"
                     ? "bg-[#181343] text-white shadow-xs"
-                    : "text-[#47464F] hover:text-[#181343]"
+                    : "text-slate-600 hover:text-[#181343]"
                   }`}
               >
                 <Building2 className="w-4 h-4" />
@@ -113,7 +113,7 @@ export function WorkflowSection() {
                 onClick={() => setRole("partner")}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "partner"
                     ? "bg-[#181343] text-white shadow-xs"
-                    : "text-[#47464F] hover:text-[#181343]"
+                    : "text-slate-600 hover:text-[#181343]"
                   }`}
               >
                 <Users2 className="w-4 h-4" />
@@ -125,7 +125,7 @@ export function WorkflowSection() {
                 onClick={() => setRole("community")}
                 className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "community"
                     ? "bg-[#181343] text-white shadow-xs"
-                    : "text-[#47464F] hover:text-[#181343]"
+                    : "text-slate-600 hover:text-[#181343]"
                   }`}
               >
                 <HeartHandshake className="w-4 h-4" />
@@ -144,7 +144,7 @@ export function WorkflowSection() {
           {steps.map((st, idx) => (
             <div
               key={st.num}
-              className="p-6 sm:p-7 rounded-2xl border border-[#C8C5D0]/80 bg-[#FFFFFF] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group h-full min-h-[270px] sm:min-h-[285px] lg:min-h-[305px]"
+              className="p-6 sm:p-7 rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group h-full min-h-[270px] sm:min-h-[285px] lg:min-h-[305px]"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -160,14 +160,14 @@ export function WorkflowSection() {
                   {st.title}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed min-h-[4.5rem] sm:min-h-[5rem] lg:min-h-[5.75rem]">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed min-h-[4.5rem] sm:min-h-[5rem] lg:min-h-[5.75rem]">
                   {role === "company" && st.companyText}
                   {role === "partner" && st.partnerText}
                   {role === "community" && st.communityText}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-[#EEEEF0] flex items-center justify-between text-[11px] text-[#787680]">
+              <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-slate-500">
                 <span className="font-medium">Tahap {idx + 1} dari 4</span>
                 {idx < 3 ? (
                   <ArrowRight className="w-3.5 h-3.5 text-[#181343]/40 group-hover:translate-x-1 transition-transform" />

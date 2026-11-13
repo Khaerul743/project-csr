@@ -39,9 +39,9 @@ const TESTIMONIALS: TestimonialItem[] = [
     category: "perusahaan",
     categoryLabel: "Kemitraan Korporasi",
     quote:
-      "SIPENA membantu kami mengelola program CSR secara lebih terarah. Pencatatan kegiatan dan pelaporan realisasi yang terpusat memudahkan pemantauan mitra serta evaluasi capaian program bersama.",
-    highlightMetric: "Terarah",
-    metricLabel: "Penyelarasan prioritas dan pelaporan kemitraan CSR",
+      "SIPENA membantu kami mengelola program CSR secara lebih terarah. Pencatatan kegiatan dan pelaporan realisasi yang terpusat memudahkan pemantauan mitra serta penyusunan laporan tahunan dan evaluasi dampak keberlanjutan.",
+    highlightMetric: "100% Akuntabel",
+    metricLabel: "Penyaluran dana per termin berbasis nota fisik tervalidasi",
     initials: "MP",
     verifiedLabel: "Mitra Korporasi",
   },
@@ -54,8 +54,8 @@ const TESTIMONIALS: TestimonialItem[] = [
     categoryLabel: "Mitra Pelaksana Lapangan",
     quote:
       "Pengelolaan proposal dan koordinasi kerja sama menjadi jauh lebih tertata. Kami dapat memperbarui progres kegiatan lapangan dan melaporkan penggunaan anggaran secara berkala dengan jelas.",
-    highlightMetric: "Kolaboratif",
-    metricLabel: "Pembaruan progres lapangan dan penggunaan anggaran",
+    highlightMetric: "Terstandardisasi",
+    metricLabel: "Pengajuan proposal dan pelaporan berkala tanpa duplikasi format",
     initials: "HW",
     verifiedLabel: "Lembaga Pelaksana",
   },
@@ -68,8 +68,8 @@ const TESTIMONIALS: TestimonialItem[] = [
     categoryLabel: "Penerima Manfaat",
     quote:
       "Masyarakat dapat langsung menyampaikan penilaian dan umpan balik kegiatan melalui pemindaian QR Code di lokasi. Prosesnya mudah tanpa perlu registrasi, sehingga suara kami didengar dengan baik.",
-    highlightMetric: "Responsif",
-    metricLabel: "Umpan balik langsung via tautan & QR Code",
+    highlightMetric: "Akses Bebas",
+    metricLabel: "Umpan balik langsung via tautan & QR Code tanpa hambatan login",
     initials: "SR",
     verifiedLabel: "Penerima Manfaat",
   },
@@ -111,8 +111,8 @@ export function TestimonialsSection() {
                 Dampak Nyata yang Dirasakan Oleh{" "}
                 <span className="text-emerald-600">Seluruh Ekosistem</span>
               </h2>
-              <p className="mt-3 text-base text-[#26224C]/80 leading-relaxed">
-                Dengarkan langsung pengalaman dari korporasi donor, yayasan pelaksana di garis depan, serta komunitas penerima manfaat yang terhubung secara transparan.
+              <p className="mt-3 text-base text-slate-600 leading-relaxed">
+                Pengalaman nyata dari korporasi donor, yayasan pelaksana di garis depan, serta komunitas penerima manfaat yang terhubung secara transparan.
               </p>
             </div>
 
@@ -125,7 +125,7 @@ export function TestimonialsSection() {
                   onClick={() => setActiveIndex(idx)}
                   className={`px-3.5 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${activeIndex === idx
                       ? "bg-[#181343] text-white shadow-sm"
-                      : "text-[#26224C]/70 hover:text-[#181343] hover:bg-white/60"
+                      : "text-slate-600 hover:text-[#181343] hover:bg-white/60"
                     }`}
                 >
                   {t.categoryLabel}
@@ -137,7 +137,7 @@ export function TestimonialsSection() {
 
         {/* Featured Hero Testimonial Box */}
         <ScrollReveal animation="zoom-in" delay={120}>
-          <div className="bg-linear-to-br from-[#F9F9FB] to-[#F4F4F6] border border-[#C8C5D0]/60 rounded-3xl p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xs">
+          <div className="bg-linear-to-br from-[#F9F9FB] to-[#F4F4F6] border border-[#E5E7EB] rounded-3xl p-6 sm:p-10 lg:p-12 relative overflow-hidden shadow-xs">
             <div className="absolute top-6 right-8 text-[#181343]/5 pointer-events-none">
               <Quote className="w-28 h-28 sm:w-36 sm:h-36" />
             </div>
@@ -171,8 +171,8 @@ export function TestimonialsSection() {
                       >
                         {active.name}
                       </h4>
-                      <p className="text-xs text-[#26224C]/70">
-                        {active.role} &mdash;{" "}
+                      <p className="text-xs text-slate-500">
+                        {active.role} &middot;{" "}
                         <span className="font-semibold text-[#181343]">
                           {active.organization}
                         </span>
@@ -194,7 +194,7 @@ export function TestimonialsSection() {
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="text-xs font-semibold text-[#26224C]/60 px-2">
+                    <span className="text-xs font-semibold text-slate-500 px-2">
                       {activeIndex + 1} / {TESTIMONIALS.length}
                     </span>
                     <button
@@ -216,31 +216,31 @@ export function TestimonialsSection() {
                 <div>
                   <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 uppercase tracking-wider mb-2">
                     <TrendingUp className="w-4 h-4" />
-                    <span>Fokus Pendekatan (Simulasi)</span>
+                    <span>Fokus Manfaat Tata Kelola</span>
                   </div>
                   <div
-                    className="text-3xl sm:text-4xl font-extrabold text-[#181343] tracking-tight mb-2"
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight mb-2"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
                     {active.highlightMetric}
                   </div>
-                  <p className="text-xs text-[#26224C]/80 leading-relaxed font-medium">
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
                     {active.metricLabel}
                   </p>
                 </div>
 
                 <div className="mt-6 pt-5 border-t border-[#F4F4F6] space-y-2.5">
-                  <div className="flex items-center justify-between text-xs text-[#26224C]/70">
+                  <div className="flex items-center justify-between text-xs text-slate-600">
                     <span>Dokumentasi Program</span>
                     <span className="font-semibold text-emerald-700">Terpusat</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-[#26224C]/70">
-                    <span>Pemetaan SDGs/ESG</span>
+                  <div className="flex items-center justify-between text-xs text-slate-600">
+                    <span>Pemetaan SDGs &amp; ESG</span>
                     <span className="font-semibold text-[#181343]">Sesuai Program</span>
                   </div>
-                  <div className="flex items-center justify-between text-xs text-[#26224C]/70">
+                  <div className="flex items-center justify-between text-xs text-slate-600">
                     <span>Monitoring Pelaksanaan</span>
-                    <span className="font-semibold text-[#181343]">Progres & Laporan</span>
+                    <span className="font-semibold text-[#181343]">Progres &amp; Laporan</span>
                   </div>
                 </div>
               </div>
@@ -260,7 +260,7 @@ export function TestimonialsSection() {
               onClick={() => setActiveIndex(idx)}
               className={`rounded-2xl p-6 transition-all duration-200 cursor-pointer border h-full ${activeIndex === idx
                   ? "bg-white border-[#181343] shadow-md ring-1 ring-[#181343]"
-                  : "bg-[#F9F9FB] border-[#E5E7EB] hover:bg-white hover:border-[#C8C5D0]"
+                  : "bg-[#F9F9FB] border-[#E5E7EB] hover:bg-white hover:border-slate-400"
                 }`}
             >
               <div className="flex items-center justify-between mb-3">
@@ -269,7 +269,7 @@ export function TestimonialsSection() {
                 </span>
                 <span className="text-xs font-bold text-emerald-600">{t.highlightMetric}</span>
               </div>
-              <p className="text-xs text-[#26224C]/80 line-clamp-2 italic mb-4">
+              <p className="text-xs text-slate-600 line-clamp-2 italic mb-4">
                 &ldquo;{t.quote}&rdquo;
               </p>
               <div className="flex items-center gap-3 pt-3 border-t border-[#E5E7EB]">
@@ -278,7 +278,7 @@ export function TestimonialsSection() {
                 </div>
                 <div className="min-w-0">
                   <div className="text-xs font-bold text-[#181343] truncate">{t.name}</div>
-                  <div className="text-[11px] text-[#26224C]/70 truncate">{t.organization}</div>
+                  <div className="text-[11px] text-slate-500 truncate">{t.organization}</div>
                 </div>
               </div>
             </div>

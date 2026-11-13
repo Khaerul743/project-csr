@@ -52,7 +52,7 @@ export class ProgramController {
   async update(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN", "PARTNER_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "PARTNER_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = updateProgramSchema.parse(body);
@@ -75,7 +75,7 @@ export class ProgramController {
   async generateEsgReport(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const result = await this.programService.generateEsgReport(id, {
         companyId: authUser.companyId,

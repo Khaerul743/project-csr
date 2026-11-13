@@ -30,7 +30,7 @@ export class ProgramStageController {
   async generateStages(request: Request, programId: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN", "PARTNER_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "PARTNER_ADMIN"]);
 
       const result = await this.programStageService.generateStagesFromProposal(programId, {
         companyId: authUser.companyId,
@@ -49,7 +49,7 @@ export class ProgramStageController {
   async saveStages(request: Request, programId: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN", "PARTNER_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "PARTNER_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = saveStagesSchema.parse(body);
@@ -76,7 +76,7 @@ export class ProgramStageController {
   ): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN", "PARTNER_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "PARTNER_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = updateStageSchema.parse(body);
@@ -103,7 +103,7 @@ export class ProgramStageController {
   ): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN", "PARTNER_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "PARTNER_ADMIN"]);
 
       await this.programStageService.deleteStage(stageId, {
         companyId: authUser.companyId,

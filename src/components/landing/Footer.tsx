@@ -67,7 +67,7 @@ export function LandingFooter() {
                   SIPENA
                 </span>
                 <span className="text-[11px] font-semibold text-emerald-400 tracking-wide block mt-1">
-                  Petakan Kebutuhan,  Pantau Perubahan
+                  Petakan Kebutuhan, Pantau Perubahan
                 </span>
               </div>
             </Link>
@@ -212,13 +212,14 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/programs"
-                  className="hover:text-white transition-colors flex items-center gap-1.5"
+                <a
+                  href="#program-dampak"
+                  onClick={(e) => scrollToSection(e, "#program-dampak")}
+                  className="hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <ArrowUpRight className="w-3 h-3 text-slate-400" />
-                  <span>Eksplorasi Proposal</span>
-                </Link>
+                  <span>Eksplorasi Program &amp; Dampak</span>
+                </a>
               </li>
               <li>
                 <a

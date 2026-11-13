@@ -299,20 +299,13 @@ export function TeamManagementView({
       {/* 1. HEADER HALAMAN */}
       {/* ============================================================ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#181343] text-white flex items-center justify-center shadow-xs">
-              <Users className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black text-[#181343] tracking-tight">
-                Anggota Tim & Akses
-              </h2>
-              <p className="text-xs text-[#787680]">
-                Kelola anggota organisasi, penugasan hak akses peran (Role-Based Access Control), dan undangan tim internal.
-              </p>
-            </div>
-          </div>
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black text-[#181343] tracking-tight">
+            Anggota Tim & Akses
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Kelola anggota organisasi, hak akses peran (Role-Based Access Control), dan undangan tim internal.
+          </p>
         </div>
 
         {/* Primary Action Button */}
@@ -322,74 +315,70 @@ export function TeamManagementView({
             variant="primary"
             size="md"
             onClick={onOpenInviteModal}
-            leftIcon={<UserPlus className="w-4 h-4 text-emerald-300" />}
-            className="shrink-0 bg-[#009E75] hover:bg-[#008764] text-white font-bold shadow-xs transition-all"
+            leftIcon={<UserPlus className="w-4 h-4" />}
+            className="shrink-0 bg-[#059669] hover:bg-[#047857] text-white font-semibold rounded-xl shadow-xs transition-all cursor-pointer"
           >
             Undang Anggota Baru
           </Button>
         ) : (
-          <div className="flex items-center gap-2 text-xs text-[#787680] bg-[#F9F9FB] px-3 py-1.5 rounded-xl border border-[#E8E8EA]">
-            <Info className="w-4 h-4 text-[#787680] shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-slate-500 bg-[#F9F9FB] px-3.5 py-2 rounded-xl border border-[#E5E7EB]">
+            <Info className="w-4 h-4 text-slate-400 shrink-0" />
             <span>Mode Lihat Anggota (Hak administratif dikelola oleh Management)</span>
           </div>
         )}
       </div>
 
-      {/* Compact Metrics Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-            Total Anggota
-          </span>
-          <span className="text-xl font-black text-[#181343] mt-0.5 block">
+      {/* 4 KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB]">
+          <span className="text-xs font-semibold text-slate-500 block">Total Anggota</span>
+          <div className="text-2xl font-black text-[#181343] mt-1 tabular-nums">
             {members.length}
-          </span>
+          </div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Akun terdaftar di organisasi</span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-            Management
-          </span>
-          <span className="text-xl font-black text-indigo-700 mt-0.5 block">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB]">
+          <span className="text-xs font-semibold text-slate-500 block">Peran Management</span>
+          <div className="text-2xl font-black text-indigo-700 mt-1 tabular-nums">
             {members.filter((m) => m.role === "MANAGEMENT").length}
-          </span>
+          </div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Hak administratif penuh</span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-            CSR Admin
-          </span>
-          <span className="text-xl font-black text-[#009E75] mt-0.5 block">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB]">
+          <span className="text-xs font-semibold text-slate-500 block">Peran CSR Admin</span>
+          <div className="text-2xl font-black text-[#059669] mt-1 tabular-nums">
             {members.filter((m) => m.role === "CSR_ADMIN").length}
-          </span>
+          </div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Operasional program & mitra</span>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-            Undangan Menunggu
-          </span>
-          <span className="text-xl font-black text-amber-600 mt-0.5 block">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB]">
+          <span className="text-xs font-semibold text-slate-500 block">Undangan Menunggu</span>
+          <div className="text-2xl font-black text-amber-600 mt-1 tabular-nums">
             {pendingInvitations.length}
-          </span>
+          </div>
+          <span className="text-[11px] text-slate-400 mt-0.5 block">Menunggu konfirmasi penerima</span>
         </div>
       </div>
 
       {/* ============================================================ */}
       {/* 2. ANGGOTA TIM AKTIF */}
       {/* ============================================================ */}
-      <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-visible">
         {/* Card Header & Filters */}
-        <div className="p-5 sm:p-6 border-b border-[#F4F4F6] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="p-5 sm:p-6 border-b border-slate-100 rounded-t-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-[#181343]">
+              <h2 className="text-base font-bold text-[#181343]">
                 Anggota Tim Aktif
-              </h3>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#EDF9F3] text-[#009E75]">
+              </h2>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
                 {members.length} Pengguna
               </span>
             </div>
-            <p className="text-xs text-[#787680]">
+            <p className="text-xs text-slate-500">
               Pengguna internal yang memiliki akses ke workspace organisasi ini
             </p>
           </div>
@@ -397,20 +386,20 @@ export function TeamManagementView({
           {/* Quick Search & Role Filter */}
           <div className="flex items-center gap-2.5">
             <div className="relative min-w-[200px] sm:min-w-[240px]">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={memberSearch}
                 onChange={(e) => setMemberSearch(e.target.value)}
                 placeholder="Cari nama atau email..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-[#181343] placeholder:text-[#787680] focus:outline-none focus:border-[#35B98E] focus:ring-1 focus:ring-[#35B98E]"
+                className="w-full pl-8 pr-3 py-2 text-xs rounded-xl bg-white border border-[#E5E7EB] text-[#181343] placeholder:text-slate-400 focus:outline-none focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/20"
               />
             </div>
 
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-[#181343] font-medium focus:outline-none focus:border-[#35B98E]"
+              className="px-3 py-2 text-xs rounded-xl bg-white border border-[#E5E7EB] text-[#181343] font-semibold focus:outline-none focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/20 cursor-pointer"
             >
               <option value="ALL">Semua Peran</option>
               <option value="MANAGEMENT">Management</option>
@@ -420,10 +409,11 @@ export function TeamManagementView({
         </div>
 
         {/* Member List */}
-        <div className="divide-y divide-[#F4F4F6]">
+        <div className="divide-y divide-slate-100">
           {filteredMembers.length > 0 ? (
-            filteredMembers.map((member) => {
+            filteredMembers.map((member, idx) => {
               const isCurrentUser = member.id === currentUser.id;
+              const isLastRow = idx === filteredMembers.length - 1 && filteredMembers.length > 1;
               const isSoleActiveManagement =
                 member.role === "MANAGEMENT" &&
                 member.status === "ACTIVE" &&
@@ -432,7 +422,7 @@ export function TeamManagementView({
               return (
                 <div
                   key={member.id}
-                  className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#F9F9FB]/60 transition-colors"
+                  className="p-4 sm:p-5 last:rounded-b-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[#F9F9FB]/60 transition-colors"
                 >
                   {/* Left: Avatar & Info */}
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -446,7 +436,7 @@ export function TeamManagementView({
                           {member.name}
                         </span>
                         {isCurrentUser && (
-                          <span className="text-[10px] font-bold bg-[#F4F4F6] text-[#5F5D6B] px-2 py-0.5 rounded-full border border-[#E8E8EA]">
+                          <span className="text-[10px] font-bold bg-[#F4F4F6] text-[#5F5D6B] px-2 py-0.5 rounded-full border border-[#E5E7EB]">
                             Anda
                           </span>
                         )}
@@ -456,7 +446,7 @@ export function TeamManagementView({
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-[#787680] block truncate">
+                      <span className="text-xs text-slate-500 block truncate">
                         {member.email}
                       </span>
                     </div>
@@ -480,7 +470,7 @@ export function TeamManagementView({
                     </div>
 
                     {/* Join Date */}
-                    <div className="text-xs text-[#787680] hidden sm:flex items-center gap-1.5">
+                    <div className="text-xs text-slate-500 hidden sm:flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-slate-400" />
                       <span>Bergabung {formatDateIndo(member.createdAt)}</span>
                     </div>
@@ -504,10 +494,14 @@ export function TeamManagementView({
                       {activeMenuMemberId === member.id && (
                         <>
                           <div
-                            className="fixed inset-0 z-20"
+                            className="fixed inset-0 z-40"
                             onClick={() => setActiveMenuMemberId(null)}
                           />
-                          <div className="absolute right-0 top-full mt-1 w-52 bg-white rounded-2xl shadow-xl border border-[#E8E8EA] py-1.5 z-30 divide-y divide-[#F4F4F6] animate-in fade-in-50 zoom-in-95 duration-100">
+                          <div
+                            className={`absolute right-0 w-52 bg-white rounded-2xl shadow-xl border border-[#E5E7EB] py-1.5 z-50 divide-y divide-[#F4F4F6] animate-in fade-in-50 zoom-in-95 duration-100 ${
+                              isLastRow ? "bottom-full mb-1.5" : "top-full mt-1.5"
+                            }`}
+                          >
                             {/* Option 1: Lihat Detail */}
                             <div className="py-1">
                               <button
@@ -597,7 +591,7 @@ export function TeamManagementView({
               );
             })
           ) : (
-            <div className="p-8 text-center text-xs text-[#787680]">
+            <div className="p-8 text-center text-xs text-slate-500">
               {memberSearch || roleFilter !== "ALL"
                 ? "Tidak ada anggota tim yang cocok dengan kriteria pencarian."
                 : "Belum ada anggota tim internal yang terdaftar."}
@@ -610,9 +604,9 @@ export function TeamManagementView({
       {/* 3. UNDANGAN MENUNGGU KONFIRMASI (PENDING ONLY) */}
       {/* ============================================================ */}
       {isManagement && (
-        <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
           {/* Card Header */}
-          <div className="p-5 sm:p-6 border-b border-[#F4F4F6] flex items-center justify-between">
+          <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-[#181343]">
@@ -622,13 +616,13 @@ export function TeamManagementView({
                   className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                     pendingInvitations.length > 0
                       ? "bg-amber-100 text-amber-800"
-                      : "bg-[#F4F4F6] text-[#787680]"
+                      : "bg-[#F4F4F6] text-slate-500"
                   }`}
                 >
                   {pendingInvitations.length}
                 </span>
               </div>
-              <p className="text-xs text-[#787680]">
+              <p className="text-xs text-slate-500">
                 Undangan aktif yang telah dikirimkan dan menunggu konfirmasi login penerima
               </p>
             </div>
@@ -636,19 +630,19 @@ export function TeamManagementView({
 
           {/* Body Content */}
           {isLoadingInvitations ? (
-            <div className="p-8 text-center text-xs text-[#787680]">
+            <div className="p-8 text-center text-xs text-slate-500">
               Memuat data undangan tim...
             </div>
           ) : pendingInvitations.length === 0 ? (
             /* Empty State sesuai instruksi user */
             <div className="p-8 sm:p-10 text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] text-[#787680] flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] text-slate-500 flex items-center justify-center mx-auto">
                 <MailCheck className="w-6 h-6 text-emerald-600" />
               </div>
               <h4 className="text-sm font-bold text-[#181343]">
                 Tidak ada undangan yang menunggu konfirmasi.
               </h4>
-              <p className="text-xs text-[#787680] max-w-sm mx-auto">
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
                 Seluruh undangan yang terkirim telah diterima oleh rekan tim atau telah diproses sebelumnya.
               </p>
             </div>
@@ -676,7 +670,7 @@ export function TeamManagementView({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-[11px] text-[#787680]">
+                    <div className="flex items-center gap-2 text-[11px] text-slate-500">
                       <Clock className="w-3 h-3 text-slate-400" />
                       <span>Berlaku s/d: {formatDateTimeIndo(inv.expiresAt)}</span>
                     </div>
@@ -688,13 +682,13 @@ export function TeamManagementView({
                     <button
                       type="button"
                       onClick={() => handleCopyToken(inv.token, inv.id)}
-                      className="px-2.5 py-1.5 rounded-xl border border-[#E8E8EA] bg-[#F9F9FB] hover:bg-white text-[#181343] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-xl border border-[#E5E7EB] bg-[#F9F9FB] hover:bg-white text-[#181343] font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                       title="Salin Token Undangan"
                     >
                       {copiedTokenId === inv.id ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-[#009E75]" />
-                          <span className="text-[#009E75] font-bold">Tersalin</span>
+                          <Check className="w-3.5 h-3.5 text-[#059669]" />
+                          <span className="text-[#059669] font-bold">Tersalin</span>
                         </>
                       ) : (
                         <>
@@ -737,7 +731,7 @@ export function TeamManagementView({
       {/* 4. RIWAYAT UNDANGAN (ACCEPTED / CANCELLED / EXPIRED) */}
       {/* ============================================================ */}
       {isManagement && historyInvitations.length > 0 && (
-        <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
           {/* Collapsible Header */}
           <div
             onClick={() => setIsHistoryExpanded(!isHistoryExpanded)}
@@ -748,11 +742,11 @@ export function TeamManagementView({
                 <h3 className="text-base font-bold text-[#181343]">
                   Riwayat Undangan
                 </h3>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#F4F4F6] text-[#787680]">
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[#F4F4F6] text-slate-500">
                   {historyInvitations.length} Catatan
                 </span>
               </div>
-              <p className="text-xs text-[#787680]">
+              <p className="text-xs text-slate-500">
                 Catatan undangan yang telah diterima, kedaluwarsa, atau dibatalkan sebelumnya
               </p>
             </div>
@@ -771,7 +765,7 @@ export function TeamManagementView({
 
           {/* Expanded List */}
           {isHistoryExpanded && (
-            <div className="border-t border-[#F4F4F6] divide-y divide-[#F4F4F6]">
+            <div className="border-t border-slate-100 divide-y divide-[#F4F4F6]">
               {historyInvitations.map((inv) => {
                 const now = new Date();
                 const isExpired =
@@ -779,11 +773,11 @@ export function TeamManagementView({
                   (inv.status === "PENDING" && new Date(inv.expiresAt) <= now);
 
                 let statusLabel = "Diterima";
-                let badgeClass = "bg-emerald-50 text-[#009E75] border-emerald-200";
+                let badgeClass = "bg-emerald-50 text-[#059669] border-emerald-200";
 
                 if (inv.status === "ACCEPTED") {
                   statusLabel = "Diterima";
-                  badgeClass = "bg-[#EDF9F3] text-[#009E75] border-[#35B98E]/50";
+                  badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 } else if (inv.status === "CANCELLED") {
                   statusLabel = "Dibatalkan";
                   badgeClass = "bg-slate-100 text-slate-600 border-slate-200";
@@ -809,12 +803,12 @@ export function TeamManagementView({
                           {statusLabel}
                         </span>
                         {/* Role */}
-                        <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-[#F9F9FB] text-[#787680] border border-[#E8E8EA]">
+                        <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-[#F9F9FB] text-slate-500 border border-[#E5E7EB]">
                           {getRoleLabel(inv.role)}
                         </span>
                       </div>
 
-                      <div className="text-[11px] text-[#787680]">
+                      <div className="text-[11px] text-slate-500">
                         Dibuat: {formatDateTimeIndo(inv.createdAt)}
                       </div>
                     </div>
@@ -851,25 +845,25 @@ export function TeamManagementView({
           maxWidth="md"
         >
           <div className="space-y-5 py-2">
-            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA]">
-              <div className="w-12 h-12 rounded-full bg-white border border-[#E8E8EA] text-[#181343] font-black text-base flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB]">
+              <div className="w-12 h-12 rounded-full bg-white border border-[#E5E7EB] text-[#181343] font-black text-base flex items-center justify-center shrink-0 shadow-2xs">
                 {detailMember.name.substring(0, 2).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <h4 className="text-sm font-bold text-[#181343] truncate">
                   {detailMember.name}
                 </h4>
-                <p className="text-xs text-[#787680] truncate">
+                <p className="text-xs text-slate-500 truncate">
                   {detailMember.email}
                 </p>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white border border-[#E8E8EA] text-[#181343]">
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white border border-[#E5E7EB] text-[#181343]">
                     {getRoleLabel(detailMember.role)}
                   </span>
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
                       detailMember.status === "ACTIVE"
-                        ? "bg-[#EDF9F3] text-[#009E75] border-[#35B98E]/50"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : "bg-rose-50 text-rose-700 border-rose-200"
                     }`}
                   >
@@ -903,15 +897,15 @@ export function TeamManagementView({
                 ) : (
                   <>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#009E75] shrink-0" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0" />
                       <span>Operasional harian pelaksanaan program dan verifikasi mitra</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#009E75] shrink-0" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0" />
                       <span>Tinjau proposal masuk dan lakukan negosiasi teknis</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#009E75] shrink-0" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#059669] shrink-0" />
                       <span>Pelaporan aktivitas lapangan dan verifikasi pertanggungjawaban</span>
                     </div>
                   </>
@@ -919,7 +913,7 @@ export function TeamManagementView({
               </div>
             </div>
 
-            <div className="text-[11px] text-[#787680] pt-1">
+            <div className="text-[11px] text-slate-500 pt-1">
               Terdaftar sejak: {formatDateIndo(detailMember.createdAt)}
             </div>
 
@@ -960,11 +954,11 @@ export function TeamManagementView({
               </div>
             )}
 
-            <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1">
-              <span className="text-xs text-[#787680] block">Pengguna:</span>
+            <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-1">
+              <span className="text-xs text-slate-500 block">Pengguna:</span>
               <p className="text-sm font-bold text-[#181343]">
                 {roleChangeMember.name}{" "}
-                <span className="text-xs font-normal text-[#787680]">
+                <span className="text-xs font-normal text-slate-500">
                   ({roleChangeMember.email})
                 </span>
               </p>
@@ -986,13 +980,13 @@ export function TeamManagementView({
               </div>
             </div>
 
-            <p className="text-xs text-[#787680] leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               {roleChangeMember.role === "MANAGEMENT"
                 ? "Peran akan dialihkan menjadi CSR Admin. Pengguna tidak akan memiliki akses administratif untuk mengundang anggota lain atau mengubah role organisasi."
                 : "Peran akan dialihkan menjadi Management. Pengguna akan memperoleh hak manajerial penuh termasuk persetujuan portofolio CSR dan pengelolaan anggota tim."}
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F4F4F6]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <Button
                 type="button"
                 variant="outline"
@@ -1045,23 +1039,23 @@ export function TeamManagementView({
               </div>
             )}
 
-            <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1">
-              <span className="text-xs text-[#787680] block">Pengguna:</span>
+            <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-1">
+              <span className="text-xs text-slate-500 block">Pengguna:</span>
               <p className="text-sm font-bold text-[#181343]">
                 {statusToggleMember.name}{" "}
-                <span className="text-xs font-normal text-[#787680]">
+                <span className="text-xs font-normal text-slate-500">
                   ({statusToggleMember.email})
                 </span>
               </p>
             </div>
 
-            <p className="text-xs text-[#787680] leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               {statusToggleMember.status === "ACTIVE"
                 ? "Apakah Anda yakin ingin menonaktifkan akun anggota ini? Pengguna tidak akan dapat login atau mengakses data workspace CSR hingga statusnya diaktifkan kembali."
                 : "Apakah Anda yakin ingin memulihkan status akses akun ini? Pengguna akan dapat kembali login dan mengakses workspace CSR organisasi."}
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F4F4F6]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <Button
                 type="button"
                 variant="outline"
@@ -1112,13 +1106,13 @@ export function TeamManagementView({
               </div>
             )}
 
-            <p className="text-xs text-[#787680] leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Batalkan undangan untuk email{" "}
               <strong className="text-[#181343]">{invitationToCancel.email}</strong>?
               Tautan dan token undangan ini tidak akan dapat digunakan lagi.
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F4F4F6]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <Button
                 type="button"
                 variant="outline"
@@ -1167,13 +1161,13 @@ export function TeamManagementView({
               </div>
             )}
 
-            <p className="text-xs text-[#787680] leading-relaxed">
+            <p className="text-xs text-slate-500 leading-relaxed">
               Perbarui undangan untuk{" "}
               <strong className="text-[#181343]">{invitationToResend.email}</strong>?
               Sistem akan membuat token baru dan memperpanjang masa berlaku hingga 7 hari ke depan.
             </p>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#F4F4F6]">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <Button
                 type="button"
                 variant="outline"
@@ -1212,7 +1206,7 @@ export function TeamManagementView({
           maxWidth="md"
         >
           <div className="space-y-4 text-center py-2">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#009E75] flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-[#059669] flex items-center justify-center mx-auto shadow-inner">
               <CheckCircle2 className="w-6 h-6" />
             </div>
 
@@ -1220,16 +1214,16 @@ export function TeamManagementView({
               <h4 className="text-sm font-bold text-[#181343]">
                 Undangan untuk {resendSuccessData.email} Aktif Kembali
               </h4>
-              <p className="text-xs text-[#787680] mt-1 max-w-sm mx-auto">
+              <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
                 Masa berlaku telah diperpanjang 7 hari ke depan.
               </p>
             </div>
 
-            <div className="p-3 bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl text-left space-y-1.5">
-              <span className="text-[11px] font-bold text-[#787680] block">
+            <div className="p-3 bg-[#F9F9FB] border border-[#E5E7EB] rounded-xl text-left space-y-1.5">
+              <span className="text-[11px] font-bold text-slate-500 block">
                 Token Undangan Baru:
               </span>
-              <div className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-[#E8E8EA] text-xs font-mono text-[#181343]">
+              <div className="flex items-center justify-between gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-[#E5E7EB] text-xs font-mono text-[#181343]">
                 <span className="truncate">{resendSuccessData.token}</span>
                 <button
                   type="button"

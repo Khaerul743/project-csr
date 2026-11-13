@@ -226,7 +226,7 @@ export class EsgReportService {
 
     return {
       source: "HEURISTIC_FALLBACK",
-      executiveSummary: `Program CSR "${input.programTitle}" yang diinisiasi oleh ${input.companyName} bersama mitra pelaksana ${input.partnerName} telah terlaksana di ${input.location} dengan serapan anggaran sebesar Rp ${spentBudgetNum.toLocaleString("id-ID")} (${absorptionRatio.toFixed(1)}%). Program ini berhasil menjangkau sasaran masyarakat secara akuntabel, transparan, serta selaras dengan prinsip keberlanjutan POJK 51 dan indikator ${primarySdg.goalTitle}.`,
+      executiveSummary: `Program CSR "${input.programTitle}" yang diinisiasi oleh ${input.companyName} bersama mitra pelaksana ${input.partnerName} telah terlaksana di ${input.location} dengan serapan anggaran sebesar Rp ${spentBudgetNum.toLocaleString("id-ID")} (${absorptionRatio.toFixed(1)}%). Program ini berhasil menjangkau sasaran masyarakat secara akuntabel, transparan, serta selaras dengan prinsip keberlanjutan ESG dan indikator ${primarySdg.goalTitle}.`,
       programHighlight: `Keberhasilan kolaborasi pentahelix yang melibatkan partisipasi aktif komunitas lokal di ${input.location}, membuktikan efektivitas pendekatan kemitraan jangka panjang yang berorientasi pada kemandirian masyarakat.`,
       esgBreakdown: {
         environmentalImpact: envImpact,

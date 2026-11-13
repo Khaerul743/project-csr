@@ -43,7 +43,7 @@ export class ActivityController {
   async review(request: Request, activityId: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = reviewActivitySchema.parse(body);

@@ -31,9 +31,10 @@ interface PartnerCurationViewProps {
   onFocusFilterChange: (focus: string) => void;
   onRefresh: () => void;
   onViewPartnerDetail: (partner: PartnerItem) => void;
-  onInvitePitch: (partner: PartnerItem) => void;
+  onInvitePitch?: (partner: PartnerItem) => void;
   onInvitePartner?: (partner: PartnerItem) => void;
   isLoadingDetail?: boolean;
+  isManagement?: boolean;
 }
 
 // Fallback Logo Component with Error Handling
@@ -97,6 +98,7 @@ export function PartnerCurationView({
   onInvitePitch,
   onInvitePartner,
   isLoadingDetail = false,
+  isManagement = false,
 }: PartnerCurationViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [regionFilter, setRegionFilter] = useState("ALL");
@@ -104,9 +106,10 @@ export function PartnerCurationView({
 
   // Handler for invite action (supporting both prop names)
   const handleInvite = (partner: PartnerItem) => {
+    if (isManagement) return;
     if (onInvitePartner) {
       onInvitePartner(partner);
-    } else {
+    } else if (onInvitePitch) {
       onInvitePitch(partner);
     }
   };
@@ -488,15 +491,17 @@ export function PartnerCurationView({
                     Lihat Profil
                   </Button>
 
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => handleInvite(partner)}
-                    leftIcon={<Send className="w-3.5 h-3.5" />}
-                    className="flex-1 text-xs cursor-pointer"
-                  >
-                    Undang Bermitra
-                  </Button>
+                  {!isManagement && (onInvitePartner || onInvitePitch) && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => handleInvite(partner)}
+                      leftIcon={<Send className="w-3.5 h-3.5" />}
+                      className="flex-1 text-xs cursor-pointer"
+                    >
+                      Undang Bermitra
+                    </Button>
+                  )}
                 </div>
               </div>
             );

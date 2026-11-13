@@ -291,23 +291,15 @@ export function CompanyFinancialOversightView({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 w-full">
-      {/* 1. Header Identitas & Aksi Eksekutif */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+    <div className="space-y-8 animate-in fade-in duration-300 w-full">
+      {/* 1. Header Ringkas & Aksi Eksekutif */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
-              <Wallet className="w-4 h-4" />
-            </div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#181343] tracking-tight">
-              Pengawasan Anggaran &amp; Keuangan CSR
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
-              Mode Pengawasan Eksekutif
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Audit agregasi pagu alokasi komitmen, realisasi belanja lapangan, dan rasio efisiensi serapan dana CSR perusahaan secara terpadu.
+          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+            Pengawasan Anggaran &amp; Keuangan
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Agregasi pagu komitmen, realisasi belanja lapangan, dan efisiensi serapan dana CSR.
           </p>
         </div>
 
@@ -319,9 +311,9 @@ export function CompanyFinancialOversightView({
             onClick={handleRefresh}
             disabled={isLoading || isFetchingServer}
             leftIcon={<RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isLoading || isFetchingServer ? "animate-spin" : ""}`} />}
-            className="text-xs font-semibold cursor-pointer"
+            className="text-xs font-semibold text-slate-700 border-[#E5E7EB] cursor-pointer"
           >
-            Segarkan Data
+            Segarkan
           </Button>
 
           <Button
@@ -329,117 +321,72 @@ export function CompanyFinancialOversightView({
             variant="outline"
             size="sm"
             onClick={handleExportCsv}
-            leftIcon={<Download className="w-3.5 h-3.5 text-emerald-700" />}
-            className="text-xs font-semibold text-[#181343] hover:bg-slate-50 border-slate-200 cursor-pointer"
+            leftIcon={<Download className="w-3.5 h-3.5 text-[#059669]" />}
+            className="text-xs font-semibold text-[#181343] hover:bg-slate-50 border-[#E5E7EB] cursor-pointer"
           >
-            Ekspor Rekap (CSV)
+            Ekspor CSV
           </Button>
         </div>
       </div>
 
-      {/* 2. 4 Kartu KPI Keuangan Eksekutif */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-        {/* KPI 1: Total Pagu Anggaran */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Total Pagu Komitmen
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
-              <Coins className="w-4 h-4" />
-            </div>
+      {/* 2. 4 Kartu KPI Keuangan yang Lega */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Total Pagu Komitmen</span>
+            <Coins className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight truncate">
-              {formatRupiah(activeMetrics.totalBudget)}
-            </div>
-            <p className="text-xs text-slate-500">
-              Total dana disepakati ({programs.length} program)
-            </p>
+          <div className="text-2xl font-extrabold text-[#181343] tabular-nums truncate">
+            {formatRupiah(activeMetrics.totalBudget)}
           </div>
+          <p className="text-xs text-slate-500">
+            Alokasi dari {programs.length} program tercatat
+          </p>
         </div>
 
-        {/* KPI 2: Realisasi Belanja */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Realisasi Belanja
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Realisasi Belanja</span>
+            <CheckCircle2 className="w-4 h-4 text-[#059669]" />
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#009E75] tracking-tight truncate">
-              {formatRupiah(activeMetrics.totalSpent)}
-            </div>
-            <p className="text-xs text-slate-500">
-              Terverifikasi kuitansi belanja lapangan
-            </p>
+          <div className="text-2xl font-extrabold text-[#059669] tabular-nums truncate">
+            {formatRupiah(activeMetrics.totalSpent)}
           </div>
+          <p className="text-xs text-slate-500">
+            Terverifikasi kuitansi belanja lapangan
+          </p>
         </div>
 
-        {/* KPI 3: Tingkat Serapan Anggaran */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Tingkat Serapan
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-4 h-4" />
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Tingkat Serapan</span>
+            <TrendingUp className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="space-y-1.5">
-            <div className="flex items-baseline justify-between gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                {activeMetrics.absorptionRate.toFixed(1)}%
-              </span>
-              <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  activeMetrics.absorptionRate >= 70
-                    ? "bg-emerald-100 text-emerald-800"
-                    : activeMetrics.absorptionRate >= 35
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {activeMetrics.absorptionRate >= 70
-                  ? "Sangat Baik"
-                  : activeMetrics.absorptionRate >= 35
-                  ? "Berjalan Normal"
-                  : "Perlu Akselerasi"}
-              </span>
-            </div>
-            {/* Mini Progress Bar */}
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div
-                className="bg-emerald-600 h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(100, activeMetrics.absorptionRate)}%` }}
-              />
-            </div>
+          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+            {activeMetrics.absorptionRate.toFixed(1)}%
           </div>
+          <p className="text-xs text-slate-500">
+            {activeMetrics.absorptionRate >= 70
+              ? "Kategori serapan sangat baik"
+              : activeMetrics.absorptionRate >= 35
+              ? "Berjalan sesuai target"
+              : "Perlu akselerasi realisasi"}
+          </p>
         </div>
 
-        {/* KPI 4: Rata-rata Biaya per Penerima */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Rata-rata Biaya / Jiwa
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
-              <Users className="w-4 h-4" />
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Biaya per Penerima</span>
+            <Users className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="space-y-1">
-            <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight truncate">
-              {activeMetrics.avgCostPerBeneficiary > 0
-                ? formatRupiah(activeMetrics.avgCostPerBeneficiary) + " / jiwa"
-                : "Rp 0 / jiwa"}
-            </div>
-            <p className="text-xs text-slate-500">
-              Rasio efisiensi dana per orang
-            </p>
+          <div className="text-2xl font-extrabold text-[#181343] tabular-nums truncate">
+            {activeMetrics.avgCostPerBeneficiary > 0
+              ? formatRupiah(activeMetrics.avgCostPerBeneficiary)
+              : "Rp 0"}
           </div>
+          <p className="text-xs text-slate-500">
+            Rasio efisiensi dana per jiwa
+          </p>
         </div>
       </div>
 

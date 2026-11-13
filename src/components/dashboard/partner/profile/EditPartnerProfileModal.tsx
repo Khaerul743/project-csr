@@ -21,7 +21,7 @@ import {
   Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SearchableSelect } from "@/components/ui/searchable-select";
+import { RegionSelectGroup } from "@/components/ui/region-select-group";
 import { INDONESIAN_REGIONS } from "../../company/opportunities/indonesian-regions";
 import { Badge } from "@/components/ui/badge";
 import { csrFocusAreaEnum, CsrFocusArea } from "@/db/schema/csr-focus-areas";
@@ -594,21 +594,18 @@ export function EditPartnerProfileModal({
                   />
                 </div>
 
-                <SearchableSelect
-                  label="Provinsi"
-                  placeholder="Pilih Provinsi..."
-                  value={province}
-                  onChange={handleProvinceChange}
-                  options={provinceOptions}
-                />
-
-                <SearchableSelect
-                  label="Kota / Kabupaten"
-                  placeholder={province ? "Pilih Kota / Kabupaten..." : "Pilih Provinsi terlebih dahulu"}
-                  value={city}
-                  onChange={setCity}
-                  options={cityOptions}
-                  disabled={!province}
+                <RegionSelectGroup
+                  province={province}
+                  city={city}
+                  onProvinceChange={handleProvinceChange}
+                  onCityChange={setCity}
+                  provinceLabel="Provinsi Domisili"
+                  cityLabel="Kota / Kabupaten"
+                  provincePlaceholder="Pilih Provinsi..."
+                  cityPlaceholder="Pilih Kota / Kabupaten..."
+                  provinceHelperText="Pilih provinsi domisili sekretariat"
+                  cityHelperText="Pilih kota/kabupaten sekretariat"
+                  layout="vertical"
                 />
               </div>
 

@@ -16,6 +16,7 @@ import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { RegionSelectGroup } from "@/components/ui/region-select-group";
 
 interface PartnerRegisterModalProps {
   isOpen: boolean;
@@ -199,23 +200,23 @@ export function PartnerRegisterModal({
             <span>3. Domisili & Sekretariat</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <Input
-              label="Kota / Kabupaten"
-              name="city"
-              placeholder="Surabaya"
-              leftIcon={<MapPin className="w-4 h-4 text-slate-400" />}
-              value={formData.city}
-              onChange={handleChange}
-            />
-            <Input
-              label="Provinsi"
-              name="province"
-              placeholder="Jawa Timur"
-              value={formData.province}
-              onChange={handleChange}
-            />
-          </div>
+          {/* Pemilihan Wilayah Terintegrasi (Provinsi -> Kota/Kabupaten) */}
+          <RegionSelectGroup
+            province={formData.province}
+            city={formData.city}
+            onProvinceChange={(prov) =>
+              setFormData((prev) => ({ ...prev, province: prov, city: "" }))
+            }
+            onCityChange={(cit) =>
+              setFormData((prev) => ({ ...prev, city: cit }))
+            }
+            provinceLabel="Provinsi Domisili"
+            cityLabel="Kota / Kabupaten"
+            provincePlaceholder="Pilih Provinsi..."
+            cityPlaceholder="Pilih Kota / Kabupaten..."
+            provinceHelperText="Pilih provinsi domisili sekretariat"
+            cityHelperText="Pilih kota/kabupaten sekretariat"
+          />
 
           <Input
             label="Alamat Lengkap Sekretariat"

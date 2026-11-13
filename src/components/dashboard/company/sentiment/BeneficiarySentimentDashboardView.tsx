@@ -365,24 +365,15 @@ export function BeneficiarySentimentDashboardView({
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 w-full">
-      {/* 1. Header Identitas & Aksi */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+    <div className="space-y-8 animate-in fade-in duration-300 w-full">
+      {/* 1. Header Ringkas & Aksi */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shrink-0">
-              <HeartHandshake className="w-4 h-4" />
-            </div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#181343] tracking-tight">
-              Intelijen Sentimen &amp; Suara Warga
-            </h2>
-            <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200 tracking-wide uppercase flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-teal-600" />
-              AI Beneficiary Intelligence
-            </span>
-          </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
-            Analisis persepsi dan kepuasan masyarakat penerima manfaat CSR berbasis Natural Language Processing (AI), rating bintang, dan feedback langsung dari lapangan.
+          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+            Sentimen &amp; Kepuasan Warga
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600">
+            Persepsi dan ulasan langsung penerima manfaat dari program CSR yang berjalan.
           </p>
         </div>
 
@@ -394,9 +385,9 @@ export function BeneficiarySentimentDashboardView({
             onClick={handleRefreshAll}
             disabled={isLoading || isFetching}
             leftIcon={<RefreshCw className={`w-3.5 h-3.5 text-slate-600 ${isLoading || isFetching ? "animate-spin" : ""}`} />}
-            className="text-xs font-semibold cursor-pointer"
+            className="text-xs font-semibold text-slate-700 border-[#E5E7EB] cursor-pointer"
           >
-            Segarkan Data
+            Segarkan
           </Button>
 
           <Button
@@ -405,145 +396,83 @@ export function BeneficiarySentimentDashboardView({
             size="sm"
             onClick={handleExportCsv}
             disabled={!data?.recentReviews || data.recentReviews.length === 0}
-            leftIcon={<Download className="w-3.5 h-3.5 text-teal-700" />}
-            className="text-xs font-semibold text-[#181343] hover:bg-slate-50 border-slate-200 cursor-pointer"
+            leftIcon={<Download className="w-3.5 h-3.5 text-[#059669]" />}
+            className="text-xs font-semibold text-[#181343] hover:bg-slate-50 border-[#E5E7EB] cursor-pointer"
           >
-            Ekspor Rekap Sentimen (CSV)
+            Ekspor CSV
           </Button>
         </div>
       </div>
 
-      {/* 2. 4 Kartu KPI Sentimen Eksekutif */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-        {/* KPI 1: Net Sentiment Score (NSS) */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Net Sentiment Score (NSS)
+      {/* 2. 4 Kartu KPI Sentimen yang Lega */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Net Sentiment Score</span>
+            <TrendingUp className="w-4 h-4 text-[#059669]" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-[#059669] tabular-nums">
+              {summary.netSentimentScore >= 0 ? `+${summary.netSentimentScore}` : summary.netSentimentScore}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-4 h-4" />
-            </div>
+            <span className="text-xs font-semibold text-slate-500">
+              {summary.netSentimentScore >= 30
+                ? "Sangat Positif"
+                : summary.netSentimentScore >= 0
+                ? "Positif"
+                : "Perhatian"}
+            </span>
           </div>
-          <div className="space-y-1">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                {summary.netSentimentScore >= 0 ? `+${summary.netSentimentScore}` : summary.netSentimentScore}
-              </span>
-              <span
-                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  summary.netSentimentScore >= 30
-                    ? "bg-emerald-100 text-emerald-800"
-                    : summary.netSentimentScore >= 0
-                    ? "bg-blue-100 text-blue-800"
-                    : "bg-rose-100 text-rose-800"
-                }`}
-              >
-                {summary.netSentimentScore >= 30
-                  ? "Sangat Positif"
-                  : summary.netSentimentScore >= 0
-                  ? "Cukup Positif"
-                  : "Perlu Perhatian"}
-              </span>
-            </div>
-            <p className="text-xs text-slate-500">
-              Formula: {summary.positivePercentage}% Positif - {summary.criticalPercentage}% Kritis
-            </p>
-          </div>
+          <p className="text-xs text-slate-500">
+            {summary.positivePercentage}% positif dibanding {summary.criticalPercentage}% kritis
+          </p>
         </div>
 
-        {/* KPI 2: Distribusi Sentimen */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Distribusi Sentimen Warga
-            </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-              <ThumbsUp className="w-4 h-4" />
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Proporsi Positif</span>
+            <ThumbsUp className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs font-bold text-[#181343]">
-              <span className="text-emerald-700">{summary.positivePercentage}% Positif</span>
-              <span className="text-blue-700">{summary.neutralPercentage}% Netral</span>
-              <span className="text-amber-700">{summary.criticalPercentage}% Kritis</span>
-            </div>
-            <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex">
-              <div
-                style={{ width: `${summary.positivePercentage}%` }}
-                className="bg-emerald-500 h-full transition-all duration-500"
-                title={`${summary.positivePercentage}% Positif`}
-              />
-              <div
-                style={{ width: `${summary.neutralPercentage}%` }}
-                className="bg-blue-500 h-full transition-all duration-500"
-                title={`${summary.neutralPercentage}% Netral`}
-              />
-              <div
-                style={{ width: `${summary.criticalPercentage}%` }}
-                className="bg-amber-500 h-full transition-all duration-500"
-                title={`${summary.criticalPercentage}% Kritis`}
-              />
-            </div>
-            <p className="text-[11px] text-slate-400">
-              Proporsi persepsi suara komunitas
-            </p>
+          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+            {summary.positivePercentage}%
           </div>
+          <p className="text-xs text-slate-500">
+            {summary.neutralPercentage}% netral &middot; {summary.criticalPercentage}% kritis
+          </p>
         </div>
 
-        {/* KPI 3: Rata-rata Rating Bintang */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Rating Kepuasan Komunitas
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Rating Kepuasan</span>
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold text-[#181343] tabular-nums">
+              {summary.averageRating > 0 ? summary.averageRating.toFixed(1) : "0.0"}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-            </div>
+            <span className="text-xs font-semibold text-slate-500">/ 5.0</span>
           </div>
-          <div className="space-y-1">
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                {summary.averageRating > 0 ? summary.averageRating.toFixed(1) : "0.0"}
-              </span>
-              <span className="text-xs font-semibold text-slate-400">/ 5.0</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  className={`w-3.5 h-3.5 ${
-                    star <= Math.round(summary.averageRating)
-                      ? "text-amber-400 fill-amber-400"
-                      : "text-slate-200"
-                  }`}
-                />
-              ))}
-              <span className="text-[11px] text-slate-500 ml-1.5 font-medium">
-                ({summary.totalReviews} ulasan)
-              </span>
-            </div>
-          </div>
+          <p className="text-xs text-slate-500">
+            Dari {summary.totalReviews} ulasan penerima manfaat
+          </p>
         </div>
 
-        {/* KPI 4: Cakupan Program Teranalisis */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-3">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              Cakupan Program
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Cakupan Program</span>
+            <BarChart3 className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold text-[#181343] tabular-nums">
+              {summary.analyzedProgramsCount}
             </span>
-            <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
-              <BarChart3 className="w-4 h-4" />
-            </div>
+            <span className="text-xs font-semibold text-slate-500 tabular-nums">
+              / {summary.totalProgramsCount} program
+            </span>
           </div>
-          <div className="space-y-1">
-            <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight truncate">
-              {summary.analyzedProgramsCount} / {summary.totalProgramsCount}
-            </div>
-            <p className="text-xs text-slate-500">
-              Program CSR telah teranalisis AI
-            </p>
-          </div>
+          <p className="text-xs text-slate-500">
+            Program dengan data feedback komunitas
+          </p>
         </div>
       </div>
 

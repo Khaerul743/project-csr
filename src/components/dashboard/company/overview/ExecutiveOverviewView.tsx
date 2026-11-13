@@ -5,7 +5,6 @@ import {
   TrendingUp,
   Activity,
   HeartHandshake,
-  Users,
   Plus,
   Eye,
   Calendar,
@@ -14,27 +13,15 @@ import {
   Clock,
   AlertTriangle,
   AlertCircle,
-  PieChart as PieChartIcon,
-  BarChart2,
-  Filter,
   RotateCcw,
   ArrowRight,
-  ChevronRight,
   ChevronDown,
   ChevronUp,
   Info,
-  Sparkles,
-  Layers,
-  Building2,
-  ExternalLink,
   Target,
-  ArrowUpRight,
-  FolderOpen,
-  CalendarDays,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SoftDataGrid } from "@/components/ui/soft-data-grid";
 import { CompanyNavMenu } from "../../Sidebar";
 import {
   CompanyProfile,
@@ -91,7 +78,7 @@ interface ExecutiveOverviewViewProps {
     budgetAbsorptionRate: number;
   };
   onNavigateMenu: (menu: CompanyNavMenu) => void;
-  onOpenCreateOpportunity: () => void;
+  onOpenCreateOpportunity?: () => void;
   onSelectOpportunityDetail: (opp: OpportunityItem) => void;
 }
 
@@ -133,6 +120,8 @@ export function ExecutiveOverviewView({
   onOpenCreateOpportunity,
   onSelectOpportunityDetail,
 }: ExecutiveOverviewViewProps) {
+  const isManagement = user.role === "MANAGEMENT";
+
   // Drill-down table ref for smooth scrolling
   const drillDownTableRef = useRef<HTMLDivElement>(null);
 
@@ -153,6 +142,8 @@ export function ExecutiveOverviewView({
 
   // Table expanded row state for program detail
   const [expandedProgramId, setExpandedProgramId] = useState<string | null>(null);
+  // Tabbed deep-dive section below main charts (prevents vertical section wall)
+  const [detailTab, setDetailTab] = useState<"programs" | "geography" | "opportunities">("programs");
 
   // Compact Rupiah helper (e.g. Rp 1,5 Miliar, Rp 750 Juta)
   const formatCompact = (val: number) => {
@@ -451,9 +442,9 @@ export function ExecutiveOverviewView({
         label: "Sedang Berjalan",
         count: inProgress,
         percentage: inProgressPct,
-        color: "#009E75", // Emerald
-        dotColor: "bg-[#009E75]",
-        lightBg: "bg-emerald-50",
+        color: "#059669", // Emerald SIPENA
+        dotColor: "bg-[#059669]",
+        lightBg: "bg-[#EAF8F4]",
         borderColor: "border-emerald-200",
         textColor: "text-emerald-800",
       },
@@ -508,8 +499,12 @@ export function ExecutiveOverviewView({
     if (pendingReportsTotal > 0) {
       items.push({
         id: "pending-verification",
-        title: "Laporan Menunggu Verifikasi",
-        description: `${pendingReportsTotal} laporan kegiatan mitra perlu peninjauan`,
+        title: isManagement
+          ? "Laporan dalam Antrean Verifikasi"
+          : "Laporan Menunggu Verifikasi",
+        description: isManagement
+          ? `${pendingReportsTotal} laporan kegiatan mitra menunggu verifikasi tim CSR`
+          : `${pendingReportsTotal} laporan kegiatan mitra perlu peninjauan`,
         count: pendingReportsTotal,
         badgeLabel: `${pendingReportsTotal} Laporan`,
         icon: Clock,
@@ -528,7 +523,9 @@ export function ExecutiveOverviewView({
     if (overduePrograms.length > 0) {
       items.push({
         id: "overdue-activities",
-        title: "Aktivitas Melewati Jadwal",
+        title: isManagement
+          ? "Program Melewati Target Jadwal"
+          : "Aktivitas Melewati Jadwal",
         description: `${overduePrograms.length} program melewati target tanggal rencana`,
         count: overduePrograms.length,
         badgeLabel: `${overduePrograms.length} Tertunda`,
@@ -690,363 +687,246 @@ export function ExecutiveOverviewView({
     setSelectedProvince(null);
   };
 
-  // Scroll to drill-down table
-  const scrollToDrillDown = () => {
-    if (drillDownTableRef.current) {
-      drillDownTableRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
-
   return (
-    <div className="space-y-8 animate-in fade-in duration-300 relative">
-      {/* Eksperimen Visual Opsi 3: Soft Data Grid Background & Atmospheric Glow */}
-      <SoftDataGrid variant="page" />
-
-      <div className="relative z-10 space-y-8">
-        {/* ============================================================ */}
-        {/* BAGIAN 1 — HEADER & FILTER ANALISIS                          */}
-        {/* ============================================================ */}
-      <div className="space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+    <div className="space-y-8 w-full animate-in fade-in duration-300">
+      {/* 1. Header Ringkas & Toolbar Filter Segaris (Selaras Halaman Kinerja Mitra) */}
+      <div className="space-y-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <h1
-                className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#181343]"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Ringkasan Manajemen &amp; Inisiatif CSR
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Live BI Hub
-              </span>
-            </div>
-            <p className="text-xs text-[#787680] leading-relaxed">
-              Pantau kinerja program, tren anggaran, kolaborasi mitra, dan persebaran manfaat CSR dalam satu dashboard.
+            <h1
+              className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {isManagement ? "Ringkasan Eksekutif Portofolio" : "Ringkasan Manajemen Inisiatif CSR"}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Alokasi anggaran, progres pelaksanaan program, dan persebaran dampak CSR perusahaan.
             </p>
           </div>
 
-          {/* Primary Action Button */}
-          <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto">
-            <Button
-              variant="primary"
-              size="md"
-              onClick={onOpenCreateOpportunity}
-              leftIcon={<Plus className="w-4 h-4" />}
-              className="px-5 py-2.5 cursor-pointer"
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <select
+              aria-label="Filter tahun pelaporan"
+              value={selectedYear}
+              onChange={(e) => {
+                setSelectedYear(e.target.value);
+                setSelectedMonth(null);
+              }}
+              className="px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
             >
-              Buat Peluang CSR
-            </Button>
-          </div>
-        </div>
+              <option value="ALL">Semua Tahun</option>
+              {availableYears.map((yr) => (
+                <option key={yr} value={yr}>
+                  Tahun {yr}
+                </option>
+              ))}
+            </select>
 
-        {/* Dynamic Analytics Filter Bar */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#181343]">
-              <Filter className="w-4 h-4 text-emerald-600" />
-              <span>Filter Analisis Portofolio</span>
-            </div>
+            <select
+              aria-label="Filter status program"
+              value={selectedStatus}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "ALL") {
+                  setSelectedStatus("ALL");
+                } else {
+                  const item = statusDistribution.find((s) => s.key === val);
+                  if (item && item.count > 0) {
+                    setSelectedStatus(val);
+                  }
+                }
+              }}
+              className="px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
+            >
+              <option value="ALL">Semua Status</option>
+              {statusDistribution.map((st) => (
+                <option key={st.key} value={st.key} disabled={st.count === 0}>
+                  {st.label} ({st.count})
+                </option>
+              ))}
+            </select>
+
+            <select
+              aria-label="Filter bidang fokus CSR"
+              value={selectedFocusArea}
+              onChange={(e) => setSelectedFocusArea(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
+            >
+              <option value="ALL">Semua Bidang</option>
+              <option value="LINGKUNGAN">Lingkungan Hidup</option>
+              <option value="PENDIDIKAN">Pendidikan</option>
+              <option value="KESEHATAN">Kesehatan</option>
+              <option value="PEMBERDAYAAN_EKONOMI">Pemberdayaan Ekonomi</option>
+              <option value="INFRASTRUKTUR_SOSIAL">Infrastruktur Sosial</option>
+              <option value="TANGGAP_BENCANA">Tanggap Bencana</option>
+              <option value="LAINNYA">Lainnya</option>
+            </select>
 
             {hasActiveFilters && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleResetFilters}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 transition-colors self-start lg:self-auto cursor-pointer"
+                leftIcon={<RotateCcw className="w-3.5 h-3.5 text-rose-600" />}
+                className="text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 cursor-pointer"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Semua Filter</span>
-              </button>
+                Reset
+              </Button>
+            )}
+
+            {!isManagement && onOpenCreateOpportunity && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={onOpenCreateOpportunity}
+                leftIcon={<Plus className="w-3.5 h-3.5" />}
+                className="text-xs font-semibold cursor-pointer"
+              >
+                Buat Peluang CSR
+              </Button>
             )}
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* Filter 1: Tahun Pelaporan */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-                Tahun Pelaporan
-              </label>
-              <select
-                value={selectedYear}
-                onChange={(e) => {
-                  setSelectedYear(e.target.value);
-                  setSelectedMonth(null);
-                }}
-                className="w-full text-xs font-semibold bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-3 py-2 text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all cursor-pointer"
-              >
-                <option value="ALL">Semua Tahun Pelaporan</option>
-                {availableYears.map((yr) => (
-                  <option key={yr} value={yr}>
-                    Tahun {yr}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Filter 2: Status Pelaksanaan Program */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-                Status Program
-              </label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === "ALL") {
-                    setSelectedStatus("ALL");
-                  } else {
-                    const item = statusDistribution.find((s) => s.key === val);
-                    if (item && item.count > 0) {
-                      setSelectedStatus(val);
-                    }
-                  }
-                }}
-                className="w-full text-xs font-semibold bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-3 py-2 text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all cursor-pointer"
-              >
-                <option value="ALL">Semua Status Pelaksanaan</option>
-                {statusDistribution.map((st) => (
-                  <option
-                    key={st.key}
-                    value={st.key}
-                    disabled={st.count === 0}
-                  >
-                    {st.label} ({st.count})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Filter 3: Bidang Fokus CSR */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
-                Bidang Fokus CSR
-              </label>
-              <select
-                value={selectedFocusArea}
-                onChange={(e) => setSelectedFocusArea(e.target.value)}
-                className="w-full text-xs font-semibold bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-3 py-2 text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all cursor-pointer"
-              >
-                <option value="ALL">Semua Bidang Fokus</option>
-                <option value="LINGKUNGAN">Lingkungan Hidup</option>
-                <option value="PENDIDIKAN">Pendidikan</option>
-                <option value="KESEHATAN">Kesehatan</option>
-                <option value="PEMBERDAYAAN_EKONOMI">Pemberdayaan Ekonomi</option>
-                <option value="INFRASTRUKTUR_SOSIAL">Infrastruktur Sosial</option>
-                <option value="TANGGAP_BENCANA">Tanggap Bencana</option>
-                <option value="LAINNYA">Lainnya</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Active Filter Indicators */}
-          {hasActiveFilters && (
-            <div className="pt-2 border-t border-[#F4F4F6] flex flex-wrap items-center gap-2 text-xs">
-              <span className="text-[#787680] font-medium">Filter Aktif:</span>
-              {selectedYear !== "ALL" && (
-                <span className="px-2.5 py-1 rounded-xl bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] font-semibold text-[11px] inline-flex items-center gap-1">
-                  Tahun: {selectedYear}
-                </span>
-              )}
-              {selectedMonth !== null && (
-                <span className="px-2.5 py-1 rounded-xl bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] font-semibold text-[11px] inline-flex items-center gap-1">
-                  Bulan: {MONTH_NAMES.find((m) => m.num === selectedMonth)?.name || selectedMonth}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMonth(null)}
-                    className="hover:text-rose-600 font-bold ml-1 cursor-pointer"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-              {selectedStatus !== "ALL" && (
-                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[11px] inline-flex items-center gap-1">
-                  Status:{" "}
-                  {selectedStatus === "IN_PROGRESS"
-                    ? "Sedang Berjalan"
-                    : selectedStatus === "PLANNED"
-                    ? "Persiapan"
-                    : "Selesai"}
-                </span>
-              )}
-              {selectedFocusArea !== "ALL" && (
-                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[11px] inline-flex items-center gap-1">
-                  Bidang: {FOCUS_AREA_CONFIG[selectedFocusArea as keyof typeof FOCUS_AREA_CONFIG]?.label || selectedFocusArea}
-                </span>
-              )}
-              {selectedProvince && (
-                <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold text-[11px] inline-flex items-center gap-1">
-                  Provinsi: {selectedProvince}
-                </span>
-              )}
-              <span className="text-[#787680] text-[11px] ml-auto">
-                Menampilkan <b>{filteredPrograms.length}</b> dari {programs.length} total program
-              </span>
-            </div>
-          )}
         </div>
-      </div>
 
-      {/* ============================================================ */}
-      {/* BAGIAN 2 — EXECUTIVE KPI (4 CARDS)                           */}
-      {/* ============================================================ */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Total Anggaran CSR */}
-        <div
-          onClick={scrollToDrillDown}
-          className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-emerald-400/60 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group cursor-pointer"
-        >
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                Total Anggaran CSR
+        {/* Active Filter Indicator Strip */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+            <span className="font-medium">Filter aktif:</span>
+            {selectedYear !== "ALL" && (
+              <span className="px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] font-semibold text-[#181343] text-[11px]">
+                Tahun {selectedYear}
               </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <TrendingUp className="w-4 h-4 text-emerald-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-extrabold text-[#181343] tracking-tight">
-              {formatCompact(kpiData.totalAllocated)}
-            </div>
-          </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs">
-            <span className="text-[#787680]">Alokasi Resmi Program</span>
-            <span className="font-semibold text-emerald-600 group-hover:underline flex items-center gap-0.5">
-              Rincian <ChevronRight className="w-3 h-3" />
+            )}
+            {selectedMonth !== null && (
+              <button
+                type="button"
+                onClick={() => setSelectedMonth(null)}
+                className="px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] font-semibold text-[#181343] text-[11px] hover:border-rose-300 hover:text-rose-600 cursor-pointer"
+              >
+                Bulan: {MONTH_NAMES.find((m) => m.num === selectedMonth)?.name || selectedMonth} ×
+              </button>
+            )}
+            {selectedStatus !== "ALL" && (
+              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px]">
+                {selectedStatus === "IN_PROGRESS"
+                  ? "Sedang Berjalan"
+                  : selectedStatus === "PLANNED"
+                  ? "Persiapan"
+                  : "Selesai"}
+              </span>
+            )}
+            {selectedFocusArea !== "ALL" && (
+              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px]">
+                {FOCUS_AREA_CONFIG[selectedFocusArea as keyof typeof FOCUS_AREA_CONFIG]?.label || selectedFocusArea}
+              </span>
+            )}
+            {selectedProvince && (
+              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px]">
+                {selectedProvince}
+              </span>
+            )}
+            <span className="text-[11px] text-slate-500 ml-auto tabular-nums">
+              {filteredPrograms.length} dari {programs.length} program
             </span>
           </div>
+        )}
+      </div>
+
+      {/* 2. Ringkasan 4 KPI Utama yang Lega */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Total Pagu CSR</span>
+            <TrendingUp className="w-4 h-4 text-slate-400" />
+          </div>
+          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+            {formatCompact(kpiData.totalAllocated)}
+          </div>
+          <p className="text-xs text-slate-500">
+            Alokasi resmi dari {kpiData.totalPrograms} program
+          </p>
         </div>
 
-        {/* KPI 2: Realisasi Anggaran */}
-        <div
-          onClick={scrollToDrillDown}
-          className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-emerald-400/60 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group cursor-pointer"
-        >
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                Realisasi Anggaran
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Activity className="w-4 h-4 text-emerald-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-extrabold text-[#181343] tracking-tight">
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Realisasi Anggaran</span>
+            <Activity className="w-4 h-4 text-[#059669]" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-extrabold text-[#059669] tabular-nums">
               {formatCompact(kpiData.totalSpent)}
-            </div>
+            </span>
+            <span className="text-xs font-semibold text-slate-500 tabular-nums">
+              ({kpiData.absorptionRate}%)
+            </span>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-[#787680]">Efektivitas Serapan</span>
-              <span className="font-bold text-emerald-600">
-                {kpiData.absorptionRate}%
-              </span>
-            </div>
-            <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
-              <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(kpiData.absorptionRate, 100)}%`,
-                }}
-              />
-            </div>
-          </div>
+          <p className="text-xs text-slate-500">
+            Serapan terverifikasi terhadap pagu
+          </p>
         </div>
 
-        {/* KPI 3: Program CSR */}
-        <div
-          onClick={scrollToDrillDown}
-          className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-emerald-400/60 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group cursor-pointer"
-        >
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                Program CSR
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Target className="w-4 h-4 text-blue-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-extrabold text-[#181343] tracking-tight">
-              {kpiData.totalPrograms}
-              <span className="text-xs font-normal text-[#787680] ml-1.5">Program</span>
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Program Berjalan</span>
+            <Target className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs">
-            <span className="text-[#787680]">
-              {kpiData.runningCount} Berjalan • {kpiData.completedCount} Selesai
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-extrabold text-[#181343] tabular-nums">
+              {kpiData.runningCount}
             </span>
-            <span className="font-semibold text-blue-600 group-hover:underline flex items-center gap-0.5">
-              Lihat <ChevronRight className="w-3 h-3" />
+            <span className="text-xs font-semibold text-slate-500 tabular-nums">
+              / {kpiData.totalPrograms} program
             </span>
           </div>
+          <p className="text-xs text-slate-500">
+            {kpiData.completedCount} program telah selesai
+          </p>
         </div>
 
-        {/* KPI 4: Mitra Berkolaborasi */}
-        <div
-          onClick={scrollToDrillDown}
-          className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-purple-400/60 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group cursor-pointer"
-        >
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                Mitra Berkolaborasi
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <HeartHandshake className="w-4 h-4 text-purple-600" />
-              </div>
-            </div>
-            <div className="text-2xl font-extrabold text-[#181343] tracking-tight">
-              {kpiData.uniquePartnersCount}
-              <span className="text-xs font-normal text-[#787680] ml-1.5">Organisasi</span>
-            </div>
+        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600">Mitra Berkontrak</span>
+            <HeartHandshake className="w-4 h-4 text-slate-400" />
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs">
-            <span className="text-[#787680]">Mitra Resmi Berkontrak</span>
-            <span className="font-semibold text-purple-600 group-hover:underline flex items-center gap-0.5">
-              Daftar <ChevronRight className="w-3 h-3" />
-            </span>
+          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+            {kpiData.uniquePartnersCount}
           </div>
+          <p className="text-xs text-slate-500">
+            Lembaga pelaksana program aktif
+          </p>
         </div>
       </div>
 
       {/* ============================================================ */}
-      {/* BAGIAN 3 — ANALISIS KINERJA                                   */}
-      {/* Tren Anggaran CSR (Tahunan | Bulanan) & Distribusi Status     */}
+      {/* BAGIAN 3 — ANALISIS ANGGARAN & STATUS PROGRAM                */}
       {/* ============================================================ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column (7 cols): Tren Anggaran CSR (Grouped Bar Chart with Tahunan/Bulanan) */}
-        <div className="lg:col-span-7 bg-white p-6 sm:p-7 rounded-3xl border border-[#E8E8EA] shadow-2xs flex flex-col justify-between">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Left Column (7 cols): Tren Anggaran CSR */}
+        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-[#E5E7EB] flex flex-col justify-between">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <BarChart2 className="w-4 h-4 text-[#181343]" />
-                  <h3 className="text-base font-bold text-[#181343]">
-                    Tren Anggaran CSR
-                  </h3>
-                </div>
-                <p className="text-xs text-[#787680]">
+              <div className="space-y-0.5">
+                <h2 className="text-base font-bold text-[#181343]">
+                  Tren Alokasi vs Realisasi
+                </h2>
+                <p className="text-xs text-slate-600">
                   {budgetTrendMode === "annual"
-                    ? "Perbandingan alokasi komitmen vs realisasi dana per tahun"
-                    : `Realisasi dan alokasi anggaran bulanan periode ${monthlyYear}`}
+                    ? "Perbandingan komitmen anggaran terhadap dana terealisasi"
+                    : `Realisasi anggaran bulanan periode ${monthlyYear}`}
                 </p>
               </div>
 
-              {/* Controls: Segmented Control (Tahunan | Bulanan) & Year Picker */}
               <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-                {/* Year Selector for Monthly Mode */}
                 {budgetTrendMode === "monthly" && (
                   <select
+                    aria-label="Pilih tahun tren bulanan"
                     value={monthlyYear}
                     onChange={(e) => {
                       setMonthlyYear(e.target.value);
                       setSelectedMonth(null);
                     }}
-                    className="text-xs font-bold bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-2.5 py-1.5 text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer"
+                    className="text-xs font-semibold bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-1.5 text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#059669]/25 cursor-pointer"
                   >
                     {availableYears.map((yr) => (
                       <option key={yr} value={yr}>
@@ -1056,18 +936,17 @@ export function ExecutiveOverviewView({
                   </select>
                 )}
 
-                {/* Segmented Control */}
-                <div className="inline-flex items-center bg-[#F4F4F6] p-1 rounded-xl border border-[#E8E8EA]">
+                <div className="inline-flex items-center bg-[#F9F9FB] p-1 rounded-xl border border-[#E5E7EB]">
                   <button
                     type="button"
                     onClick={() => {
                       setBudgetTrendMode("annual");
                       setSelectedMonth(null);
                     }}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                       budgetTrendMode === "annual"
-                        ? "bg-white text-[#181343] shadow-xs"
-                        : "text-[#787680] hover:text-[#181343]"
+                        ? "bg-[#181343] text-white"
+                        : "text-slate-600 hover:text-[#181343]"
                     }`}
                   >
                     Tahunan
@@ -1075,10 +954,10 @@ export function ExecutiveOverviewView({
                   <button
                     type="button"
                     onClick={() => setBudgetTrendMode("monthly")}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                       budgetTrendMode === "monthly"
-                        ? "bg-white text-[#181343] shadow-xs"
-                        : "text-[#787680] hover:text-[#181343]"
+                        ? "bg-[#181343] text-white"
+                        : "text-slate-600 hover:text-[#181343]"
                     }`}
                   >
                     Bulanan
@@ -1087,16 +966,16 @@ export function ExecutiveOverviewView({
               </div>
             </div>
 
-            {/* Legend */}
-            <div className="flex items-center justify-between pb-3 text-xs border-b border-[#F4F4F6]">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-[#181343]" />
-                  <span className="text-[#47464F] font-semibold">Alokasi Anggaran</span>
+            {/* Minimalist Legend */}
+            <div className="flex items-center justify-between pb-3 text-xs border-b border-slate-100">
+              <div className="flex items-center gap-5">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#181343]" />
+                  <span className="text-slate-700 font-medium">Alokasi</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-3 h-3 rounded bg-[#009E75]" />
-                  <span className="text-[#47464F] font-semibold">Realisasi Dana</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#059669]" />
+                  <span className="text-slate-700 font-medium">Realisasi</span>
                 </div>
               </div>
 
@@ -1104,7 +983,7 @@ export function ExecutiveOverviewView({
                 <button
                   type="button"
                   onClick={() => setSelectedMonth(null)}
-                  className="text-emerald-600 font-bold hover:underline cursor-pointer"
+                  className="text-[#059669] font-semibold hover:underline cursor-pointer"
                 >
                   Tampilkan Semua Bulan
                 </button>
@@ -1113,14 +992,14 @@ export function ExecutiveOverviewView({
 
             {/* VISUALISASI MODE TAHUNAN */}
             {budgetTrendMode === "annual" && (
-              <div className="pt-4 pb-2">
+              <div className="pt-5">
                 {annualTrendData.data.length === 0 ? (
-                  <div className="py-16 text-center text-xs text-[#787680]">
+                  <div className="py-16 text-center text-xs text-slate-600">
                     Belum ada data anggaran tahunan untuk ditampilkan.
                   </div>
                 ) : (
                   <div>
-                    <div className="h-56 flex items-end justify-around gap-6 sm:gap-10 px-4 border-b border-[#E8E8EA]">
+                    <div className="h-56 flex items-end justify-around gap-6 sm:gap-10 px-4 border-b border-[#E5E7EB]">
                       {annualTrendData.data.map((item) => {
                         const allocatedHeight =
                           annualTrendData.maxVal > 0
@@ -1146,9 +1025,8 @@ export function ExecutiveOverviewView({
                               setSelectedYear(selectedYear === item.year ? "ALL" : item.year);
                             }}
                           >
-                            {/* Hover Tooltip */}
                             <div
-                              className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#181343] text-white text-[11px] shadow-lg transition-all duration-200 pointer-events-none text-center ${
+                              className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#181343] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center ${
                                 isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 hidden sm:block"
                               }`}
                             >
@@ -1156,38 +1034,30 @@ export function ExecutiveOverviewView({
                               <div className="text-slate-300">
                                 Alokasi: {formatRupiah(item.allocated)}
                               </div>
-                              <div className="text-emerald-400">
+                              <div className="text-emerald-300">
                                 Realisasi: {formatRupiah(item.spent)} ({item.absorption}%)
-                              </div>
-                              <div className="text-slate-400 text-[10px]">
-                                {item.count} Program Tercatat
                               </div>
                             </div>
 
-                            {/* Bars Container */}
                             <div className="w-full flex items-end justify-center gap-2 h-44">
-                              {/* Alokasi Bar (Deep Navy) */}
                               <div
-                                className="w-1/2 max-w-[32px] bg-[#181343] rounded-t-lg transition-all duration-500 group-hover:brightness-125 relative flex items-center justify-center shadow-xs"
+                                className="w-1/2 max-w-[30px] bg-[#181343] rounded-t-md transition-all duration-300 group-hover:brightness-125"
                                 style={{ height: `${allocatedHeight}%` }}
                                 title={`Alokasi ${item.year}: ${formatRupiah(item.allocated)}`}
                               />
-
-                              {/* Realisasi Bar (Emerald) */}
                               <div
-                                className="w-1/2 max-w-[32px] bg-[#009E75] rounded-t-lg transition-all duration-500 group-hover:brightness-110 relative flex items-center justify-center shadow-xs"
+                                className="w-1/2 max-w-[30px] bg-[#059669] rounded-t-md transition-all duration-300 group-hover:brightness-110"
                                 style={{ height: `${spentHeight}%` }}
                                 title={`Realisasi ${item.year}: ${formatRupiah(item.spent)}`}
                               />
                             </div>
 
-                            {/* Year Label */}
-                            <div className="pt-2 text-center">
+                            <div className="pt-2.5 text-center">
                               <span
-                                className={`text-xs font-bold transition-colors ${
+                                className={`text-xs font-bold tabular-nums transition-colors ${
                                   isSelected
-                                    ? "text-emerald-600 underline"
-                                    : "text-[#181343] group-hover:text-emerald-600"
+                                    ? "text-[#059669] underline"
+                                    : "text-[#181343] group-hover:text-[#059669]"
                                 }`}
                               >
                                 {item.year}
@@ -1197,15 +1067,6 @@ export function ExecutiveOverviewView({
                         );
                       })}
                     </div>
-
-                    <div className="pt-3 flex items-center justify-between text-xs text-[#787680]">
-                      <span>Klik batang tahun untuk memfilter seluruh dashboard</span>
-                      {selectedYear !== "ALL" && (
-                        <span className="font-semibold text-emerald-600">
-                          Tahun {selectedYear} aktif
-                        </span>
-                      )}
-                    </div>
                   </div>
                 )}
               </div>
@@ -1213,8 +1074,8 @@ export function ExecutiveOverviewView({
 
             {/* VISUALISASI MODE BULANAN */}
             {budgetTrendMode === "monthly" && (
-              <div className="pt-4 pb-2">
-                <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-[#E8E8EA] overflow-x-auto">
+              <div className="pt-5">
+                <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-[#E5E7EB] overflow-x-auto">
                   {monthlyTrendData.months.map((m) => {
                     const allocatedHeight =
                       monthlyTrendData.maxVal > 0 && m.allocated > 0
@@ -1240,9 +1101,8 @@ export function ExecutiveOverviewView({
                           setSelectedMonth(selectedMonth === m.num ? null : m.num);
                         }}
                       >
-                        {/* Hover Tooltip Popup */}
                         <div
-                          className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#181343] text-white text-[11px] shadow-lg transition-all duration-200 pointer-events-none text-center whitespace-nowrap z-20 ${
+                          className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#181343] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center whitespace-nowrap z-20 ${
                             isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 hidden sm:block"
                           }`}
                         >
@@ -1252,50 +1112,42 @@ export function ExecutiveOverviewView({
                               <div className="text-slate-300">
                                 Alokasi: {formatRupiah(m.allocated)}
                               </div>
-                              <div className="text-emerald-400">
+                              <div className="text-emerald-300">
                                 Realisasi: {formatRupiah(m.spent)} ({m.absorption}%)
-                              </div>
-                              <div className="text-slate-400 text-[10px]">
-                                {m.count} Program Periode Ini
                               </div>
                             </>
                           ) : (
-                            <div className="text-slate-400 text-[10px] italic">
-                              Tidak ada alokasi/transaksi tercatat
+                            <div className="text-slate-400 text-[10px]">
+                              Belum ada realisasi
                             </div>
                           )}
                         </div>
 
-                        {/* Bars Container */}
                         <div className="w-full flex items-end justify-center gap-1 h-44">
                           {m.hasData ? (
                             <>
-                              {/* Alokasi Bar */}
                               <div
-                                className="w-1/2 max-w-[14px] bg-[#181343] rounded-t-md transition-all duration-500 group-hover:brightness-125"
+                                className="w-1/2 max-w-[14px] bg-[#181343] rounded-t-sm transition-all duration-300 group-hover:brightness-125"
                                 style={{ height: `${allocatedHeight}%` }}
                                 title={`${m.name}: Alokasi ${formatRupiah(m.allocated)}`}
                               />
-                              {/* Realisasi Bar */}
                               <div
-                                className="w-1/2 max-w-[14px] bg-[#009E75] rounded-t-md transition-all duration-500 group-hover:brightness-110"
+                                className="w-1/2 max-w-[14px] bg-[#059669] rounded-t-sm transition-all duration-300 group-hover:brightness-110"
                                 style={{ height: `${spentHeight}%` }}
                                 title={`${m.name}: Realisasi ${formatRupiah(m.spent)}`}
                               />
                             </>
                           ) : (
-                            /* Baseline subtle indicator for month without recorded transaction */
-                            <div className="w-full h-1.5 bg-[#E8E8EA] rounded-full group-hover:bg-slate-300 transition-colors" />
+                            <div className="w-full h-1 bg-slate-100 rounded-full group-hover:bg-slate-200 transition-colors" />
                           )}
                         </div>
 
-                        {/* Month Label */}
-                        <div className="pt-2 text-center">
+                        <div className="pt-2.5 text-center">
                           <span
-                            className={`text-[11px] font-bold transition-colors ${
+                            className={`text-[11px] font-semibold transition-colors ${
                               isSelected
-                                ? "text-emerald-600 underline font-extrabold"
-                                : "text-[#787680] group-hover:text-[#181343]"
+                                ? "text-[#059669] underline font-bold"
+                                : "text-slate-600 group-hover:text-[#181343]"
                             }`}
                           >
                             {m.short}
@@ -1306,816 +1158,637 @@ export function ExecutiveOverviewView({
                   })}
                 </div>
 
-                <div className="pt-3 flex items-center justify-between text-xs text-[#787680]">
-                  <span>Klik batang bulan untuk melihat rincian program terkait</span>
-                  <span className="font-medium text-[#181343]">
-                    Total Realisasi {monthlyYear}: <b className="text-emerald-600">{formatCompact(monthlyTrendData.totalYearSpent)}</b>
+                <div className="pt-3 flex items-center justify-between text-xs text-slate-600">
+                  <span>Klik bulan untuk memfilter rincian</span>
+                  <span className="font-medium text-[#181343] tabular-nums">
+                    Total {monthlyYear}: <strong className="text-[#059669]">{formatCompact(monthlyTrendData.totalYearSpent)}</strong>
                   </span>
                 </div>
               </div>
             )}
           </div>
-
-          <div className="pt-4 border-t border-[#F4F4F6] mt-5 flex items-center justify-between text-xs text-[#787680]">
-            <span>Realisasi bulanan dihitung berdasarkan tanggal laporan capaian dan alokasi resmi program</span>
-            <button
-              type="button"
-              onClick={scrollToDrillDown}
-              className="font-semibold text-emerald-600 hover:underline flex items-center gap-1 cursor-pointer"
-            >
-              <span>Lihat Detail Program Terkait</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
 
-        {/* Right Column (5 cols): Distribusi Status Program CSR (Donut Modern & Prioritas Tindak Lanjut) */}
-        <div className="lg:col-span-5 bg-white p-6 sm:p-7 rounded-3xl border border-[#E8E8EA] shadow-2xs space-y-5">
-          {/* Header */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <PieChartIcon className="w-4 h-4 text-[#181343]" />
-              <h3 className="text-base font-bold text-[#181343]">
-                Distribusi Status Program CSR
-              </h3>
+        {/* Right Column (5 cols): Distribusi Status & Perhatian */}
+        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-[#E5E7EB] flex flex-col justify-between gap-5">
+          <div className="space-y-5">
+            <div className="space-y-0.5">
+              <h2 className="text-base font-bold text-[#181343]">
+                Status Program CSR
+              </h2>
+              <p className="text-xs text-slate-600">
+                Proporsi tahap pelaksanaan portofolio saat ini
+              </p>
             </div>
-            <p className="text-xs text-[#787680]">
-              Progres pelaksanaan program dalam portofolio aktif
-            </p>
-          </div>
 
-          {/* Donut & Legenda Layout: Donut di Kiri, Legenda di Kanan */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 py-1">
-            {/* SVG Donut Chart Modern */}
-            <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
-              <svg viewBox="0 0 100 100" className="w-36 h-36 transform -rotate-90">
-                {donutConfig.type === "empty" && (
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="35"
-                    fill="none"
-                    stroke="#E8E8EA"
-                    strokeWidth="14"
-                  />
-                )}
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              {/* SVG Donut Chart */}
+              <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
+                <svg viewBox="0 0 100 100" className="w-32 h-32 transform -rotate-90">
+                  {donutConfig.type === "empty" && (
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#E5E7EB" strokeWidth="13" />
+                  )}
 
-                {donutConfig.type === "single" && donutConfig.singleSlice && (
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="35"
-                    fill="none"
-                    stroke={donutConfig.singleSlice.color}
-                    strokeWidth="14"
-                    className="transition-all duration-300 hover:opacity-85 cursor-pointer"
-                    onClick={() => {
-                      handleSelectStatus(donutConfig.singleSlice!.key);
-                    }}
-                  />
-                )}
-
-                {donutConfig.type === "multi" &&
-                  donutConfig.slices.map((slice) => (
-                    <path
-                      key={slice.key}
-                      d={slice.path}
-                      fill={slice.color}
-                      stroke="#FFFFFF"
-                      strokeWidth="1.5"
-                      className="transition-all duration-300 hover:opacity-85 cursor-pointer"
-                      onClick={() => {
-                        handleSelectStatus(slice.key);
-                      }}
+                  {donutConfig.type === "single" && donutConfig.singleSlice && (
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="35"
+                      fill="none"
+                      stroke={donutConfig.singleSlice.color}
+                      strokeWidth="13"
+                      className="transition-opacity duration-200 hover:opacity-85 cursor-pointer"
+                      onClick={() => handleSelectStatus(donutConfig.singleSlice!.key)}
                     />
-                  ))}
-              </svg>
+                  )}
 
-              {/* Angka Total Program di Tengah Donut (Selalu menampilkan total baseline) */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                <span className="text-[10px] uppercase font-bold text-[#787680] tracking-wider">
-                  Total
-                </span>
-                <span className="text-xl font-extrabold text-[#181343] leading-none my-0.5">
-                  {donutConfig.total}
-                </span>
-                <span className="text-[10px] text-[#787680] font-medium">Program</span>
-              </div>
-            </div>
-
-            {/* Legenda Status di Sebelah Kanan */}
-            <div className="flex-1 w-full space-y-2">
-              {statusDistribution.map((st) => {
-                const isSelected = selectedStatus === st.key;
-                const isZero = st.count === 0;
-
-                return (
-                  <div
-                    key={st.key}
-                    onClick={() => {
-                      if (!isZero) {
-                        handleSelectStatus(st.key);
-                      }
-                    }}
-                    className={`p-2.5 rounded-xl border transition-all flex items-center justify-between ${
-                      isZero
-                        ? "bg-[#F9F9FB]/60 border-[#E8E8EA] opacity-50 cursor-default select-none"
-                        : isSelected
-                        ? `${st.lightBg} ${st.borderColor} ring-2 ring-emerald-500/40 shadow-xs cursor-pointer`
-                        : "bg-[#F9F9FB] border-[#E8E8EA] hover:bg-white hover:border-slate-300 cursor-pointer"
-                    }`}
-                    title={
-                      isZero
-                        ? `Tidak ada program dengan status ${st.label}`
-                        : isSelected
-                        ? `Klik untuk menghapus filter ${st.label}`
-                        : `Klik untuk melihat ${st.count} program ${st.label}`
-                    }
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${st.dotColor} ${
-                          isZero ? "opacity-40" : ""
-                        }`}
+                  {donutConfig.type === "multi" &&
+                    donutConfig.slices.map((slice) => (
+                      <path
+                        key={slice.key}
+                        d={slice.path}
+                        fill={slice.color}
+                        stroke="#FFFFFF"
+                        strokeWidth="1.5"
+                        className="transition-opacity duration-200 hover:opacity-85 cursor-pointer"
+                        onClick={() => handleSelectStatus(slice.key)}
                       />
-                      <span
-                        className={`text-xs font-bold ${
-                          isZero ? "text-[#787680]" : "text-[#181343]"
-                        }`}
-                      >
-                        {st.label}
+                    ))}
+                </svg>
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                  <span className="text-xl font-extrabold text-[#181343] leading-none tabular-nums">
+                    {donutConfig.total}
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-medium mt-0.5">Program</span>
+                </div>
+              </div>
+
+              {/* Clean Flat Status Rows (No nested boxes per status) */}
+              <div className="flex-1 w-full divide-y divide-slate-100">
+                {statusDistribution.map((st) => {
+                  const isSelected = selectedStatus === st.key;
+                  const isZero = st.count === 0;
+
+                  return (
+                    <button
+                      type="button"
+                      key={st.key}
+                      disabled={isZero}
+                      onClick={() => handleSelectStatus(st.key)}
+                      className={`w-full py-2.5 px-2 flex items-center justify-between text-left transition-colors rounded-lg ${
+                        isZero
+                          ? "opacity-45 cursor-not-allowed"
+                          : isSelected
+                          ? "bg-emerald-50/70 text-emerald-900 cursor-pointer"
+                          : "hover:bg-slate-50 cursor-pointer"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2.5">
+                        <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${st.dotColor}`} />
+                        <span className="text-xs font-semibold text-[#181343]">{st.label}</span>
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-xs font-extrabold ${
-                          isZero ? "text-[#787680]" : "text-[#181343]"
-                        }`}
-                      >
-                        {st.count}
+                      <span className="flex items-center gap-2.5 tabular-nums">
+                        <span className="text-xs font-bold text-[#181343]">{st.count}</span>
+                        <span className="text-xs text-slate-500 w-9 text-right">{st.percentage}%</span>
                       </span>
-                      <span className="text-[11px] font-bold text-[#787680] w-9 text-right">
-                        {st.percentage}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {/* Prioritas Tindak Lanjut (Ditampilkan HANYA jika ada item tindak lanjut) */}
+          {/* Compact Attention Strip (Only if items exist) */}
           {followUpPriorities.length > 0 && (
-            <div className="pt-4 border-t border-[#F4F4F6] space-y-2.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                  Prioritas Tindak Lanjut
-                </span>
-                <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-full">
-                  Perlu Perhatian
-                </span>
-              </div>
-
-              <div className="space-y-1.5">
+            <div className="pt-4 border-t border-slate-100 space-y-2">
+              <span className="text-xs font-semibold text-slate-600 block">
+                {isManagement ? "Perhatian Eksekutif" : "Prioritas Tindak Lanjut"}
+              </span>
+              <div className="divide-y divide-slate-100">
                 {followUpPriorities.map((item) => {
                   const IconComponent = item.icon;
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={item.id}
                       onClick={item.onClick}
-                      className="p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] hover:bg-amber-50/50 hover:border-amber-300 transition-all flex items-center justify-between gap-3 cursor-pointer group"
+                      className="w-full py-2 px-1.5 rounded-lg hover:bg-amber-50/60 transition-colors flex items-center justify-between gap-3 text-left cursor-pointer group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0">
-                          <IconComponent className="w-3.5 h-3.5 text-amber-700" />
-                        </div>
+                        <IconComponent className="w-4 h-4 text-amber-600 shrink-0" />
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#181343] group-hover:text-amber-800 transition-colors truncate">
+                          <p className="text-xs font-semibold text-[#181343] truncate">
                             {item.title}
                           </p>
-                          <p className="text-[11px] text-[#787680] truncate">
+                          <p className="text-[11px] text-slate-500 truncate">
                             {item.description}
                           </p>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className="text-[10px] font-extrabold text-amber-800 bg-amber-100/70 border border-amber-200 px-2 py-0.5 rounded-md">
-                          {item.badgeLabel}
-                        </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-700 group-hover:translate-x-0.5 transition-all" />
-                      </div>
-                    </div>
+                      <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0 tabular-nums">
+                        {item.badgeLabel}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
             </div>
           )}
-
-          {/* Footer: Filter Active Indicator */}
-          {selectedStatus !== "ALL" && (
-            <div className="pt-3 border-t border-[#F4F4F6] flex items-center justify-between text-xs text-[#787680]">
-              <span className="font-semibold text-emerald-700">
-                Filter aktif: {statusDistribution.find((s) => s.key === selectedStatus)?.label}
-              </span>
-              <button
-                type="button"
-                onClick={() => setSelectedStatus("ALL")}
-                className="text-rose-600 font-bold hover:underline cursor-pointer"
-              >
-                Hapus filter status
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
       {/* ============================================================ */}
-      {/* BAGIAN 4 — KOMPOSISI PROGRAM CSR                              */}
-      {/* Sebaran Tematik Pendukung Tanpa Duplikasi SDGs/ESG           */}
+      {/* BAGIAN 4 — PENJELAJAH PORTOFOLIO TERPADU (TAB SWITCHER)       */}
       {/* ============================================================ */}
-      <div className="bg-white p-6 sm:p-7 rounded-3xl border border-[#E8E8EA] shadow-2xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#181343]" />
-              <h3 className="text-base font-bold text-[#181343]">
-                Komposisi Program CSR
-              </h3>
-            </div>
-            <p className="text-xs text-[#787680]">
-              Sebaran program dan ringkasan anggaran berdasarkan kategori tematik pelaksanaan
-            </p>
-          </div>
-          <span className="text-xs font-semibold text-[#787680] self-start sm:self-auto">
-            {categoryDistribution.length} Kategori Tematik Tercatat
-          </span>
-        </div>
-
-        {categoryDistribution.length === 0 ? (
-          <div className="py-10 text-center text-xs text-[#787680]">
-            Belum ada data program pada kategori tematik untuk filter yang dipilih.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {categoryDistribution.map((item) => {
-              const isSelected = selectedFocusArea === item.key;
+      <div ref={drillDownTableRef} className="space-y-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div
+            className="flex items-center gap-2 shrink-0 whitespace-nowrap overflow-x-auto max-w-full"
+            role="tablist"
+            aria-label="Tampilan detail portofolio"
+          >
+            {[
+              { id: "programs" as const, label: "Program & Mitra", count: filteredPrograms.length },
+              { id: "geography" as const, label: "Wilayah & Bidang Fokus", count: categoryDistribution.length },
+              { id: "opportunities" as const, label: "Katalog Peluang", count: opportunities.length },
+            ].map((tab) => {
+              const isSelected = detailTab === tab.id;
               return (
-                <div
-                  key={item.key}
-                  onClick={() => {
-                    setSelectedFocusArea(selectedFocusArea === item.key ? "ALL" : item.key);
-                  }}
-                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer space-y-2 ${
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isSelected}
+                  onClick={() => setDetailTab(tab.id)}
+                  className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]/40 ${
                     isSelected
-                      ? "bg-emerald-50/50 border-emerald-400 ring-2 ring-emerald-500/30 shadow-xs"
-                      : "bg-[#F9F9FB] border-[#E8E8EA] hover:bg-white hover:border-slate-300"
+                      ? "bg-[#181343] text-white border-[#181343]"
+                      : "bg-white text-slate-700 border-[#E5E7EB] hover:bg-slate-50"
                   }`}
                 >
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full shrink-0"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="font-bold text-[#181343] truncate">
-                        {item.label}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="font-extrabold text-[#181343]">
-                        {item.count} Program
-                      </span>
-                      <span className="text-[11px] font-bold text-[#787680]">
-                        ({item.programShare}%)
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Horizontal Compact Bar */}
-                  <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${item.programShare}%`,
-                        backgroundColor: item.color,
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-[#787680]">
-                    <span>Alokasi: <b className="text-[#181343]">{formatCompact(item.totalBudget)}</b></span>
-                    <span className="font-semibold text-emerald-600">
-                      {isSelected ? "Filter Aktif" : "Klik untuk rincian"}
-                    </span>
-                  </div>
-                </div>
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
+                      isSelected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                </button>
               );
             })}
-          </div>
-        )}
-      </div>
-
-      {/* ============================================================ */}
-      {/* BAGIAN 5 — ANALISIS GEOGRAFIS (PETA PERSEBARAN & SDGS)       */}
-      {/* ============================================================ */}
-      <IndonesiaBeneficiaryMap
-        programs={filteredPrograms}
-        selectedSdgFilter={selectedSdgFilter}
-        onSelectSdgFilter={(sdgId) => setSelectedSdgFilter(sdgId)}
-        selectedProvince={selectedProvince}
-        onSelectProvince={(prov) => setSelectedProvince(prov)}
-        onNavigateToProgramDetail={() => onNavigateMenu("programs")}
-      />
-
-      {/* ============================================================ */}
-      {/* BAGIAN 6 — PENELUSURAN DATA: RINCIAN PROGRAM & MITRA TERKAIT */}
-      {/* Tabel Luas, Lega, Bebas Terpotong, dengan Expandable Detail   */}
-      {/* ============================================================ */}
-      <div
-        ref={drillDownTableRef}
-        className="bg-white p-6 sm:p-7 rounded-3xl border border-[#E8E8EA] shadow-2xs space-y-5 w-full"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4 text-[#181343]" />
-              <h3 className="text-base sm:text-lg font-bold text-[#181343]">
-                Rincian Program &amp; Mitra Terkait
-              </h3>
-            </div>
-            <p className="text-xs text-[#787680]">
-              Daftar operasional pelaksanaan program CSR, mitra pelaksana, lokasi, alokasi anggaran, dan realisasi dana.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-auto">
-            {hasActiveFilters && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
-                className="text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 cursor-pointer"
-              >
-                Reset Filter
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onNavigateMenu("programs")}
-              rightIcon={<ArrowRight className="w-3.5 h-3.5 text-emerald-600" />}
-              className="text-xs font-bold text-[#181343] border-[#E8E8EA] hover:border-emerald-400 hover:bg-emerald-50 cursor-pointer"
-            >
-              Lihat di Pelaksanaan Program
-            </Button>
-          </div>
-        </div>
-
-        {/* Drill-down Program Table (Spacious, Legible, Full Width) */}
-        {filteredPrograms.length === 0 ? (
-          <div className="p-10 rounded-2xl bg-[#F9F9FB] border border-dashed border-[#C8C5D0] text-center space-y-3">
-            <Info className="w-8 h-8 text-[#787680] mx-auto" />
-            <div className="space-y-1">
-              <p className="text-sm font-bold text-[#181343]">
-                Tidak ada program yang memenuhi kriteria filter saat ini.
-              </p>
-              <p className="text-xs text-[#787680]">
-                Coba ubah pilihan tahun, status, bidang tematik, atau klik tombol di bawah untuk menampilkan semua program.
-              </p>
-            </div>
-            {hasActiveFilters && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={handleResetFilters}
-                className="text-xs"
-              >
-                Reset Semua Filter
-              </Button>
-            )}
-          </div>
-        ) : (
-          <div className="w-full overflow-x-auto rounded-2xl border border-[#E8E8EA]">
-            <table className="w-full text-left text-sm border-collapse min-w-[850px]">
-              <thead className="bg-[#F9F9FB] border-b border-[#E8E8EA] text-[#787680] font-bold uppercase text-[11px] tracking-wider">
-                <tr>
-                  <th className="py-3.5 px-5 w-[30%]">Program CSR &amp; Bidang</th>
-                  <th className="py-3.5 px-5 w-[20%]">Mitra Pelaksana</th>
-                  <th className="py-3.5 px-5 w-[15%]">Lokasi</th>
-                  <th className="py-3.5 px-5 w-[12%]">Status Program</th>
-                  <th className="py-3.5 px-5 w-[11%] text-right">Alokasi Anggaran</th>
-                  <th className="py-3.5 px-5 w-[12%] text-right">Realisasi Dana</th>
-                  <th className="py-3.5 px-5 text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F4F4F6]">
-                {filteredPrograms.map((prog) => {
-                  const focus =
-                    FOCUS_AREA_CONFIG[prog.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
-                      label: prog.focusArea,
-                      variant: "slate" as const,
-                    };
-
-                  // Status Bahasa Indonesia yang rapi
-                  const statusDisplay =
-                    prog.status === "IN_PROGRESS"
-                      ? { label: "Sedang Berjalan", variant: "emerald" as const }
-                      : prog.status === "PLANNED"
-                      ? { label: "Persiapan", variant: "blue" as const }
-                      : prog.status === "COMPLETED"
-                      ? { label: "Selesai", variant: "slate" as const }
-                      : STATUS_CONFIG[prog.status as keyof typeof STATUS_CONFIG] || {
-                          label: prog.status,
-                          variant: "emerald" as const,
-                        };
-
-                  const alloc = parseFloat(prog.budget) || 0;
-                  const spent = parseFloat(prog.spentBudget || "0") || 0;
-                  const progAbsorption =
-                    alloc > 0 ? Math.round((spent / alloc) * 1000) / 10 : 0;
-
-                  const progSdgs = getProgramSdgs({
-                    id: prog.id,
-                    title: prog.title,
-                    description: prog.description || prog.opportunityDescription || "",
-                    focusArea: prog.focusArea,
-                    status: prog.status,
-                    budget: prog.budget,
-                  });
-
-                  const isExpanded = expandedProgramId === prog.id;
-
-                  const targetBen = parseBeneficiariesCount(prog.targetBeneficiaries);
-                  const actualBen = parseBeneficiariesCount(prog.actualBeneficiaries);
-
-                  return (
-                    <React.Fragment key={prog.id}>
-                      <tr
-                        className={`hover:bg-emerald-50/30 transition-colors cursor-pointer ${
-                          isExpanded ? "bg-emerald-50/40" : ""
-                        }`}
-                        onClick={() =>
-                          setExpandedProgramId(isExpanded ? null : prog.id)
-                        }
-                      >
-                        {/* Kolom 1: Program & Bidang */}
-                        <td className="py-4 px-5">
-                          <div className="space-y-1.5">
-                            <p className="font-bold text-[#181343] line-clamp-2 leading-snug">
-                              {prog.title}
-                            </p>
-                            <Badge variant={focus.variant} size="sm">
-                              {focus.label}
-                            </Badge>
-                          </div>
-                        </td>
-
-                        {/* Kolom 2: Mitra Pelaksana (Nama tidak terpotong) */}
-                        <td className="py-4 px-5">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 rounded-full bg-[#181343]/10 text-[#181343] font-bold text-xs flex items-center justify-center shrink-0">
-                              {prog.partnerName ? prog.partnerName.charAt(0) : "M"}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-bold text-[#181343] leading-snug">
-                                {prog.partnerName || "Mitra Pelaksana"}
-                              </p>
-                              <p className="text-xs text-[#787680]">
-                                {prog.partnerCity || "Kota Mitra"}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Kolom 3: Lokasi */}
-                        <td className="py-4 px-5 text-[#47464F]">
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span className="text-xs font-semibold leading-snug">
-                              {prog.targetCity
-                                ? `${prog.targetCity}, ${prog.targetProvince || ""}`
-                                : prog.targetProvince || "Nasional"}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Kolom 4: Status Program */}
-                        <td className="py-4 px-5">
-                          <Badge variant={statusDisplay.variant} size="sm" hasDot>
-                            {statusDisplay.label}
-                          </Badge>
-                        </td>
-
-                        {/* Kolom 5: Alokasi Anggaran */}
-                        <td className="py-4 px-5 text-right font-bold text-[#181343]">
-                          {formatRupiah(alloc)}
-                        </td>
-
-                        {/* Kolom 6: Realisasi Anggaran */}
-                        <td className="py-4 px-5 text-right">
-                          <div className="space-y-0.5">
-                            <p className="font-bold text-emerald-600">
-                              {formatRupiah(spent)}
-                            </p>
-                            <p className="text-[11px] text-[#787680]">
-                              {progAbsorption}% serapan
-                            </p>
-                          </div>
-                        </td>
-
-                        {/* Kolom 7: Aksi */}
-                        <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center justify-center gap-1.5">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setExpandedProgramId(isExpanded ? null : prog.id)}
-                              className="text-xs font-semibold text-[#181343] hover:text-emerald-700 border-[#E8E8EA] hover:border-emerald-400 hover:bg-emerald-50 cursor-pointer px-2.5 py-1"
-                            >
-                              <span>{isExpanded ? "Tutup" : "Detail"}</span>
-                              {isExpanded ? (
-                                <ChevronUp className="w-3.5 h-3.5 ml-1" />
-                              ) : (
-                                <ChevronDown className="w-3.5 h-3.5 ml-1" />
-                              )}
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-
-                      {/* Expandable Detail Panel Row (SDGs, Penerima Manfaat, Periode, Action) */}
-                      {isExpanded && (
-                        <tr className="bg-slate-50/70 border-b border-[#E8E8EA]">
-                          <td colSpan={7} className="p-5 sm:p-6">
-                            <div className="bg-white rounded-2xl p-5 border border-[#E8E8EA] shadow-xs space-y-4">
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#F4F4F6] pb-3">
-                                <div>
-                                  <h4 className="text-sm font-bold text-[#181343]">
-                                    Detail Indikator &amp; Dampak Program
-                                  </h4>
-                                  <p className="text-xs text-[#787680]">
-                                    Penerima manfaat terverifikasi, sasaran SDGs, dan linimasa operasional
-                                  </p>
-                                </div>
-                                <Button
-                                  variant="primary"
-                                  size="sm"
-                                  onClick={() => onNavigateMenu("programs")}
-                                  rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                                  className="text-xs self-start sm:self-auto cursor-pointer"
-                                >
-                                  Buka Halaman Monitoring Program
-                                </Button>
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                                {/* Penerima Manfaat (Membedakan Target vs Realisasi secara tegas) */}
-                                <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-                                  <span className="text-[11px] uppercase font-bold text-[#787680] tracking-wider block">
-                                    Penerima Manfaat
-                                  </span>
-                                  <div className="space-y-1">
-                                    <div className="flex items-center justify-between text-xs">
-                                      <span className="text-[#47464F]">Target Rencana:</span>
-                                      <span className="font-bold text-[#181343]">
-                                        {targetBen > 0 ? `${targetBen.toLocaleString("id-ID")} Jiwa` : "-"}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-xs">
-                                      <span className="text-[#47464F]">Realisasi Capaian:</span>
-                                      <span className="font-bold text-emerald-600">
-                                        {actualBen > 0
-                                          ? `${actualBen.toLocaleString("id-ID")} Jiwa`
-                                          : "Belum ada laporan"}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Sasaran Kontribusi SDGs */}
-                                <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-                                  <span className="text-[11px] uppercase font-bold text-[#787680] tracking-wider block">
-                                    Sasaran SDGs Terkait
-                                  </span>
-                                  <div className="flex flex-wrap gap-1.5 pt-0.5">
-                                    {progSdgs.length === 0 ? (
-                                      <span className="text-xs text-[#787680] italic">
-                                        Tidak ada SDG yang terpetakan
-                                      </span>
-                                    ) : (
-                                      progSdgs.map((sdgId) => {
-                                        const sdgInfo = ALL_17_SDGS.find((s) => s.id === sdgId);
-                                        return (
-                                          <span
-                                            key={sdgId}
-                                            className="px-2 py-0.5 rounded-md text-white text-[10px] font-bold flex items-center gap-1 shadow-2xs"
-                                            style={{
-                                              backgroundColor: sdgInfo?.color || "#10B981",
-                                            }}
-                                            title={sdgInfo?.name}
-                                          >
-                                            <span>SDG {sdgId}</span>
-                                            <span className="hidden sm:inline font-normal text-white/90">
-                                              - {sdgInfo?.name || ""}
-                                            </span>
-                                          </span>
-                                        );
-                                      })
-                                    )}
-                                  </div>
-                                </div>
-
-                                {/* Periode Pelaksanaan & PIC */}
-                                <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1.5">
-                                  <span className="text-[11px] uppercase font-bold text-[#787680] tracking-wider block">
-                                    Periode Pelaksanaan
-                                  </span>
-                                  <div className="space-y-1 text-xs text-[#47464F]">
-                                    <div className="flex items-center gap-1.5">
-                                      <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                                      <span>
-                                        {formatDate(prog.startDate)} s/d {formatDate(prog.endDate)}
-                                      </span>
-                                    </div>
-                                    <div className="text-[11px] text-[#787680] truncate">
-                                      Mitra: {prog.partnerName} ({prog.partnerCity || "Indonesia"})
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-
-      {/* ============================================================ */}
-      {/* BAGIAN 7 — INFORMASI PENDUKUNG                                */}
-      {/* Peluang CSR Terkini                                          */}
-      {/* ============================================================ */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-[#181343]">
-                Peluang CSR Terkini
-              </h3>
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold">
-                Inisiatif Terbuka
-              </span>
-            </div>
-            <p className="text-xs text-[#787680]">
-              Inisiatif peluang CSR yang telah dipublikasikan dan siap menerima proposal kolaborasi mitra
-            </p>
           </div>
 
           <Button
+            type="button"
             variant="outline"
             size="sm"
-            onClick={() => onNavigateMenu("opportunities")}
-            rightIcon={<ArrowRight className="w-3.5 h-3.5 text-[#181343]" />}
-            className="text-xs font-semibold text-[#181343] cursor-pointer"
+            onClick={() =>
+              onNavigateMenu(detailTab === "opportunities" ? "opportunities" : "programs")
+            }
+            rightIcon={<ArrowRight className="w-3.5 h-3.5 text-[#059669]" />}
+            className="text-xs font-semibold text-[#181343] border-[#E5E7EB] hover:bg-slate-50 cursor-pointer self-start sm:self-auto"
           >
-            Lihat Semua Peluang CSR ({opportunities.length})
+            {detailTab === "opportunities"
+              ? "Lihat Semua Peluang"
+              : isManagement
+              ? "Buka Pengawasan Program"
+              : "Lihat Semua Program"}
           </Button>
         </div>
 
-        {opportunities.length === 0 ? (
-          <div className="p-8 rounded-3xl bg-white border border-dashed border-[#C8C5D0] text-center space-y-3">
-            <p className="text-xs text-[#787680]">
-              Belum ada inisiatif peluang CSR yang dibuat oleh perusahaan Anda.
-            </p>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onOpenCreateOpportunity}
-              leftIcon={<Plus className="w-4 h-4" />}
-              className="text-xs cursor-pointer"
-            >
-              Buat Peluang CSR Baru
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {opportunities.slice(0, 3).map((opp) => {
-              const focus = FOCUS_AREA_CONFIG[opp.focusArea] || {
-                label: opp.focusArea,
-                variant: "slate" as const,
-              };
-              const isDraft = opp.status === "DRAFT";
-              const statusCfg = isDraft
-                ? { label: "Draf Internal", variant: "slate" as const }
-                : STATUS_CONFIG[opp.status] || {
-                    label: opp.status,
-                    variant: "emerald" as const,
-                  };
-
-              return (
-                <div
-                  key={opp.id}
-                  className="rounded-2xl bg-white border border-[#E8E8EA] hover:border-emerald-400/60 shadow-2xs hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-200 flex flex-col justify-between overflow-hidden group"
-                >
-                  <div>
-                    {/* Visual Banner or Safe Fallback */}
-                    {opp.bannerUrl ? (
-                      <div className="relative h-32 overflow-hidden bg-slate-900">
-                        <img
-                          src={opp.bannerUrl}
-                          alt={opp.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
-                        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2">
-                          <Badge
-                            variant={statusCfg.variant}
-                            size="sm"
-                            hasDot={!isDraft}
-                            className="bg-white/95 backdrop-blur-xs shadow-2xs"
-                          >
-                            {statusCfg.label}
-                          </Badge>
-                          <Badge
-                            variant={focus.variant}
-                            size="sm"
-                            className="bg-white/95 backdrop-blur-xs shadow-2xs"
-                          >
-                            {focus.label}
-                          </Badge>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-[#F9F9FB] border-b border-[#E8E8EA] flex items-center justify-between gap-2">
-                        <Badge
-                          variant={statusCfg.variant}
-                          size="sm"
-                          hasDot={!isDraft}
-                        >
-                          {statusCfg.label}
-                        </Badge>
-                        <Badge variant={focus.variant} size="sm">
-                          {focus.label}
-                        </Badge>
-                      </div>
-                    )}
-
-                    <div className="p-4 space-y-2.5">
-                      <h4 className="text-sm font-bold text-[#181343] group-hover:text-emerald-600 transition-colors line-clamp-2 leading-snug">
-                        {opp.title}
-                      </h4>
-
-                      <div className="pt-2 border-t border-[#F4F4F6] space-y-1.5 text-xs">
-                        <div className="flex items-center justify-between text-[#47464F]">
-                          <span className="text-[#787680]">Anggaran:</span>
-                          <span className="font-extrabold text-emerald-600">
-                            {formatRupiah(opp.estimatedBudget)}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-[#47464F]">
-                          <span className="text-[#787680]">Lokasi:</span>
-                          <span className="font-medium truncate max-w-[150px]">
-                            {opp.targetCity || opp.targetProvince || "Nasional"}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-[#47464F]">
-                          <span className="text-[#787680]">Batas Proposal:</span>
-                          <span className="font-medium">
-                            {formatDate(opp.deadline)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Clean Single Action Button */}
-                  <div className="p-4 pt-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onSelectOpportunityDetail(opp)}
-                      leftIcon={<Eye className="w-3.5 h-3.5" />}
-                      className="w-full text-xs font-bold text-[#181343] hover:text-emerald-700 border-[#E8E8EA] hover:border-emerald-400 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer"
-                    >
-                      Buka Detail Inisiatif
-                    </Button>
-                  </div>
+        {/* TAB 1: PROGRAM & MITRA (Ringkas, 5 Kolom Utama, Ekspansi Detail Opsional) */}
+        {detailTab === "programs" && (
+          <>
+            {filteredPrograms.length === 0 ? (
+              <div className="py-14 px-6 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
+                <Info className="w-7 h-7 text-slate-400 mx-auto" />
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-[#181343]">
+                    Tidak ada program pada filter saat ini
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Ubah filter tahun, status, atau bidang fokus untuk melihat daftar program.
+                  </p>
                 </div>
-              );
-            })}
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetFilters}
+                    leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                    className="text-xs font-semibold cursor-pointer"
+                  >
+                    Reset Filter
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-white border border-[#E5E7EB] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse min-w-[760px]">
+                    <thead>
+                      <tr className="border-b border-[#E5E7EB] text-slate-600 font-bold bg-slate-50/70">
+                        <th className="py-3.5 px-5 w-[34%]">Program CSR</th>
+                        <th className="py-3.5 px-4 w-[24%]">Mitra Pelaksana</th>
+                        <th className="py-3.5 px-4 w-[14%]">Status</th>
+                        <th className="py-3.5 px-4 w-[18%] text-right">Realisasi / Pagu</th>
+                        <th className="py-3.5 px-5 w-[10%] text-right">Rincian</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {filteredPrograms.map((prog) => {
+                        const focus =
+                          FOCUS_AREA_CONFIG[prog.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
+                            label: prog.focusArea,
+                            variant: "slate" as const,
+                          };
+
+                        const statusDisplay =
+                          prog.status === "IN_PROGRESS"
+                            ? { label: "Sedang Berjalan", variant: "emerald" as const }
+                            : prog.status === "PLANNED"
+                            ? { label: "Persiapan", variant: "blue" as const }
+                            : prog.status === "COMPLETED"
+                            ? { label: "Selesai", variant: "slate" as const }
+                            : STATUS_CONFIG[prog.status as keyof typeof STATUS_CONFIG] || {
+                                label: prog.status,
+                                variant: "emerald" as const,
+                              };
+
+                        const alloc = parseFloat(prog.budget) || 0;
+                        const spent = parseFloat(prog.spentBudget || "0") || 0;
+                        const progAbsorption =
+                          alloc > 0 ? Math.round((spent / alloc) * 1000) / 10 : 0;
+
+                        const progSdgs = getProgramSdgs({
+                          id: prog.id,
+                          title: prog.title,
+                          description: prog.description || prog.opportunityDescription || "",
+                          focusArea: prog.focusArea,
+                          status: prog.status,
+                          budget: prog.budget,
+                        });
+
+                        const isExpanded = expandedProgramId === prog.id;
+                        const targetBen = parseBeneficiariesCount(prog.targetBeneficiaries);
+                        const actualBen = parseBeneficiariesCount(prog.actualBeneficiaries);
+
+                        return (
+                          <React.Fragment key={prog.id}>
+                            <tr
+                              className={`hover:bg-slate-50/70 transition-colors cursor-pointer ${
+                                isExpanded ? "bg-slate-50/80" : ""
+                              }`}
+                              onClick={() =>
+                                setExpandedProgramId(isExpanded ? null : prog.id)
+                              }
+                            >
+                              <td className="py-4 px-5">
+                                <p className="font-bold text-[#181343] text-[13px] line-clamp-1">
+                                  {prog.title}
+                                </p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">
+                                  {focus.label} &middot;{" "}
+                                  {prog.targetCity || prog.targetProvince || "Nasional"}
+                                </p>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <p className="font-semibold text-[#181343]">
+                                  {prog.partnerName || "Mitra Pelaksana"}
+                                </p>
+                                <p className="text-[11px] text-slate-500">
+                                  {prog.partnerCity || "Indonesia"}
+                                </p>
+                              </td>
+
+                              <td className="py-4 px-4">
+                                <Badge variant={statusDisplay.variant} size="sm" hasDot>
+                                  {statusDisplay.label}
+                                </Badge>
+                              </td>
+
+                              <td className="py-4 px-4 text-right tabular-nums">
+                                <p className="font-bold text-[#059669]">
+                                  {formatCompact(spent)}{" "}
+                                  <span className="text-slate-500 font-medium">
+                                    / {formatCompact(alloc)}
+                                  </span>
+                                </p>
+                                <p className="text-[11px] text-slate-500">
+                                  {progAbsorption}% terserap
+                                </p>
+                              </td>
+
+                              <td
+                                className="py-4 px-5 text-right"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedProgramId(isExpanded ? null : prog.id)
+                                  }
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#181343] hover:text-[#059669] cursor-pointer px-1.5 py-1 rounded-md"
+                                >
+                                  <span>{isExpanded ? "Tutup" : "Detail"}</span>
+                                  {isExpanded ? (
+                                    <ChevronUp className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+
+                            {isExpanded && (
+                              <tr className="bg-slate-50/70 border-b border-[#E5E7EB]">
+                                <td colSpan={5} className="p-5">
+                                  <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                                      <div>
+                                        <h4 className="text-sm font-bold text-[#181343]">
+                                          Indikator &amp; Dampak Program
+                                        </h4>
+                                        <p className="text-xs text-slate-600">
+                                          Alokasi resmi {formatRupiah(alloc)} &middot; Realisasi {formatRupiah(spent)}
+                                        </p>
+                                      </div>
+                                      <Button
+                                        variant="primary"
+                                        size="sm"
+                                        onClick={() => onNavigateMenu("programs")}
+                                        rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                                        className="text-xs self-start sm:self-auto cursor-pointer"
+                                      >
+                                        {isManagement
+                                          ? "Buka Pengawasan Program"
+                                          : "Buka Monitoring Program"}
+                                      </Button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                      <div className="space-y-1.5">
+                                        <span className="text-xs font-semibold text-slate-500 block">
+                                          Penerima Manfaat
+                                        </span>
+                                        <p className="text-xs text-[#181343]">
+                                          Target:{" "}
+                                          <strong className="tabular-nums">
+                                            {targetBen > 0 ? `${targetBen.toLocaleString("id-ID")} Jiwa` : "-"}
+                                          </strong>
+                                        </p>
+                                        <p className="text-xs text-[#059669] font-semibold">
+                                          Realisasi:{" "}
+                                          <strong className="tabular-nums">
+                                            {actualBen > 0
+                                              ? `${actualBen.toLocaleString("id-ID")} Jiwa`
+                                              : "Belum dilaporkan"}
+                                          </strong>
+                                        </p>
+                                      </div>
+
+                                      <div className="space-y-1.5">
+                                        <span className="text-xs font-semibold text-slate-500 block">
+                                          Sasaran SDGs Terkait
+                                        </span>
+                                        <div className="flex flex-wrap gap-1.5">
+                                          {progSdgs.length === 0 ? (
+                                            <span className="text-xs text-slate-500">
+                                              Belum dipetakan
+                                            </span>
+                                          ) : (
+                                            progSdgs.map((sdgId) => {
+                                              const sdgInfo = ALL_17_SDGS.find((s) => s.id === sdgId);
+                                              return (
+                                                <span
+                                                  key={sdgId}
+                                                  className="px-2 py-0.5 rounded-md text-white text-[10px] font-bold"
+                                                  style={{
+                                                    backgroundColor: sdgInfo?.color || "#059669",
+                                                  }}
+                                                  title={sdgInfo?.name}
+                                                >
+                                                  SDG {sdgId}
+                                                </span>
+                                              );
+                                            })
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-1.5">
+                                        <span className="text-xs font-semibold text-slate-500 block">
+                                          Periode Pelaksanaan
+                                        </span>
+                                        <div className="flex items-center gap-1.5 text-xs text-[#181343] font-medium">
+                                          <Calendar className="w-3.5 h-3.5 text-[#059669]" />
+                                          <span>
+                                            {formatDate(prog.startDate)} s/d {formatDate(prog.endDate)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* TAB 2: SEBARAN WILAYAH & BIDANG FOKUS */}
+        {detailTab === "geography" && (
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-[#E5E7EB] space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Sebaran Bidang Fokus CSR
+                  </h3>
+                  <p className="text-xs text-slate-600">
+                    Klik salah satu kategori tematik untuk memfilter seluruh dashboard
+                  </p>
+                </div>
+                <span className="text-xs font-semibold text-slate-500">
+                  {categoryDistribution.length} Kategori Aktif
+                </span>
+              </div>
+
+              {categoryDistribution.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500">
+                  Belum ada data kategori tematik untuk filter yang dipilih.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                  {categoryDistribution.map((item) => {
+                    const isSelected = selectedFocusArea === item.key;
+                    return (
+                      <button
+                        type="button"
+                        key={item.key}
+                        onClick={() =>
+                          setSelectedFocusArea(selectedFocusArea === item.key ? "ALL" : item.key)
+                        }
+                        className={`p-3 rounded-xl text-left transition-colors space-y-2 cursor-pointer border ${
+                          isSelected
+                            ? "bg-emerald-50/70 border-emerald-400"
+                            : "bg-transparent border-transparent hover:bg-slate-50 hover:border-[#E5E7EB]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="flex items-center gap-2 font-bold text-[#181343]">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full shrink-0"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            {item.label}
+                          </span>
+                          <span className="tabular-nums text-slate-600">
+                            <strong className="text-[#181343]">{item.count} Program</strong> &middot;{" "}
+                            {formatCompact(item.totalBudget)} ({item.programShare}%)
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${item.programShare}%`,
+                              backgroundColor: item.color,
+                            }}
+                          />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <IndonesiaBeneficiaryMap
+              programs={filteredPrograms}
+              selectedSdgFilter={selectedSdgFilter}
+              onSelectSdgFilter={(sdgId) => setSelectedSdgFilter(sdgId)}
+              selectedProvince={selectedProvince}
+              onSelectProvince={(prov) => setSelectedProvince(prov)}
+              onNavigateToProgramDetail={() => onNavigateMenu("programs")}
+            />
           </div>
         )}
-      </div>
+
+        {/* TAB 3: KATALOG PELUANG TERKINI */}
+        {detailTab === "opportunities" && (
+          <>
+            {opportunities.length === 0 ? (
+              <div className="py-12 px-6 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
+                <p className="text-xs text-slate-600">
+                  Belum ada inisiatif peluang CSR yang dipublikasikan perusahaan.
+                </p>
+                {!isManagement && onOpenCreateOpportunity && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={onOpenCreateOpportunity}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                    className="text-xs cursor-pointer"
+                  >
+                    Buat Peluang CSR Baru
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {opportunities.slice(0, 6).map((opp) => {
+                  const focus = FOCUS_AREA_CONFIG[opp.focusArea] || {
+                    label: opp.focusArea,
+                    variant: "slate" as const,
+                  };
+                  const isDraft = opp.status === "DRAFT";
+                  const statusCfg = isDraft
+                    ? { label: "Draf Internal", variant: "slate" as const }
+                    : STATUS_CONFIG[opp.status] || {
+                        label: opp.status,
+                        variant: "emerald" as const,
+                      };
+
+                  return (
+                    <div
+                      key={opp.id}
+                      className="rounded-2xl bg-white border border-[#E5E7EB] hover:border-slate-300 transition-colors flex flex-col justify-between overflow-hidden"
+                    >
+                      <div>
+                        {opp.bannerUrl ? (
+                          <div className="h-36 overflow-hidden bg-slate-100 border-b border-[#E5E7EB]">
+                            <img
+                              src={opp.bannerUrl}
+                              alt={opp.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = "none";
+                              }}
+                            />
+                          </div>
+                        ) : null}
+
+                        <div className="p-5 space-y-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <Badge variant={statusCfg.variant} size="sm" hasDot={!isDraft}>
+                              {statusCfg.label}
+                            </Badge>
+                            <span className="text-[11px] font-medium text-slate-500">
+                              {focus.label}
+                            </span>
+                          </div>
+
+                          <h3 className="text-sm font-bold text-[#181343] line-clamp-2 leading-snug">
+                            {opp.title}
+                          </h3>
+
+                          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                            <div>
+                              <span className="text-[11px] text-slate-500 block">Alokasi</span>
+                              <span className="font-bold text-[#059669] tabular-nums">
+                                {formatCompact(parseFloat(opp.estimatedBudget || "0") || 0)}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[11px] text-slate-500 block">Lokasi</span>
+                              <span className="font-medium text-[#181343] flex items-center gap-1 justify-end">
+                                <MapPin className="w-3 h-3 text-slate-400" />
+                                {opp.targetCity || opp.targetProvince || "Nasional"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="px-5 pb-5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onSelectOpportunityDetail(opp)}
+                          leftIcon={<Eye className="w-3.5 h-3.5 text-slate-600" />}
+                          className="w-full text-xs font-semibold text-[#181343] border-[#E5E7EB] hover:bg-slate-50 cursor-pointer"
+                        >
+                          Buka Detail
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

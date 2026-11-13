@@ -44,6 +44,7 @@ interface ProgramFinancesTabProps {
   programTitle: string;
   agreedBudget: number | string;
   role: "COMPANY" | "PARTNER";
+  isManagement?: boolean;
   onFinancesUpdated?: () => void;
 }
 
@@ -52,6 +53,7 @@ export function ProgramFinancesTab({
   programTitle,
   agreedBudget,
   role,
+  isManagement = false,
   onFinancesUpdated,
 }: ProgramFinancesTabProps) {
   const [data, setData] = useState<ProgramFinancesData | null>(null);
@@ -257,7 +259,7 @@ export function ProgramFinancesTab({
 
         {/* Action Button depending on Role */}
         <div>
-          {role === "COMPANY" && (
+          {role === "COMPANY" && !isManagement && (
             <Button
               type="button"
               variant="primary"
@@ -301,11 +303,13 @@ export function ProgramFinancesTab({
                 Belum ada penyaluran dana termin
               </h4>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
-                {role === "COMPANY"
+                {role === "COMPANY" && !isManagement
                   ? "Salurkan dana tahap pertama (DP) beserta bukti transfer agar dapat segera digunakan oleh mitra."
-                  : "Menunggu perusahaan mencairkan dana termin pertama ke rekening yayasan/mitra."}
+                  : role === "COMPANY"
+                    ? "Tim operasional perusahaan (CSR Admin) belum mencatat penyaluran dana termin untuk program ini."
+                    : "Menunggu perusahaan mencairkan dana termin pertama ke rekening yayasan/mitra."}
               </p>
-              {role === "COMPANY" && (
+              {role === "COMPANY" && !isManagement && (
                 <Button
                   type="button"
                   variant="primary"
@@ -554,7 +558,7 @@ export function ProgramFinancesTab({
                       </div>
 
                       {/* Company action: Verify if PENDING */}
-                      {role === "COMPANY" && exp.verificationStatus === "PENDING" && (
+                      {role === "COMPANY" && !isManagement && exp.verificationStatus === "PENDING" && (
                         <Button
                           type="button"
                           variant="primary"

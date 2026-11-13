@@ -8,6 +8,11 @@ export class AuthRepository {
     return result[0] ?? null;
   }
 
+  async findByUsername(username: string): Promise<User | null> {
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0] ?? null;
+  }
+
   async findById(id: string): Promise<User | null> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
     return result[0] ?? null;

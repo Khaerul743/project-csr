@@ -72,8 +72,8 @@ export function LandingNavbar() {
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 ${
         isScrolled
-          ? "bg-[#FFFFFF]/95 backdrop-blur-md shadow-xs border-b border-[#C8C5D0]/60"
-          : "bg-[#FFFFFF] border-b border-[#EEEEF0]"
+          ? "bg-[#FFFFFF]/95 backdrop-blur-md shadow-xs border-b border-[#E5E7EB]"
+          : "bg-[#FFFFFF] border-b border-[#E5E7EB]"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
@@ -105,7 +105,7 @@ export function LandingNavbar() {
                 Tata Kelola CSR
               </span>
             </div>
-            <span className="text-[11px] font-medium text-[#47464F] block tracking-tight">
+            <span className="text-[11px] font-medium text-slate-600 block tracking-tight">
               Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR
             </span>
           </div>
@@ -125,7 +125,7 @@ export function LandingNavbar() {
                 className={`relative px-3.5 py-2 rounded-lg text-[13px] transition-all duration-200 ${
                   isActive
                     ? "text-emerald-700 font-bold"
-                    : "text-[#47464F] hover:text-[#181343] font-medium hover:bg-[#F4F4F6]"
+                    : "text-slate-600 hover:text-[#181343] font-medium hover:bg-[#F4F4F6]"
                 }`}
               >
                 {item.label}
@@ -184,7 +184,7 @@ export function LandingNavbar() {
 
       {/* Mobile Menu Drawer */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-b border-[#C8C5D0] bg-[#FFFFFF] px-4 pt-3 pb-6 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-200">
+        <div className="lg:hidden border-b border-[#E5E7EB] bg-[#FFFFFF] px-4 pt-3 pb-6 space-y-3 shadow-lg animate-in slide-in-from-top-2 duration-200">
           <nav className="flex flex-col space-y-1">
             {NAV_ITEMS.map((item) => {
               const id = item.href.replace("#", "");
@@ -198,7 +198,7 @@ export function LandingNavbar() {
                   className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-between ${
                     isActive
                       ? "text-[#181343] font-bold bg-[#181343]/8"
-                      : "text-[#47464F] hover:bg-[#F4F4F6] hover:text-[#181343]"
+                      : "text-slate-600 hover:bg-[#F4F4F6] hover:text-[#181343]"
                   }`}
                 >
                   <span>{item.label}</span>
@@ -210,7 +210,7 @@ export function LandingNavbar() {
             })}
           </nav>
 
-          <div className="pt-3 border-t border-[#EEEEF0] flex flex-col gap-2.5">
+          <div className="pt-3 border-t border-[#E5E7EB] flex flex-col gap-2.5">
             <Link
               href="/login"
               onClick={() => setIsMobileMenuOpen(false)}

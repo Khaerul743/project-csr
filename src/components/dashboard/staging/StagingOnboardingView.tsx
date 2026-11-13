@@ -369,7 +369,7 @@ export function StagingOnboardingView({
                       Monitoring &amp; Pelaporan ESG
                     </h4>
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      Pantau serapan dana riil dan hasilkan laporan kepatuhan POJK 51.
+                      Pantau serapan dana riil dan hasilkan laporan akuntabilitas serta dampak ESG.
                     </p>
                   </div>
                 </div>
@@ -485,10 +485,10 @@ export function StagingOnboardingView({
             {/* CTA Button */}
             <div className="pt-6">
               <Button
-                variant="secondary"
+                variant="primary"
                 size="md"
                 onClick={() => setIsPartnerModalOpen(true)}
-                className="w-full text-xs sm:text-sm font-bold min-h-[44px] rounded-xl cursor-pointer bg-[#181343] hover:bg-[#231b5e] text-white"
+                className="w-full text-xs sm:text-sm font-bold min-h-[44px] rounded-xl cursor-pointer"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 Daftarkan Lembaga Mitra
@@ -528,30 +528,30 @@ export function StagingOnboardingView({
 
           {isRoleGuideOpen && (
             <div className="p-4 sm:p-6 border-t border-slate-100 bg-slate-50/40 space-y-4 text-xs">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-white border border-slate-200/80 space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
+                <div className="p-4 sm:p-5 rounded-xl bg-white border border-slate-200/80 space-y-2.5 h-full">
                   <div className="flex items-center gap-2 text-emerald-800 font-bold">
-                    <Building2 className="w-4 h-4 text-emerald-600" />
+                    <Building2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>Perusahaan Sponsor</span>
                   </div>
-                  <ul className="space-y-1.5 text-slate-600 list-disc list-inside">
-                    <li>Sebagai pihak pendana dan pemilik inisiatif program sosial.</li>
+                  <ul className="space-y-1.5 text-slate-600 list-disc pl-4 leading-relaxed">
+                    <li>Sebagai pihak pendana dan inisiator program sosial CSR.</li>
                     <li>Menyetujui atau menolak proposal kegiatan dari mitra.</li>
                     <li>Memvalidasi bukti transfer dan termin penyaluran dana.</li>
-                    <li>Menerima ringkasan laporan dampak ESG untuk stakeholder korporat.</li>
+                    <li>Menerima ringkasan laporan dampak ESG untuk stakeholder.</li>
                   </ul>
                 </div>
 
-                <div className="p-4 rounded-xl bg-white border border-slate-200/80 space-y-2">
+                <div className="p-4 sm:p-5 rounded-xl bg-white border border-slate-200/80 space-y-2.5 h-full">
                   <div className="flex items-center gap-2 text-[#181343] font-bold">
-                    <HeartHandshake className="w-4 h-4 text-[#181343]" />
+                    <HeartHandshake className="w-4 h-4 text-[#181343] shrink-0" />
                     <span>Lembaga Mitra Pelaksana</span>
                   </div>
-                  <ul className="space-y-1.5 text-slate-600 list-disc list-inside">
-                    <li>Sebagai pelaksana teknis yang bergerak langsung di masyarakat.</li>
-                    <li>Menyusun rancangan jadwal kerja, target penerima, dan rincian RAB.</li>
-                    <li>Mengunggah bukti kuitansi belanja riil dan Berita Acara Serah Terima (BAST).</li>
-                    <li>Memfasilitasi warga untuk memberikan feedback kepuasan secara transparan.</li>
+                  <ul className="space-y-1.5 text-slate-600 list-disc pl-4 leading-relaxed">
+                    <li>Sebagai pelaksana teknis kegiatan langsung di lapangan.</li>
+                    <li>Menyusun jadwal kerja, target penerima, dan rincian RAB.</li>
+                    <li>Mengunggah bukti kuitansi belanja riil dan dokumen BAST.</li>
+                    <li>Mengelola survei kepuasan warga penerima manfaat program.</li>
                   </ul>
                 </div>
               </div>

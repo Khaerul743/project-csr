@@ -19,7 +19,7 @@ export class OpportunityController {
   async create(request: Request): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = createOpportunitySchema.parse(body);
@@ -39,7 +39,7 @@ export class OpportunityController {
   async update(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = updateOpportunitySchema.parse(body);
@@ -59,7 +59,7 @@ export class OpportunityController {
   async delete(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       await this.opportunityService.deleteOpportunity(id, authUser.companyId);
       return ApiResponse.success(null, "Opportunity berhasil dihapus");
@@ -128,7 +128,7 @@ export class OpportunityController {
   async invitePartner(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = invitePartnerSchema.parse(body);
@@ -201,7 +201,7 @@ export class OpportunityController {
   async analyzeNeedPrioritization(request: Request): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);
-      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validatedInput = needPrioritizationRequestSchema.parse(body);

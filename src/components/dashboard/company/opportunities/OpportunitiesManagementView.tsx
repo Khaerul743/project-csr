@@ -32,10 +32,10 @@ interface OpportunitiesManagementViewProps {
   opportunities: OpportunityItem[];
   isLoading: boolean;
   onRefresh: () => void;
-  onOpenCreateModal: () => void;
-  onOpenEditModal: (opp: OpportunityItem) => void;
+  onOpenCreateModal?: () => void;
+  onOpenEditModal?: (opp: OpportunityItem) => void;
   onOpenDetailModal: (opp: OpportunityItem) => void;
-  onDeleteOpportunity: (oppId: string, oppTitle: string) => void;
+  onDeleteOpportunity?: (oppId: string, oppTitle: string) => void;
   isManagement?: boolean;
 }
 
@@ -215,7 +215,7 @@ export function OpportunitiesManagementView({
         </div>
 
         {/* Tombol Buat Peluang CSR (Khusus CSR_ADMIN) */}
-        {!isManagement && (
+        {!isManagement && onOpenCreateModal && (
           <Button
             variant="primary"
             size="sm"
@@ -363,9 +363,11 @@ export function OpportunitiesManagementView({
           <p className="text-xs text-[#787680] max-w-sm mx-auto leading-relaxed">
             {searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL"
               ? "Coba sesuaikan kata kunci pencarian atau ubah filter untuk menampilkan peluang."
-              : "Rencanakan peluang kerja sama CSR baru perusahaan Anda agar calon mitra dapat mengajukan inisiatif solutif."}
+              : isManagement
+                ? "Belum ada peluang inisiatif kerja sama CSR yang dibuka oleh tim operasional perusahaan Anda."
+                : "Rencanakan peluang kerja sama CSR baru perusahaan Anda agar calon mitra dapat mengajukan inisiatif solutif."}
           </p>
-          {!(searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL") && (
+          {!isManagement && onOpenCreateModal && !(searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL") && (
             <Button
               variant="primary"
               size="sm"
@@ -514,7 +516,7 @@ export function OpportunitiesManagementView({
                     >
                       Lihat Rincian Peluang
                     </Button>
-                  ) : opp.status === "DRAFT" ? (
+                  ) : !isManagement && opp.status === "DRAFT" && onOpenEditModal ? (
                     <Button
                       variant="primary"
                       size="sm"
@@ -547,7 +549,7 @@ export function OpportunitiesManagementView({
                         >
                           <Eye className="w-4 h-4" />
                         </button>
-                      ) : (
+                      ) : onOpenEditModal ? (
                         <button
                           type="button"
                           onClick={() => onOpenEditModal(opp)}
@@ -556,16 +558,18 @@ export function OpportunitiesManagementView({
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                      )}
+                      ) : null}
 
-                      <button
-                        type="button"
-                        onClick={() => onDeleteOpportunity(opp.id, opp.title)}
-                        title="Hapus Peluang"
-                        className="p-2 rounded-xl text-[#787680] hover:text-[#BA1A1A] hover:bg-rose-50 transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {onDeleteOpportunity && (
+                        <button
+                          type="button"
+                          onClick={() => onDeleteOpportunity(opp.id, opp.title)}
+                          title="Hapus Peluang"
+                          className="p-2 rounded-xl text-[#787680] hover:text-[#BA1A1A] hover:bg-rose-50 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

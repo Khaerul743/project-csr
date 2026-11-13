@@ -446,10 +446,10 @@ export function CompanyFullProfileView({
         </div>
       )}
 
-      {/* Main Header / LinkedIn-Style Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+      {/* Main Header Card */}
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
         {/* Cover Banner */}
-        <div className="relative h-48 sm:h-64 w-full bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 overflow-hidden">
+        <div className="relative h-40 sm:h-52 w-full bg-gradient-to-r from-[#181343] via-slate-900 to-[#064E3B] overflow-hidden">
           {c.coverUrl ? (
             <img
               src={c.coverUrl}
@@ -457,9 +457,9 @@ export function CompanyFullProfileView({
               className="w-full h-full object-cover opacity-90"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-              <Building2 className="w-12 h-12 text-slate-700/60 mb-2" />
-              <p className="text-xs text-slate-400 font-medium">
+            <div className="w-full h-full flex flex-col items-center justify-center text-slate-300/80 p-6 text-center">
+              <Building2 className="w-10 h-10 text-white/30 mb-1.5" />
+              <p className="text-xs text-white/60 font-medium">
                 Belum ada foto sampul profil perusahaan
               </p>
             </div>
@@ -473,7 +473,7 @@ export function CompanyFullProfileView({
                 setEditCategory("branding");
                 setIsEditingProfile(true);
               }}
-              className="absolute top-4 right-4 p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md text-xs font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+              className="absolute top-4 right-4 px-3 py-2 rounded-xl bg-slate-900/60 hover:bg-slate-900/80 text-white backdrop-blur-md text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Camera className="w-3.5 h-3.5" />
               <span>Ganti Sampul</span>
@@ -482,22 +482,24 @@ export function CompanyFullProfileView({
         </div>
 
         {/* Profile Info Header Bar */}
-        <div className="px-6 sm:px-10 pb-8 pt-0 relative">
+        <div className="px-6 sm:px-8 pb-7 pt-0 relative">
           {/* Avatar / Logo (Overlapping Banner) */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-16 sm:-mt-20 mb-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 -mt-12 sm:-mt-16 mb-4">
             <div className="relative group">
-              <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl bg-white p-2 shadow-xl border-2 border-white overflow-hidden shrink-0">
-                <div className="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white flex items-center justify-center font-black text-3xl sm:text-4xl overflow-hidden shadow-inner">
-                  {c.logoUrl ? (
-                    <img
-                      src={c.logoUrl}
-                      alt={c.name}
-                      className="w-full h-full object-contain p-1"
-                    />
-                  ) : (
-                    c.name?.substring(0, 2).toUpperCase() || "CP"
-                  )}
-                </div>
+              <div
+                className={`w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-md overflow-hidden shrink-0 flex items-center justify-center font-black text-2xl sm:text-3xl ${
+                  c.logoUrl ? "bg-white" : "bg-[#181343] text-white"
+                }`}
+              >
+                {c.logoUrl ? (
+                  <img
+                    src={c.logoUrl}
+                    alt={c.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  c.name?.substring(0, 2).toUpperCase() || "CP"
+                )}
               </div>
               {isOwner && (
                 <button
@@ -506,7 +508,7 @@ export function CompanyFullProfileView({
                     setEditCategory("branding");
                     setIsEditingProfile(true);
                   }}
-                  className="absolute bottom-1 right-1 p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-lg transition-transform active:scale-95 cursor-pointer"
+                  className="absolute bottom-1 right-1 p-2 bg-[#059669] hover:bg-[#047857] text-white rounded-full shadow-md transition-transform active:scale-95 cursor-pointer"
                   title="Ganti Logo Perusahaan"
                 >
                   <Camera className="w-3.5 h-3.5" />
@@ -517,14 +519,13 @@ export function CompanyFullProfileView({
             {/* Action Buttons Top-Right */}
             <div className="flex items-center gap-3 self-end sm:self-auto w-full sm:w-auto justify-end">
               {isOwner ? (
-                /* Redesigned Edit Profil Perusahaan Button: clean, modern, horizontal, 16px icon, 8px gap, secondary outlined */
                 <button
                   type="button"
                   onClick={() => {
                     setEditCategory("info");
                     setIsEditingProfile(true);
                   }}
-                  className="inline-flex items-center gap-2 h-[38px] px-3.5 sm:px-4 rounded-lg bg-white border border-[#E5E7EB] text-[#181343] hover:bg-[#F4F4F6] hover:border-slate-300 transition-colors duration-150 text-xs sm:text-sm font-semibold shadow-2xs shrink-0 cursor-pointer"
+                  className="inline-flex items-center gap-2 h-[38px] px-4 rounded-xl bg-white border border-[#E5E7EB] text-[#181343] hover:bg-slate-50 hover:border-slate-300 transition-colors duration-150 text-xs sm:text-sm font-semibold shrink-0 cursor-pointer"
                 >
                   <SquarePen className="w-4 h-4 text-[#181343] shrink-0" strokeWidth={1.75} />
                   <span>Edit Profil Perusahaan</span>
@@ -633,35 +634,35 @@ export function CompanyFullProfileView({
           </div>
         </div>
 
-        {/* Profile Completeness Bar (Owner Only) - Clearly differentiated from Administrative Verification */}
+        {/* Profile Completeness Bar (Owner Only) */}
         {isOwner && completeness.score < 100 && (
-          <div className="mx-6 sm:mx-10 mb-8 p-5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-white border border-emerald-200/80 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
+          <div className="mx-6 sm:mx-8 mb-6 p-4 sm:p-5 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
-                <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-                  Persentase Kelengkapan Profil Organisasi
+                <Sparkles className="w-4 h-4 text-[#059669]" />
+                <span className="text-xs font-bold text-[#181343]">
+                  Kelengkapan Profil Organisasi
                 </span>
               </div>
-              <span className="text-xs font-black text-emerald-700">
+              <span className="text-xs font-bold text-[#059669] tabular-nums">
                 {completeness.score}% Lengkap
               </span>
             </div>
 
             <p className="text-[11px] text-slate-500 leading-relaxed">
-              Tingkat kelengkapan data informasi publik perusahaan untuk membangun transparansi di hadapan mitra CSR. Berbeda dengan status verifikasi administratif yang memvalidasi keabsahan dokumen hukum legalitas (NIB & NPWP).
+              Lengkapi informasi publik perusahaan untuk membangun transparansi di hadapan mitra CSR (terpisah dari validasi dokumen legal NIB &amp; NPWP).
             </p>
 
-            <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
               <div
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500"
+                className="bg-[#059669] h-full rounded-full transition-all duration-500"
                 style={{ width: `${completeness.score}%` }}
               />
             </div>
 
             {completeness.missing.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
-                <span className="text-slate-500 font-medium">Lengkapi atribut profil:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-0.5 text-[11px]">
+                <span className="text-slate-500 font-medium">Lengkapi:</span>
                 {completeness.missing.slice(0, 3).map((item, idx) => (
                   <button
                     key={idx}
@@ -678,7 +679,7 @@ export function CompanyFullProfileView({
                       }
                       setIsEditingProfile(true);
                     }}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-emerald-300 text-emerald-700 font-bold hover:bg-emerald-50 transition cursor-pointer"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] text-[#059669] font-semibold hover:border-[#059669] hover:bg-emerald-50 transition cursor-pointer"
                   >
                     <span>+ {item}</span>
                   </button>
@@ -691,40 +692,41 @@ export function CompanyFullProfileView({
 
       {/* 4 Live Impact Highlight Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Total Realisasi Anggaran CSR (Distinct from initial allocated budget) */}
-        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Total Realisasi Anggaran CSR
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-500">
+              Realisasi Anggaran CSR
             </span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <DollarSign className="w-4 h-4" />
-            </div>
+            <DollarSign className="w-4 h-4 text-[#059669] shrink-0" />
           </div>
           <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
+            <span className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight block tabular-nums">
               {formatRupiah(realMetrics.totalRealizedBudget)}
             </span>
-            <span className="text-[11px] text-slate-400 font-medium mt-0.5 block truncate" title={realMetrics.totalAllocatedBudget > 0 ? `Alokasi Anggaran: ${formatRupiah(realMetrics.totalAllocatedBudget)}` : "Pengeluaran dana program terealisasi"}>
+            <span
+              className="text-[11px] text-slate-400 font-medium mt-0.5 block truncate"
+              title={
+                realMetrics.totalAllocatedBudget > 0
+                  ? `Alokasi Anggaran: ${formatRupiah(realMetrics.totalAllocatedBudget)}`
+                  : "Pengeluaran dana program terealisasi"
+              }
+            >
               {realMetrics.totalAllocatedBudget > 0
                 ? `Alokasi: ${formatRupiah(realMetrics.totalAllocatedBudget)}`
-                : "Pengeluaran dana program terealisasi"}
+                : "Dana program terealisasi"}
             </span>
           </div>
         </div>
 
-        {/* Metric 2: Program Selesai */}
-        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-500">
               Program Selesai
             </span>
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-              <Award className="w-4 h-4" />
-            </div>
+            <Award className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
           <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
+            <span className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight block tabular-nums">
               {realMetrics.completedPrograms}
             </span>
             <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
@@ -733,18 +735,15 @@ export function CompanyFullProfileView({
           </div>
         </div>
 
-        {/* Metric 3: Mitra Berkolaborasi (Only actual collaborating partner organizations) */}
-        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-500">
               Mitra Berkolaborasi
             </span>
-            <div className="p-2 rounded-xl bg-purple-50 text-purple-600">
-              <HeartHandshake className="w-4 h-4" />
-            </div>
+            <HeartHandshake className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
           <div>
-            <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight block">
+            <span className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight block tabular-nums">
               {realMetrics.totalPartnersEngaged} Mitra
             </span>
             <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
@@ -755,21 +754,18 @@ export function CompanyFullProfileView({
           </div>
         </div>
 
-        {/* Metric 4: Penilaian Penerima Manfaat (With explicit empty state when no reviews exist) */}
-        <div className="p-5 rounded-3xl bg-white border border-slate-200/80 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] flex flex-col justify-between space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-500">
               Penilaian Penerima Manfaat
             </span>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-            </div>
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
           </div>
           <div>
             {realMetrics.totalReviews > 0 && realMetrics.averageRating > 0 ? (
               <>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  <span className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight tabular-nums">
                     {realMetrics.averageRating.toFixed(1)}
                   </span>
                   <span className="text-xs font-bold text-slate-400">/ 5.0</span>
@@ -781,10 +777,10 @@ export function CompanyFullProfileView({
             ) : (
               <>
                 <span className="text-xl sm:text-2xl font-black text-slate-400 tracking-tight block">
-                  —
+                  -
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium mt-0.5 block">
-                  Belum ada data evaluasi penerima manfaat
+                  Belum ada evaluasi penerima manfaat
                 </span>
               </>
             )}
@@ -792,137 +788,121 @@ export function CompanyFullProfileView({
         </div>
       </div>
 
-      {/* Profile Detail Tabs */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-        {/* Tab Headers: Exact 4 names requested */}
-        <div className="flex items-center border-b border-slate-200 bg-slate-50/60 px-6 gap-2 sm:gap-4 overflow-x-auto">
-          {/* Tab 1: Profil & Informasi Perusahaan */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("about")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
-              activeTab === "about"
-                ? "border-emerald-600 text-emerald-700 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <Building2 className="w-4 h-4" />
-            <span>Profil & Informasi Perusahaan</span>
-          </button>
-
-          {/* Tab 2: Portofolio Program CSR */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("programs")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
-              activeTab === "programs"
-                ? "border-emerald-600 text-emerald-700 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>Portofolio Program CSR ({programList.length})</span>
-          </button>
-
-          {/* Tab 3: Legalitas & Dokumen */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("legal")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
-              activeTab === "legal"
-                ? "border-emerald-600 text-emerald-700 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Legalitas & Dokumen</span>
-          </button>
-
-          {/* Tab 4: Tim Pengelola CSR */}
-          <button
-            type="button"
-            onClick={() => setActiveTab("leaders")}
-            className={`py-4 px-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 cursor-pointer ${
-              activeTab === "leaders"
-                ? "border-emerald-600 text-emerald-700 bg-white"
-                : "border-transparent text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Tim Pengelola CSR ({csrLeaders.length})</span>
-          </button>
+      {/* Profile Detail Pill Tabs & Clean Card Body */}
+      <div className="space-y-5">
+        <div
+          className="flex items-center gap-2 overflow-x-auto max-w-full pb-1"
+          role="tablist"
+          aria-label="Detail profil perusahaan"
+        >
+          {[
+            { id: "about" as const, label: "Profil & Informasi", icon: Building2 },
+            { id: "programs" as const, label: "Portofolio Program CSR", count: programList.length, icon: Layers },
+            { id: "legal" as const, label: "Legalitas & Dokumen", icon: ShieldCheck },
+            { id: "leaders" as const, label: "Tim Pengelola CSR", count: csrLeaders.length, icon: Users },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]/40 ${
+                  isSelected
+                    ? "bg-[#181343] text-white border-[#181343]"
+                    : "bg-white text-slate-700 border-[#E5E7EB] hover:bg-slate-50"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {typeof tab.count === "number" && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
+                      isSelected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Tab Body */}
-        <div className="p-6 sm:p-10">
-          {/* TAB 1: PROFIL & INFORMASI PERUSAHAAN */}
-          {activeTab === "about" && (
-            <div className="space-y-8 animate-in fade-in duration-150">
-              {/* Visi & Komitmen ESG */}
-              {c.csrVision && (
-                <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white border border-emerald-200/80 shadow-xs space-y-2">
-                  <div className="flex items-center gap-2 text-emerald-800 text-xs font-black uppercase tracking-wider">
-                    <Award className="w-4 h-4 text-emerald-600" />
-                    <span>Visi & Komitmen Keberlanjutan (ESG Vision)</span>
+        <div className="bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
+          {/* Tab Body */}
+          <div className="p-6 sm:p-8">
+            {/* TAB 1: PROFIL & INFORMASI PERUSAHAAN */}
+            {activeTab === "about" && (
+              <div className="space-y-8 animate-in fade-in duration-150">
+                {/* Visi & Komitmen ESG */}
+                {c.csrVision && (
+                  <div className="p-5 rounded-2xl bg-emerald-50/40 border border-emerald-200/70 space-y-1.5">
+                    <div className="flex items-center gap-2 text-[#059669] text-xs font-bold">
+                      <Award className="w-4 h-4 text-[#059669]" />
+                      <span>Visi &amp; Komitmen Keberlanjutan (ESG Vision)</span>
+                    </div>
+                    <p className="text-sm sm:text-base text-[#181343] leading-relaxed font-medium">
+                      &ldquo;{c.csrVision}&rdquo;
+                    </p>
                   </div>
-                  <p className="text-sm sm:text-base text-slate-800 leading-relaxed font-medium">
-                    "{c.csrVision}"
-                  </p>
-                </div>
-              )}
-
-              {/* Deskripsi Profil */}
-              <div className="space-y-3">
-                <h3 className="text-base font-extrabold text-slate-900">
-                  Profil Perusahaan & Latar Belakang
-                </h3>
-                {c.description ? (
-                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
-                    {c.description}
-                  </p>
-                ) : (
-                  <p className="text-xs text-slate-400 italic">
-                    Belum ada narasi profil perusahaan yang ditambahkan.
-                  </p>
                 )}
-              </div>
 
-              {/* Detail Kontak & Domisili Resmi */}
-              <div className="pt-6 border-t border-slate-100">
-                <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider mb-4">
-                  Informasi Domisili & Kontak Resmi
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5" /> Email Resmi
-                    </span>
-                    <span className="font-bold text-slate-800 block truncate">
-                      {c.email || "-"}
-                    </span>
-                  </div>
+                {/* Deskripsi Profil */}
+                <div className="space-y-2.5">
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Profil Perusahaan &amp; Latar Belakang
+                  </h3>
+                  {c.description ? (
+                    <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                      {c.description}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">
+                      Belum ada narasi profil perusahaan yang ditambahkan.
+                    </p>
+                  )}
+                </div>
 
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5" /> Telepon
-                    </span>
-                    <span className="font-bold text-slate-800 block">
-                      {c.phone || "-"}
-                    </span>
-                  </div>
+                {/* Detail Kontak & Domisili Resmi */}
+                <div className="pt-6 border-t border-slate-100">
+                  <h4 className="text-xs font-bold text-[#181343] mb-4">
+                    Informasi Domisili &amp; Kontak Resmi
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
+                    <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-1">
+                      <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                        <Mail className="w-3.5 h-3.5 text-slate-400" /> Email Resmi
+                      </span>
+                      <span className="font-bold text-[#181343] block truncate">
+                        {c.email || "-"}
+                      </span>
+                    </div>
 
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
-                    <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5" /> Kantor Pusat
-                    </span>
-                    <span className="font-bold text-slate-800 block truncate">
-                      {c.address ? `${c.address}, ${c.city || ""}` : [c.city, c.province].filter(Boolean).join(", ") || "-"}
-                    </span>
+                    <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-1">
+                      <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                        <Phone className="w-3.5 h-3.5 text-slate-400" /> Telepon
+                      </span>
+                      <span className="font-bold text-[#181343] block">
+                        {c.phone || "-"}
+                      </span>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-1">
+                      <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" /> Kantor Pusat
+                      </span>
+                      <span className="font-bold text-[#181343] block truncate">
+                        {c.address ? `${c.address}, ${c.city || ""}` : [c.city, c.province].filter(Boolean).join(", ") || "-"}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
           {/* TAB 2: PORTOFOLIO PROGRAM CSR (Filter & Dynamic Empty State) */}
           {activeTab === "programs" && (
@@ -1192,28 +1172,28 @@ export function CompanyFullProfileView({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* NIB Card */}
-                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-[#059669]" />
                       Nomor Induk Berusaha (NIB OSS)
                     </span>
                     <Badge variant={c.nibNumber ? "emerald" : "slate"} size="sm">
                       {c.nibNumber ? "Terdaftar" : "Belum Ada"}
                     </Badge>
                   </div>
-                  <span className="text-base font-extrabold text-slate-900 block font-mono">
+                  <span className="text-base font-extrabold text-[#181343] block font-mono">
                     {c.nibNumber || "Belum dicantumkan"}
                   </span>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-500">
                     Dokumen legalitas berusaha resmi Republik Indonesia.
                   </p>
                 </div>
 
                 {/* NPWP Card */}
-                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                <div className="p-5 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
                       <FileText className="w-4 h-4 text-blue-600" />
                       NPWP Perusahaan
                     </span>
@@ -1221,24 +1201,24 @@ export function CompanyFullProfileView({
                       {c.npwpNumber ? "Wajib Pajak" : "Belum Ada"}
                     </Badge>
                   </div>
-                  <span className="text-base font-extrabold text-slate-900 block font-mono">
+                  <span className="text-base font-extrabold text-[#181343] block font-mono">
                     {c.npwpNumber || "Belum dicantumkan"}
                   </span>
-                  <p className="text-[11px] text-slate-400">
+                  <p className="text-[11px] text-slate-500">
                     Nomor Pokok Wajib Pajak badan hukum terdaftar.
                   </p>
                 </div>
               </div>
 
               {/* Sustainability Report Download Card */}
-              <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-50 via-teal-50/40 to-slate-50 border border-emerald-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-5 sm:p-6 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                    <FileText className="w-6 h-6" />
+                  <div className="w-11 h-11 rounded-xl bg-emerald-50 text-[#059669] border border-emerald-200/70 flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-extrabold text-slate-900 text-sm sm:text-base">
-                      Laporan Keberlanjutan & Dampak ESG (Sustainability Report)
+                    <h4 className="font-bold text-[#181343] text-sm sm:text-base">
+                      Laporan Keberlanjutan &amp; Dampak ESG (Sustainability Report)
                     </h4>
                     <p className="text-xs text-slate-600 max-w-xl leading-relaxed">
                       Laporan resmi tahunan yang memuat rekam jejak dampak sosial, tata kelola lingkungan, dan transparansi penyaluran dana program CSR.
@@ -1251,7 +1231,7 @@ export function CompanyFullProfileView({
                     href={c.sustainabilityReportUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs shadow-2xs transition-all shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs transition-all shrink-0 cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
                     <span>Unduh Laporan (PDF)</span>
@@ -1270,8 +1250,8 @@ export function CompanyFullProfileView({
             <div className="space-y-6 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    Tim Pengelola & Penanggung Jawab CSR
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Tim Pengelola &amp; Penanggung Jawab CSR
                   </h3>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Penanggung jawab inisiatif kemitraan dan koordinasi teknis program CSR perusahaan.
@@ -1280,12 +1260,12 @@ export function CompanyFullProfileView({
               </div>
 
               {csrLeaders.length === 0 ? (
-                <div className="py-12 text-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50">
-                  <Users className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                  <p className="text-sm font-bold text-slate-700">
+                <div className="py-12 text-center rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9F9FB]">
+                  <Users className="w-9 h-9 text-slate-300 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-[#181343]">
                     Belum ada kontak tim pengelola yang dicantumkan
                   </p>
-                  <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                  <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                     {isOwner
                       ? "Tambahkan kontak person atau pimpinan CSR perusahaan Anda agar mitra pelaksana dapat berkomunikasi secara langsung."
                       : "Perusahaan belum mencantumkan PIC tim CSR publik."}
@@ -1296,10 +1276,10 @@ export function CompanyFullProfileView({
                   {csrLeaders.map((leader, idx) => (
                     <div
                       key={leader.id || idx}
-                      className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-emerald-300 hover:shadow-xs transition-all space-y-3"
+                      className="p-5 rounded-2xl border border-[#E5E7EB] bg-white hover:border-[#059669]/50 transition-colors space-y-3"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center font-bold text-lg overflow-hidden shrink-0 shadow-sm">
+                        <div className="w-11 h-11 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-base overflow-hidden shrink-0">
                           {leader.photoUrl ? (
                             <img
                               src={leader.photoUrl}
@@ -1311,10 +1291,10 @@ export function CompanyFullProfileView({
                           )}
                         </div>
                         <div className="min-w-0">
-                          <h4 className="font-extrabold text-slate-900 text-sm truncate">
+                          <h4 className="font-bold text-[#181343] text-sm truncate">
                             {leader.name}
                           </h4>
-                          <span className="text-[11px] font-semibold text-emerald-700 block truncate">
+                          <span className="text-[11px] font-semibold text-[#059669] block truncate">
                             {leader.role}
                           </span>
                         </div>
@@ -1342,6 +1322,7 @@ export function CompanyFullProfileView({
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
 

@@ -61,16 +61,16 @@ export function ContactSection() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#181343]/5 border border-[#181343]/10 text-[#181343] text-xs font-semibold mb-3">
               <Mail className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Kemitraan & Konsultasi Tata Kelola</span>
+              <span>Kemitraan &amp; Konsultasi Tata Kelola</span>
             </div>
             <h2
               className="text-2xl sm:text-4xl font-extrabold text-[#181343] tracking-tight leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Mulai Transformasi Dampak CSR{" "}
-              <span className="text-emerald-600">Institusi Anda.</span>
+              <span className="text-emerald-600">Institusi Anda</span>
             </h2>
-            <p className="mt-3 text-base text-[#26224C]/80 leading-relaxed">
+            <p className="mt-3 text-base text-slate-600 leading-relaxed">
               Apakah Anda mewakili korporasi, yayasan pelaksana program, atau lembaga publik? Diskusikan kebutuhan kolaborasi, integrasi sistem, atau konsultasi akuntabilitas program Anda bersama tim SIPENA.
             </p>
           </div>
@@ -80,14 +80,11 @@ export function ContactSection() {
           {/* Left Column: Institutional Contact Details & Direct Help */}
           <ScrollReveal animation="fade-right" delay={100} className="lg:col-span-5 space-y-6">
             <div className="bg-[#181343] text-white rounded-3xl p-8 sm:p-10 relative overflow-hidden shadow-md">
-              {/* Subtle visual accent */}
-              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/15 rounded-full blur-2xl pointer-events-none" />
-
               <h3
                 className="text-xl font-bold text-white mb-2"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Sekretariat & Hub Kemitraan SIPENA
+                Sekretariat &amp; Hub Kemitraan SIPENA
               </h3>
               <p className="text-sm text-slate-300 leading-relaxed mb-8">
                 Pusat layanan informasi kemitraan, verifikasi kelembagaan, serta asistensi teknis platform tata kelola CSR nasional.
@@ -117,7 +114,7 @@ export function ContactSection() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-xs uppercase tracking-wider text-slate-300 mb-1">
-                      Hotline & Pusat Bantuan
+                      Hotline &amp; Pusat Bantuan
                     </h4>
                     <p className="text-slate-200 text-xs sm:text-sm font-semibold">
                       +62 (21) 5299-8800
@@ -162,7 +159,7 @@ export function ContactSection() {
                   Butuh Demo Langsung Sistem?
                 </h4>
               </div>
-              <p className="text-xs text-[#26224C]/80 leading-relaxed mb-4">
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
                 Jadwalkan sesi walk-through 30 menit bersama tim implementasi kami untuk melihat alur kerja dan fitur pengelolaan CSR di SIPENA.
               </p>
               <a
@@ -177,7 +174,7 @@ export function ContactSection() {
 
           {/* Right Column: Institutional Inquiry Form */}
           <ScrollReveal animation="fade-left" delay={200} className="lg:col-span-7">
-            <div className="bg-white rounded-3xl p-8 sm:p-10 border border-[#C8C5D0]/60 shadow-xs">
+            <div className="bg-white rounded-3xl p-8 sm:p-10 border border-[#E5E7EB] shadow-xs">
               {isSubmitted ? (
                 <div className="py-12 text-center space-y-4">
                   <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
@@ -189,7 +186,7 @@ export function ContactSection() {
                   >
                     Pesan Kemitraan Berhasil Dikirim
                   </h3>
-                  <p className="text-sm text-[#26224C]/80 max-w-md mx-auto leading-relaxed">
+                  <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                     Terima kasih atas inisiatif kolaborasi Anda. Tim Sekretariat Kemitraan SIPENA akan meninjau kebutuhan institusi Anda dan menghubungi melalui kontak yang dicantumkan dalam 1x24 jam kerja.
                   </p>
                   <div className="pt-4">
@@ -210,9 +207,9 @@ export function ContactSection() {
                       className="text-xl font-bold text-[#181343]"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
-                      Formulir Kemitraan & Penjajakan CSR
+                      Formulir Kemitraan &amp; Penjajakan CSR
                     </h3>
-                    <p className="text-xs text-[#26224C]/70 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Lengkapi rincian profil institusi Anda di bawah ini untuk memulai dialog resmi.
                     </p>
                   </div>
@@ -230,7 +227,7 @@ export function ContactSection() {
                         onChange={(e) =>
                           setFormData({ ...formData, fullName: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#C8C5D0] text-sm text-[#181343] placeholder-[#26224C]/40 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-sm text-[#181343] placeholder-slate-400 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
                       />
                     </div>
 
@@ -246,7 +243,7 @@ export function ContactSection() {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#C8C5D0] text-sm text-[#181343] placeholder-[#26224C]/40 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-sm text-[#181343] placeholder-slate-400 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
                       />
                     </div>
                   </div>
@@ -263,7 +260,7 @@ export function ContactSection() {
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#C8C5D0] text-sm text-[#181343] placeholder-[#26224C]/40 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-sm text-[#181343] placeholder-slate-400 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
                       />
                     </div>
 
@@ -276,7 +273,7 @@ export function ContactSection() {
                         onChange={(e) =>
                           setFormData({ ...formData, institutionType: e.target.value })
                         }
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#C8C5D0] text-sm text-[#181343] focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50 cursor-pointer"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-sm text-[#181343] focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50 cursor-pointer"
                       >
                         <option value="company">Perusahaan Korporasi / Donor CSR</option>
                         <option value="ngo">Yayasan / Lembaga Swadaya Masyarakat</option>
@@ -297,7 +294,7 @@ export function ContactSection() {
                       onChange={(e) =>
                         setFormData({ ...formData, topic: e.target.value })
                       }
-                      className={`w-full px-4 py-2.5 rounded-xl border border-[#C8C5D0] text-sm focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50 cursor-pointer ${!formData.topic ? "text-[#26224C]/60" : "text-[#181343]"
+                      className={`w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-sm focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50 cursor-pointer ${!formData.topic ? "text-slate-400" : "text-[#181343]"
                         }`}
                     >
                       <option value="" disabled>
@@ -323,12 +320,12 @@ export function ContactSection() {
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
                       }
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#C8C5D0] text-sm text-[#181343] placeholder-[#26224C]/40 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#E5E7EB] text-sm text-[#181343] placeholder-slate-400 focus:outline-none focus:border-[#181343] focus:ring-1 focus:ring-[#181343] transition-all bg-[#F9F9FB]/50"
                     />
                   </div>
 
                   <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <span className="text-[11px] text-[#26224C]/60 text-center sm:text-left">
+                    <span className="text-[11px] text-slate-500 text-center sm:text-left">
                       Semua informasi bersifat rahasia dan hanya digunakan untuk keperluan komunikasi resmi.
                     </span>
                     <Button

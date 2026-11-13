@@ -26,7 +26,7 @@ export class FinanceController {
   async createDisbursement(request: Request, programId: string): Promise<NextResponse> {
     try {
       const user = AuthGuard.authenticate(request);
-      AuthGuard.authorize(user, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(user, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validated = createDisbursementSchema.parse(body);
@@ -84,7 +84,7 @@ export class FinanceController {
   ): Promise<NextResponse> {
     try {
       const user = AuthGuard.authenticate(request);
-      AuthGuard.authorize(user, ["MANAGEMENT", "CSR_ADMIN"]);
+      AuthGuard.authorize(user, ["CSR_ADMIN"]);
 
       const body = await request.json();
       const validated = verifyExpenseSchema.parse(body);

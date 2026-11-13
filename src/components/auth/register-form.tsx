@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, Mail, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { User, AtSign, Mail, AlertCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { PasswordInput } from "@/components/ui/password-input";
 
 export function RegisterForm() {
   const router = useRouter();
 
+  const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +20,7 @@ export function RegisterForm() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!username.trim() || !email.trim() || !password.trim()) {
+    if (!fullName.trim() || !username.trim() || !email.trim() || !password.trim()) {
       setErrorMessage("Silakan lengkapi seluruh kolom formulir pendaftaran.");
       return;
     }
@@ -41,6 +42,7 @@ export function RegisterForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: fullName.trim(),
           username: username.trim(),
           email: email.trim(),
           password,
@@ -99,17 +101,42 @@ export function RegisterForm() {
         </span>
       </div>
 
+      {/* Full Name field */}
+      <div className="space-y-1.5">
+        <label
+          htmlFor="register-fullname"
+          className="block text-[13px] font-semibold text-[#1A1C1D]"
+        >
+          Nama Lengkap
+        </label>
+        <div className="relative">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C8C5D0] pointer-events-none">
+            <User className="w-[18px] h-[18px]" />
+          </div>
+          <input
+            id="register-fullname"
+            type="text"
+            placeholder="Budi Santoso"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            required
+            autoComplete="name"
+            className={inputClass}
+          />
+        </div>
+      </div>
+
       {/* Username field */}
       <div className="space-y-1.5">
         <label
           htmlFor="register-username"
           className="block text-[13px] font-semibold text-[#1A1C1D]"
         >
-          Username
+          Nama Pengguna
         </label>
         <div className="relative">
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C8C5D0] pointer-events-none">
-            <User className="w-[18px] h-[18px]" />
+            <AtSign className="w-[18px] h-[18px]" />
           </div>
           <input
             id="register-username"
@@ -124,13 +151,13 @@ export function RegisterForm() {
         </div>
       </div>
 
-      {/* Email field */}
+      {/* Personal Email field */}
       <div className="space-y-1.5">
         <label
           htmlFor="register-email"
           className="block text-[13px] font-semibold text-[#1A1C1D]"
         >
-          Email
+          Email Pribadi
         </label>
         <div className="relative">
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#C8C5D0] pointer-events-none">
@@ -139,7 +166,7 @@ export function RegisterForm() {
           <input
             id="register-email"
             type="email"
-            placeholder="nama@perusahaan.com"
+            placeholder="nama@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

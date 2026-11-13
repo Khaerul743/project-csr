@@ -33,7 +33,7 @@ export function AboutSection() {
               Menjembatani Niat Baik Perusahaan dengan Realitas Kebutuhan Masyarakat
             </h2>
 
-            <p className="text-base sm:text-lg text-[#47464F] leading-relaxed">
+            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
               Menentukan kebutuhan masyarakat, membangun kemitraan yang tepat, dan mengevaluasi dampak program CSR bukanlah proses yang sederhana. SIPENA hadir untuk membantu menghubungkan seluruh tahapan tersebut dalam satu platform terintegrasi.
             </p>
           </div>
@@ -52,10 +52,10 @@ export function AboutSection() {
                   className="text-lg sm:text-xl font-bold text-[#181343]"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Tantangan Pengelolaan CSR
+                  Tantangan Tata Kelola CSR
                 </h3>
-                <p className="text-sm text-[#47464F] leading-relaxed mt-2">
-                  Perencanaan, koordinasi, dan evaluasi program CSR menghadapi berbagai tantangan yang dapat memengaruhi efektivitas pelaksanaannya.
+                <p className="text-sm text-slate-600 leading-relaxed mt-2">
+                  Pengelolaan program sosial konvensional sering terkendala proses manual yang memperbesar risiko ketidaksesuaian sasaran dan keterlambatan pelaporan.
                 </p>
               </div>
 
@@ -64,28 +64,28 @@ export function AboutSection() {
               <div className="space-y-4 sm:space-y-5">
                 <div>
                   <h4 className="text-[15px] font-bold text-[#181343]">
-                    Prioritas Kebutuhan
+                    Prioritas Kebutuhan Terfragmentasi
                   </h4>
-                  <p className="text-sm text-[#47464F] leading-relaxed mt-1">
-                    Keterbatasan informasi menyulitkan penentuan kebutuhan masyarakat yang paling mendesak.
+                  <p className="text-sm text-slate-600 leading-relaxed mt-1">
+                    Ketiadaan data kebutuhan wilayah terpusat membuat program CSR kerap tumpang tindih dan kurang menyentuh sasaran yang paling mendesak.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-[15px] font-bold text-[#181343]">
-                    Kemitraan dan Koordinasi
+                    Standardisasi Proposal &amp; RAB
                   </h4>
-                  <p className="text-sm text-[#47464F] leading-relaxed mt-1">
-                    Pemilihan mitra dan pengelolaan kerja sama terkendala informasi yang tersebar.
+                  <p className="text-sm text-slate-600 leading-relaxed mt-1">
+                    Format rencana anggaran biaya dari mitra pelaksana yang beragam menyulitkan due diligence dan kepatuhan audit internal perusahaan.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-[15px] font-bold text-[#181343]">
-                    Evaluasi Dampak
+                    Verifikasi Bukti Lapangan &amp; LPJ
                   </h4>
-                  <p className="text-sm text-[#47464F] leading-relaxed mt-1">
-                    Progres, hasil, dan keberlanjutan manfaat program sulit dipantau secara menyeluruh.
+                  <p className="text-sm text-slate-600 leading-relaxed mt-1">
+                    Rekapitulasi nota belanja fisik dan foto kegiatan sering tercecer, menyulitkan penyusunan Laporan Keberlanjutan dan evaluasi akuntabilitas program.
                   </p>
                 </div>
               </div>
@@ -103,10 +103,10 @@ export function AboutSection() {
                   className="text-lg sm:text-xl font-bold text-white"
                   style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Pendekatan SIPENA
+                  Solusi Tata Kelola SIPENA
                 </h3>
                 <p className="text-sm text-slate-300 leading-relaxed mt-2">
-                  SIPENA mengintegrasikan pengelolaan CSR untuk mendukung perencanaan berbasis data, kolaborasi, serta evaluasi program.
+                  SIPENA mengintegrasikan seluruh siklus kemitraan CSR dalam alur digital terstruktur yang transparan dan dapat diaudit setiap saat.
                 </p>
               </div>
 
@@ -115,28 +115,28 @@ export function AboutSection() {
               <div className="space-y-4 sm:space-y-5">
                 <div>
                   <h4 className="text-[15px] font-bold text-white">
-                    AI Need Prioritization
+                    Pemetaan Prioritas Berbasis Data
                   </h4>
                   <p className="text-sm text-slate-300 leading-relaxed mt-1">
-                    Membantu menentukan prioritas kebutuhan melalui analisis data wilayah dan program CSR.
+                    Menganalisis indikator kebutuhan wilayah untuk mengarahkan alokasi program ke sektor dan kelompok sasaran yang paling tepat.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-[15px] font-bold text-white">
-                    Kolaborasi Terintegrasi
+                    Standardisasi Rencana Anggaran &amp; Milestone
                   </h4>
                   <p className="text-sm text-slate-300 leading-relaxed mt-1">
-                    Memfasilitasi pencarian mitra, pengelolaan proposal, dan koordinasi kerja sama.
+                    Ekstraksi otomatis ruang lingkup kegiatan dari berkas proposal menjadi tahapan terstruktur dengan rincian biaya yang transparan.
                   </p>
                 </div>
 
                 <div>
                   <h4 className="text-[15px] font-bold text-white">
-                    Monitoring dan Evaluasi
+                    Audit Realisasi Bertahap &amp; Kepatuhan ESG
                   </h4>
                   <p className="text-sm text-slate-300 leading-relaxed mt-1">
-                    Mendukung pelacakan progres, evaluasi hasil, dan umpan balik penerima manfaat.
+                    Penyaluran dana berbasis verifikasi nota fisik per termin, pemantauan foto berkoordinat, dan pemetaan otomatis ke 17 SDGs.
                   </p>
                 </div>
               </div>
@@ -157,15 +157,15 @@ export function AboutSection() {
               >
                 ASA: Fondasi di Balik Setiap Aksi
               </h3>
-              <p className="text-sm sm:text-base text-[#47464F] leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
                 Tiga nilai yang menjadi landasan SIPENA dalam mewujudkan pengelolaan CSR yang lebih terarah, kolaboratif, dan akuntabel.
               </p>
             </div>
           </ScrollReveal>
 
-          <StaggerContainer staggerDelay={140} baseDelay={100} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Card 1 — Arah */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#C8C5D0]/80 shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group">
+          <StaggerContainer staggerDelay={140} baseDelay={100} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+            {/* Card 1: Arah */}
+            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
               <div
                 className="w-12 h-12 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-emerald-600 transition-colors duration-200"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -179,14 +179,14 @@ export function AboutSection() {
                 >
                   Arah
                 </h4>
-                <p className="text-sm text-[#47464F] leading-relaxed">
+                <p className="text-sm text-slate-600 leading-relaxed">
                   Menentukan prioritas program CSR berdasarkan kebutuhan masyarakat, kondisi wilayah, dan informasi yang relevan untuk mendukung perencanaan tepat sasaran.
                 </p>
               </div>
             </div>
 
-            {/* Card 2 — Sinergi */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#C8C5D0]/80 shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group">
+            {/* Card 2: Sinergi */}
+            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
               <div
                 className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-[#181343] transition-colors duration-200"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -200,14 +200,14 @@ export function AboutSection() {
                 >
                   Sinergi
                 </h4>
-                <p className="text-sm text-[#47464F] leading-relaxed">
+                <p className="text-sm text-slate-600 leading-relaxed">
                   Menghubungkan perusahaan dengan NGO, yayasan, dan komunitas untuk membangun kemitraan serta koordinasi program CSR yang lebih efektif.
                 </p>
               </div>
             </div>
 
-            {/* Card 3 — Akuntabilitas */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#C8C5D0]/80 shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group">
+            {/* Card 3: Akuntabilitas */}
+            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
               <div
                 className="w-12 h-12 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-emerald-600 transition-colors duration-200"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -221,8 +221,8 @@ export function AboutSection() {
                 >
                   Akuntabilitas
                 </h4>
-                <p className="text-sm text-[#47464F] leading-relaxed">
-                  Mendukung transparansi melalui pencatatan kegiatan, monitoring pelaksanaan, dan evaluasi hasil serta dampak program CSR.
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Mendukung transparansi melalui pencatatan kegiatan lapangan, monitoring realisasi anggaran berkala, serta evaluasi hasil dan dampak program CSR secara menyeluruh.
                 </p>
               </div>
             </div>

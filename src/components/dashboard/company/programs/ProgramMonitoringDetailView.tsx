@@ -109,6 +109,7 @@ export function ProgramMonitoringDetailView({
 
   const handleUpdateStatus = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isManagement) return;
     setIsSubmitting(true);
     setErrorMsg(null);
     setSuccessMsg(null);
@@ -163,7 +164,7 @@ export function ProgramMonitoringDetailView({
       {/* ============================================================ */}
       {/* 1. TOP NAVIGATION ROW (Tanpa duplikasi breadcrumb lokal)      */}
       {/* ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E8E8EA]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-3">
           <Button
             type="button"
@@ -171,7 +172,7 @@ export function ProgramMonitoringDetailView({
             size="sm"
             onClick={onBack}
             leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="text-xs font-bold text-[#181343] hover:text-[#009E75] border-[#E8E8EA] hover:border-emerald-300 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer"
+            className="text-xs font-bold text-[#181343] hover:text-[#047857] border-[#E5E7EB] hover:border-emerald-300 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer"
           >
             Kembali ke Daftar Program
           </Button>
@@ -183,7 +184,7 @@ export function ProgramMonitoringDetailView({
               href={program.collaborationMouUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#181343] hover:text-[#009E75] bg-white hover:bg-emerald-50 border border-[#E8E8EA] hover:border-emerald-300 px-3 py-1.5 rounded-xl shadow-2xs transition-all"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#181343] hover:text-[#047857] bg-white hover:bg-emerald-50 border border-[#E5E7EB] hover:border-emerald-300 px-3 py-1.5 rounded-xl shadow-2xs transition-all"
             >
               <FileCheck2 className="w-4 h-4 text-emerald-600" />
               <span>Dokumen MoU</span>
@@ -228,7 +229,7 @@ export function ProgramMonitoringDetailView({
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
           <div className="flex items-start gap-4 min-w-0">
             {/* Logo Mitra dengan graceful fallback initial */}
-            <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100/80 flex items-center justify-center font-black text-teal-800 text-lg overflow-hidden shrink-0 shadow-2xs">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center font-black text-emerald-800 text-lg overflow-hidden shrink-0 shadow-2xs">
               {program.partnerLogo && !partnerLogoError ? (
                 <img
                   src={program.partnerLogo}
@@ -300,7 +301,7 @@ export function ProgramMonitoringDetailView({
               <button
                 type="button"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="text-xs font-bold text-[#009E75] hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-[#059669] hover:text-[#047857] hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
               >
                 {isDescriptionExpanded ? (
                   <>
@@ -324,14 +325,14 @@ export function ProgramMonitoringDetailView({
       {/* ============================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Progres Aktivitas Proposal */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-teal-400/60 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] hover:border-emerald-400/70 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#5B5966] uppercase tracking-wider">
                 Progres Aktivitas Proposal
               </span>
-              <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Activity className="w-4 h-4 text-teal-600" />
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#059669] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Activity className="w-4 h-4 text-[#059669]" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight">
@@ -340,14 +341,14 @@ export function ProgramMonitoringDetailView({
           </div>
           <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#787680]">Tahapan Proposal Selesai</span>
-              <span className="font-bold text-teal-700">
+              <span className="text-[#5B5966]">Tahapan Proposal Selesai</span>
+              <span className="font-bold text-emerald-700">
                 {program.completedActivitiesCount ?? 0} / {program.totalActivitiesCount ?? 0}
               </span>
             </div>
             <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-teal-600 h-full rounded-full transition-all duration-500"
+                className="bg-emerald-600 h-full rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(program.activityProgressPercent ?? 0, 100)}%` }}
               />
             </div>
@@ -415,14 +416,14 @@ export function ProgramMonitoringDetailView({
         </div>
 
         {/* KPI 4: Penerima Manfaat Aktual */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-teal-400/60 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] hover:border-emerald-400/70 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
+              <span className="text-[11px] font-bold text-[#5B5966] uppercase tracking-wider">
                 Penerima Manfaat Aktual
               </span>
-              <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Users className="w-4 h-4 text-teal-600" />
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#059669] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Users className="w-4 h-4 text-[#059669]" />
               </div>
             </div>
             <div className="text-base font-black text-[#181343] line-clamp-2 min-h-[32px]">
@@ -443,16 +444,16 @@ export function ProgramMonitoringDetailView({
       {/* ============================================================ */}
       {/* 4. FULL-WIDTH TABS NAVIGATION                                */}
       {/* ============================================================ */}
-      <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xs overflow-hidden">
         {/* Navigation Bar */}
-        <div className="px-6 border-b border-[#E8E8EA] flex items-center gap-2 sm:gap-6 bg-[#FBFBFC] overflow-x-auto scrollbar-none">
+        <div className="px-6 border-b border-[#E5E7EB] flex items-center gap-2 sm:gap-6 bg-[#F9F9FB] overflow-x-auto scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab("activities")}
             className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "activities"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#059669] text-[#047857] font-extrabold"
+                : "border-transparent text-[#5B5966] hover:text-[#181343]"
             }`}
           >
             <Camera className="w-4 h-4" />
@@ -464,8 +465,8 @@ export function ProgramMonitoringDetailView({
             onClick={() => setActiveTab("finances")}
             className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "finances"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#059669] text-[#047857] font-extrabold"
+                : "border-transparent text-[#5B5966] hover:text-[#181343]"
             }`}
           >
             <Wallet className="w-4 h-4" />
@@ -477,8 +478,8 @@ export function ProgramMonitoringDetailView({
             onClick={() => setActiveTab("reviews")}
             className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "reviews"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#059669] text-[#047857] font-extrabold"
+                : "border-transparent text-[#5B5966] hover:text-[#181343]"
             }`}
           >
             <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
@@ -490,26 +491,28 @@ export function ProgramMonitoringDetailView({
             onClick={() => setActiveTab("esg-report")}
             className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "esg-report"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#059669] text-[#047857] font-extrabold"
+                : "border-transparent text-[#5B5966] hover:text-[#181343]"
             }`}
           >
             <Sparkles className="w-4 h-4 text-emerald-600" />
             <span>Laporan Keberlanjutan &amp; ESG (AI)</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab("settings")}
-            className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
-              activeTab === "settings"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Parameter &amp; Evaluasi Status</span>
-          </button>
+          {!isManagement && (
+            <button
+              type="button"
+              onClick={() => setActiveTab("settings")}
+              className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+                activeTab === "settings"
+                  ? "border-[#059669] text-[#047857] font-extrabold"
+                  : "border-transparent text-[#5B5966] hover:text-[#181343]"
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Parameter &amp; Evaluasi Status</span>
+            </button>
+          )}
         </div>
 
         {/* Tab Body */}
@@ -530,6 +533,7 @@ export function ProgramMonitoringDetailView({
               programTitle={program.title}
               agreedBudget={program.budget || "0"}
               role="COMPANY"
+              isManagement={isManagement}
               onFinancesUpdated={onProgramUpdated}
             />
           )}
@@ -549,7 +553,7 @@ export function ProgramMonitoringDetailView({
             />
           )}
 
-          {activeTab === "settings" && (
+          {activeTab === "settings" && !isManagement && (
             <div className="max-w-4xl mx-auto space-y-6">
               <div className="space-y-1">
                 <h3 className="text-base font-extrabold text-[#181343]">
@@ -591,15 +595,15 @@ export function ProgramMonitoringDetailView({
                           onClick={() => setStatus(st)}
                           className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                             isSelected
-                              ? "border-[#009E75] bg-emerald-50/80 text-emerald-950 shadow-xs ring-1 ring-[#009E75]"
-                              : "border-[#E8E8EA] bg-white text-[#47464F] hover:border-emerald-300"
+                              ? "border-[#059669] bg-emerald-50/80 text-emerald-950 shadow-xs ring-1 ring-[#059669]"
+                              : "border-[#E5E7EB] bg-white text-[#47464F] hover:border-emerald-300"
                           }`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold">{cfg.label}</span>
-                            {isSelected && <Check className="w-4 h-4 text-[#009E75]" />}
+                            {isSelected && <Check className="w-4 h-4 text-[#059669]" />}
                           </div>
-                          <span className="text-[10px] text-[#787680]">
+                          <span className="text-[10px] text-[#5B5966]">
                             {st === "PLANNED" && "Persiapan awal program"}
                             {st === "IN_PROGRESS" && "Aktif berjalan di lapangan"}
                             {st === "COMPLETED" && "Selesai & laporan tuntas"}
