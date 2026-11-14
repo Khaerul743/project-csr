@@ -195,19 +195,22 @@ export function OpportunitiesManagementView({
   return (
     <div className="space-y-6 animate-in fade-in duration-300 w-full">
       {/* 1. Header Identitas & Satu Tombol Utama */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+            <h1
+              className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               {isManagement ? "Katalog Peluang CSR" : "Kelola Peluang CSR"}
-            </h2>
+            </h1>
             {isManagement && (
               <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
                 Akses Tinjauan (Read-Only)
               </span>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-[#787680] mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
             {isManagement
               ? "Tinjau daftar peluang inisiatif CSR yang dibuka oleh tim operasional perusahaan untuk kolaborasi mitra."
               : "Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat."}
@@ -231,7 +234,7 @@ export function OpportunitiesManagementView({
       {/* 2. Informasi Status Compact (Read-Only) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
         <div className="p-4 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between cursor-default">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+          <span className="text-xs font-semibold text-slate-600 block">
             Total Peluang
           </span>
           <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1">
@@ -243,7 +246,7 @@ export function OpportunitiesManagementView({
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between cursor-default">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+          <span className="text-xs font-semibold text-slate-600 block">
             Peluang Terbuka
           </span>
           <div className="text-2xl sm:text-3xl font-extrabold text-[#009E75] my-1">
@@ -255,7 +258,7 @@ export function OpportunitiesManagementView({
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between cursor-default">
-          <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+          <span className="text-xs font-semibold text-slate-600 block">
             Draf
           </span>
           <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1">

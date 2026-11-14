@@ -155,36 +155,26 @@ export function PartnerSidebar({
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white text-[#181343] border-r border-[#E5E7EB] select-none">
-      {/* 1. Header & Brand */}
-      <div className="h-[72px] px-5 border-b border-[#E5E7EB] flex items-center justify-between">
+      {/* 1. Header & Brand - Tepat h-[72px], Nama Lembaga di bawah SIPENA dengan Truncate (...) */}
+      <div className="h-[72px] px-5 border-b border-[#E5E7EB] flex items-center justify-between shrink-0">
         <AppLogo
           size="md"
           theme="light"
           subtitle={organizationName || "Mitra Pelaksana"}
+          className="min-w-0 flex-1"
         />
 
         {/* Mobile close button */}
         <button
           onClick={onCloseMobile}
-          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-[#181343] hover:bg-slate-100 transition-colors cursor-pointer"
+          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-[#181343] hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
           aria-label="Tutup Menu"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
-      {/* 2. Badge Organisasi Mitra */}
-      <div className="px-5 py-2.5 bg-[#F4F4F6] border-b border-[#E5E7EB] flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[#181343] font-medium">Workspace Mitra</span>
-        </div>
-        <Badge variant="emerald" size="sm" className="font-bold">
-          NGO / Mitra
-        </Badge>
-      </div>
-
-      {/* 3. Navigation Sections */}
+      {/* 2. Navigation Sections (Langsung ke menu navigasi, tanpa bar repetitif 'Workspace Mitra') */}
       <div className="flex-1 overflow-y-auto px-3.5 py-4 pb-8 space-y-6">
         {navigationSections.map((section) => (
           <div key={section.title} className="space-y-1">
@@ -233,45 +223,6 @@ export function PartnerSidebar({
             </div>
           </div>
         ))}
-      </div>
-
-      {/* 4. Footer User Info & Logout */}
-      <div className="p-4 border-t border-[#E5E7EB] bg-white space-y-3">
-        <div
-          onClick={onOpenProfile}
-          className={`flex items-center gap-3 p-2.5 rounded-xl bg-[#F4F4F6] border border-[#E5E7EB] mb-2 shadow-xs ${
-            onOpenProfile ? "hover:bg-[#ECEAF8]/60 hover:border-[#D8D2F2] cursor-pointer transition-colors group" : ""
-          }`}
-          title={onOpenProfile ? "Klik untuk mengedit profil akun Anda" : undefined}
-        >
-          <div className="w-9 h-9 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs overflow-hidden">
-            {user.avatarUrl ? (
-              <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-            ) : (
-              user.name ? user.name.charAt(0).toUpperCase() : "U"
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold text-[#181343] truncate leading-tight group-hover:text-indigo-950">
-              {user.name}
-            </p>
-            <p className="text-[11px] text-[#787680] truncate mt-0.5">
-              {user.position || user.email}
-            </p>
-          </div>
-          <Badge variant="purple" size="sm" className="shrink-0 text-[10px] font-bold">
-            Mitra
-          </Badge>
-        </div>
-
-        <button
-          type="button"
-          onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-[#787680] hover:text-rose-600 hover:bg-rose-50/80 transition-colors border border-transparent hover:border-rose-200 cursor-pointer"
-        >
-          <LogOut className="w-3.5 h-3.5" />
-          <span>Keluar dari Akun</span>
-        </button>
       </div>
     </div>
   );

@@ -228,10 +228,10 @@ export function EsgAnalyticsView({
   return (
     <div className="space-y-8 animate-in fade-in duration-200 w-full">
       {/* 1. Header Ringkas & Aksi (Selaras Halaman Kinerja Mitra) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div className="space-y-1">
           <h1
-            className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight"
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
             Laporan &amp; Analitik ESG

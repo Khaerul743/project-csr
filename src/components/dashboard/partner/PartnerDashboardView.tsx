@@ -47,7 +47,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SoftDataGrid } from "@/components/ui/soft-data-grid";
 import { DashboardHeader, BreadcrumbItem } from "../DashboardHeader";
 import { PartnerSidebar } from "./PartnerSidebar";
 import { SubmitProposalPageView } from "./SubmitProposalPageView";
@@ -155,10 +154,10 @@ function OpportunityCard({
   const isClosed = (opp.status && opp.status !== "OPEN") || isExpired;
 
   return (
-    <div className="bg-white rounded-2xl border border-[#E8E8EA] shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 overflow-hidden flex flex-col justify-between group">
+    <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#181343]/30 transition-all duration-200 overflow-hidden flex flex-col justify-between group">
       <div>
         {/* 1. Banner atau Fallback Visual */}
-        <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-50 border-b border-[#E8E8EA]">
+        <div className="relative h-44 sm:h-48 w-full overflow-hidden bg-slate-50 border-b border-[#E5E7EB]">
           {opp.bannerUrl && !imgFailed ? (
             <img
               src={opp.bannerUrl}
@@ -201,7 +200,7 @@ function OpportunityCard({
         {/* Card Body */}
         <div className="p-5 space-y-3">
           {/* 3. Nama Perusahaan Penyelenggara */}
-          <div className="flex items-center gap-1.5 text-xs text-[#787680]">
+          <div className="flex items-center gap-1.5 text-xs text-slate-600">
             <Building2 className="w-3.5 h-3.5 text-teal-600 shrink-0" />
             <button
               type="button"
@@ -225,7 +224,7 @@ function OpportunityCard({
           </h3>
 
           {/* 5. Deskripsi Singkat (Maks 2 Baris) */}
-          <p className="text-xs text-[#787680] line-clamp-2 leading-relaxed min-h-[36px]">
+          <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed min-h-[36px]">
             {opp.description || "Tidak ada ringkasan deskripsi untuk inisiatif ini."}
           </p>
 
@@ -257,9 +256,9 @@ function OpportunityCard({
 
       {/* 8. Estimasi Anggaran & 9. Tombol Tindakan */}
       <div className="p-5 pt-0 space-y-3">
-        <div className="pt-3 border-t border-[#E8E8EA] flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-xs">
           <span className="text-slate-500 font-medium">Alokasi Anggaran:</span>
-          <span className="text-sm font-extrabold text-emerald-600">
+          <span className="text-sm font-extrabold text-[#009E75]">
             {formatRupiah(opp.estimatedBudget)}
           </span>
         </div>
@@ -270,7 +269,7 @@ function OpportunityCard({
             type="button"
             variant="outline"
             size="sm"
-            className="flex-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 border-[#E8E8EA] cursor-pointer"
+            className="flex-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 border-[#E5E7EB] cursor-pointer"
             onClick={() => onSelectDetail(opp)}
             leftIcon={<Eye className="w-3.5 h-3.5" />}
           >
@@ -283,7 +282,7 @@ function OpportunityCard({
               type="button"
               variant="outline"
               size="sm"
-              className="flex-1 text-xs cursor-pointer"
+              className="flex-1 text-xs font-semibold border-[#E5E7EB] text-[#181343] cursor-pointer"
               onClick={() => onSelectExistingProposal(existingProposal)}
               leftIcon={<FileCheck2 className="w-3.5 h-3.5 text-[#181343] shrink-0" />}
               title="Proposal telah diajukan. Klik untuk melihat detail proposal Anda."
@@ -306,7 +305,7 @@ function OpportunityCard({
               type="button"
               variant="primary"
               size="sm"
-              className="flex-1 text-xs font-semibold cursor-pointer"
+              className="flex-1 text-xs font-semibold cursor-pointer bg-[#009E75] hover:bg-emerald-700 text-white"
               onClick={() => onSelectProposal(opp)}
               leftIcon={<Send className="w-3.5 h-3.5 shrink-0" />}
             >
@@ -840,6 +839,10 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
     );
   }, [invitations.length, proposals.length, collaborations.length, programs.length]);
 
+  const hasActiveInitiatives = useMemo(() => {
+    return programs.length > 0 || collaborations.length > 0;
+  }, [programs.length, collaborations.length]);
+
   // Section 3: Prioritas Tindak Lanjut (Max 3 actionable items)
   const prioritizedActionItems = useMemo(() => {
     const items: Array<{
@@ -1199,7 +1202,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
 
   // Standardized SIPENA Right Action for Partner Dashboard Header
   const headerRightAction = (
-    <div className="flex items-center gap-2 sm:gap-2.5">
+    <div className="flex items-center gap-2">
       {/* Subtle Aligned Refresh Button */}
       <button
         type="button"
@@ -1214,17 +1217,6 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
             }`}
         />
       </button>
-
-      {/* Sleek Workspace Chip / Role Badge */}
-      <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs">
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="truncate max-w-[140px] font-medium text-slate-700">
-          {partner?.name || "Workspace Mitra"}
-        </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-md border border-teal-200/60">
-          Mitra Pelaksana
-        </span>
-      </div>
     </div>
   );
 
@@ -1253,6 +1245,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
         <DashboardHeader
           user={currentUser}
           onOpenProfile={() => setIsUserProfileModalOpen(true)}
+          onLogout={handleLogout}
           breadcrumbs={headerBreadcrumbs}
           title={
             selectedOppForProposal
@@ -1328,719 +1321,455 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
           {/* SUBVIEW 1: OVERVIEW (RINGKASAN OPERASIONAL & KOLABORASI) */}
           {/* ========================================================================= */}
           {activeMenu === "overview" && (
-            <div className="space-y-6 relative">
-              {/* Eksperimen Visual Opsi 3: Soft Data Grid Background & Atmospheric Glow */}
-              <SoftDataGrid variant="page" />
-
-              <div className="relative z-10 space-y-6">
-                {/* ========================================================================= */}
-                {/* SECTION 1: WELCOME BANNER (Ringkas, Elegan, Navy-Emerald Subtle) */}
-                {/* ========================================================================= */}
-                <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-[#181343] via-[#1E1B4B] to-[#122A2F] text-white shadow-xs overflow-hidden border border-[#26224C]">
-                  {/* Hero Corner Soft Data Grid */}
-                  <SoftDataGrid variant="hero" />
-
-                  {/* Subtle flowing lines background ornament */}
-                  <svg
-                    className="absolute right-0 top-0 bottom-0 h-full w-1/2 opacity-10 pointer-events-none"
-                    viewBox="0 0 500 200"
-                    preserveAspectRatio="none"
-                    fill="none"
+            <div className="space-y-6 w-full animate-in fade-in duration-300">
+              {/* ========================================================================= */}
+              {/* SECTION 1: HEADER HALAMAN (Bersih, Tenang & Elegan) */}
+              {/* ========================================================================= */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
+                <div className="space-y-1">
+                  <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
                   >
-                    <path
-                      d="M0,100 C150,180 350,20 500,100 L500,200 L0,200 Z"
-                      fill="currentColor"
-                      className="text-emerald-400"
-                    />
-                    <path
-                      d="M0,130 C120,50 380,180 500,120 L500,200 L0,200 Z"
-                      fill="currentColor"
-                      className="text-teal-300"
-                    />
-                  </svg>
-
-                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
-                    <div className="space-y-1.5 sm:space-y-2 max-w-2xl">
-                      <h1
-                        className="text-2xl sm:text-[28px] lg:text-[32px] font-extrabold text-white tracking-tight leading-tight"
-                        style={{ fontFamily: "var(--font-display)" }}
-                      >
-                        Selamat Datang, {partner?.name || user.name}
-                      </h1>
-                      <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-normal max-w-xl">
-                        Pantau peluang kolaborasi, perkembangan proposal, dan pelaksanaan program CSR lembaga Anda.
-                      </p>
-                    </div>
-
-                    {partner?.status && (
-                      <div className="shrink-0 self-start md:self-center">
-                        <span className="px-3 py-1.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-400/25 text-xs font-medium inline-flex items-center gap-1.5 backdrop-blur-xs">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          <span>
-                            {partner.status === "VERIFIED"
-                              ? "Mitra Terverifikasi"
-                              : partner.status === "PENDING"
-                                ? "Menunggu Verifikasi Administratif"
-                                : partner.status}
-                          </span>
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                    Ringkasan Aktivitas Lembaga
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600">
+                    Selamat datang kembali, {partner?.name || user.name}. Kelola kolaborasi dan pantau pelaksanaan program CSR.
+                  </p>
                 </div>
 
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <Button
+                    type="button"
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setActiveMenu("explore")}
+                    className="bg-[#009E75] hover:bg-emerald-700 text-white text-xs font-semibold cursor-pointer shadow-xs"
+                    leftIcon={<Compass className="w-3.5 h-3.5" />}
+                  >
+                    Eksplorasi Peluang CSR
+                  </Button>
+                </div>
+              </div>
+
               {/* ========================================================================= */}
-              {/* SECTION 2: OPERATIONAL KPI (4 Indikator Operasional Sejajar) */}
+              {/* SECTION 2: 4 INDIKATOR KUNCI UTAMA (Non-Overlapping & Terarah)            */}
               {/* ========================================================================= */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* KPI A: Undangan Menunggu Respons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+                {/* KPI 1: Peluang CSR Terbuka */}
                 <div
-                  onClick={() => setActiveMenu("invitations")}
-                  className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs hover:border-emerald-300 hover:shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setActiveMenu("explore")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveMenu("explore");
+                    }
+                  }}
+                  className="p-5 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs hover:border-[#181343]/30 hover:shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between group"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-[#787680]">Undangan Menunggu</span>
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-500 group-hover:text-emerald-700 border border-slate-100 group-hover:border-emerald-200/60 flex items-center justify-center transition-colors">
-                      <Inbox className="w-4 h-4" />
+                    <span className="text-xs font-semibold text-slate-600">Peluang CSR Terbuka</span>
+                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-500 group-hover:text-emerald-700 border border-slate-200/80 group-hover:border-emerald-200 flex items-center justify-center transition-colors">
+                      <Compass className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="pt-3">
-                    <div className="text-2xl sm:text-3xl font-semibold text-[#181343] tracking-tight">
-                      {pendingInvitations.length}
+                    <div className="text-3xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      {latestOpenOpportunities.length || opportunities.length}
                     </div>
-                    <span className="text-[11px] text-[#787680] mt-0.5 block font-normal">
-                      Undangan kolaborasi baru
+                    <span className="text-xs text-slate-500 mt-1 block font-medium">
+                      Inisiatif siap diajukan
                     </span>
                   </div>
                 </div>
 
-                {/* KPI B: Proposal Dalam Proses */}
+                {/* KPI 2: Pipeline Pengajuan (Proposal & Undangan) */}
                 <div
-                  onClick={() => setActiveMenu("proposals")}
-                  className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs hover:border-emerald-300 hover:shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setActiveMenu(proposals.length > 0 ? "proposals" : "invitations")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveMenu(proposals.length > 0 ? "proposals" : "invitations");
+                    }
+                  }}
+                  className="p-5 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs hover:border-[#181343]/30 hover:shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between group"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-[#787680]">Proposal Dalam Proses</span>
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-500 group-hover:text-emerald-700 border border-slate-100 group-hover:border-emerald-200/60 flex items-center justify-center transition-colors">
+                    <span className="text-xs font-semibold text-slate-600">Pipeline Pengajuan</span>
+                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-blue-50 text-slate-500 group-hover:text-blue-700 border border-slate-200/80 group-hover:border-blue-200 flex items-center justify-center transition-colors">
                       <FileText className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="pt-3">
-                    <div className="text-2xl sm:text-3xl font-semibold text-[#181343] tracking-tight">
-                      {inProgressProposals.length}
+                    <div className="text-3xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      {proposals.length + pendingInvitations.length}
                     </div>
-                    <span className="text-[11px] text-[#787680] mt-0.5 block font-normal">
-                      Dalam peninjauan & revisi
+                    <span className="text-xs text-slate-500 mt-1 block font-medium truncate">
+                      {proposals.length > 0
+                        ? `${proposalStats.underReview} tinjauan • ${proposalStats.accepted} disetujui`
+                        : pendingInvitations.length > 0
+                          ? `${pendingInvitations.length} undangan menunggu respon`
+                          : "Belum ada pengajuan aktif"}
                     </span>
                   </div>
                 </div>
 
-                {/* KPI C: Kolaborasi Aktif */}
+                {/* KPI 3: Program Kolaborasi (MoU Aktif) */}
                 <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setActiveMenu("collaborations")}
-                  className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs hover:border-emerald-300 hover:shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveMenu("collaborations");
+                    }
+                  }}
+                  className="p-5 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs hover:border-[#181343]/30 hover:shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between group"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-[#787680]">Kolaborasi Aktif</span>
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-500 group-hover:text-emerald-700 border border-slate-100 group-hover:border-emerald-200/60 flex items-center justify-center transition-colors">
+                    <span className="text-xs font-semibold text-slate-600">Program Kolaborasi</span>
+                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-500 group-hover:text-emerald-700 border border-slate-200/80 group-hover:border-emerald-200 flex items-center justify-center transition-colors">
                       <HeartHandshake className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="pt-3">
-                    <div className="text-2xl sm:text-3xl font-semibold text-[#181343] tracking-tight">
+                    <div className="text-3xl font-extrabold text-[#181343] tracking-tight tabular-nums">
                       {agreedCollabs.length}
                     </div>
-                    <span className="text-[11px] text-[#787680] mt-0.5 block font-normal">
-                      Kesepakatan MoU/PKS resmi
+                    <span className="text-xs text-slate-500 mt-1 block font-medium">
+                      {agreedCollabs.length > 0 ? "MoU resmi berjalan" : "Belum ada program aktif"}
                     </span>
                   </div>
                 </div>
 
-                {/* KPI D: Laporan Perlu Tindakan */}
+                {/* KPI 4: Penerima Manfaat Terdata */}
                 <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setActiveMenu("programs")}
-                  className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs hover:border-emerald-300 hover:shadow-xs transition-all duration-200 cursor-pointer flex flex-col justify-between group"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveMenu("programs");
+                    }
+                  }}
+                  className="p-5 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs hover:border-[#181343]/30 hover:shadow-sm transition-all duration-200 cursor-pointer flex flex-col justify-between group"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-medium text-[#787680]">Laporan Perlu Tindakan</span>
-                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-emerald-50 text-slate-500 group-hover:text-emerald-700 border border-slate-100 group-hover:border-emerald-200/60 flex items-center justify-center transition-colors">
-                      <ClipboardCheck className="w-4 h-4" />
+                    <span className="text-xs font-semibold text-slate-600">Penerima Manfaat</span>
+                    <div className="w-8 h-8 rounded-xl bg-slate-50 group-hover:bg-purple-50 text-slate-500 group-hover:text-purple-700 border border-slate-200/80 group-hover:border-purple-200 flex items-center justify-center transition-colors">
+                      <Users className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="pt-3">
-                    <div className="text-2xl sm:text-3xl font-semibold text-[#181343] tracking-tight">
-                      {totalReportsNeedingAction}
+                    <div className="text-3xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      {impactSummary.totalBeneficiaries > 0
+                        ? impactSummary.totalBeneficiaries.toLocaleString("id-ID")
+                        : "0"}
                     </div>
-                    <span className="text-[11px] text-[#787680] mt-0.5 block font-normal">
-                      Perlu perbaikan oleh mitra
+                    <span className="text-xs text-slate-500 mt-1 block font-medium">
+                      {impactSummary.totalBeneficiaries > 0
+                        ? "Warga / kelompok sasaran"
+                        : "Tercatat di pelaporan"}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* ========================================================================= */}
-              {/* SECTION 3: INTELIJEN OPERASIONAL & CAPAIAN KEMITRAAN (VISUAL CHARTS) */}
+              {/* SECTION 3: DASHBOARD BI & ANALITIK KEMITRAAN (2 KARTU SIMETRIS & SEIMBANG)*/}
               {/* ========================================================================= */}
-              <div className="space-y-4">
-                {/* Row 1: Realisasi Anggaran (Kiri) + Funnel Konversi Kemitraan (Kanan) */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Chart 1: Realisasi & Daya Serap Anggaran CSR */}
-                  <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between space-y-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center border border-emerald-100 shrink-0">
-                            <DollarSign className="w-3.5 h-3.5" />
-                          </div>
-                          <h3
-                            className="text-sm sm:text-base font-bold text-[#181343]"
-                            style={{ fontFamily: "var(--font-display)" }}
-                          >
-                            Realisasi &amp; Daya Serap Anggaran
-                          </h3>
-                        </div>
-                        <p className="text-xs text-[#787680]">
-                          Tingkat penyerapan dana program dari MoU yang telah disepakati.
-                        </p>
-                      </div>
-
-                      <Badge
-                        variant={
-                          budgetAbsorptionRate >= 75
-                            ? "emerald"
-                            : budgetAbsorptionRate >= 40
-                            ? "blue"
-                            : "amber"
-                        }
-                        size="sm"
-                      >
-                        {budgetAbsorptionRate >= 75
-                          ? "Optimal"
-                          : budgetAbsorptionRate >= 40
-                          ? "Sedang Berjalan"
-                          : "Tahap Awal"}
-                      </Badge>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Kartu BI 1: Realisasi Anggaran Program (Keuangan) */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs flex flex-col justify-between space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h3 className="text-base font-bold text-[#181343]">
+                        Realisasi Anggaran Program
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Perbandingan serapan dana lapangan terhadap komitmen MoU.
+                      </p>
                     </div>
+                    <span className="text-xs font-bold text-[#009E75] tabular-nums bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80">
+                      {budgetAbsorptionRate}% Serapan
+                    </span>
+                  </div>
 
-                    {/* Donut Gauge & Ringkasan Nominal */}
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6 py-1">
-                      {/* Donut Circular SVG */}
-                      <div className="relative w-40 h-40 shrink-0 flex items-center justify-center">
-                        <svg viewBox="0 0 160 160" className="w-full h-full transform -rotate-90">
-                          <circle
-                            cx="80"
-                            cy="80"
-                            r="58"
-                            stroke="#F1F5F9"
-                            strokeWidth="14"
-                            fill="none"
-                          />
-                          <circle
-                            cx="80"
-                            cy="80"
-                            r="58"
-                            stroke="#009E75"
-                            strokeWidth="14"
-                            strokeLinecap="round"
-                            strokeDasharray={`${(budgetAbsorptionRate / 100) * 364.425} 364.425`}
-                            strokeDashoffset="0"
-                            fill="none"
-                            className="transition-all duration-700 ease-out"
-                          />
-                        </svg>
-
-                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center p-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            Daya Serap
-                          </span>
-                          <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight leading-tight">
-                            {budgetAbsorptionRate}%
-                          </span>
-                          <span className="text-[10px] text-slate-500 font-medium mt-0.5">
-                            dari Komitmen
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Financial Detail Breakdown */}
-                      <div className="flex-1 w-full space-y-2.5">
-                        <div className="p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-slate-600 font-medium">Total Dana Dikelola (MoU)</span>
-                            <span className="font-bold text-[#181343]">{formatRupiah(totalProgramBudget)}</span>
-                          </div>
-                          <div className="w-full bg-slate-200/70 h-1.5 rounded-full overflow-hidden">
-                            <div className="bg-[#181343] h-full rounded-full" style={{ width: "100%" }} />
-                          </div>
-                        </div>
-
-                        <div className="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-emerald-800 font-medium">Dana Terealisasi Lapangan</span>
-                            <span className="font-bold text-[#009E75]">{formatRupiah(totalSpentBudget)}</span>
-                          </div>
-                          <div className="w-full bg-emerald-200/50 h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-[#009E75] h-full rounded-full transition-all duration-500"
-                              style={{ width: `${Math.min(100, budgetAbsorptionRate)}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
-                          <span className="text-slate-500 font-medium">Sisa Alokasi Anggaran</span>
-                          <span className="font-semibold text-slate-700">
-                            {formatRupiah(Math.max(0, totalProgramBudget - totalSpentBudget))}
-                          </span>
-                        </div>
+                  {/* Donut Gauge & Ringkasan Anggaran (Simetris & Terstruktur) */}
+                  <div className="flex flex-col sm:flex-row items-center gap-6 my-auto py-2">
+                    <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0 flex items-center justify-center">
+                      <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
+                        <circle cx="60" cy="60" r="46" stroke="#F1F5F9" strokeWidth="12" fill="none" />
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="46"
+                          stroke="#009E75"
+                          strokeWidth="12"
+                          strokeLinecap="round"
+                          strokeDasharray={`${(budgetAbsorptionRate / 100) * 289.026} 289.026`}
+                          strokeDashoffset="0"
+                          fill="none"
+                          className="transition-all duration-700 ease-out"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tabular-nums tracking-tight">
+                          {budgetAbsorptionRate}%
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-semibold mt-0.5">Terserap</span>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-[#E8E8EA] flex items-center justify-between text-[11px] text-[#787680]">
-                      <span className="flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#009E75] shrink-0" />
-                        Realisasi dihitung dari laporan penggunaan dana program yang telah terverifikasi.
-                      </span>
+                    <div className="flex-1 w-full divide-y divide-slate-100">
+                      <div className="py-2.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#181343] shrink-0" />
+                          <span>Total Pagu Komitmen</span>
+                        </span>
+                        <span className="font-bold text-[#181343] tabular-nums text-xs sm:text-sm">
+                          {formatRupiah(totalProgramBudget)}
+                        </span>
+                      </div>
+
+                      <div className="py-2.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#009E75] shrink-0" />
+                          <span>Dana Terealisasi</span>
+                        </span>
+                        <span className="font-bold text-[#009E75] tabular-nums text-xs sm:text-sm">
+                          {formatRupiah(totalSpentBudget)}
+                        </span>
+                      </div>
+
+                      <div className="py-2.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-slate-300 shrink-0" />
+                          <span>Sisa Alokasi Pagu</span>
+                        </span>
+                        <span className="font-semibold text-slate-700 tabular-nums text-xs sm:text-sm">
+                          {formatRupiah(Math.max(0, totalProgramBudget - totalSpentBudget))}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Chart 2: Pipeline Konversi Kemitraan (Funnel) */}
-                  <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between space-y-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-100 shrink-0">
-                            <TrendingUp className="w-3.5 h-3.5" />
-                          </div>
-                          <h3
-                            className="text-sm sm:text-base font-bold text-[#181343]"
-                            style={{ fontFamily: "var(--font-display)" }}
-                          >
-                            Pipeline Konversi Kemitraan
-                          </h3>
-                        </div>
-                        <p className="text-xs text-[#787680]">
-                          Efektivitas alur kemitraan dari undangan dan proposal hingga program aktif.
-                        </p>
-                      </div>
-
-                      <Badge variant={proposalStats.winRate >= 50 ? "emerald" : "blue"} size="sm">
-                        Win-Rate {proposalStats.winRate}%
-                      </Badge>
-                    </div>
-
-                    {/* Funnel 4-Langkah Visual */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 pb-1">
-                      {/* Step 1: Undangan */}
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                          1. Undangan
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-[#181343]">
-                          {pendingInvitations.length}
-                        </div>
-                        <span className="text-[10px] text-slate-400">Peluang Masuk</span>
-                      </div>
-
-                      {/* Step 2: Proposal */}
-                      <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 flex flex-col justify-between space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700">
-                          2. Proposal
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-blue-900">
-                          {proposalStats.total}
-                        </div>
-                        <span className="text-[10px] text-blue-600">Telah Diajukan</span>
-                      </div>
-
-                      {/* Step 3: Negosiasi */}
-                      <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 flex flex-col justify-between space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                          3. Negosiasi
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-amber-900">
-                          {negotiatingCollabs.length}
-                        </div>
-                        <span className="text-[10px] text-amber-600">Finalisasi RAB</span>
-                      </div>
-
-                      {/* Step 4: MoU Berjalan */}
-                      <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/80 flex flex-col justify-between space-y-1">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-                          4. MoU Aktif
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-emerald-900">
-                          {agreedCollabs.length}
-                        </div>
-                        <span className="text-[10px] text-emerald-600">Disepakati</span>
-                      </div>
-                    </div>
-
-                    {/* Status Rincian Proposal */}
-                    <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
-                        <span>Rincian Status Proposal ({proposalStats.total})</span>
-                        <span className="text-[11px] text-emerald-700 font-bold">{proposalStats.accepted} Disetujui</span>
-                      </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
-                        <div className="flex items-center gap-1.5 text-emerald-700">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                          <span>{proposalStats.accepted} Disetujui</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-blue-700">
-                          <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                          <span>{proposalStats.underReview} Tinjauan</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-amber-700">
-                          <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                          <span>{proposalStats.revision} Revisi</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-rose-700">
-                          <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
-                          <span>{proposalStats.rejected} Ditolak</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-[#E8E8EA] flex items-center justify-between text-[11px] text-[#787680]">
-                      <span className="flex items-center gap-1">
-                        <Compass className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                        Semakin tinggi rasio proposal disetujui, semakin kuat kredibilitas lembaga Anda.
+                  {/* Footer Progress Bar Serapan Dana */}
+                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
+                      <span>Rasio Serapan Dana Lapangan</span>
+                      <span className="font-semibold text-emerald-700 tabular-nums">
+                        {budgetAbsorptionRate}%
                       </span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#009E75] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, budgetAbsorptionRate)}%` }}
+                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Row 2: Distribusi Bidang Fokus (Kiri) + Capaian Dampak Sosial (Kanan) */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {/* Chart 3: Distribusi Program per Bidang Fokus CSR */}
-                  <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between space-y-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-100 shrink-0">
-                            <Layers className="w-3.5 h-3.5" />
-                          </div>
-                          <h3
-                            className="text-sm sm:text-base font-bold text-[#181343]"
-                            style={{ fontFamily: "var(--font-display)" }}
-                          >
-                            Komposisi Portofolio per Bidang Fokus
-                          </h3>
-                        </div>
-                        <p className="text-xs text-[#787680]">
-                          Pilar inisiatif CSR yang dijalankan oleh lembaga Anda.
-                        </p>
-                      </div>
+                {/* Kartu BI 2: Pelaksanaan & Status Program (Operasional) */}
+                <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs flex flex-col justify-between space-y-5">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <h3 className="text-base font-bold text-[#181343]">
+                        Pelaksanaan &amp; Status Program
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Progres rata-rata eksekusi dan proporsi status program kolaborasi.
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+                      {impactSummary.totalPrograms} Program Terdata
+                    </span>
+                  </div>
 
-                      <Badge variant="purple" size="sm">
-                        {sectorDistribution.length} Sektor Aktif
-                      </Badge>
+                  {/* Donut Gauge & Ringkasan Status Program (Symmetrical Twin to Card 1) */}
+                  <div className="flex flex-col sm:flex-row items-center gap-6 my-auto py-2">
+                    <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0 flex items-center justify-center">
+                      <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
+                        <circle cx="60" cy="60" r="46" stroke="#F1F5F9" strokeWidth="12" fill="none" />
+                        <circle
+                          cx="60"
+                          cy="60"
+                          r="46"
+                          stroke="#181343"
+                          strokeWidth="12"
+                          strokeLinecap="round"
+                          strokeDasharray={`${(impactSummary.averageProgress / 100) * 289.026} 289.026`}
+                          strokeDashoffset="0"
+                          fill="none"
+                          className="transition-all duration-700 ease-out"
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tabular-nums tracking-tight">
+                          {impactSummary.averageProgress}%
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-semibold mt-0.5">Eksekusi</span>
+                      </div>
                     </div>
 
-                    {sectorDistribution.length === 0 ? (
-                      <div className="py-8 text-center bg-[#F9F9FB] rounded-xl border border-dashed border-[#E8E8EA]">
-                        <Layers className="w-7 h-7 text-slate-300 mx-auto mb-1.5" />
-                        <p className="text-xs font-semibold text-slate-600">
-                          Belum ada program aktif yang terdaftar dalam portofolio.
-                        </p>
+                    <div className="flex-1 w-full divide-y divide-slate-100">
+                      <div className="py-2.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shrink-0" />
+                          <span>Program Berjalan</span>
+                        </span>
+                        <span className="font-bold text-[#181343] tabular-nums text-xs sm:text-sm">
+                          {inProgressPrograms.length || agreedCollabs.length} Program
+                        </span>
                       </div>
-                    ) : (
-                      <div className="space-y-3 py-1">
-                        {sectorDistribution.map((sec) => {
-                          const conf = (FOCUS_AREA_CONFIG as any)[sec.focusArea] || {
-                            label: sec.focusArea,
-                            variant: "slate",
-                          };
-                          return (
-                            <div key={sec.focusArea} className="space-y-1.5">
-                              <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-5 h-5 rounded-md flex items-center justify-center bg-slate-100 text-slate-600 shrink-0">
-                                    {getFocusAreaIcon(sec.focusArea)}
-                                  </div>
-                                  <span>{conf.label}</span>
-                                </div>
-                                <div className="text-right text-[11px] text-slate-500">
-                                  <span className="font-bold text-[#181343]">{sec.count} Program</span>{" "}
-                                  <span>({sec.percentage}%)</span>
-                                </div>
-                              </div>
-                              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
-                                <div
-                                  style={{ width: `${sec.percentage}%` }}
-                                  className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-500"
-                                />
-                              </div>
-                              <div className="flex items-center justify-between text-[10px] text-slate-400">
-                                <span>Total Alokasi Program:</span>
-                                <span className="font-semibold text-slate-600">{formatRupiah(sec.totalBudget)}</span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
 
-                    <div className="pt-2 border-t border-[#E8E8EA] flex items-center justify-between text-[11px] text-[#787680]">
-                      <span className="flex items-center gap-1">
-                        <Award className="w-3.5 h-3.5 text-purple-600 shrink-0" />
-                        Portofolio mencerminkan spesialisasi dan keunggulan kompetitif lembaga Anda.
-                      </span>
+                      <div className="py-2.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0" />
+                          <span>Tahap Persiapan</span>
+                        </span>
+                        <span className="font-bold text-amber-600 tabular-nums text-xs sm:text-sm">
+                          {Math.max(0, agreedCollabs.length - inProgressPrograms.length)} Program
+                        </span>
+                      </div>
+
+                      <div className="py-2.5 flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
+                          <span>Program Selesai</span>
+                        </span>
+                        <span className="font-bold text-emerald-600 tabular-nums text-xs sm:text-sm">
+                          {impactSummary.completedCount} Program
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Chart 4: Capaian Dampak Sosial & Pelaksanaan Lapangan */}
-                  <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between space-y-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center border border-rose-100 shrink-0">
-                            <HeartHandshake className="w-3.5 h-3.5" />
-                          </div>
-                          <h3
-                            className="text-sm sm:text-base font-bold text-[#181343]"
-                            style={{ fontFamily: "var(--font-display)" }}
-                          >
-                            Capaian Dampak Sosial &amp; Lapangan
-                          </h3>
-                        </div>
-                        <p className="text-xs text-[#787680]">
-                          Ringkasan jangkauan penerima manfaat dan realisasi kegiatan mitra.
-                        </p>
-                      </div>
-
-                      <Badge variant="emerald" size="sm">
-                        Berdampak Nyata
-                      </Badge>
-                    </div>
-
-                    {/* 3 Kotak Sorotan Dampak */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-1">
-                      {/* Box 1: Penerima Manfaat */}
-                      <div className="p-3.5 rounded-xl bg-emerald-50/60 border border-emerald-100 space-y-1.5 flex flex-col justify-between">
-                        <div className="flex items-center justify-between text-emerald-800">
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            Penerima Manfaat
-                          </span>
-                          <Users className="w-3.5 h-3.5 text-emerald-600" />
-                        </div>
-                        <div>
-                          <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight">
-                            {impactSummary.totalBeneficiaries > 0
-                              ? `${impactSummary.totalBeneficiaries.toLocaleString("id-ID")}+`
-                              : "-"}
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-medium">Warga / Komunitas</span>
-                        </div>
-                        <p className="text-[10px] text-emerald-700">Tercatat di lapangan</p>
-                      </div>
-
-                      {/* Box 2: Progres Kegiatan */}
-                      <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-100 space-y-1.5 flex flex-col justify-between">
-                        <div className="flex items-center justify-between text-blue-800">
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            Progres Kegiatan
-                          </span>
-                          <Activity className="w-3.5 h-3.5 text-blue-600" />
-                        </div>
-                        <div>
-                          <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight">
-                            {impactSummary.averageProgress}%
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-medium">Rata-rata Eksekusi</span>
-                        </div>
-                        <div className="w-full bg-blue-200/60 h-1 rounded-full overflow-hidden">
-                          <div
-                            className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                            style={{ width: `${impactSummary.averageProgress}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Box 3: Siklus Program */}
-                      <div className="p-3.5 rounded-xl bg-purple-50/60 border border-purple-100 space-y-1.5 flex flex-col justify-between">
-                        <div className="flex items-center justify-between text-purple-800">
-                          <span className="text-[10px] font-bold uppercase tracking-wider">
-                            Program Aktif
-                          </span>
-                          <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
-                        </div>
-                        <div>
-                          <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight">
-                            {impactSummary.inProgressCount}
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-medium">
-                            {impactSummary.completedCount} Selesai Penuh
-                          </span>
-                        </div>
-                        <p className="text-[10px] text-purple-700">Dari {impactSummary.totalPrograms} total program</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-[#E8E8EA] flex items-center justify-between text-[11px] text-[#787680]">
-                      <span className="flex items-center gap-1">
-                        <Target className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                        Data dampak divalidasi melalui pelaporan berkala dan dokumentasi kegiatan fisik.
+                  {/* Footer Progress Bar Pelaksanaan Program */}
+                  <div className="space-y-1.5 pt-2 border-t border-slate-100">
+                    <div className="flex items-center justify-between text-xs text-slate-500">
+                      <span>Rata-rata Pelaksanaan Program ({impactSummary.totalPrograms} Program)</span>
+                      <span className="font-semibold text-slate-700 tabular-nums">
+                        {impactSummary.averageProgress}% Selesai
                       </span>
+                    </div>
+                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-[#181343] h-full rounded-full transition-all duration-500"
+                        style={{ width: `${impactSummary.averageProgress}%` }}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* ========================================================================= */}
-              {/* SECTION 4: PRIORITAS TINDAK LANJUT / ONBOARDING STATE */}
-              {/* ========================================================================= */}
-              {isNewPartner ? (
-                /* Onboarding State untuk NGO Baru */
-                <div className="p-6 sm:p-7 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-4">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-semibold flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-emerald-600" />
-                          Langkah Awal
-                        </span>
-                      </div>
-                      <h3
-                        className="text-base sm:text-lg font-bold text-[#181343]"
-                        style={{ fontFamily: "var(--font-display)" }}
-                      >
-                        Mulai Kolaborasi Pertama Anda
-                      </h3>
-                      <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl font-normal">
-                        Jelajahi peluang CSR yang tersedia dan temukan program yang sesuai dengan keahlian serta cakupan wilayah lembaga Anda.
+              {/* Notifikasi Kelengkapan Profil (Hanya ditampilkan jika profil belum lengkap) */}
+              {isProfileIncomplete && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <AlertCircle className="w-4 h-4 text-amber-700" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
+                        Lengkapi Profil Lembaga Anda
+                      </h4>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        Data profil dan legalitas yang lengkap meningkatkan kredibilitas lembaga di mata mitra perusahaan CSR.
                       </p>
                     </div>
-
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="sm"
-                      onClick={() => setActiveMenu("explore")}
-                      className="bg-[#009E75] hover:bg-emerald-700 text-white text-xs font-semibold shadow-2xs shrink-0 cursor-pointer"
-                      rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                    >
-                      Eksplorasi Peluang CSR
-                    </Button>
                   </div>
-
-                  {/* Pengingat Profil Lembaga Jika Belum Lengkap */}
-                  {isProfileIncomplete && (
-                    <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex items-start gap-2.5">
-                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                        <div className="space-y-0.5">
-                          <h4 className="text-xs font-semibold text-slate-800">
-                            Lengkapi Profil Lembaga Anda
-                          </h4>
-                          <p className="text-[11px] text-[#787680] leading-relaxed">
-                            Informasi organisasi yang lengkap mempermudah mitra perusahaan menemukan dan mengundang lembaga Anda ke program CSR mereka.
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setActiveMenu("profile")}
-                        className="text-xs font-medium text-slate-700 hover:bg-white border-[#E8E8EA] shrink-0 self-end sm:self-center cursor-pointer"
-                      >
-                        Lengkapi Profil
-                      </Button>
-                    </div>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveMenu("profile")}
+                    className="text-xs font-semibold text-slate-700 hover:bg-white bg-white/80 border-slate-300 shrink-0 self-end sm:self-auto cursor-pointer"
+                  >
+                    Lengkapi Profil
+                  </Button>
                 </div>
-              ) : (
-                /* Prioritas Tindak Lanjut untuk NGO Aktif */
+              )}
+
+              {/* Prioritas Tindak Lanjut jika ada */}
+              {prioritizedActionItems.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3
-                        className="text-base sm:text-lg font-semibold text-[#181343]"
-                        style={{ fontFamily: "var(--font-display)" }}
-                      >
-                        Prioritas Tindak Lanjut
-                      </h3>
-                      <p className="text-xs text-[#787680]">
-                        Aktivitas yang membutuhkan perhatian lembaga Anda.
-                      </p>
-                    </div>
+                  <div>
+                    <h2
+                      className="text-base sm:text-lg font-bold text-[#181343]"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      Prioritas Tindak Lanjut
+                    </h2>
+                    <p className="text-xs text-slate-600">
+                      Aktivitas yang membutuhkan perhatian atau revisi lembaga Anda.
+                    </p>
                   </div>
 
-                  {prioritizedActionItems.length > 0 ? (
-                    <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-2.5">
-                      {prioritizedActionItems.map((action) => (
-                        <div
-                          key={action.id}
-                          className="p-3.5 sm:p-4 rounded-xl border border-[#E8E8EA] bg-[#F9F9FB] hover:bg-white hover:border-slate-300 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
-                        >
-                          <div className="flex items-start gap-3 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-white border border-[#E8E8EA] flex items-center justify-center shrink-0 mt-0.5 text-slate-600 shadow-2xs">
-                              {action.icon}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs space-y-2.5">
+                    {prioritizedActionItems.map((action) => (
+                      <div
+                        key={action.id}
+                        className="p-3.5 sm:p-4 rounded-xl border border-[#E5E7EB] bg-slate-50/60 hover:bg-white hover:border-[#181343]/30 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                      >
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center shrink-0 mt-0.5 text-slate-600 shadow-2xs">
+                            {action.icon}
+                          </div>
+                          <div className="min-w-0 space-y-0.5">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-semibold text-xs sm:text-sm text-slate-900 truncate">
+                                {action.title}
+                              </span>
+                              <Badge variant={action.badgeVariant} size="sm">
+                                {action.badgeLabel}
+                              </Badge>
                             </div>
-                            <div className="min-w-0 space-y-0.5">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-semibold text-xs sm:text-sm text-slate-900 truncate">
-                                  {action.title}
-                                </span>
-                                <Badge variant={action.badgeVariant} size="sm">
-                                  {action.badgeLabel}
-                                </Badge>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-[#787680]">
-                                {action.subtitle && <span className="truncate">{action.subtitle}</span>}
-                                {action.subtitle && action.meta && <span>•</span>}
-                                {action.meta && <span>{action.meta}</span>}
-                              </div>
+                            <div className="flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+                              {action.subtitle && <span className="truncate">{action.subtitle}</span>}
+                              {action.subtitle && action.meta && <span>•</span>}
+                              {action.meta && <span>{action.meta}</span>}
                             </div>
                           </div>
-
-                          <Button
-                            type="button"
-                            variant="primary"
-                            size="sm"
-                            onClick={action.onClick}
-                            className="self-end sm:self-center shrink-0 text-xs font-semibold bg-[#181343] hover:bg-[#26224C] text-white shadow-2xs cursor-pointer"
-                            rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                          >
-                            {action.buttonLabel}
-                          </Button>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex items-center gap-3.5">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-600 flex items-center justify-center shrink-0">
-                        <CheckCircle2 className="w-4 h-4" />
+
+                        <Button
+                          type="button"
+                          variant="primary"
+                          size="sm"
+                          onClick={action.onClick}
+                          className="self-end sm:self-center shrink-0 text-xs font-semibold bg-[#181343] hover:bg-[#26224C] text-white shadow-xs cursor-pointer"
+                          rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                        >
+                          {action.buttonLabel}
+                        </Button>
                       </div>
-                      <div className="space-y-0.5 min-w-0">
-                        <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
-                          Semua Aktivitas Operasional Berjalan Lancar
-                        </h4>
-                        <p className="text-[11px] text-[#787680] leading-relaxed">
-                          Tidak ada tindakan mendesak atau revisi yang membutuhkan perhatian saat ini. Seluruh proposal, undangan, dan laporan kegiatan lembaga Anda telah terkelola dengan baik.
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
                 </div>
               )}
 
               {/* ========================================================================= */}
-              {/* SECTION 5: PELUANG CSR TERBARU (Preview 2-3 Peluang Terbuka) */}
+              {/* SECTION 4: PELUANG CSR TERBARU (Katalog Terbuka Siap Diajukan) */}
               {/* ========================================================================= */}
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h3
+                  <div className="space-y-0.5">
+                    <h2
                       className="text-base sm:text-lg font-bold text-[#181343]"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
                       Peluang CSR Terbaru
-                    </h3>
-                    <p className="text-xs text-[#787680]">
-                      Inisiatif program CSR terbuka yang siap diajukan proposal oleh lembaga Anda.
+                    </h2>
+                    <p className="text-xs text-slate-600">
+                      Inisiatif CSR terbuka dari perusahaan yang siap diajukan proposal oleh lembaga Anda.
                     </p>
                   </div>
 
@@ -2055,9 +1784,9 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                 </div>
 
                 {latestOpenOpportunities.length === 0 ? (
-                  <div className="py-8 text-center bg-white rounded-2xl border border-dashed border-[#E8E8EA] p-6 space-y-2">
+                  <div className="py-8 text-center bg-white rounded-2xl border border-dashed border-[#E5E7EB] p-6 space-y-2">
                     <Compass className="w-6 h-6 text-slate-400 mx-auto" />
-                    <p className="text-xs text-[#787680]">Saat ini belum ada peluang CSR terbuka baru.</p>
+                    <p className="text-xs text-slate-600">Saat ini belum ada peluang CSR terbuka baru.</p>
                   </div>
                 ) : (
                   <div className={latestOpportunitiesGridClass}>
@@ -2080,38 +1809,46 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
               </div>
 
               {/* ========================================================================= */}
-              {/* SECTION 6: AKTIVITAS KOLABORASI TERBARU (Kondisional Jika Ada Aktivitas) */}
+              {/* SECTION 5: AKTIVITAS KOLABORASI TERBARU (Jika Ada Riwayat Aktivitas) */}
               {/* ========================================================================= */}
               {recentCollaborationActivities.length > 0 && (
-                <div className="space-y-3">
-                  <div>
-                    <h3
-                      className="text-base sm:text-lg font-semibold text-[#181343]"
+                <div className="space-y-3.5">
+                  <div className="space-y-0.5">
+                    <h2
+                      className="text-base sm:text-lg font-bold text-[#181343]"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
                       Aktivitas Kolaborasi Terbaru
-                    </h3>
-                    <p className="text-xs text-[#787680]">
-                      Riwayat dan perkembangan kesepakatan serta pelaksanaan program kerja sama lembaga Anda.
+                    </h2>
+                    <p className="text-xs text-slate-600">
+                      Riwayat perkembangan kesepakatan dan pelaksanaan program kerja sama lembaga Anda.
                     </p>
                   </div>
 
-                  <div className="rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs divide-y divide-[#E8E8EA] overflow-hidden">
+                  <div className="rounded-2xl bg-white border border-[#E5E7EB] shadow-xs divide-y divide-[#E5E7EB] overflow-hidden">
                     {recentCollaborationActivities.map((act) => (
                       <div
                         key={act.id}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setActiveMenu(act.targetMenu)}
-                        className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-[#F9F9FB] transition-colors cursor-pointer group"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setActiveMenu(act.targetMenu);
+                          }
+                        }}
+                        className="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-slate-50/70 transition-colors cursor-pointer group"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-slate-600 group-hover:text-emerald-700 group-hover:border-emerald-200/60 transition-colors">
+                          <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-center shrink-0 text-slate-600 group-hover:text-emerald-700 group-hover:border-emerald-200 transition-colors">
                             {act.icon}
                           </div>
                           <div className="min-w-0 space-y-0.5">
-                            <p className="text-xs sm:text-sm font-medium text-slate-800 truncate">
+                            <p className="text-xs sm:text-sm font-semibold text-[#181343] truncate">
                               {act.title}
                             </p>
-                            <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-[#787680]">
+                            <div className="flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
                               <span className="truncate">{act.organizationOrProgram}</span>
                               <span>•</span>
                               <span>{act.date ? formatDate(act.date) : "-"}</span>
@@ -2130,7 +1867,6 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                   </div>
                 </div>
               )}
-              </div>
             </div>
           )}
 
@@ -2152,7 +1888,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
               {/* ========================================================================= */}
               {/* 1. Page Header: Eksplorasi Peluang CSR (Clean, Sederhana, Sejajar) */}
               {/* ========================================================================= */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-bold flex items-center gap-1">
@@ -2167,7 +1903,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                   >
                     Eksplorasi Peluang CSR
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-sm text-slate-600">
                     Temukan inisiatif CSR perusahaan yang terbuka dan ajukan proposal sesuai kapasitas lembaga Anda.
                   </p>
                 </div>
@@ -2320,7 +2056,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
           {/* ========================================================================= */}
           {activeMenu === "invitations" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div className="space-y-1">
                   <h1
                     className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
@@ -2328,7 +2064,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                   >
                     Undangan Kolaborasi dari Perusahaan
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-sm text-slate-600">
                     Perusahaan secara langsung mengundang yayasan/organisasi Anda untuk mengajukan proposal ke inisiatif mereka.
                   </p>
                 </div>
@@ -2480,7 +2216,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
           {/* ========================================================================= */}
           {activeMenu === "proposals" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div className="space-y-1">
                   <h1
                     className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
@@ -2488,7 +2224,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                   >
                     Daftar Proposal Inisiatif Saya
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
+                  <p className="text-xs sm:text-sm text-slate-600">
                     Riwayat seluruh proposal yang diajukan beserta status peninjauan resmi dari perusahaan mitra.
                   </p>
                 </div>
@@ -2637,93 +2373,91 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
           {/* ========================================================================= */}
           {activeMenu === "collaborations" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              {/* Header Kolaborasi Aktif */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div className="space-y-1">
                   <h1
                     className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
-                    Kontrak Kolaborasi & Perjanjian MoU
+                    Kolaborasi Aktif &amp; Kesepakatan MoU
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
-                    Daftar resmi kesepakatan kerja sama program CSR antara organisasi Anda dan perusahaan sponsor.
+                  <p className="text-xs sm:text-sm text-slate-600">
+                    Daftar resmi kesepakatan program CSR yang disetujui bersama perusahaan sponsor.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
-                  <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs flex items-center gap-1.5">
-                    <span>Total</span>
-                    <span className="font-bold text-[#009E75]">{collaborations.length}</span>
-                    <span>Kontrak / MoU</span>
-                  </div>
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                   <button
                     type="button"
                     onClick={handleRefreshAll}
-                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
-                    title="Segarkan kolaborasi"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-xs"
+                    title="Segarkan daftar kolaborasi"
                   >
-                    <RefreshCw className={`w-4 h-4 ${isLoadingCollaborations ? "animate-spin text-emerald-600" : ""}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoadingCollaborations ? "animate-spin text-[#009E75]" : "text-slate-500"}`} />
+                    <span>Segarkan</span>
                   </button>
                 </div>
               </div>
 
-              {/* Summary Metrics */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card>
-                  <CardContent className="p-4 space-y-1.5">
-                    <span className="text-xs font-semibold text-slate-500">Total Kontrak / MoU</span>
-                    <div className="text-2xl font-extrabold text-slate-900">{collaborations.length}</div>
-                    <span className="text-[11px] text-slate-400 block">Dari proposal yang diterima</span>
-                  </CardContent>
-                </Card>
+              {/* Summary Metrics (4 Kartu Simetris Bersih) */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                  <span className="text-xs font-semibold text-slate-600 block">
+                    Total Kolaborasi
+                  </span>
+                  <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                    {collaborations.length}
+                  </div>
+                  <span className="text-[11px] text-slate-500 block">Kesepakatan tercatat</span>
+                </div>
 
-                <Card className={negotiatingCollabs.length > 0 ? "border-amber-200 bg-amber-50/20" : ""}>
-                  <CardContent className="p-4 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-amber-600">Tahap Negosiasi</span>
-                      {negotiatingCollabs.length > 0 && (
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                      )}
-                    </div>
-                    <div className="text-2xl font-extrabold text-amber-600">{negotiatingCollabs.length}</div>
-                    <span className="text-[11px] text-amber-700 font-medium block">Penyepakatan & berkas legal</span>
-                  </CardContent>
-                </Card>
+                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                  <span className="text-xs font-semibold text-slate-600 block">
+                    Tahap Negosiasi
+                  </span>
+                  <div className="text-xl sm:text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                    {negotiatingCollabs.length}
+                  </div>
+                  <span className="text-[11px] text-slate-500 block">Finalisasi berkas legal &amp; RAB</span>
+                </div>
 
-                <Card>
-                  <CardContent className="p-4 space-y-1.5">
-                    <span className="text-xs font-semibold text-emerald-600">MoU Disepakati</span>
-                    <div className="text-2xl font-extrabold text-emerald-600">{agreedCollabs.length}</div>
-                    <span className="text-[11px] text-slate-400 block">Siap dieksekusi di lapangan</span>
-                  </CardContent>
-                </Card>
+                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                  <span className="text-xs font-semibold text-slate-600 block">
+                    MoU Disahkan
+                  </span>
+                  <div className="text-xl sm:text-2xl font-extrabold text-[#009E75] tracking-tight tabular-nums">
+                    {agreedCollabs.length}
+                  </div>
+                  <span className="text-[11px] text-slate-500 block">Siap dieksekusi di lapangan</span>
+                </div>
 
-                <Card>
-                  <CardContent className="p-4 space-y-1.5">
-                    <span className="text-xs font-semibold text-teal-600">Total Nilai Disahkan</span>
-                    <div className="text-2xl font-extrabold text-teal-600 truncate">
-                      {formatRupiah(totalAgreedCollabBudget)}
-                    </div>
-                    <span className="text-[11px] text-slate-400 block">Anggaran definitif disetujui</span>
-                  </CardContent>
-                </Card>
+                <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                  <span className="text-xs font-semibold text-slate-600 block">
+                    Komitmen Anggaran
+                  </span>
+                  <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums truncate">
+                    {formatRupiah(totalAgreedCollabBudget)}
+                  </div>
+                  <span className="text-[11px] text-slate-500 block">Pagu definitif disetujui</span>
+                </div>
               </div>
 
-              {/* Filters & Search Bar */}
-              <div className="bg-white p-4 rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
+              {/* Filter & Pencarian */}
+              <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-[#E5E7EB] shadow-xs space-y-3">
                 <div className="relative flex-1">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     value={collabSearch}
                     onChange={(e) => setCollabSearch(e.target.value)}
-                    placeholder="Cari kolaborasi berdasarkan nama perusahaan, inisiatif CSR, atau proposal..."
-                    className="w-full pl-10 pr-4 py-2 rounded-2xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+                    placeholder="Cari berdasarkan nama perusahaan, inisiatif CSR, atau proposal..."
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-[#E5E7EB] text-xs focus:border-[#181343] focus:ring-1 focus:ring-[#181343] focus:outline-hidden transition bg-white"
                   />
                 </div>
 
-                {/* Filter Chips */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                {/* Filter Status Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs">
                   {[
                     { key: "ALL", label: `Semua (${collaborations.length})` },
                     { key: "NEGOTIATION", label: `Tahap Negosiasi (${negotiatingCollabs.length})` },
@@ -2734,11 +2468,13 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                     return (
                       <button
                         key={tab.key}
+                        type="button"
                         onClick={() => setCollabStatusFilter(tab.key)}
-                        className={`px-3 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap ${isSelected
-                            ? "bg-slate-900 text-white shadow-xs"
-                            : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                          }`}
+                        className={`px-3 py-1.5 rounded-xl font-semibold transition-all whitespace-nowrap cursor-pointer text-xs ${
+                          isSelected
+                            ? "bg-[#181343] text-white shadow-2xs"
+                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-[#E5E7EB]"
+                        }`}
                       >
                         {tab.label}
                       </button>
@@ -2747,27 +2483,27 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                 </div>
               </div>
 
-              {/* Content List */}
+              {/* Daftar Kontrak Kolaborasi */}
               {isLoadingCollaborations ? (
-                <div className="py-20 text-center bg-white rounded-3xl border border-slate-200/80 p-8 space-y-3">
-                  <RefreshCw className="w-6 h-6 text-teal-600 animate-spin mx-auto" />
-                  <p className="text-xs text-slate-500">Memuat data kontrak kerja sama...</p>
+                <div className="py-20 text-center bg-white rounded-2xl border border-[#E5E7EB] p-8 space-y-3 shadow-xs">
+                  <RefreshCw className="w-5 h-5 text-[#009E75] animate-spin mx-auto" />
+                  <p className="text-xs text-slate-500">Memuat data kontrak kolaborasi...</p>
                 </div>
               ) : filteredCollaborations.length === 0 ? (
-                <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
-                    <HeartHandshake className="w-7 h-7" />
+                <div className="py-16 text-center bg-white rounded-2xl border border-[#E5E7EB] p-8 space-y-4 shadow-xs">
+                  <div className="w-12 h-12 rounded-xl bg-slate-50 text-[#181343] border border-slate-200/80 flex items-center justify-center mx-auto">
+                    <HeartHandshake className="w-6 h-6 text-slate-600" />
                   </div>
                   <div className="max-w-md mx-auto space-y-1">
-                    <h4 className="font-bold text-slate-800 text-base">
+                    <h3 className="font-bold text-slate-900 text-sm sm:text-base">
                       {collaborations.length === 0
-                        ? "Belum Ada Kontrak Kolaborasi"
+                        ? "Belum Ada Kontrak Kolaborasi Aktif"
                         : "Tidak Ada Kolaborasi yang Sesuai"}
-                    </h4>
+                    </h3>
                     <p className="text-xs text-slate-500 leading-relaxed">
                       {collaborations.length === 0
-                        ? "Saat proposal inisiatif Anda disetujui (Accepted) oleh pihak perusahaan, proyek tersebut secara otomatis tercatat sebagai kontrak kolaborasi di sini untuk disepakati MoU-nya."
-                        : "Coba ubah kata kunci pencarian atau ganti filter status di atas."}
+                        ? "Saat proposal inisiatif Anda disetujui oleh pihak perusahaan, usulan tersebut akan otomatis tercatat sebagai kontrak kolaborasi untuk difinalisasi MoU-nya."
+                        : "Coba ubah kata kunci pencarian atau pilih filter status lainnya."}
                     </p>
                   </div>
                   {collaborations.length === 0 ? (
@@ -2776,7 +2512,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                       size="sm"
                       onClick={() => setActiveMenu("proposals")}
                       rightIcon={<ArrowRight className="w-4 h-4" />}
-                      className="font-semibold"
+                      className="font-semibold text-xs py-2 px-4 rounded-xl"
                     >
                       Buka Proposal Saya
                     </Button>
@@ -2788,6 +2524,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                         setCollabSearch("");
                         setCollabStatusFilter("ALL");
                       }}
+                      className="text-xs font-semibold rounded-xl"
                     >
                       Reset Filter
                     </Button>
@@ -2805,35 +2542,35 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                     return (
                       <div
                         key={collab.id}
-                        className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs hover:border-teal-300 transition-all space-y-4"
+                        className="p-5 sm:p-6 rounded-2xl bg-white border border-[#E5E7EB] shadow-xs hover:border-slate-300 transition-all space-y-4"
                       >
-                        {/* Header: Company Profile + Status */}
+                        {/* Header: Profil Perusahaan Mitra + Status Badge */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center font-bold text-teal-700 text-sm overflow-hidden shrink-0">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-11 h-11 rounded-xl bg-slate-50 border border-[#E5E7EB] flex items-center justify-center font-bold text-[#181343] text-sm overflow-hidden shrink-0">
                               {collab.companyLogo ? (
                                 <img
                                   src={collab.companyLogo}
                                   alt={collab.companyName || "Perusahaan"}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-contain p-1"
                                 />
                               ) : (
                                 (collab.companyName || "C").substring(0, 2).toUpperCase()
                               )}
                             </div>
-                            <div>
+                            <div className="min-w-0 space-y-0.5">
                               <div className="flex items-center gap-2">
-                                <h4 className="font-extrabold text-slate-900 text-sm">
+                                <h4 className="font-bold text-[#181343] text-sm truncate">
                                   {collab.companyName || "Perusahaan Sponsor"}
                                 </h4>
                                 {collab.companyCity && (
-                                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                                  <span className="text-xs text-slate-400 flex items-center gap-1 shrink-0">
                                     <MapPin className="w-3 h-3 text-slate-400" />
                                     {collab.companyCity}
                                   </span>
                                 )}
                               </div>
-                              <span className="text-xs text-slate-400 mt-0.5 block">
+                              <span className="text-xs text-slate-400 block">
                                 Dibuat: {formatDate(collab.createdAt)}
                               </span>
                             </div>
@@ -2846,13 +2583,13 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                           </div>
                         </div>
 
-                        {/* Program & Proposal Info */}
+                        {/* Detail Inisiatif & Usulan Program */}
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2 text-xs text-slate-500">
                             <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
                               Inisiatif CSR:
                             </span>
-                            <span className="font-bold text-teal-700 truncate">
+                            <span className="font-semibold text-slate-700 truncate">
                               {collab.opportunityTitle || "Inisiatif CSR"}
                             </span>
                             {collab.opportunityFocusArea && (
@@ -2867,7 +2604,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                               </Badge>
                             )}
                           </div>
-                          <h3 className="text-base font-extrabold text-slate-900 leading-snug">
+                          <h3 className="text-base font-bold text-[#181343] leading-snug">
                             {collab.proposalTitle || "Program Kerjasama CSR"}
                           </h3>
                           {collab.proposalSummary && (
@@ -2877,11 +2614,11 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                           )}
                         </div>
 
-                        {/* Metrics Bar */}
-                        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs">
+                        {/* Bar Parameter Kolaborasi (Bersih & Rapi) */}
+                        <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200/60 flex flex-wrap items-center justify-between gap-4 text-xs">
                           <div className="space-y-0.5">
-                            <span className="text-[11px] text-slate-400 font-medium">Anggaran Disepakati</span>
-                            <div className="text-sm font-extrabold text-emerald-600">
+                            <span className="text-[11px] text-slate-500 font-medium">Anggaran Disepakati</span>
+                            <div className="text-sm font-bold text-[#009E75] tabular-nums">
                               {formatRupiah(collab.finalBudget || collab.proposedBudget)}
                             </div>
                             {collab.finalBudget && collab.proposedBudget && collab.finalBudget !== collab.proposedBudget && (
@@ -2892,48 +2629,50 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                           </div>
 
                           <div className="space-y-0.5">
-                            <span className="text-[11px] text-slate-400 font-medium">Jadwal Pelaksanaan</span>
-                            <div className="text-xs font-bold text-slate-800 flex items-center gap-1">
-                              <Calendar className="w-3 h-3 text-slate-400" />
+                            <span className="text-[11px] text-slate-500 font-medium">Jadwal Pelaksanaan</span>
+                            <div className="text-xs font-semibold text-slate-800 flex items-center gap-1">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
                               {collab.startDate && collab.endDate
                                 ? `${formatDate(collab.startDate)} s/d ${formatDate(collab.endDate)}`
                                 : "Belum ditentukan"}
                             </div>
                           </div>
 
-                          <div className="space-y-0.5 max-w-[200px]">
-                            <span className="text-[11px] text-slate-400 font-medium">Penerima Manfaat</span>
-                            <div className="text-xs font-bold text-slate-800 truncate">
+                          <div className="space-y-0.5 max-w-[180px]">
+                            <span className="text-[11px] text-slate-500 font-medium">Penerima Manfaat</span>
+                            <div className="text-xs font-semibold text-slate-800 truncate">
                               {collab.targetBeneficiaries || "-"}
                             </div>
                           </div>
 
                           <div className="space-y-0.5">
-                            <span className="text-[11px] text-slate-400 font-medium block">Dokumen MoU</span>
+                            <span className="text-[11px] text-slate-500 font-medium block">Dokumen MoU</span>
                             {collab.mouDocumentUrl ? (
                               <a
                                 href={collab.mouDocumentUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200"
+                                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#009E75] hover:text-emerald-800 hover:underline"
                               >
                                 <FileCheck2 className="w-3.5 h-3.5" />
-                                Lihat Berkas MoU
+                                <span>Lihat Berkas MoU</span>
                                 <ExternalLink className="w-3 h-3 ml-0.5" />
                               </a>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-medium">
-                                <Clock className="w-3 h-3" /> Menunggu Berkas
+                              <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 font-medium">
+                                <Clock className="w-3 h-3" />
+                                <span>Menunggu Berkas</span>
                               </span>
                             )}
                           </div>
 
-                          <div className="pt-2 sm:pt-0 flex items-center gap-2">
+                          {/* Tombol Aksi */}
+                          <div className="pt-2 sm:pt-0 flex items-center gap-2 w-full sm:w-auto justify-end">
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="text-xs border-teal-200 text-teal-700 bg-teal-50/60 hover:bg-teal-100/70"
+                              className="text-xs font-semibold border-[#E5E7EB] hover:bg-white text-slate-700 rounded-xl"
                               onClick={() => {
                                 setActiveCollaborationChatId(collab.id);
                                 setActiveMenu("conversations");
@@ -2943,35 +2682,28 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                               Pesan
                             </Button>
 
-                            {collab.status === "NEGOTIATION" ? (
-                              <Button
-                                variant="primary"
-                                size="sm"
-                                className="bg-amber-600 hover:bg-amber-700 text-white text-xs shadow-xs"
-                                onClick={() => setSelectedCollabForDetail(collab)}
-                                leftIcon={<FileCheck2 className="w-3.5 h-3.5" />}
-                              >
-                                Tinjau Kesepakatan & MoU
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-xs border-slate-200 hover:border-slate-300"
-                                onClick={() => setSelectedCollabForDetail(collab)}
-                                leftIcon={<Eye className="w-3.5 h-3.5" />}
-                              >
-                                {collab.status === "AGREED" ? "Detail Kontrak & MoU" : "Lihat Catatan"}
-                              </Button>
-                            )}
+                            <Button
+                              type="button"
+                              variant="primary"
+                              size="sm"
+                              className="text-xs font-semibold bg-[#181343] hover:bg-[#26224C] text-white rounded-xl shadow-xs"
+                              onClick={() => setSelectedCollabForDetail(collab)}
+                              leftIcon={collab.status === "NEGOTIATION" ? <FileCheck2 className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                            >
+                              {collab.status === "NEGOTIATION"
+                                ? "Tinjau Kesepakatan"
+                                : collab.status === "AGREED"
+                                  ? "Detail Kontrak"
+                                  : "Lihat Catatan"}
+                            </Button>
                           </div>
                         </div>
 
-                        {/* Notes Preview if available */}
+                        {/* Catatan Kesepakatan jika ada */}
                         {collab.notes && (
-                          <div className="text-xs text-slate-600 italic bg-amber-50/50 p-2.5 rounded-xl border border-amber-200/50 flex items-start gap-2">
-                            <span className="font-semibold text-amber-900 not-italic shrink-0">Catatan Kesepakatan:</span>
-                            <span className="not-italic text-slate-700 line-clamp-2">"{collab.notes}"</span>
+                          <div className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-200/60 flex items-start gap-2">
+                            <span className="font-semibold text-slate-800 shrink-0">Catatan:</span>
+                            <span className="text-slate-700 line-clamp-2">{collab.notes}</span>
                           </div>
                         )}
                       </div>
@@ -3002,39 +2734,35 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                 }}
               />
             ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Page Header: Pelaksanaan Program & Monitoring */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div className="space-y-1">
                   <h1
                     className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
                     style={{ fontFamily: "var(--font-display)" }}
                   >
-                    Pelaksanaan Program & Monitoring
+                    Pelaksanaan Program &amp; Monitoring
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#787680] leading-relaxed max-w-2xl">
-                    Pantau realisasi milestone lapangan, penyaluran & serapan termin dana, serta pelaporan akuntabilitas kegiatan.
+                  <p className="text-xs sm:text-sm text-slate-600">
+                    Pantau realisasi milestone lapangan, serapan dana, serta pelaporan akuntabilitas kegiatan.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
-                  <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E8E8EA] text-xs font-semibold text-[#181343] shadow-2xs flex items-center gap-1.5">
-                    <span>Total</span>
-                    <span className="font-bold text-[#009E75]">{programs.length}</span>
-                    <span>Program Berjalan</span>
-                  </div>
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
                   <button
                     type="button"
                     onClick={handleRefreshAll}
-                    className="p-2.5 rounded-xl border border-[#E8E8EA] bg-white hover:bg-slate-50 text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-xs"
                     title="Segarkan program"
                   >
-                    <RefreshCw className={`w-4 h-4 ${isLoadingPrograms ? "animate-spin text-emerald-600" : ""}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoadingPrograms ? "animate-spin text-[#009E75]" : "text-slate-500"}`} />
+                    <span>Segarkan</span>
                   </button>
                 </div>
               </div>
 
-              {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten) */}
+              {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten Persis Kolaborasi Aktif) */}
               {(() => {
                 const opStats = {
                   inProgress: programs.filter((p) => p.status === "IN_PROGRESS").length,
@@ -3050,85 +2778,57 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                 };
 
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Kartu 1: Program Berjalan */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Program Berjalan
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50/80 text-emerald-600 flex items-center justify-center shrink-0">
-                          <Activity className="w-4 h-4 text-emerald-600" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Program Berjalan
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                        {opStats.inProgress}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.inProgress}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Program dalam pelaksanaan
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Program dalam pelaksanaan
+                      </span>
                     </div>
 
                     {/* Kartu 2: Aktivitas Tersisa */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Aktivitas Tersisa
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-slate-100/80 text-[#181343] flex items-center justify-center shrink-0">
-                          <Layers className="w-4 h-4 text-[#181343]" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Aktivitas Tersisa
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                        {opStats.pendingActivities}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.pendingActivities}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Kegiatan yang belum selesai
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Kegiatan yang belum selesai
+                      </span>
                     </div>
 
                     {/* Kartu 3: Menunggu Verifikasi */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Menunggu Verifikasi
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-amber-50/80 text-amber-600 flex items-center justify-center shrink-0">
-                          <Clock className="w-4 h-4 text-amber-600" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Menunggu Verifikasi
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                        {opStats.pendingVerification}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.pendingVerification}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Laporan perlu ditinjau
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Laporan perlu ditinjau
+                      </span>
                     </div>
 
                     {/* Kartu 4: Program Selesai */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Program Selesai
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-slate-100/80 text-[#181343] flex items-center justify-center shrink-0">
-                          <CheckCircle2 className="w-4 h-4 text-[#181343]" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Program Selesai
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-[#009E75] tracking-tight tabular-nums">
+                        {opStats.completed}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.completed}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Program yang telah rampung
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Program yang telah rampung
+                      </span>
                     </div>
                   </div>
                 );

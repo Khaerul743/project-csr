@@ -140,8 +140,8 @@ export function ProgramFinancesTab({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Pagu Anggaran */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Pagu Disepakati</span>
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-semibold">Pagu Disepakati</span>
             <DollarSign className="w-4 h-4 text-slate-500" />
           </div>
           <div className="text-lg font-black text-slate-900 truncate">
@@ -153,15 +153,15 @@ export function ProgramFinancesTab({
         </div>
 
         {/* Card 2: Dana Telah Masuk Kas Mitra */}
-        <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200/80 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-teal-700">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Diterima Kas Mitra</span>
-            <Wallet className="w-4 h-4 text-teal-600" />
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-slate-700">
+            <span className="text-xs font-semibold">Diterima Kas Mitra</span>
+            <Wallet className="w-4 h-4 text-slate-600" />
           </div>
-          <div className="text-lg font-black text-teal-900 truncate">
+          <div className="text-lg font-black text-[#181343] truncate">
             {formatRupiah(summary.totalConfirmedReceived)}
           </div>
-          <div className="flex items-center justify-between text-[11px] text-teal-700 font-medium">
+          <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium">
             <span>{disbursementPercent}% terealisasi</span>
             {summary.totalPendingConfirmation > 0 && (
               <span className="text-amber-700 font-bold">
@@ -174,7 +174,7 @@ export function ProgramFinancesTab({
         {/* Card 3: Serapan Pengeluaran & Nota */}
         <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-emerald-700">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Serapan Biaya</span>
+            <span className="text-xs font-semibold">Serapan Biaya</span>
             <Receipt className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-lg font-black text-emerald-900 truncate">
@@ -186,15 +186,15 @@ export function ProgramFinancesTab({
         </div>
 
         {/* Card 4: Sisa Kas di Tangan Mitra */}
-        <div className="p-4 rounded-2xl bg-slate-900 text-white shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-teal-300">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Sisa Saldo Kas</span>
-            <TrendingUp className="w-4 h-4 text-teal-400" />
+        <div className="p-4 rounded-2xl bg-[#181343] text-white shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-slate-200">
+            <span className="text-xs font-semibold">Sisa Saldo Kas</span>
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-lg font-black text-white truncate">
             {formatRupiah(summary.remainingPartnerBalance)}
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">
+          <p className="text-[11px] text-slate-300 font-medium">
             Kas aktif dipegang mitra
           </p>
         </div>

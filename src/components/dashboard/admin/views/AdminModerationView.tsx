@@ -194,7 +194,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
   return (
     <div className="space-y-6">
       {/* Header + Tabs */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div>
           <h1
             className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"

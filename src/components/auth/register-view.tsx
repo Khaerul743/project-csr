@@ -198,9 +198,9 @@ export function RegisterView() {
         </svg>
       </div>
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-14 items-center">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 relative z-10 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 xl:gap-16">
         {/* Kolom Kiri: Identitas Brand & Headline SIPENA */}
-        <div className="lg:col-span-5 flex flex-col items-start lg:-mt-8">
+        <div className="w-full lg:w-[420px] shrink-0 flex flex-col items-start lg:-mt-6">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#47464F] hover:text-[#181343] transition-colors mb-6 rounded-lg py-1 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
@@ -225,16 +225,14 @@ export function RegisterView() {
               >
                 SIPENA
               </span>
-              <span className="text-[11px] font-semibold text-[#047857] tracking-wide block mt-1">
+              <span className="text-[11px] font-semibold text-[#181343]/60 tracking-wide block mt-1">
                 Petakan Kebutuhan, Pantau Perubahan
               </span>
             </div>
           </div>
 
-          <div className="w-10 h-1 rounded-full bg-emerald-500 mt-5 mb-4" />
-
           <h1
-            className="text-3xl sm:text-4xl lg:text-[42px] xl:text-[46px] font-extrabold tracking-tight leading-[1.18] text-[#181343]"
+            className="mt-6 text-3xl sm:text-4xl lg:text-[40px] xl:text-[44px] font-extrabold tracking-tight leading-[1.18] text-[#181343]"
             style={{ fontFamily: "var(--font-display)" }}
           >
             Kolaborasi CSR
@@ -251,8 +249,8 @@ export function RegisterView() {
         </div>
 
         {/* Kolom Kanan: Kartu Form Pendaftaran */}
-        <div className="lg:col-span-7 flex justify-center lg:justify-end">
-          <div className="w-full max-w-[560px] bg-white rounded-3xl border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(24,19,67,0.08)] p-6 sm:p-8 lg:p-9">
+        <div className="w-full max-w-[520px] shrink-0 flex justify-center">
+          <div className="w-full bg-white rounded-3xl border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(24,19,67,0.08)] p-6 sm:p-8 lg:p-9">
             <div>
               <h2
                 className="text-[24px] sm:text-[28px] font-extrabold tracking-tight text-[#181343] leading-tight"

@@ -367,11 +367,14 @@ export function BeneficiarySentimentDashboardView({
   return (
     <div className="space-y-8 animate-in fade-in duration-300 w-full">
       {/* 1. Header Ringkas & Aksi */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Sentimen &amp; Kepuasan Warga
-          </h2>
+          </h1>
           <p className="text-xs sm:text-sm text-slate-600">
             Persepsi dan ulasan langsung penerima manfaat dari program CSR yang berjalan.
           </p>
@@ -884,38 +887,61 @@ export function BeneficiarySentimentDashboardView({
         </div>
       </div>
 
-      {/* 4. Panel Sintesis Eksekutif & Temuan AI */}
+      {/* 4. Panel Sintesis Eksekutif & Temuan AI - Tema Deep Navy SIPENA (#181343) */}
       {data?.executiveSummary && (
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-[#181343] via-[#1E1754] to-[#0A2E28] text-white shadow-lg space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="p-6 rounded-2xl bg-[#181343] text-white shadow-md border border-[#181343] space-y-5 relative overflow-hidden">
+          {/* Pola titik halus khas brand SIPENA */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none opacity-[0.06]"
+            style={{
+              backgroundImage:
+                "radial-gradient(#ffffff 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
+          />
 
           <div className="space-y-2 relative z-10">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-teal-400/20 text-teal-300 flex items-center justify-center border border-teal-400/30">
-                <Sparkles className="w-4 h-4" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center border border-emerald-400/30 shrink-0 shadow-xs">
+                  <Sparkles className="w-4 h-4 text-emerald-300" />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold tracking-tight text-white">
+                  Rangkuman Eksekutif Sentimen Masyarakat
+                </h3>
               </div>
-              <h3 className="text-base sm:text-lg font-bold tracking-tight text-white">
-                Rangkuman Eksekutif Sentimen Masyarakat
-              </h3>
+              <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[11px] font-bold">
+                  Wawasan AI
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-slate-200 text-[11px] font-semibold">
+                  NSS: <strong className="text-emerald-300 font-extrabold">{summary.netSentimentScore >= 0 ? `+${summary.netSentimentScore}` : summary.netSentimentScore}</strong>
+                </span>
+              </div>
             </div>
             <p className="text-xs sm:text-sm text-slate-200 leading-relaxed max-w-4xl">
               {data.executiveSummary}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10 pt-2 border-t border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-white/10 relative z-10">
             {/* Kolom 1: Apresiasi Utama */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>Hal Paling Diapresiasi</span>
+            <div className="p-4 rounded-xl bg-white/[0.06] border border-emerald-400/30 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-emerald-500/25 border border-emerald-400/40 text-emerald-300 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Hal Paling Diapresiasi
+                </span>
+                <span className="text-[11px] font-bold text-emerald-300">
+                  {data.aggregatedHighlights.length} Poin
+                </span>
               </div>
-              <ul className="space-y-2 text-xs text-slate-300">
+              <ul className="space-y-2 text-xs text-slate-200">
                 {data.aggregatedHighlights.length > 0 ? (
                   data.aggregatedHighlights.map((hl, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                      <span>{hl}</span>
+                      <span className="leading-snug">{hl}</span>
                     </li>
                   ))
                 ) : (
@@ -925,17 +951,21 @@ export function BeneficiarySentimentDashboardView({
             </div>
 
             {/* Kolom 2: Isu & Keluhan Lapangan */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>Isu &amp; Kendala Lapangan</span>
+            <div className="p-4 rounded-xl bg-white/[0.06] border border-amber-400/30 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-amber-500/25 border border-amber-400/40 text-amber-300 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                  <AlertTriangle className="w-3 h-3 text-amber-400" /> Isu &amp; Kendala Lapangan
+                </span>
+                <span className="text-[11px] font-bold text-amber-300">
+                  {data.aggregatedConcerns.length} Poin
+                </span>
               </div>
-              <ul className="space-y-2 text-xs text-slate-300">
+              <ul className="space-y-2 text-xs text-slate-200">
                 {data.aggregatedConcerns.length > 0 ? (
                   data.aggregatedConcerns.map((cn, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-                      <span>{cn}</span>
+                      <span className="leading-snug">{cn}</span>
                     </li>
                   ))
                 ) : (
@@ -945,17 +975,21 @@ export function BeneficiarySentimentDashboardView({
             </div>
 
             {/* Kolom 3: Rekomendasi Korporat */}
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-wider">
-                <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
-                <span>Rekomendasi Tindak Lanjut</span>
+            <div className="p-4 rounded-xl bg-white/[0.06] border border-teal-400/30 space-y-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-teal-500/25 border border-teal-400/40 text-teal-300 font-bold text-[10px] uppercase tracking-wider flex items-center gap-1 shadow-2xs">
+                  <ArrowUpRight className="w-3 h-3 text-teal-300" /> Rekomendasi Tindak Lanjut
+                </span>
+                <span className="text-[11px] font-bold text-teal-300">
+                  {data.aggregatedRecommendations.length} Aksi
+                </span>
               </div>
-              <ul className="space-y-2 text-xs text-slate-300">
+              <ul className="space-y-2 text-xs text-slate-200">
                 {data.aggregatedRecommendations.length > 0 ? (
                   data.aggregatedRecommendations.map((rc, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 shrink-0" />
-                      <span>{rc}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 shrink-0" />
+                      <span className="leading-snug">{rc}</span>
                     </li>
                   ))
                 ) : (

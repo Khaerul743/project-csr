@@ -200,12 +200,15 @@ export function PartnerCurationView({
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* 1. Header Identitas & Deskripsi Halaman */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Direktori &amp; Seleksi Mitra CSR
-          </h2>
-          <p className="text-xs sm:text-sm text-[#787680] mt-1 leading-relaxed">
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
             Temukan organisasi pelaksana yang sesuai dengan kebutuhan dan bidang program CSR.
           </p>
         </div>

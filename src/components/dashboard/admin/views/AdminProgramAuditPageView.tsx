@@ -179,7 +179,7 @@ export function AdminProgramAuditPageView({
         </div>
 
         <h1
-          className="text-xl sm:text-2xl font-extrabold text-[#181343]"
+          className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
           style={{ fontFamily: "var(--font-display)" }}
         >
           {program.title}
@@ -210,7 +210,7 @@ export function AdminProgramAuditPageView({
       {/* 4 Audit Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-[11px] font-bold text-slate-600 uppercase">Progres Tahapan</span>
+          <span className="text-xs font-semibold text-slate-600 block">Progres Tahapan</span>
           <div className="text-2xl font-extrabold text-[#181343]">
             {program.activityProgressPercent}%
           </div>
@@ -220,7 +220,7 @@ export function AdminProgramAuditPageView({
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-[11px] font-bold text-slate-600 uppercase">Pagu &amp; Termin</span>
+          <span className="text-xs font-semibold text-slate-600 block">Pagu &amp; Termin</span>
           <div className="text-2xl font-extrabold text-[#181343] truncate">
             {formatCompactRupiah(financialSummary.totalDisbursed)}
           </div>
@@ -230,7 +230,7 @@ export function AdminProgramAuditPageView({
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-[11px] font-bold text-slate-600 uppercase">Nota Terverifikasi</span>
+          <span className="text-xs font-semibold text-slate-600 block">Nota Terverifikasi</span>
           <div className="text-2xl font-extrabold text-emerald-700 truncate">
             {formatCompactRupiah(financialSummary.totalExpensesVerified)}
           </div>
@@ -240,7 +240,7 @@ export function AdminProgramAuditPageView({
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-[11px] font-bold text-slate-600 uppercase">Kepuasan Warga</span>
+          <span className="text-xs font-semibold text-slate-600 block">Kepuasan Warga</span>
           <div className="text-2xl font-extrabold text-[#181343]">
             {reviewStats.totalReviews > 0 ? `${reviewStats.averageRating} / 5` : "-"}
           </div>

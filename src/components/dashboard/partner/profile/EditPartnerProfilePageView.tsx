@@ -547,7 +547,10 @@ export function EditPartnerProfilePageView({
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Profil Lembaga</span>
           </button>
-          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Pengaturan & Edit Profil Lembaga
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">

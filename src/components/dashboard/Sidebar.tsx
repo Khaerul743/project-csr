@@ -278,19 +278,20 @@ export function Sidebar({
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-white text-[#181343] border-r border-[#E5E7EB] select-none">
-      {/* 1. Header & Brand */}
-      <div className="h-[72px] px-5 border-b border-[#E5E7EB] flex items-center justify-between">
+      {/* 1. Header & Brand - Tepat h-[72px], Nama Perusahaan di bawah SIPENA dengan Truncate (...) */}
+      <div className="h-[72px] px-5 border-b border-[#E5E7EB] flex items-center justify-between shrink-0">
         <AppLogo
           size="md"
           theme="light"
           subtitle={organizationName || "Workspace Perusahaan"}
+          className="min-w-0 flex-1"
         />
 
         {/* Close button on mobile */}
         <button
           type="button"
           onClick={onCloseMobile}
-          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-[#181343] hover:bg-slate-100 transition-colors cursor-pointer"
+          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-[#181343] hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
           aria-label="Tutup Menu"
         >
           <X className="w-5 h-5" />

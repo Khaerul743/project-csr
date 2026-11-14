@@ -90,7 +90,7 @@ export function AdminOverviewView({
   return (
     <div className="space-y-6">
       {/* Header Title & Refresh */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div>
           <h1
             className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
@@ -124,7 +124,7 @@ export function AdminOverviewView({
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-5 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-300">
+            <p className="text-xs font-semibold text-emerald-300">
               Akumulasi Komitmen Dana MoU
             </p>
             <div className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">

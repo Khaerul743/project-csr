@@ -89,7 +89,7 @@ export function AdminImpactView({ onOpenProgramAudit }: AdminImpactViewProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div>
           <h1
             className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
@@ -123,7 +123,7 @@ export function AdminImpactView({ onOpenProgramAudit }: AdminImpactViewProps) {
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1">
-            <span className="text-xs text-emerald-300 font-semibold uppercase tracking-wider">
+            <span className="text-xs text-emerald-300 font-semibold">
               Rata-Rata Rating Publik
             </span>
             <div className="text-3xl font-extrabold text-white">

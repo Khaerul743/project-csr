@@ -245,16 +245,16 @@ export function PartnerCollaborationDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+      <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95">
         {/* Header Modal */}
         <div className="p-5 sm:p-6 border-b border-slate-100 flex items-start justify-between gap-4 bg-slate-50/50">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-100 flex items-center justify-center font-bold text-teal-700 text-base overflow-hidden shrink-0 shadow-2xs">
+            <div className="w-12 h-12 rounded-xl bg-slate-50 border border-[#E5E7EB] flex items-center justify-center font-bold text-[#181343] text-sm overflow-hidden shrink-0 shadow-2xs">
               {collaboration.companyLogo ? (
                 <img
                   src={collaboration.companyLogo}
                   alt={collaboration.companyName || "Perusahaan"}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-1"
                 />
               ) : (
                 (collaboration.companyName || "C").substring(0, 2).toUpperCase()
@@ -359,7 +359,7 @@ export function PartnerCollaborationDetailModal({
           {/* Program & Proposal Reference */}
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-500">
                 Inisiatif CSR Sponsor
               </span>
               {focusConfig && (
@@ -387,7 +387,7 @@ export function PartnerCollaborationDetailModal({
                     href={collaboration.proposalDocumentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-900 underline underline-offset-2"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#009E75] hover:text-emerald-800 underline underline-offset-2"
                   >
                     <FileText className="w-3.5 h-3.5" />
                     <span>Lihat Berkas Proposal &amp; RAB yang Diajukan</span>
@@ -446,7 +446,7 @@ export function PartnerCollaborationDetailModal({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E8EA]">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 text-[#181343] flex items-center justify-center">
                     <Layers className="w-4 h-4" />
                   </div>
                   <h4 className="text-sm font-bold text-[#181343]">
@@ -638,7 +638,7 @@ export function PartnerCollaborationDetailModal({
                           <span className="text-[10px] font-semibold text-slate-400 block">
                             Bukti Pelaksanaan (Expected Evidence)
                           </span>
-                          <span className="text-teal-700 font-medium">{st.expectedEvidence}</span>
+                          <span className="text-slate-700 font-medium">{st.expectedEvidence}</span>
                         </div>
                       )}
                     </div>
@@ -650,7 +650,7 @@ export function PartnerCollaborationDetailModal({
 
           {/* Dokumen MoU Legal */}
           <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-slate-600 block">
               Dokumen Kesepakatan (MoU/PKS)
             </span>
             {collaboration.mouDocumentUrl ? (
@@ -680,7 +680,7 @@ export function PartnerCollaborationDetailModal({
 
           {/* Chat / Catatan Negosiasi Cepat */}
           <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-3">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-slate-600 block">
               Catatan Negosiasi Kemitraan
             </span>
 

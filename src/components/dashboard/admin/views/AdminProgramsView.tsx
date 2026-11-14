@@ -75,7 +75,7 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80 w-full">
         <div>
           <h1
             className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
