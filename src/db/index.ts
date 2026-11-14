@@ -27,11 +27,39 @@ function getSanitizedDatabaseUrl(): string {
   return url;
 }
 
-const pool = mysql.createPool(getSanitizedDatabaseUrl());
+function createMySqlPool(): mysql.Pool {
+  const dbUrl = getSanitizedDatabaseUrl();
 
-export const db = drizzle({
-  client: (pool as any).pool ?? pool,
-});
+  return mysql.createPool({
+    uri: dbUrl,
+    waitForConnections: true,
+    connectionLimit: 10,
+    maxIdle: 10,
+    idleTimeout: 60000, // Bersihkan koneksi idle sebelum diputus oleh TiDB Serverless gateway
+    enableKeepAlive: true, // TCP keep-alive aktif untuk mencegah zombie connection di cloud database
+    keepAliveInitialDelay: 10000, // Deteksi keep-alive setiap 10 detik
+    connectTimeout: 20000,
+  });
+}
+
+// Singleton pattern di Next.js dev server untuk mencegah kebocoran koneksi akibat hot module reload (HMR)
+const globalForDb = globalThis as unknown as {
+  _mysqlPool?: mysql.Pool;
+  _drizzleDb?: ReturnType<typeof drizzle>;
+};
+
+export const pool = globalForDb._mysqlPool ?? createMySqlPool();
+
+export const db =
+  globalForDb._drizzleDb ??
+  drizzle({
+    client: (pool as any).pool ?? pool,
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb._mysqlPool = pool;
+  globalForDb._drizzleDb = db;
+}
 
 export type DbClient = typeof db;
 export { schema };
