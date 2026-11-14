@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { AuthGuard } from "@/common/guards/auth.guard";
 import { ApiResponse } from "@/common/utils/api-response";
 import { ErrorHandler } from "@/common/utils/error-handler";
 import { BadRequestError } from "@/common/errors/app-error";
+import { storageService } from "@/common/storage";
 
 export async function POST(request: Request) {
   try {
@@ -38,25 +37,23 @@ export async function POST(request: Request) {
     // 5. Nama file unik dan aman
     const safeFilename = `proposal-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
 
-    // 6. Siapkan folder penyimpanan di public/uploads/proposals
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "proposals");
-    await mkdir(uploadDir, { recursive: true });
-
-    // 7. Simpan file buffer ke disk
-    const filePath = path.join(uploadDir, safeFilename);
+    // 6. Simpan file via Storage Service (Vercel Blob / Local Storage)
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    const publicUrl = `/uploads/proposals/${safeFilename}`;
+    const uploadResult = await storageService.upload(buffer, safeFilename, {
+      folder: "proposals",
+      contentType: file.type || "application/pdf",
+    });
 
     return ApiResponse.created(
       {
-        url: publicUrl,
+        url: uploadResult.url,
         filename: safeFilename,
         originalName: file.name,
         size: file.size,
         mimeType: file.type,
+        provider: uploadResult.provider,
       },
       "Dokumen proposal berhasil diunggah"
     );

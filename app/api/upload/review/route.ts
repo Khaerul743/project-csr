@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { ApiResponse } from "@/common/utils/api-response";
 import { ErrorHandler } from "@/common/utils/error-handler";
 import { BadRequestError } from "@/common/errors/app-error";
+import { storageService } from "@/common/storage";
 
 export async function POST(request: Request) {
   try {
@@ -37,22 +36,21 @@ export async function POST(request: Request) {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const safeFilename = `review-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "reviews");
-    await mkdir(uploadDir, { recursive: true });
-
-    const filePath = path.join(uploadDir, safeFilename);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    const publicUrl = `/uploads/reviews/${safeFilename}`;
+    const uploadResult = await storageService.upload(buffer, safeFilename, {
+      folder: "reviews",
+      contentType: file.type,
+    });
 
     return ApiResponse.created(
       {
-        url: publicUrl,
+        url: uploadResult.url,
         filename: safeFilename,
         size: file.size,
         mimeType: file.type,
+        provider: uploadResult.provider,
       },
       "Foto testimoni berhasil diunggah"
     );
@@ -60,3 +58,4 @@ export async function POST(request: Request) {
     return ErrorHandler.handle(error);
   }
 }
+

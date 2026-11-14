@@ -14,27 +14,40 @@ export class PdfParserService {
     try {
       if (!documentUrlOrPath) return "";
 
-      // 1. Tentukan path file di disk
-      let fullPath = documentUrlOrPath;
-      if (documentUrlOrPath.startsWith("/uploads/")) {
-        fullPath = path.join(process.cwd(), "public", documentUrlOrPath);
-      } else if (!path.isAbsolute(documentUrlOrPath)) {
-        fullPath = path.join(process.cwd(), "public", "uploads", "proposals", documentUrlOrPath);
-      }
+      let fileBuffer: Buffer | ArrayBuffer;
 
-      if (!existsSync(/*turbopackIgnore: true*/ fullPath)) {
-        this.logger.warn(`File PDF tidak ditemukan di path: ${fullPath}`);
-        return "";
-      }
+      // Dukungan untuk URL remote (misal: Vercel Blob / Cloud Storage)
+      if (documentUrlOrPath.startsWith("http://") || documentUrlOrPath.startsWith("https://")) {
+        this.logger.info(`Mengunduh berkas PDF dari remote URL: ${documentUrlOrPath}`);
+        const response = await fetch(documentUrlOrPath);
+        if (!response.ok) {
+          this.logger.warn(`Gagal mengunduh remote PDF: HTTP ${response.status}`);
+          return "";
+        }
+        fileBuffer = await response.arrayBuffer();
+      } else {
+        // Tentukan path file di disk lokal
+        let fullPath = documentUrlOrPath;
+        if (documentUrlOrPath.startsWith("/uploads/")) {
+          fullPath = path.join(process.cwd(), "public", documentUrlOrPath);
+        } else if (!path.isAbsolute(documentUrlOrPath)) {
+          fullPath = path.join(process.cwd(), "public", "uploads", "proposals", documentUrlOrPath);
+        }
 
-      // Pastikan ekstensi adalah PDF
-      if (!fullPath.toLowerCase().endsWith(".pdf")) {
-        this.logger.info(`Bukan berkas PDF, lewati parsing PDF: ${fullPath}`);
-        return "";
-      }
+        if (!existsSync(/*turbopackIgnore: true*/ fullPath)) {
+          this.logger.warn(`File PDF tidak ditemukan di path: ${fullPath}`);
+          return "";
+        }
 
-      this.logger.info(`Membaca dan mengekstrak berkas PDF: ${fullPath}`);
-      const fileBuffer = await readFile(/*turbopackIgnore: true*/ fullPath);
+        // Pastikan ekstensi adalah PDF
+        if (!fullPath.toLowerCase().endsWith(".pdf")) {
+          this.logger.info(`Bukan berkas PDF, lewati parsing PDF: ${fullPath}`);
+          return "";
+        }
+
+        this.logger.info(`Membaca dan mengekstrak berkas PDF lokal: ${fullPath}`);
+        fileBuffer = await readFile(/*turbopackIgnore: true*/ fullPath);
+      }
 
       // 2. Ekstrak teks dengan unpdf (workerless, native Next.js & serverless compatible)
       let rawText = "";

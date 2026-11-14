@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { AuthGuard } from "@/common/guards/auth.guard";
 import { ApiResponse } from "@/common/utils/api-response";
 import { ErrorHandler } from "@/common/utils/error-handler";
 import { BadRequestError } from "@/common/errors/app-error";
+import { storageService } from "@/common/storage";
 
 export async function POST(request: Request) {
   try {
@@ -51,26 +50,24 @@ export async function POST(request: Request) {
     const ext = file.name.split(".").pop()?.toLowerCase() || (isPdf ? "pdf" : "jpg");
     const prefix = isPdf ? "doc" : "media";
     const safeFilename = `${prefix}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
-
-    // 6. Siapkan folder penyimpanan di public/uploads/[folder]
     const safeFolder = requestedFolder.replace(/[^a-zA-Z0-9-_]/g, "");
-    const uploadDir = path.join(process.cwd(), "public", "uploads", safeFolder);
-    await mkdir(uploadDir, { recursive: true });
 
-    // 7. Simpan file
-    const filePath = path.join(uploadDir, safeFilename);
+    // 6. Simpan file via Storage Service (Vercel Blob / Local Storage)
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filePath, buffer);
 
-    const publicUrl = `/uploads/${safeFolder}/${safeFilename}`;
+    const uploadResult = await storageService.upload(buffer, safeFilename, {
+      folder: safeFolder,
+      contentType: file.type,
+    });
 
     return ApiResponse.created(
       {
-        url: publicUrl,
+        url: uploadResult.url,
         filename: safeFilename,
         size: file.size,
         mimeType: file.type,
+        provider: uploadResult.provider,
       },
       "File berhasil diunggah"
     );
