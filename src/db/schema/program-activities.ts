@@ -27,7 +27,7 @@ export const programActivities = mysqlTable("program_activities", {
   activityDate: timestamp("activity_date").notNull(),
   location: varchar("location", { length: 255 }),
   beneficiariesReached: varchar("beneficiaries_reached", { length: 100 }),
-  fundsSpent: decimal("funds_spent", { precision: 15, scale: 2 }).default("0"),
+  fundsSpent: decimal("funds_spent", { precision: 15, scale: 2 }).$defaultFn(() => "0"),
   mediaUrls: text("media_urls"), // JSON stringified array of image URLs
   documentUrl: varchar("document_url", { length: 500 }),
   status: mysqlEnum("status", activityStatusEnum).notNull().default("SUBMITTED"),

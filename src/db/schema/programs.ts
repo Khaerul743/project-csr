@@ -34,7 +34,7 @@ export const programs = mysqlTable("programs", {
   description: text("description"),
   focusArea: mysqlEnum("focus_area", csrFocusAreaEnum).notNull(),
   budget: decimal("budget", { precision: 15, scale: 2 }).notNull(),
-  spentBudget: decimal("spent_budget", { precision: 15, scale: 2 }).default("0"),
+  spentBudget: decimal("spent_budget", { precision: 15, scale: 2 }).$defaultFn(() => "0"),
   targetBeneficiaries: varchar("target_beneficiaries", { length: 255 }),
   actualBeneficiaries: varchar("actual_beneficiaries", { length: 255 }),
   targetCity: varchar("target_city", { length: 100 }),
