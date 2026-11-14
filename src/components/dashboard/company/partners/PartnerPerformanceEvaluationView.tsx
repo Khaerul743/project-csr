@@ -457,11 +457,14 @@ export function PartnerPerformanceEvaluationView({
   return (
     <div className="space-y-8 w-full">
       {/* 1. Header Ringkas & Aksi */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Evaluasi Kinerja Mitra
-          </h2>
+          </h1>
           <p className="text-xs sm:text-sm text-slate-600">
             Indeks akuntabilitas mitra berdasarkan pelaporan lapangan, kepatuhan anggaran, dan ulasan warga.
           </p>

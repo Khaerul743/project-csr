@@ -526,7 +526,10 @@ export function PartnerFullProfileView({
           {/* Name & Dynamic Administrative Verification Status */}
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1
+                className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 {p.name}
               </h1>
 

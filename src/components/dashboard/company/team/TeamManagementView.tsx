@@ -298,9 +298,12 @@ export function TeamManagementView({
       {/* ============================================================ */}
       {/* 1. HEADER HALAMAN */}
       {/* ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#181343] tracking-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Anggota Tim & Akses
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">

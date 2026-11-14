@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   MapPin,
   Calendar,
   AlertCircle,
@@ -18,7 +19,8 @@ import {
   Search,
   Layers,
   Clock,
-  HelpCircle,
+  Sparkles,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +49,17 @@ const DEFAULT_SDGS_BY_FOCUS: Record<CsrFocusArea, number[]> = {
   TANGGAP_BENCANA: [11, 1, 3, 17],
   LAINNYA: [10, 17],
 };
+
+const FORM_STEPS = [
+  { id: 1, label: "Informasi Dasar", shortDesc: "Judul & bidang fokus" },
+  { id: 2, label: "Wilayah & AI", shortDesc: "Lokasi sasaran & prioritas" },
+  { id: 3, label: "Sasaran SDGs", shortDesc: "17 Sasaran & pilar ESG" },
+  { id: 4, label: "Jadwal Program", shortDesc: "Batas pengajuan & periode" },
+  { id: 5, label: "Deskripsi & Pratinjau", shortDesc: "Detail ruang lingkup & simpan" },
+];
+
+const INPUT_BASE_CLASS =
+  "w-full h-11 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl text-[14px] text-[#181343] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:bg-white focus-visible:border-[#181343] focus-visible:ring-2 focus-visible:ring-[#181343]/15 transition-all font-medium";
 
 // Searchable Dropdown for Province and City
 function SearchableSelect({
@@ -86,8 +99,8 @@ function SearchableSelect({
   }, [options, query]);
 
   return (
-    <div className="flex flex-col gap-1.5 relative" ref={dropdownRef}>
-      <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+    <div className="flex flex-col relative" ref={dropdownRef}>
+      <label className="text-[13px] font-semibold text-[#181343] mb-1.5 block">
         {label}
       </label>
 
@@ -97,26 +110,26 @@ function SearchableSelect({
         onClick={() => {
           if (!disabled) setIsOpen(!isOpen);
         }}
-        className={`w-full text-left px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm flex items-center justify-between transition ${
+        className={`w-full h-11 text-left px-3.5 rounded-xl border text-[14px] font-medium flex items-center justify-between transition-all ${
           disabled
-            ? "bg-slate-100 border-[#E8E8EA] text-slate-400 cursor-not-allowed"
+            ? "bg-slate-100 border-[#E2E8F0] text-slate-400 cursor-not-allowed"
             : isOpen
-            ? "bg-white border-[#181343] ring-2 ring-[#181343]/10 text-slate-900 shadow-2xs"
-            : "bg-white border-[#E8E8EA] hover:border-slate-300 text-slate-800 cursor-pointer"
+            ? "bg-white border-[#181343] ring-2 ring-[#181343]/15 text-[#181343] shadow-2xs"
+            : "bg-[#F8FAFC] border-[#E2E8F0] hover:border-[#CBD5E1] text-[#181343] cursor-pointer"
         }`}
       >
-        <span className={value ? "font-semibold text-slate-900" : "text-slate-400 font-normal"}>
+        <span className={value ? "text-[#181343]" : "text-[#94A3B8] font-normal"}>
           {value || placeholder}
         </span>
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {helperText && <span className="text-[11px] text-slate-400">{helperText}</span>}
+      {helperText && <span className="text-[11px] text-[#64748B] mt-1">{helperText}</span>}
 
       {/* Popover list */}
       {isOpen && !disabled && (
-        <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-[#E8E8EA] rounded-xl shadow-xl z-30 overflow-hidden animate-in fade-in duration-150">
-          <div className="p-2 border-b border-[#E8E8EA] bg-[#F9F9FB]">
+        <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-[#E2E8F0] rounded-xl shadow-xl z-30 overflow-hidden animate-in fade-in duration-150">
+          <div className="p-2 border-b border-[#E2E8F0] bg-[#F8FAFC]">
             <div className="relative">
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -125,12 +138,12 @@ function SearchableSelect({
                 placeholder="Cari wilayah..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#E8E8EA] rounded-lg outline-none focus:border-[#181343]/40"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#E2E8F0] rounded-lg outline-none focus:border-[#181343]"
               />
             </div>
           </div>
 
-          <div className="max-h-56 overflow-y-auto divide-y divide-slate-50 text-xs">
+          <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 text-xs">
             {filtered.length === 0 ? (
               <div className="p-4 text-center text-slate-400 text-xs italic">
                 Wilayah tidak ditemukan
@@ -147,9 +160,9 @@ function SearchableSelect({
                       setIsOpen(false);
                       setQuery("");
                     }}
-                    className={`w-full text-left px-3.5 py-2 transition flex items-center justify-between ${
+                    className={`w-full text-left px-3.5 py-2.5 transition flex items-center justify-between cursor-pointer ${
                       isSelected
-                        ? "bg-[#181343] text-white font-bold"
+                        ? "bg-[#181343] text-white font-semibold"
                         : "hover:bg-slate-50 text-slate-700"
                     }`}
                   >
@@ -174,6 +187,9 @@ export function OpportunityFormPageView({
 }: OpportunityFormPageViewProps) {
   const isEdit = mode === "edit" && !!opportunity;
 
+  // Multi-step State (1 to 5)
+  const [currentStep, setCurrentStep] = useState<number>(1);
+
   // Initial description without SDGs metadata tag
   const parseCleanDescription = (desc?: string | null) => {
     if (!desc) return "";
@@ -182,9 +198,8 @@ export function OpportunityFormPageView({
 
   // Helper to parse existing SDGs from opportunity
   const parseInitialSdgs = (opp?: OpportunityItem | null): number[] => {
-    if (!opp) return DEFAULT_SDGS_BY_FOCUS["LINGKUNGAN"] || [13, 14, 15, 17];
+    if (!opp) return [];
 
-    // 1. Try regex on description tag
     const match = opp.description?.match(/\[Klasifikasi SDGs:\s*([^\]]+)\]/);
     if (match && match[1]) {
       const found: number[] = [];
@@ -200,7 +215,6 @@ export function OpportunityFormPageView({
       if (found.length > 0) return found.sort((a, b) => a - b);
     }
 
-    // 2. Try getProgramSdgs helper
     const calculated = getProgramSdgs({
       id: opp.id,
       title: opp.title,
@@ -211,8 +225,7 @@ export function OpportunityFormPageView({
     });
     if (calculated.length > 0) return calculated.sort((a, b) => a - b);
 
-    // 3. Fallback to default by focus area
-    return DEFAULT_SDGS_BY_FOCUS[opp.focusArea] || [17];
+    return [];
   };
 
   // Form States
@@ -263,34 +276,8 @@ export function OpportunityFormPageView({
 
   // UI & submission states
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleApplyAiRecommendation = ({
-    focusArea: nextFocusArea,
-    sdgs: nextSdgs,
-    descriptionSnippet,
-  }: {
-    focusArea?: CsrFocusArea;
-    sdgs?: number[];
-    descriptionSnippet?: string;
-  }) => {
-    const focusChanged = Boolean(nextFocusArea && nextFocusArea !== focusArea);
-    if (nextFocusArea) {
-      setFocusArea(nextFocusArea);
-    }
-    if (nextSdgs && nextSdgs.length > 0) {
-      setSelectedSdgs((prev) => {
-        const base = focusChanged ? [] : prev;
-        return Array.from(new Set([...base, ...nextSdgs])).sort((a, b) => a - b);
-      });
-    }
-    if (descriptionSnippet) {
-      setDescription((prev) => {
-        const trimmed = prev.trim();
-        if (trimmed.includes(descriptionSnippet.trim())) return prev;
-        return trimmed ? `${trimmed}\n\n${descriptionSnippet}` : descriptionSnippet;
-      });
-    }
-  };
+  const [isDescriptionHighlighted, setIsDescriptionHighlighted] = useState(false);
+  const [appliedAiSnippet, setAppliedAiSnippet] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -313,19 +300,13 @@ export function OpportunityFormPageView({
     return found ? found.cities : [];
   }, [targetProvince]);
 
-  // When province changes, reset city selection
   const handleProvinceChange = (prov: string) => {
     setTargetProvince(prov);
     setTargetCity("");
   };
 
-  // Suggest SDGs when focusArea changes in Create mode
   const handleFocusAreaChange = (newArea: CsrFocusArea) => {
     setFocusArea(newArea);
-    if (!isEdit) {
-      const suggested = DEFAULT_SDGS_BY_FOCUS[newArea] || [17];
-      setSelectedSdgs(suggested);
-    }
   };
 
   const toggleSdg = (id: number) => {
@@ -334,7 +315,6 @@ export function OpportunityFormPageView({
     );
   };
 
-  // Mapped ESG Pillars
   const mappedEsgPillars = useMemo(() => {
     const pillars = {
       E: [] as SdgGoal[],
@@ -353,6 +333,66 @@ export function OpportunityFormPageView({
     });
     return pillars;
   }, [selectedSdgs]);
+
+  const handleApplyAiRecommendation = ({
+    focusArea: nextFocusArea,
+    sdgs: nextSdgs,
+    descriptionSnippet,
+    feedbackMessage,
+  }: {
+    focusArea?: CsrFocusArea;
+    sdgs?: number[];
+    descriptionSnippet?: string;
+    feedbackMessage?: string;
+  }) => {
+    if (nextFocusArea) {
+      setFocusArea(nextFocusArea);
+    }
+    if (nextSdgs && nextSdgs.length > 0) {
+      // Set directly to the newly selected priority's SDGs so it replaces the previous choice
+      setSelectedSdgs([...nextSdgs].sort((a, b) => a - b));
+    }
+    if (descriptionSnippet) {
+      const newSnippet = descriptionSnippet.trim();
+      setDescription((prev) => {
+        const trimmed = prev.trim();
+
+        // 1. If description was empty, just use the new snippet
+        if (!trimmed) {
+          return newSnippet;
+        }
+
+        // 2. If description equals the previous AI snippet, replace completely
+        if (appliedAiSnippet && trimmed === appliedAiSnippet.trim()) {
+          return newSnippet;
+        }
+
+        // 3. If description contains the previous AI snippet, replace that specific snippet
+        if (appliedAiSnippet && trimmed.includes(appliedAiSnippet.trim())) {
+          return trimmed.replace(appliedAiSnippet.trim(), newSnippet);
+        }
+
+        // 4. If description was previously generated by an AI priority (starts with "Prioritas Wilayah (")
+        if (trimmed.startsWith("Prioritas Wilayah (")) {
+          return newSnippet;
+        }
+
+        // 5. If user had custom manual text, append or replace
+        return `${trimmed}\n\n${newSnippet}`;
+      });
+
+      setAppliedAiSnippet(newSnippet);
+    }
+
+    setSuccessMessage(
+      feedbackMessage ||
+        "Rekomendasi AI berhasil diterapkan ke form. Sasaran SDGs dan draf deskripsi telah diperbarui."
+    );
+    setIsDescriptionHighlighted(true);
+    setTimeout(() => {
+      setIsDescriptionHighlighted(false);
+    }, 4000);
+  };
 
   // Image upload
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -393,7 +433,6 @@ export function OpportunityFormPageView({
     }
   };
 
-  // Check if form is dirty for leave confirmation
   const isDirty = useMemo(() => {
     if (!isEdit) {
       return (
@@ -451,6 +490,73 @@ export function OpportunityFormPageView({
     }
   };
 
+  // Step Navigation Handlers
+  const validateCurrentStep = (step: number): boolean => {
+    setErrorMessage(null);
+
+    if (step === 1) {
+      if (!title.trim()) {
+        setErrorMessage("Nama / Judul Peluang CSR wajib diisi sebelum melanjutkan.");
+        return false;
+      }
+    }
+
+    if (step === 2) {
+      if (!targetProvince || !targetCity) {
+        setErrorMessage("Silakan pilih Provinsi dan Kota/Kabupaten sasaran terlebih dahulu.");
+        return false;
+      }
+    }
+
+    if (step === 4) {
+      if (deadline) {
+        const deadlineDate = new Date(deadline);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (deadlineDate < today) {
+          setErrorMessage("Batas waktu pengajuan proposal tidak boleh mendahului hari ini.");
+          return false;
+        }
+      }
+      if (startDate && endDate) {
+        if (new Date(endDate) < new Date(startDate)) {
+          setErrorMessage("Tanggal selesai program tidak boleh lebih awal dari tanggal mulai.");
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  const handleNextStep = () => {
+    if (!validateCurrentStep(currentStep)) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setErrorMessage(null);
+    setCurrentStep((prev) => Math.min(prev + 1, 5));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handlePrevStep = () => {
+    setErrorMessage(null);
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goToStep = (targetStep: number) => {
+    if (targetStep > currentStep) {
+      if (!validateCurrentStep(currentStep)) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+    }
+    setErrorMessage(null);
+    setCurrentStep(targetStep);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   // CREATE Save Handler: DRAFT or OPEN
   const handleSaveCreate = async (targetStatus: "DRAFT" | "OPEN") => {
     setErrorMessage(null);
@@ -458,18 +564,27 @@ export function OpportunityFormPageView({
 
     if (!title.trim()) {
       setErrorMessage("Nama / Judul Peluang CSR wajib diisi.");
+      setCurrentStep(1);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     if (targetStatus === "OPEN") {
-      if (!description.trim()) {
-        setErrorMessage("Deskripsi & ruang lingkup inisiatif wajib diisi sebelum mempublikasikan.");
+      if (!targetProvince || !targetCity) {
+        setErrorMessage("Wilayah sasaran (Provinsi dan Kota/Kabupaten) wajib dipilih sebelum mempublikasikan.");
+        setCurrentStep(2);
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
-      if (!targetProvince || !targetCity) {
-        setErrorMessage("Wilayah sasaran (Provinsi dan Kota/Kabupaten) wajib dipilih sebelum mempublikasikan.");
+      if (!deadline) {
+        setErrorMessage("Batas waktu pengajuan proposal wajib diisi sebelum mempublikasikan.");
+        setCurrentStep(4);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      if (!description.trim()) {
+        setErrorMessage("Deskripsi & ruang lingkup inisiatif wajib diisi sebelum mempublikasikan.");
+        setCurrentStep(5);
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -479,6 +594,7 @@ export function OpportunityFormPageView({
         today.setHours(0, 0, 0, 0);
         if (deadlineDate < today) {
           setErrorMessage("Batas waktu pengajuan proposal tidak boleh mendahului tanggal hari ini.");
+          setCurrentStep(4);
           window.scrollTo({ top: 0, behavior: "smooth" });
           return;
         }
@@ -486,6 +602,7 @@ export function OpportunityFormPageView({
       if (startDate && endDate) {
         if (new Date(endDate) < new Date(startDate)) {
           setErrorMessage("Tanggal selesai program tidak boleh lebih awal dari tanggal mulai.");
+          setCurrentStep(4);
           window.scrollTo({ top: 0, behavior: "smooth" });
           return;
         }
@@ -548,7 +665,7 @@ export function OpportunityFormPageView({
 
       setTimeout(() => {
         onSuccess();
-      }, 1000);
+      }, 1200);
     } catch (err: any) {
       setErrorMessage(err.message || "Terjadi kesalahan saat menyimpan peluang CSR.");
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -557,7 +674,7 @@ export function OpportunityFormPageView({
     }
   };
 
-  // EDIT Save Handler: Updates existing opportunity
+  // EDIT Save Handler
   const handleSaveEdit = async () => {
     if (!opportunity) return;
     setErrorMessage(null);
@@ -565,11 +682,13 @@ export function OpportunityFormPageView({
 
     if (!title.trim()) {
       setErrorMessage("Nama / Judul Peluang CSR wajib diisi.");
+      setCurrentStep(1);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     if (!description.trim()) {
       setErrorMessage("Deskripsi inisiatif peluang wajib diisi.");
+      setCurrentStep(5);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -580,14 +699,7 @@ export function OpportunityFormPageView({
       today.setHours(0, 0, 0, 0);
       if (deadlineDate < today) {
         setErrorMessage("Batas waktu pengajuan proposal tidak boleh mendahului tanggal hari ini.");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-    }
-
-    if (startDate && endDate) {
-      if (new Date(endDate) < new Date(startDate)) {
-        setErrorMessage("Tanggal selesai program tidak boleh lebih awal dari tanggal mulai.");
+        setCurrentStep(4);
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -622,11 +734,10 @@ export function OpportunityFormPageView({
         endDate: endDate || undefined,
         deadline: deadline || undefined,
         bannerUrl: bannerUrl || undefined,
-        status: opportunity.status, // preserve existing status!
       };
 
       const res = await fetch(`/api/opportunities/${opportunity.id}`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -651,45 +762,103 @@ export function OpportunityFormPageView({
     }
   };
 
-  // Completion calculation for sidebar
-  const completionScore = useMemo(() => {
-    let score = 0;
-    if (title.trim()) score += 20;
-    if (targetProvince && targetCity) score += 25;
-    if (selectedSdgs.length > 0) score += 20;
-    if (deadline) score += 15;
-    if (description.trim()) score += 20;
-    return score;
-  }, [title, targetProvince, targetCity, selectedSdgs, deadline, description]);
-
   return (
-    <div className="w-full space-y-6 animate-in fade-in duration-300">
-      {/* 1. Header Halaman Khusus */}
-      <div className="pb-2 border-b border-[#E8E8EA]">
-        <div className="space-y-1">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#181343] transition mb-1 cursor-pointer"
+    <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
+      {/* 1. Header Bar */}
+      <div className="space-y-1 pb-3 border-b border-slate-200/80 w-full">
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#64748B] hover:text-[#181343] transition mb-1 cursor-pointer"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Kembali ke Daftar Peluang CSR</span>
+        </button>
+        <div className="flex items-center gap-3">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Daftar Peluang CSR</span>
-          </button>
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
-              {isEdit ? "Edit Peluang CSR" : "Buat Peluang CSR Baru"}
-            </h2>
-            {isEdit && opportunity && (
-              <Badge variant={STATUS_CONFIG[opportunity.status]?.variant || "slate"} size="sm" hasDot>
-                {STATUS_CONFIG[opportunity.status]?.label || opportunity.status}
-              </Badge>
-            )}
+            {isEdit ? "Edit Peluang CSR" : "Buat Peluang CSR Baru"}
+          </h1>
+          {isEdit && opportunity && (
+            <Badge variant={STATUS_CONFIG[opportunity.status]?.variant || "slate"} size="sm" hasDot>
+              {STATUS_CONFIG[opportunity.status]?.label || opportunity.status}
+            </Badge>
+          )}
+        </div>
+        <p className="text-xs sm:text-sm text-[#64748B]">
+          {isEdit
+            ? "Perbarui rincian inisiatif kolaborasi CSR melalui tahapan formulir di bawah ini."
+            : "Rencanakan dan publikasikan peluang kolaborasi CSR melalui 5 tahapan yang terstruktur."}
+        </p>
+      </div>
+
+      {/* 2. Top Stepper Card */}
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-3 sm:p-4 shadow-2xs">
+        {/* Desktop 5-step segments */}
+        <div className="hidden sm:grid grid-cols-5 gap-2">
+          {FORM_STEPS.map((step) => {
+            const isCompleted = step.id < currentStep;
+            const isCurrent = step.id === currentStep;
+
+            return (
+              <button
+                key={step.id}
+                type="button"
+                onClick={() => goToStep(step.id)}
+                className={`flex items-center gap-2.5 p-2 rounded-xl text-left transition-all cursor-pointer ${
+                  isCurrent
+                    ? "bg-[#181343]/5 border border-[#181343]/20"
+                    : isCompleted
+                    ? "hover:bg-slate-50 border border-transparent"
+                    : "opacity-60 hover:opacity-100 border border-transparent"
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
+                    isCurrent
+                      ? "bg-[#181343] text-white"
+                      : isCompleted
+                      ? "bg-emerald-600 text-white"
+                      : "bg-slate-100 text-slate-500"
+                  }`}
+                >
+                  {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
+                </div>
+                <div className="min-w-0">
+                  <span
+                    className={`text-xs block truncate ${
+                      isCurrent ? "font-bold text-[#181343]" : "font-medium text-slate-700"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                  <span className="text-[11px] text-[#64748B] block truncate">
+                    {step.shortDesc}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile Stepper bar */}
+        <div className="sm:hidden space-y-2 px-1 py-0.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-[#181343]">
+              Langkah {currentStep} dari 5: {FORM_STEPS[currentStep - 1].label}
+            </span>
+            <span className="text-slate-500 font-medium">
+              {Math.round((currentStep / 5) * 100)}%
+            </span>
           </div>
-          <p className="text-xs sm:text-sm text-[#787680]">
-            {isEdit
-              ? "Perbarui informasi dan perencanaan peluang kerja sama CSR."
-              : "Rencanakan dan publikasikan peluang kerja sama CSR berdasarkan kebutuhan masyarakat."}
-          </p>
+          <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+            <div
+              className="h-full bg-[#181343] rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / 5) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
 
@@ -723,32 +892,33 @@ export function OpportunityFormPageView({
         </div>
       ) : null}
 
-      {/* 2. Main Two-Column Layout (Form 70%, Summary 30%) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full">
+      {/* 3. Main Step Form Card */}
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 shadow-2xs space-y-6">
         {/* ============================================================ */}
-        {/* FORM UTAMA (Kolom Kiri) */}
+        {/* LANGKAH 1: INFORMASI DASAR */}
         {/* ============================================================ */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* SECTION 1: Informasi Dasar Peluang */}
-          <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-5">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#F4F4F6]">
-              <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
-                1
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-[#181343]">
-                  Informasi Dasar Peluang
-                </h3>
-                <span className="text-[11px] text-[#787680]">
-                  Tentukan judul inisiatif dan bidang fokus program CSR yang direncanakan.
-                </span>
+        {currentStep === 1 && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Informasi Dasar Inisiatif CSR
+                  </h3>
+                  <p className="text-xs text-[#64748B]">
+                    Tentukan nama judul inisiatif dan bidang fokus program yang direncanakan.
+                  </p>
+                </div>
               </div>
             </div>
 
             <div className="space-y-4">
               {/* Nama / Judul */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="text-[13px] font-semibold text-[#181343] block">
                   Nama / Judul Peluang CSR <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -756,21 +926,24 @@ export function OpportunityFormPageView({
                   placeholder="Contoh: Program Air Bersih dan Sanitasi Terpadu Pedesaan"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30 transition"
+                  className={INPUT_BASE_CLASS}
                 />
+                <span className="text-[12px] text-[#64748B]">
+                  Gunakan judul yang jelas, ringkas, dan merefleksikan sasaran intervensi sosial.
+                </span>
               </div>
 
               {/* Grid 2 Kolom: Bidang Fokus & Estimasi Anggaran */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 {/* Bidang Fokus */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="text-[13px] font-semibold text-[#181343] block">
                     Bidang Fokus CSR <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={focusArea}
                     onChange={(e) => handleFocusAreaChange(e.target.value as CsrFocusArea)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30 cursor-pointer"
+                    className={INPUT_BASE_CLASS}
                   >
                     {csrFocusAreaEnum.map((area: CsrFocusArea) => (
                       <option key={area} value={area}>
@@ -778,11 +951,14 @@ export function OpportunityFormPageView({
                       </option>
                     ))}
                   </select>
+                  <span className="text-[12px] text-[#64748B]">
+                    Pilih pilar tematik CSR yang paling sesuai dengan mandat perusahaan.
+                  </span>
                 </div>
 
                 {/* Estimasi Alokasi Anggaran */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="text-[13px] font-semibold text-[#181343] block">
                     Estimasi Alokasi Anggaran (Opsional)
                   </label>
                   <div className="relative">
@@ -797,30 +973,36 @@ export function OpportunityFormPageView({
                         const numeric = e.target.value.replace(/[^\d]/g, "");
                         setEstimatedBudget(numeric);
                       }}
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30"
+                      className={`${INPUT_BASE_CLASS} pl-10`}
                     />
                   </div>
-                  <span className="text-[11px] text-slate-400">
-                    Kosongkan jika anggaran program belum dipublikasikan atau fleksibel.
+                  <span className="text-[12px] text-[#64748B]">
+                    Kosongkan jika anggaran program belum dipublikasikan atau bersifat fleksibel.
                   </span>
                 </div>
               </div>
             </div>
           </div>
+        )}
 
-          {/* SECTION 2: Lokasi Sasaran & AI Need Prioritization */}
-          <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-5">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#F4F4F6]">
-              <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
-                2
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-[#181343]">
-                  Lokasi Sasaran &amp; Analisis Kebutuhan Wilayah
-                </h3>
-                <span className="text-[11px] text-[#787680]">
-                  Tentukan wilayah intervensi CSR melalui dropdown terhubung 38 provinsi di Indonesia.
-                </span>
+        {/* ============================================================ */}
+        {/* LANGKAH 2: WILAYAH SASARAN & ANALISIS AI */}
+        {/* ============================================================ */}
+        {currentStep === 2 && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Wilayah Sasaran &amp; Analisis Kebutuhan
+                  </h3>
+                  <p className="text-xs text-[#64748B]">
+                    Tentukan wilayah intervensi dan gunakan asisten AI untuk memetakan prioritas masyarakat lokal.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -832,7 +1014,7 @@ export function OpportunityFormPageView({
                 value={targetProvince}
                 onChange={handleProvinceChange}
                 options={provinceOptions}
-                helperText="Pilih provinsi utama program"
+                helperText="Pilih provinsi utama pelaksanaan program"
               />
 
               <SearchableSelect
@@ -847,45 +1029,51 @@ export function OpportunityFormPageView({
             </div>
 
             {/* AI Need Prioritization Assistant */}
-            <AiNeedPrioritizationPanel
-              targetProvince={targetProvince}
-              targetCity={targetCity}
-              focusArea={focusArea}
-              title={title}
-              description={description}
-              estimatedBudget={estimatedBudget}
-              excludeOpportunityId={isEdit ? opportunity?.id : null}
-              onApplyRecommendation={handleApplyAiRecommendation}
-            />
+            <div className="pt-2">
+              <AiNeedPrioritizationPanel
+                targetProvince={targetProvince}
+                targetCity={targetCity}
+                focusArea={focusArea}
+                title={title}
+                description={description}
+                estimatedBudget={estimatedBudget}
+                excludeOpportunityId={isEdit ? opportunity?.id : null}
+                onApplyRecommendation={handleApplyAiRecommendation}
+              />
+            </div>
           </div>
+        )}
 
-          {/* SECTION 3: Sasaran SDGs & Pemetaan ESG (Prioritas Arahan Dosen) */}
-          <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-5">
-            <div className="flex items-center justify-between pb-2 border-b border-[#F4F4F6]">
+        {/* ============================================================ */}
+        {/* LANGKAH 3: SASARAN SDGS & PEMETAAN ESG */}
+        {/* ============================================================ */}
+        {currentStep === 3 && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
                   3
                 </div>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-[#181343]">
-                    Sasaran SDGs &amp; Pemetaan ESG
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Sasaran SDGs &amp; Pemetaan Pilar ESG
                   </h3>
-                  <span className="text-[11px] text-[#787680]">
-                    Pilih sasaran SDGs yang relevan dari 17 kategori resmi PBB. Sistem memetakan pilar ESG secara otomatis.
-                  </span>
+                  <p className="text-xs text-[#64748B]">
+                    Pilih sasaran SDGs yang relevan dari 17 tujuan resmi PBB. Sistem memetakan pilar ESG secara otomatis.
+                  </p>
                 </div>
               </div>
-              <Badge variant="emerald" size="sm" className="font-bold">
+              <Badge variant="emerald" size="sm" className="font-bold self-start sm:self-auto">
                 {selectedSdgs.length} SDGs Terpilih
               </Badge>
             </div>
 
             {/* Interactive 17 SDGs Grid */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+            <div className="space-y-2.5">
+              <span className="text-[13px] font-semibold text-[#181343] block">
                 Pilih Sasaran SDGs yang Ditargetkan:
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                 {ALL_17_SDGS.map((sdg) => {
                   const isChecked = selectedSdgs.includes(sdg.id);
                   return (
@@ -893,7 +1081,7 @@ export function OpportunityFormPageView({
                       key={sdg.id}
                       type="button"
                       onClick={() => toggleSdg(sdg.id)}
-                      className={`p-2.5 rounded-xl text-left transition-colors duration-150 border flex items-start gap-2.5 cursor-pointer ${
+                      className={`p-3 rounded-xl text-left transition-colors duration-150 border flex items-start gap-2.5 cursor-pointer ${
                         isChecked
                           ? "bg-[#EDF9F3] border-[#35B98E] text-[#181343]"
                           : "bg-[#F9F9FB] hover:bg-slate-100/80 border-[#E5E7EB] text-[#181343]"
@@ -923,16 +1111,16 @@ export function OpportunityFormPageView({
             </div>
 
             {/* Mapped ESG Summary */}
-            <div className="space-y-2 pt-1">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+            <div className="space-y-2 pt-2">
+              <span className="text-[13px] font-semibold text-[#181343] block">
                 Hasil Pemetaan Otomatis Pilar ESG:
               </span>
-              <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E8EA] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-4 rounded-xl bg-slate-50 border border-[#E5E7EB] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 {/* E */}
-                <div className="p-3 rounded-lg bg-white border border-[#E8E8EA] space-y-1">
+                <div className="p-3 rounded-lg bg-white border border-[#E5E7EB] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-800">🌿 Lingkungan (E)</span>
-                    <span className="font-extrabold text-slate-900">{mappedEsgPillars.E.length}</span>
+                    <span className="font-bold text-emerald-800">Lingkungan (E)</span>
+                    <span className="font-bold text-[#181343]">{mappedEsgPillars.E.length}</span>
                   </div>
                   <div className="text-[11px] text-slate-500 line-clamp-2">
                     {mappedEsgPillars.E.length > 0
@@ -942,10 +1130,10 @@ export function OpportunityFormPageView({
                 </div>
 
                 {/* S */}
-                <div className="p-3 rounded-lg bg-white border border-[#E8E8EA] space-y-1">
+                <div className="p-3 rounded-lg bg-white border border-[#E5E7EB] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-blue-800">👥 Sosial (S)</span>
-                    <span className="font-extrabold text-slate-900">{mappedEsgPillars.S.length}</span>
+                    <span className="font-bold text-blue-800">Sosial (S)</span>
+                    <span className="font-bold text-[#181343]">{mappedEsgPillars.S.length}</span>
                   </div>
                   <div className="text-[11px] text-slate-500 line-clamp-2">
                     {mappedEsgPillars.S.length > 0
@@ -955,10 +1143,10 @@ export function OpportunityFormPageView({
                 </div>
 
                 {/* G */}
-                <div className="p-3 rounded-lg bg-white border border-[#E8E8EA] space-y-1">
+                <div className="p-3 rounded-lg bg-white border border-[#E5E7EB] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-purple-800">🏛️ Tata Kelola (G)</span>
-                    <span className="font-extrabold text-slate-900">{mappedEsgPillars.G.length}</span>
+                    <span className="font-bold text-purple-800">Tata Kelola (G)</span>
+                    <span className="font-bold text-[#181343]">{mappedEsgPillars.G.length}</span>
                   </div>
                   <div className="text-[11px] text-slate-500 line-clamp-2">
                     {mappedEsgPillars.G.length > 0
@@ -967,114 +1155,141 @@ export function OpportunityFormPageView({
                   </div>
                 </div>
               </div>
-              <span className="text-[10px] text-slate-400 italic block">
-                Klasifikasi SDGs &amp; ESG tersimpan otomatis untuk integrasi laporan Analisis Kontribusi SDGs &amp; ESG.
+              <span className="text-[11px] text-[#64748B] block mt-1">
+                Klasifikasi SDGs dan ESG tersimpan otomatis untuk integrasi laporan Analisis Kontribusi.
               </span>
             </div>
           </div>
+        )}
 
-          {/* SECTION 4: Jadwal Peluang & Pelaksanaan Program */}
-          <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-5">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#F4F4F6]">
-              <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
-                4
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-[#181343]">
-                  Jadwal Peluang &amp; Pelaksanaan Program
-                </h3>
-                <span className="text-[11px] text-[#787680]">
-                  Atur batas waktu pengajuan proposal serta estimasi periode eksekusi program bersama mitra.
-                </span>
+        {/* ============================================================ */}
+        {/* LANGKAH 4: JADWAL PELUANG & PELAKSANAAN PROGRAM */}
+        {/* ============================================================ */}
+        {currentStep === 4 && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+                  4
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Jadwal Peluang &amp; Pelaksanaan Program
+                  </h3>
+                  <p className="text-xs text-[#64748B]">
+                    Atur batas waktu pengajuan proposal bagi calon mitra serta estimasi periode eksekusi program.
+                  </p>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Batas Pengajuan Proposal */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="text-[13px] font-semibold text-[#181343] block">
                   Batas Pengajuan Proposal *
                 </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30"
-                  />
-                </div>
-                <span className="text-[11px] text-slate-400">
-                  Batas akhir mitra mengajukan proposal
+                <input
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  className={INPUT_BASE_CLASS}
+                />
+                <span className="text-[11px] text-[#64748B]">
+                  Batas akhir mitra mengajukan proposal teknis &amp; RAB
                 </span>
               </div>
 
               {/* Tanggal Mulai Program */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="text-[13px] font-semibold text-[#181343] block">
                   Mulai Program (Estimasi)
                 </label>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30"
+                  className={INPUT_BASE_CLASS}
                 />
-                <span className="text-[11px] text-slate-400">Kick-off pelaksanaan kegiatan</span>
+                <span className="text-[11px] text-[#64748B]">
+                  Perkiraan kick-off kegiatan di lapangan
+                </span>
               </div>
 
               {/* Tanggal Selesai Program */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                <label className="text-[13px] font-semibold text-[#181343] block">
                   Selesai Program (Estimasi)
                 </label>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30"
+                  className={INPUT_BASE_CLASS}
                 />
-                <span className="text-[11px] text-slate-400">Target rampung kegiatan</span>
+                <span className="text-[11px] text-[#64748B]">
+                  Target rampung seluruh kegiatan program
+                </span>
               </div>
             </div>
           </div>
+        )}
 
-          {/* SECTION 5: Deskripsi & Materi Pendukung */}
-          <div className="p-6 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-5">
-            <div className="flex items-center gap-2 pb-2 border-b border-[#F4F4F6]">
-              <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
-                5
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-bold text-[#181343]">
-                  Deskripsi &amp; Materi Pendukung
-                </h3>
-                <span className="text-[11px] text-[#787680]">
-                  Uraikan latar belakang masalah, profil penerima manfaat, dan banner representatif inisiatif.
-                </span>
+        {/* ============================================================ */}
+        {/* LANGKAH 5: DESKRIPSI, BANNER & PRATINJAU AKHIR */}
+        {/* ============================================================ */}
+        {currentStep === 5 && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div className="pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+                  5
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-[#181343]">
+                    Deskripsi, Banner &amp; Pratinjau Akhir
+                  </h3>
+                  <p className="text-xs text-[#64748B]">
+                    Lengkapi uraian ruang lingkup inisiatif dan tinjau ringkasan sebelum mempublikasikan.
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* Deskripsi Textarea */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Deskripsi &amp; Ruang Lingkup Inisiatif <span className="text-rose-500">*</span>
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="field-description" className="text-[13px] font-semibold text-[#181343] block">
+                  Deskripsi &amp; Ruang Lingkup Inisiatif <span className="text-rose-500">*</span>
+                </label>
+                {isDescriptionHighlighted && (
+                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-in fade-in">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Rekomendasi AI Berhasil Disisipkan
+                  </span>
+                )}
+              </div>
               <textarea
+                id="field-description"
                 rows={6}
                 placeholder="Jelaskan latar belakang program, sasaran penerima manfaat, ruang lingkup kegiatan yang diharapkan, serta kualifikasi calon mitra pelaksana yang dicari..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3.5 rounded-xl border border-[#E8E8EA] bg-white text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343]/30 transition leading-relaxed resize-y"
+                className={`w-full p-3.5 rounded-xl border text-[14px] text-[#181343] focus:outline-none transition-all duration-300 leading-relaxed resize-y ${
+                  isDescriptionHighlighted
+                    ? "bg-emerald-50/50 border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm"
+                    : "border-[#E2E8F0] bg-[#F8FAFC] focus:bg-white focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343]"
+                }`}
               />
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[12px] text-[#64748B]">
                 Informasi yang lengkap mempermudah mitra pelaksana menyusun proposal teknis dan RAB yang akurat.
               </span>
             </div>
 
             {/* Banner Upload / Preview */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                Gambar Sampul / Banner Peluang
+            <div className="space-y-2 pt-2">
+              <label className="text-[13px] font-semibold text-[#181343] block">
+                Gambar Sampul / Banner Peluang (Opsional)
               </label>
 
               {uploadError && (
@@ -1085,7 +1300,7 @@ export function OpportunityFormPageView({
               )}
 
               {bannerUrl && !imageError ? (
-                <div className="relative rounded-2xl overflow-hidden border border-[#E8E8EA] h-48 sm:h-56 bg-slate-100 group">
+                <div className="relative rounded-2xl overflow-hidden border border-[#E5E7EB] h-48 sm:h-56 bg-slate-100 group">
                   <img
                     src={bannerUrl}
                     alt="Pratinjau Sampul"
@@ -1115,7 +1330,7 @@ export function OpportunityFormPageView({
                   </div>
                 </div>
               ) : (
-                <label className="border-2 border-dashed border-[#E8E8EA] hover:border-slate-400 rounded-2xl p-6 text-center cursor-pointer transition bg-[#F9F9FB] hover:bg-white flex flex-col items-center justify-center gap-2 group">
+                <label className="border-2 border-dashed border-[#E5E7EB] hover:border-slate-400 rounded-2xl p-6 text-center cursor-pointer transition bg-[#F9F9FB] hover:bg-white flex flex-col items-center justify-center gap-2 group">
                   <input
                     type="file"
                     accept="image/*"
@@ -1132,7 +1347,7 @@ export function OpportunityFormPageView({
                     </div>
                   ) : (
                     <>
-                      <div className="w-10 h-10 rounded-xl bg-white border border-[#E8E8EA] text-slate-600 flex items-center justify-center shadow-2xs group-hover:scale-105 transition">
+                      <div className="w-10 h-10 rounded-xl bg-white border border-[#E5E7EB] text-slate-600 flex items-center justify-center shadow-2xs group-hover:scale-105 transition">
                         <ImageIcon className="w-5 h-5 text-slate-500" />
                       </div>
                       <div>
@@ -1142,7 +1357,7 @@ export function OpportunityFormPageView({
                             : "Pilih Gambar Sampul dari Komputer"}
                         </span>
                         <span className="text-[11px] text-slate-400 block mt-0.5">
-                          Format PNG, JPG, atau WEBP • Maksimal 5MB
+                          Format PNG, JPG, atau WEBP - Maksimal 5MB
                         </span>
                       </div>
                     </>
@@ -1150,159 +1365,107 @@ export function OpportunityFormPageView({
                 </label>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* ============================================================ */}
-        {/* SIDEBAR RINGKASAN & KELENGKAPAN (Kolom Kanan) */}
-        {/* ============================================================ */}
-        <div className="lg:col-span-4 sticky top-24 space-y-5">
-          {/* Kelengkapan Form */}
-          <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#181343] uppercase tracking-wider block">
-                Kelengkapan Peluang
-              </span>
-              <span className="text-xs font-extrabold text-emerald-700">{completionScore}%</span>
-            </div>
-
-            {/* Progress bar */}
-            <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-              <div
-                className="h-full bg-emerald-600 transition-all duration-300 rounded-full"
-                style={{ width: `${completionScore}%` }}
-              />
-            </div>
-
-            {/* Checklist */}
-            <div className="space-y-2 text-xs pt-1 text-slate-600">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  {title.trim() ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />}
-                  Nama / Judul Peluang
+            {/* Pratinjau Ringkasan Inisiatif */}
+            <div className="pt-2">
+              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] space-y-3">
+                <span className="text-xs font-bold text-[#181343] block">
+                  Ringkasan Pratinjau Peluang:
                 </span>
-                <span className={title.trim() ? "text-emerald-700 font-semibold" : "text-slate-400"}>
-                  {title.trim() ? "Terisi" : "Wajib"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  {targetProvince && targetCity ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />}
-                  Wilayah Sasaran
-                </span>
-                <span className={targetProvince && targetCity ? "text-emerald-700 font-semibold" : "text-slate-400"}>
-                  {targetProvince && targetCity ? "Terpilih" : "Wajib"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  {selectedSdgs.length > 0 ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />}
-                  Sasaran SDGs
-                </span>
-                <span className="text-emerald-700 font-semibold">
-                  {selectedSdgs.length} Terpilih
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  {deadline ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />}
-                  Batas Pengajuan
-                </span>
-                <span className={deadline ? "text-emerald-700 font-semibold" : "text-slate-400"}>
-                  {deadline ? "Diatur" : "Wajib"}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  {description.trim() ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />}
-                  Deskripsi Inisiatif
-                </span>
-                <span className={description.trim() ? "text-emerald-700 font-semibold" : "text-slate-400"}>
-                  {description.trim() ? "Terisi" : "Wajib"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Pratinjau Cepat Ringkasan */}
-          <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3">
-            <span className="text-xs font-bold text-[#181343] uppercase tracking-wider block">
-              Ringkasan Inisiatif
-            </span>
-
-            <div className="space-y-2.5 text-xs">
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Bidang Fokus</span>
-                <span className="font-bold text-[#181343]">{FOCUS_AREA_CONFIG[focusArea]?.label}</span>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Wilayah Sasaran</span>
-                <span className="font-semibold text-slate-800">
-                  {targetCity && targetProvince ? `${targetCity}, ${targetProvince}` : "Belum ditentukan"}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Estimasi Anggaran</span>
-                <span className="font-bold text-[#009E75]">
-                  {estimatedBudget && parseFloat(estimatedBudget) > 0 ? formatRupiah(estimatedBudget) : "Belum ditentukan"}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">Pemetaan Pilar ESG</span>
-                <div className="flex items-center gap-1.5 pt-0.5">
-                  <Badge variant="emerald" size="sm">E: {mappedEsgPillars.E.length}</Badge>
-                  <Badge variant="blue" size="sm">S: {mappedEsgPillars.S.length}</Badge>
-                  <Badge variant="purple" size="sm">G: {mappedEsgPillars.G.length}</Badge>
-                </div>
-              </div>
-
-              {/* Status Peluang Saat Ini (Read-only) */}
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-                  Status Peluang Saat Ini
-                </span>
-                <div className="pt-1">
-                  {isEdit && opportunity ? (
-                    <Badge variant={STATUS_CONFIG[opportunity.status]?.variant || "slate"} size="sm" hasDot>
-                      {STATUS_CONFIG[opportunity.status]?.label || opportunity.status}
-                    </Badge>
-                  ) : (
-                    <Badge variant="blue" size="sm" hasDot>
-                      Draf Baru
-                    </Badge>
-                  )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block">Judul Inisiatif</span>
+                    <span className="font-semibold text-[#181343]">{title || "Belum diisi"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block">Bidang Fokus</span>
+                    <span className="font-semibold text-[#181343]">{FOCUS_AREA_CONFIG[focusArea]?.label}</span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block">Wilayah Sasaran</span>
+                    <span className="font-semibold text-[#181343]">
+                      {targetCity && targetProvince ? `${targetCity}, ${targetProvince}` : "Belum ditentukan"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block">Estimasi Anggaran</span>
+                    <span className="font-bold text-[#047857]">
+                      {estimatedBudget && parseFloat(estimatedBudget) > 0 ? formatRupiah(estimatedBudget) : "Fleksibel / Belum Ditentukan"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block">Batas Pengajuan Proposal</span>
+                    <span className="font-medium text-[#181343]">{deadline || "Belum ditentukan"}</span>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block">Sasaran SDGs &amp; ESG</span>
+                    <span className="font-medium text-[#181343]">
+                      {selectedSdgs.length > 0 ? `${selectedSdgs.length} SDGs (E:${mappedEsgPillars.E.length}, S:${mappedEsgPillars.S.length}, G:${mappedEsgPillars.G.length})` : "Belum dipilih"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* ============================================================ */}
-      {/* 4. STICKY FOOTER — SATU-SATUNYA AREA TINDAKAN */}
-      {/* ============================================================ */}
-      <div className="sticky bottom-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 -mb-4 sm:-mb-6 lg:-mb-8 px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 bg-white/95 backdrop-blur-md border-t border-[#E8E8EA] shadow-md transition-all">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Tombol Batal di Sisi Kiri */}
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-            className="w-full sm:w-auto text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 py-2.5 px-4 rounded-xl border border-[#E8E8EA] sm:border-transparent hover:bg-slate-100/80 transition-colors cursor-pointer text-center"
-          >
-            Batal
-          </button>
+        {/* ============================================================ */}
+        {/* STEP FOOTER / NAVIGATION CONTROLS */}
+        {/* ============================================================ */}
+        <div className="pt-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
+          {/* Tombol Kiri */}
+          <div>
+            {currentStep === 1 ? (
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto text-xs sm:text-sm font-semibold text-[#47464F] hover:text-[#181343] py-2.5 px-4 rounded-xl border border-[#E5E7EB] hover:bg-slate-50 transition-colors cursor-pointer text-center"
+              >
+                Batal
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handlePrevStep}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto text-xs sm:text-sm font-semibold text-[#47464F] hover:text-[#181343] py-2.5 px-4 rounded-xl border border-[#E5E7EB] hover:bg-slate-50 transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Sebelumnya</span>
+              </button>
+            )}
+          </div>
 
-          {/* Sisi Kanan: Aksi Sesuai Mode */}
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            {isEdit ? (
+          {/* Tombol Kanan */}
+          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+            {/* Simpan Draf Selalu Tersedia */}
+            {!isEdit && (
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => handleSaveCreate("DRAFT")}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-initial text-xs sm:text-sm font-semibold border-[#E5E7EB] text-[#47464F] hover:bg-slate-50 rounded-xl px-4 py-2.5 cursor-pointer"
+              >
+                Simpan Draf
+              </Button>
+            )}
+
+            {currentStep < 5 ? (
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleNextStep}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-6 py-2.5 shadow-2xs cursor-pointer inline-flex items-center justify-center gap-2"
+              >
+                <span>Lanjut ke Langkah Berikutnya</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            ) : isEdit ? (
               <Button
                 type="button"
                 variant="primary"
@@ -1321,36 +1484,23 @@ export function OpportunityFormPageView({
                 )}
               </Button>
             ) : (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="md"
-                  onClick={() => handleSaveCreate("DRAFT")}
-                  disabled={isSubmitting}
-                  className="flex-1 sm:flex-initial text-xs sm:text-sm font-semibold border-[#E8E8EA] text-slate-700 hover:bg-slate-50 rounded-xl px-5 py-2.5 cursor-pointer"
-                >
-                  Simpan Draf
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="primary"
-                  size="md"
-                  onClick={() => handleSaveCreate("OPEN")}
-                  disabled={isSubmitting}
-                  className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-6 py-2.5 shadow-2xs cursor-pointer flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Memproses...</span>
-                    </>
-                  ) : (
-                    <span>Publikasikan Peluang</span>
-                  )}
-                </Button>
-              </>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={() => handleSaveCreate("OPEN")}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-7 py-2.5 shadow-2xs cursor-pointer flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Memproses...</span>
+                  </>
+                ) : (
+                  <span>Publikasikan Peluang CSR</span>
+                )}
+              </Button>
             )}
           </div>
         </div>

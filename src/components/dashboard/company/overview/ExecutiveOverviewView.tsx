@@ -691,10 +691,10 @@ export function ExecutiveOverviewView({
     <div className="space-y-8 w-full animate-in fade-in duration-300">
       {/* 1. Header Ringkas & Toolbar Filter Segaris (Selaras Halaman Kinerja Mitra) */}
       <div className="space-y-3">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
           <div className="space-y-1">
             <h1
-              className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight"
+              className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
               {isManagement ? "Ringkasan Eksekutif Portofolio" : "Ringkasan Manajemen Inisiatif CSR"}
@@ -899,7 +899,7 @@ export function ExecutiveOverviewView({
       </div>
 
       {/* ============================================================ */}
-      {/* BAGIAN 3 — ANALISIS ANGGARAN & STATUS PROGRAM                */}
+      {/* BAGIAN 3: ANALISIS ANGGARAN & STATUS PROGRAM                 */}
       {/* ============================================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left Column (7 cols): Tren Anggaran CSR */}
@@ -1299,7 +1299,7 @@ export function ExecutiveOverviewView({
       </div>
 
       {/* ============================================================ */}
-      {/* BAGIAN 4 — PENJELAJAH PORTOFOLIO TERPADU (TAB SWITCHER)       */}
+      {/* BAGIAN 4: PENJELAJAH PORTOFOLIO TERPADU (TAB SWITCHER)        */}
       {/* ============================================================ */}
       <div ref={drillDownTableRef} className="space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">

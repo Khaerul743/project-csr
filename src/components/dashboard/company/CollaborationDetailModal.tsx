@@ -485,25 +485,28 @@ export function CollaborationDetailModal({
         <div className="px-6 py-4 sm:py-5 border-b border-[#E8E8EA] flex items-center justify-between bg-white shrink-0">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2.5">
-              <h2 className="text-lg sm:text-xl font-bold text-[#181343] tracking-tight">
+              <h1
+                className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 Detail Kesepakatan &amp; MoU
-              </h2>
+              </h1>
               {isAgreed ? (
-                <Badge variant="emerald" size="sm">
+                <Badge variant="emerald" size="sm" hasDot>
                   MoU Disepakati
                 </Badge>
               ) : isNegotiation ? (
-                <Badge variant="amber" size="sm">
+                <Badge variant="amber" size="sm" hasDot>
                   Tahap Negosiasi
                 </Badge>
               ) : (
-                <Badge variant="rose" size="sm">
+                <Badge variant="rose" size="sm" hasDot>
                   Dibatalkan
                 </Badge>
               )}
             </div>
-            <p className="text-xs text-[#787680]">
-              Kelola klausul kesepakatan, finalisasi tahapan milestone dari proposal, dan sahkan kontrak MoU.
+            <p className="text-xs text-slate-500">
+              Finalisasi klausul anggaran, jadwal pelaksanaan, dan tahapan milestone sebelum pengesahan MoU.
             </p>
           </div>
 
@@ -542,7 +545,7 @@ export function CollaborationDetailModal({
             <div className="lg:col-span-7 xl:col-span-8 space-y-6">
               {/* Snapshot Program & Inisiatif */}
               <div className="p-4 sm:p-4.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#787680] block">
+                <span className="text-xs font-semibold text-slate-500 block">
                   Program CSR &amp; Inisiatif Terkait
                 </span>
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
@@ -571,14 +574,14 @@ export function CollaborationDetailModal({
 
               {/* Grid Field Kesepakatan (2 Kolom) */}
               <div className="space-y-4">
-                <div className="text-xs font-bold uppercase tracking-wider text-[#181343]">
+                <div className="text-xs font-bold text-[#181343]">
                   Klausul &amp; Parameter Program
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Field 1: Nilai Anggaran Disepakati */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Nilai Anggaran Disepakati <span className="text-rose-500">*</span>
                     </label>
                     {isAgreed || isCancelled ? (
@@ -617,7 +620,7 @@ export function CollaborationDetailModal({
 
                   {/* Field 2: Target Penerima Manfaat */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Target Penerima Manfaat
                     </label>
                     {isAgreed || isCancelled ? (
@@ -642,7 +645,7 @@ export function CollaborationDetailModal({
 
                   {/* Field 3: Tanggal Mulai Program */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Tanggal Mulai Program
                     </label>
                     {isAgreed || isCancelled ? (
@@ -667,7 +670,7 @@ export function CollaborationDetailModal({
 
                   {/* Field 4: Tanggal Selesai Program */}
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Tanggal Selesai Program
                     </label>
                     {isAgreed || isCancelled ? (
@@ -693,7 +696,7 @@ export function CollaborationDetailModal({
 
                 {/* Field 5: Catatan Negosiasi & Klausul Khusus */}
                 <div className="space-y-1.5 pt-1">
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="block text-xs font-semibold text-slate-700">
                     Catatan Negosiasi &amp; Ketentuan Khusus
                   </label>
                   {isAgreed || isCancelled ? (
@@ -725,7 +728,7 @@ export function CollaborationDetailModal({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E8EA]">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-lg bg-slate-100 text-[#181343] flex items-center justify-center">
                         <Layers className="w-4 h-4" />
                       </div>
                       <h4 className="text-sm font-bold text-[#181343]">
@@ -733,7 +736,7 @@ export function CollaborationDetailModal({
                       </h4>
                     </div>
                     <p className="text-[11px] text-[#787680]">
-                      Ubah rencana kerja dari dokumen proposal menjadi milestone terstruktur yang disepakati kedua pihak sebelum MoU disahkan.
+                      Tahapan kegiatan yang disepakati bersama mitra sebagai dasar pemantauan program.
                     </p>
                   </div>
 
@@ -795,11 +798,11 @@ export function CollaborationDetailModal({
 
                 {/* AI Rationale banner jika ada */}
                 {aiRationale && (
-                  <div className="p-3 rounded-xl bg-indigo-50/80 border border-indigo-200/70 text-indigo-900 text-xs flex items-start gap-2">
-                    <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 text-xs flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-[#009E75] shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
-                      <span className="font-bold text-indigo-950">Draf Ekstraksi AI dari Dokumen Proposal:</span>
-                      <p className="text-[11px] text-indigo-800">{aiRationale}</p>
+                      <span className="font-bold text-slate-900">Rangkuman Tahapan dari Dokumen Proposal:</span>
+                      <p className="text-[11px] text-slate-600">{aiRationale}</p>
                     </div>
                   </div>
                 )}
@@ -815,17 +818,17 @@ export function CollaborationDetailModal({
                           size="sm"
                           onClick={handleExtractWithAi}
                           disabled={isExtractingAi || isSubmitting}
-                          className="text-xs bg-indigo-50/50 hover:bg-indigo-50 text-indigo-700 border-indigo-200 rounded-xl flex items-center gap-1.5 cursor-pointer"
+                          className="text-xs bg-white hover:bg-slate-50 text-slate-700 border border-[#E5E7EB] rounded-xl flex items-center gap-1.5 cursor-pointer shadow-2xs"
                         >
                           {isExtractingAi ? (
                             <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#009E75]" />
                               <span>Mengekstrak Dokumen...</span>
                             </>
                           ) : (
                             <>
-                              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                              <span>Bantu Ekstraksi dengan AI</span>
+                              <Sparkles className="w-3.5 h-3.5 text-[#009E75]" />
+                              <span>Ekstraksi Rencana dari Proposal</span>
                             </>
                           )}
                         </Button>
@@ -849,7 +852,7 @@ export function CollaborationDetailModal({
                         href={collaboration.proposalDocumentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] font-semibold text-teal-700 hover:text-teal-900 flex items-center gap-1 underline underline-offset-2"
+                        className="text-[11px] font-semibold text-[#009E75] hover:text-emerald-800 flex items-center gap-1 underline underline-offset-2"
                       >
                         <FileText className="w-3.5 h-3.5" />
                         <span>Lihat Dokumen Proposal Rujukan</span>
@@ -860,13 +863,13 @@ export function CollaborationDetailModal({
 
                 {/* Daftar Milestone Cards */}
                 {milestones.length === 0 ? (
-                  <div className="p-6 rounded-xl border border-dashed border-[#E8E8EA] text-center space-y-2 bg-slate-50/40">
-                    <Layers className="w-8 h-8 text-slate-300 mx-auto" />
-                    <p className="text-xs font-semibold text-slate-700">
-                      Belum ada tahapan milestone yang disusun
+                  <div className="p-6 rounded-xl border border-dashed border-[#E8E8EA] text-center space-y-1.5 bg-slate-50/40">
+                    <Layers className="w-7 h-7 text-slate-400 mx-auto" />
+                    <p className="text-xs font-semibold text-slate-800">
+                      Belum Ada Rencana Milestone
                     </p>
-                    <p className="text-[11px] text-[#787680] max-w-md mx-auto">
-                      Klik <strong>"Bantu Ekstraksi dengan AI"</strong> untuk mengekstrak draf milestone secara otomatis dari dokumen proposal mitra, atau klik <strong>"Tambah Manual"</strong> untuk menyusun sendiri.
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      Susun tahapan pelaksanaan kegiatan secara manual atau gunakan bantuan ringkasan dari dokumen proposal mitra.
                     </p>
                   </div>
                 ) : (
@@ -891,7 +894,7 @@ export function CollaborationDetailModal({
 
                           <div className="flex items-center gap-1.5 shrink-0">
                             <span className="text-[9px] font-bold px-2 py-0.5 rounded-md bg-white border border-[#E8E8EA] text-slate-600">
-                              {st.source === "AI_GENERATED" ? "Draft AI" : "Manual"}
+                              {st.source === "AI_GENERATED" ? "Draft Ringkasan" : "Manual"}
                             </span>
 
                             {!isAgreed && !isCancelled && (
@@ -937,7 +940,7 @@ export function CollaborationDetailModal({
                               <span className="text-[10px] font-semibold text-slate-400 block">
                                 Bukti Pelaksanaan (Expected Evidence)
                               </span>
-                              <span className="text-teal-700 font-medium">{st.expectedEvidence}</span>
+                              <span className="text-slate-700 font-medium">{st.expectedEvidence}</span>
                             </div>
                           )}
                         </div>
@@ -1143,7 +1146,7 @@ export function CollaborationDetailModal({
             <div className="lg:col-span-5 xl:col-span-4 space-y-4">
               {/* Card 1: Para Pihak Kemitraan */}
               <div className="p-4 rounded-xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#787680] block">
+                <span className="text-xs font-semibold text-slate-600 block">
                   Para Pihak Kerja Sama
                 </span>
 
@@ -1154,7 +1157,7 @@ export function CollaborationDetailModal({
                       <Building2 className="w-4 h-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] text-[#787680] uppercase font-semibold block">
+                      <span className="text-[11px] text-slate-500 font-medium block">
                         Perusahaan Sponsor
                       </span>
                       <h4 className="font-bold text-[#181343] text-xs truncate">
@@ -1172,7 +1175,7 @@ export function CollaborationDetailModal({
                   <div className="flex items-center gap-3 p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA]">
                     <ModalPartnerLogo logoUrl={collaboration.partnerLogo} name={collaboration.partnerName || "Mitra"} />
                     <div className="min-w-0 flex-1">
-                      <span className="text-[10px] text-[#787680] uppercase font-semibold block">
+                      <span className="text-[11px] text-slate-500 font-medium block">
                         Mitra Pelaksana
                       </span>
                       <h4 className="font-bold text-[#181343] text-xs truncate">
@@ -1192,15 +1195,15 @@ export function CollaborationDetailModal({
               {/* Card 2: Dokumen MoU / Perjanjian Kerja Sama */}
               <div className="p-4 rounded-xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#787680]">
+                  <span className="text-xs font-semibold text-slate-600">
                     Dokumen MoU / PKS
                   </span>
                   {isAgreed ? (
-                    <Badge variant="emerald" size="sm">
+                    <Badge variant="emerald" size="sm" hasDot>
                       Telah Disepakati
                     </Badge>
                   ) : mouDocumentUrl ? (
-                    <Badge variant="amber" size="sm">
+                    <Badge variant="amber" size="sm" hasDot>
                       Dalam Proses
                     </Badge>
                   ) : (
@@ -1286,12 +1289,12 @@ export function CollaborationDetailModal({
               {/* Card 3: Dokumen Proposal Sumber */}
               {collaboration.proposalDocumentUrl && (
                 <div className="p-4 rounded-xl bg-white border border-[#E8E8EA] shadow-2xs space-y-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#787680] block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     Dokumen Proposal &amp; RAB Mitra
                   </span>
                   <div className="p-2.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="w-4 h-4 text-teal-600 shrink-0" />
+                      <FileText className="w-4 h-4 text-slate-600 shrink-0" />
                       <span className="text-xs font-semibold text-slate-800 truncate">
                         {collaboration.proposalDocumentUrl.split("/").pop() || "Proposal-Mitra"}
                       </span>
@@ -1300,7 +1303,7 @@ export function CollaborationDetailModal({
                       href={collaboration.proposalDocumentUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-bold text-teal-700 hover:text-teal-900 flex items-center gap-1 shrink-0"
+                      className="text-xs font-semibold text-[#009E75] hover:text-emerald-800 flex items-center gap-1 shrink-0"
                     >
                       <span>Lihat</span>
                       <ExternalLink className="w-3 h-3" />

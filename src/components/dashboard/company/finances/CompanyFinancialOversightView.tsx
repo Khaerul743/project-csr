@@ -293,11 +293,14 @@ export function CompanyFinancialOversightView({
   return (
     <div className="space-y-8 animate-in fade-in duration-300 w-full">
       {/* 1. Header Ringkas & Aksi Eksekutif */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
         <div className="space-y-1">
-          <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             Pengawasan Anggaran &amp; Keuangan
-          </h2>
+          </h1>
           <p className="text-xs sm:text-sm text-slate-600">
             Agregasi pagu komitmen, realisasi belanja lapangan, dan efisiensi serapan dana CSR.
           </p>

@@ -263,9 +263,12 @@ export function PartnerProgramDetailPageView({
               </div>
 
               {/* Main Heading: Nama Program */}
-              <h2 className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight leading-snug">
+              <h1
+                className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight leading-snug"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
                 {program.title}
-              </h2>
+              </h1>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#787680]">
                 <span className="font-semibold text-[#181343] flex items-center gap-1">
@@ -324,14 +327,14 @@ export function PartnerProgramDetailPageView({
       {/* ============================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Progres Aktivitas Proposal */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-teal-400/60 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-600">
                 Progres Aktivitas Proposal
               </span>
-              <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Activity className="w-4 h-4 text-teal-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Activity className="w-4 h-4 text-emerald-600" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight">
@@ -341,13 +344,13 @@ export function PartnerProgramDetailPageView({
           <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-[#787680]">Tahapan Selesai</span>
-              <span className="font-bold text-teal-700">
+              <span className="font-bold text-emerald-700">
                 {program.completedActivitiesCount ?? 0} / {program.totalActivitiesCount ?? 0}
               </span>
             </div>
             <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-teal-600 h-full rounded-full transition-all duration-500"
+                className="bg-emerald-600 h-full rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(program.activityProgressPercent ?? 0, 100)}%` }}
               />
             </div>
@@ -355,10 +358,10 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 2: Realisasi Dana */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-emerald-400/60 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-600">
                 Realisasi Dana
               </span>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -384,10 +387,10 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 3: Status Laporan Lapangan */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-amber-400/60 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-600">
                 Status Laporan Lapangan
               </span>
               <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -415,14 +418,14 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 4: Penerima Manfaat Aktual */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-teal-400/60 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
+              <span className="text-xs font-semibold text-slate-600">
                 Penerima Manfaat Aktual
               </span>
-              <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Users className="w-4 h-4 text-teal-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Users className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
             <div className="text-base font-black text-[#181343] line-clamp-2 min-h-[32px]">

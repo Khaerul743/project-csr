@@ -1161,12 +1161,15 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {!isManagement && activeMenu === "proposals" && (
             <div className="w-full space-y-6 animate-in fade-in duration-300">
               {/* Header Identitas & Ringkasan Total */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+                  <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
                     Kelola Proposal CSR
-                  </h2>
-                  <p className="text-xs sm:text-sm text-[#787680] mt-1">
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
                     Tinjau pengajuan mitra dan pantau proses persetujuan kerja sama.
                   </p>
                 </div>
@@ -1179,7 +1182,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 {/* KPI 1: Menunggu Tinjauan */}
                 <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex flex-col justify-between cursor-default">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     Menunggu Tinjauan
                   </span>
                   <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1.5">
@@ -1192,7 +1195,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* KPI 2: Perlu Revisi */}
                 <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex flex-col justify-between cursor-default">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     Perlu Revisi
                   </span>
                   <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1.5">
@@ -1205,7 +1208,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* KPI 3: Disetujui */}
                 <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex flex-col justify-between cursor-default">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     Disetujui
                   </span>
                   <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1.5">
@@ -1426,12 +1429,15 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {!isManagement && activeMenu === "collaborations" && (
             <div className="w-full space-y-6 animate-in fade-in duration-300">
               {/* Header Identitas & Ringkasan Total */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-[#181343] tracking-tight">
+                  <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
                     Kelola Kerja Sama &amp; MoU
-                  </h2>
-                  <p className="text-xs sm:text-sm text-[#787680] mt-1">
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1">
                     Pantau proses kesepakatan, dokumen perjanjian, dan kesiapan pelaksanaan program CSR bersama mitra.
                   </p>
                 </div>
@@ -1444,7 +1450,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                 {/* KPI 1: Dalam Proses */}
                 <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex flex-col justify-between cursor-default">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     Dalam Proses
                   </span>
                   <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1.5">
@@ -1457,7 +1463,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* KPI 2: MoU Disepakati */}
                 <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex flex-col justify-between cursor-default">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     MoU Disepakati
                   </span>
                   <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1.5">
@@ -1470,7 +1476,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* KPI 3: Nilai Kesepakatan */}
                 <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex flex-col justify-between cursor-default">
-                  <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider block">
+                  <span className="text-xs font-semibold text-slate-600 block">
                     Nilai Kesepakatan
                   </span>
                   <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1.5 truncate">
@@ -1826,8 +1832,37 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 initialTab={programInitialTab}
               />
             ) : (
-            <div className="space-y-6">
-              {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten) */}
+            <div className="space-y-5">
+              {/* Header Pengawasan Program (Standar Seragam Anti-Slop) */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
+                <div className="space-y-1">
+                  <h1
+                    className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {isManagement ? "Pengawasan Program" : "Pelaksanaan Program"}
+                  </h1>
+                  <p className="text-xs sm:text-sm text-slate-600">
+                    {isManagement
+                      ? "Pantau realisasi milestone lapangan, progres kegiatan mitra, dan verifikasi pelaporan kegiatan."
+                      : "Pantau progres pelaksanaan program CSR, tahapan kegiatan lapangan, dan kepatuhan pelaporan."}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                  <button
+                    type="button"
+                    onClick={fetchPrograms}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-xs"
+                    title="Segarkan program"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoadingPrograms ? "animate-spin text-[#009E75]" : "text-slate-500"}`} />
+                    <span>Segarkan</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten Persis Kolaborasi Aktif) */}
               {(() => {
                 const opStats = {
                   inProgress: programs.filter((p) => p.status === "IN_PROGRESS").length,
@@ -1843,85 +1878,57 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 };
 
                 return (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     {/* Kartu 1: Program Berjalan */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Program Berjalan
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50/80 text-emerald-600 flex items-center justify-center shrink-0">
-                          <Activity className="w-4 h-4 text-emerald-600" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Program Berjalan
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                        {opStats.inProgress}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.inProgress}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Program dalam pelaksanaan
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Program dalam pelaksanaan
+                      </span>
                     </div>
 
                     {/* Kartu 2: Aktivitas Tersisa */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Aktivitas Tersisa
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-slate-100/80 text-[#181343] flex items-center justify-center shrink-0">
-                          <Layers className="w-4 h-4 text-[#181343]" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Aktivitas Tersisa
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                        {opStats.pendingActivities}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.pendingActivities}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Kegiatan yang belum selesai
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Kegiatan yang belum selesai
+                      </span>
                     </div>
 
                     {/* Kartu 3: Menunggu Verifikasi */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Menunggu Verifikasi
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-amber-50/80 text-amber-600 flex items-center justify-center shrink-0">
-                          <Clock className="w-4 h-4 text-amber-600" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Menunggu Verifikasi
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                        {opStats.pendingVerification}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.pendingVerification}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Laporan perlu ditinjau
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Laporan perlu ditinjau
+                      </span>
                     </div>
 
                     {/* Kartu 4: Program Selesai */}
-                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-semibold text-slate-600">
-                          Program Selesai
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-slate-100/80 text-[#181343] flex items-center justify-center shrink-0">
-                          <CheckCircle2 className="w-4 h-4 text-[#181343]" />
-                        </div>
+                    <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                      <span className="text-xs font-semibold text-slate-600 block">
+                        Program Selesai
+                      </span>
+                      <div className="text-xl sm:text-2xl font-extrabold text-[#009E75] tracking-tight tabular-nums">
+                        {opStats.completed}
                       </div>
-                      <div className="space-y-1">
-                        <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight">
-                          {opStats.completed}
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium">
-                          Program yang telah rampung
-                        </p>
-                      </div>
+                      <span className="text-[11px] text-slate-500 block">
+                        Program yang telah rampung
+                      </span>
                     </div>
                   </div>
                 );

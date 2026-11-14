@@ -9,9 +9,11 @@ import {
   ChevronDown,
   ChevronUp,
   Compass,
+  FileText,
   Info,
   Layers,
   Loader2,
+  MapPin,
   RefreshCw,
   ShieldAlert,
   Sparkles,
@@ -70,7 +72,7 @@ const EVIDENCE_BADGE: Record<
     className: "bg-[#181343]/10 text-[#181343] border-[#181343]/20",
   },
   REGIONAL_CONTEXT: {
-    label: "Konteks Makro Wilayah",
+    label: "Konteks Wilayah",
     className: "bg-slate-100 text-slate-700 border-slate-200",
   },
 };
@@ -88,7 +90,7 @@ const COVERAGE_META: Record<
     className: "bg-amber-50 text-amber-800 border-amber-200",
   },
   COLD_START: {
-    label: "Wilayah Baru (Cold Start)",
+    label: "Wilayah Baru (Data Awal)",
     className: "bg-slate-100 text-slate-700 border-slate-300",
   },
 };
@@ -106,10 +108,13 @@ export function AiNeedPrioritizationPanel({
   const aiEnabled = isAiFeatureEnabled();
 
   const [isOpen, setIsOpen] = useState(true);
+  const [showNotes, setShowNotes] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [fieldContextNotes, setFieldContextNotes] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [appliedNotice, setAppliedNotice] = useState<string | null>(null);
+  const [appliedActionId, setAppliedActionId] = useState<string | null>(null);
   const [result, setResult] = useState<NeedPrioritizationResponse | null>(null);
   const [lastAnalyzedKey, setLastAnalyzedKey] = useState<string>("");
 
@@ -119,7 +124,7 @@ export function AiNeedPrioritizationPanel({
 
   useEffect(() => {
     if (!appliedNotice) return;
-    const timer = window.setTimeout(() => setAppliedNotice(null), 4000);
+    const timer = window.setTimeout(() => setAppliedNotice(null), 5000);
     return () => window.clearTimeout(timer);
   }, [appliedNotice]);
 
@@ -136,6 +141,7 @@ export function AiNeedPrioritizationPanel({
     setIsAnalyzing(true);
     setErrorMessage(null);
     setAppliedNotice(null);
+    setAppliedActionId(null);
 
     try {
       const token = localStorage.getItem("accessToken");
@@ -167,21 +173,27 @@ export function AiNeedPrioritizationPanel({
       setIsOpen(true);
     } catch (err: any) {
       setErrorMessage(
-        err?.message || "Terjadi kendala saat menjalankan AI Need Prioritization."
+        err?.message || "Terjadi kendala saat menjalankan analisis prioritas wilayah."
       );
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const applyWithFeedback = (payload: {
-    focusArea?: CsrFocusArea;
-    sdgs?: number[];
-    descriptionSnippet?: string;
-    feedbackMessage: string;
-  }) => {
+  const applyWithFeedback = (
+    actionId: string,
+    payload: {
+      focusArea?: CsrFocusArea;
+      sdgs?: number[];
+      descriptionSnippet?: string;
+      feedbackMessage: string;
+    }
+  ) => {
+    setAppliedActionId(actionId);
+    setAppliedNotice(
+      "Rekomendasi berhasil diterapkan ke form. Halaman telah diarahkan ke bagian deskripsi inisiatif."
+    );
     onApplyRecommendation(payload);
-    setAppliedNotice(payload.feedbackMessage);
   };
 
   const riskBadgeStyle =
@@ -192,19 +204,19 @@ export function AiNeedPrioritizationPanel({
       : "bg-emerald-50 text-emerald-800 border-emerald-200";
 
   return (
-    <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4 sm:p-5 space-y-4">
+    <div className="rounded-2xl border border-slate-200 bg-[#F9FAFB] p-4 sm:p-5 space-y-4">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-start sm:items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4" aria-hidden="true" />
+          <div className="w-8 h-8 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-[#181343]" aria-hidden="true" />
           </div>
           <div>
-            <h4 className="text-xs sm:text-sm font-bold text-[#181343]">
-              AI Need Prioritization &amp; Deteksi Tumpang Tindih Wilayah
+            <h4 className="text-sm font-bold text-[#181343]">
+              Asisten Rekomendasi Wilayah &amp; Prioritas (AI)
             </h4>
-            <p className="text-xs text-slate-700">
-              Analisis program CSR eksisting, suara warga, kesiapan mitra lokal, dan prioritas kebutuhan wilayah.
+            <p className="text-xs text-[#64748B]">
+              Analisis kebutuhan masyarakat riil dan cegah tumpang tindih program CSR di lokasi sasaran.
             </p>
           </div>
         </div>
@@ -213,95 +225,137 @@ export function AiNeedPrioritizationPanel({
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-expanded={isOpen}
-          className="min-h-[44px] px-3 py-2 rounded-xl border border-emerald-200 bg-white hover:bg-emerald-50 text-xs font-semibold text-emerald-800 inline-flex items-center justify-center gap-1.5 self-start sm:self-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+          className="min-h-[40px] px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 self-start sm:self-auto transition-colors cursor-pointer"
         >
-          <span>{isOpen ? "Sembunyikan Panel" : "Buka Panel AI"}</span>
+          <span>{isOpen ? "Sembunyikan Panel" : "Buka Asisten AI"}</span>
           {isOpen ? (
-            <ChevronUp className="w-4 h-4" aria-hidden="true" />
+            <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" />
           ) : (
-            <ChevronDown className="w-4 h-4" aria-hidden="true" />
+            <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />
           )}
         </button>
       </div>
 
       {isOpen && (
-        <div className="pt-3 border-t border-emerald-200/80 space-y-4">
-          {/* Input Konteks Lapangan Opsional + Tombol Pemicu */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-            <div className="flex flex-col gap-1.5">
-              <label
-                htmlFor="ai-need-field-context"
-                className="text-xs font-bold text-[#181343]"
-              >
-                Catatan Kondisi / Survei Awal Lapangan (Opsional)
-              </label>
-              <textarea
-                id="ai-need-field-context"
-                rows={2}
-                value={fieldContextNotes}
-                onChange={(e) => setFieldContextNotes(e.target.value)}
-                placeholder="Contoh: Kawasan pesisir sering terdampak banjir rob, pelaku UMKM pengolah ikan kekurangan sarana sanitasi dan rantai dingin..."
-                className="w-full p-3 rounded-xl border border-slate-300 bg-white text-xs sm:text-sm text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343] resize-y"
-              />
-              <span className="text-xs text-slate-600">
-                Tambahkan temuan spesifik dari lapangan jika ada agar dipadukan dengan database program SIPENA.
-              </span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-              <div className="text-xs text-slate-700">
+        <div className="pt-2 border-t border-slate-200 space-y-4">
+          {/* Action Trigger Card */}
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 space-y-3">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              {/* Sisi Kiri: Informasi Target (Sejajar satu baris) */}
+              <div className="min-w-0">
                 {currentLocationReady ? (
-                  <span>
-                    Target analisis:{" "}
-                    <strong className="text-[#181343]">
-                      {targetCity}, {targetProvince}
-                    </strong>{" "}
-                    (Fokus:{" "}
-                    <strong className="text-[#181343]">
-                      {FOCUS_AREA_CONFIG[focusArea]?.label || focusArea}
-                    </strong>
-                    )
-                  </span>
+                  <div className="flex items-center gap-2 text-xs text-slate-700 flex-wrap">
+                    <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>
+                      Target Analisis:{" "}
+                      <strong className="text-[#181343]">
+                        {targetCity}, {targetProvince}
+                      </strong>
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span>
+                      Fokus:{" "}
+                      <strong className="text-[#181343]">
+                        {FOCUS_AREA_CONFIG[focusArea]?.label || focusArea}
+                      </strong>
+                    </span>
+                  </div>
                 ) : (
-                  <span className="text-amber-800 font-medium">
-                    Pilih Provinsi dan Kota/Kabupaten sasaran di atas untuk mengaktifkan analisis AI.
-                  </span>
+                  <div className="flex items-center gap-2 text-amber-800 text-xs font-medium">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>
+                      Pilih Provinsi dan Kota/Kabupaten sasaran di atas terlebih dahulu untuk memulai analisis.
+                    </span>
+                  </div>
                 )}
               </div>
 
-              <button
-                type="button"
-                onClick={handleAnalyze}
-                disabled={isAnalyzing || !currentLocationReady}
-                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#181343] hover:bg-[#26224C] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                    <span>Menganalisis Wilayah...</span>
-                  </>
-                ) : result ? (
-                  <>
-                    <RefreshCw className="w-4 h-4" aria-hidden="true" />
-                    <span>Analisis Ulang Wilayah</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" aria-hidden="true" />
-                    <span>Analisis Prioritas Wilayah (AI)</span>
-                  </>
+              {/* Sisi Kanan: Tombol Sejajar (Catatan Lapangan & Tombol Analisis) */}
+              <div className="flex items-center gap-2 self-start lg:self-auto shrink-0 flex-wrap">
+                {currentLocationReady && (
+                  <button
+                    type="button"
+                    onClick={() => setShowNotes((prev) => !prev)}
+                    className={`min-h-[38px] px-3 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      showNotes || fieldContextNotes.trim()
+                        ? "bg-emerald-50 border-emerald-300 text-emerald-800"
+                        : "bg-white hover:bg-slate-50 border-slate-200 text-[#181343]"
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-slate-500" />
+                    <span>
+                      {showNotes
+                        ? "Tutup Catatan"
+                        : fieldContextNotes.trim()
+                        ? "Catatan Lapangan Terisi"
+                        : "+ Catatan Lapangan"}
+                    </span>
+                  </button>
                 )}
-              </button>
+
+                <button
+                  type="button"
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing || !currentLocationReady}
+                  className="min-h-[38px] px-4 py-1.5 rounded-xl bg-[#181343] hover:bg-[#26224C] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                      <span>Menganalisis...</span>
+                    </>
+                  ) : result ? (
+                    <>
+                      <RefreshCw className="w-4 h-4" aria-hidden="true" />
+                      <span>Analisis Ulang</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+                      <span>Analisis Wilayah Ini</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
+
+            {/* Collapsible Field Notes Box */}
+            {showNotes && (
+              <div className="space-y-2 pt-2.5 border-t border-slate-100 animate-in fade-in">
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="ai-need-field-context"
+                    className="text-xs font-semibold text-[#181343]"
+                  >
+                    Catatan Survei Awal / Kondisi Lapangan (Opsional)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowNotes(false)}
+                    className="text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    Tutup
+                  </button>
+                </div>
+                <textarea
+                  id="ai-need-field-context"
+                  rows={2}
+                  value={fieldContextNotes}
+                  onChange={(e) => setFieldContextNotes(e.target.value)}
+                  placeholder="Contoh: Kawasan pesisir sering banjir rob, pelaku UMKM olahan ikan butuh sanitasi..."
+                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-[#F8FAFC] text-xs text-[#181343] placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/15 transition resize-y"
+                />
+              </div>
+            )}
           </div>
 
           {/* Error Banner */}
           {errorMessage && (
             <div
               role="alert"
-              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5"
+              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in"
             >
-              <AlertCircle className="w-4 h-4 text-rose-700 shrink-0 mt-0.5" aria-hidden="true" />
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
               <div className="flex-1">
                 <p className="font-bold">Gagal Menjalankan Analisis</p>
                 <p className="mt-0.5">{errorMessage}</p>
@@ -313,137 +367,62 @@ export function AiNeedPrioritizationPanel({
           {appliedNotice && (
             <div
               role="status"
-              className="p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-xs text-emerald-900 font-semibold flex items-center gap-2"
+              className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 font-semibold flex items-center gap-2 animate-in fade-in"
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" aria-hidden="true" />
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
               <span>{appliedNotice}</span>
             </div>
           )}
 
           {/* Loading Skeleton */}
           {isAnalyzing && (
-            <div className="p-6 rounded-xl bg-white border border-slate-200 text-center space-y-2">
+            <div className="p-6 rounded-xl bg-white border border-slate-200 text-center space-y-2 animate-in fade-in">
               <Loader2 className="w-6 h-6 animate-spin text-[#181343] mx-auto" aria-hidden="true" />
               <p className="text-xs font-bold text-[#181343]">
-                Memeriksa data program CSR, peluang aktif, ulasan warga, dan mitra di {targetCity}...
+                Memeriksa data program CSR, peluang aktif, dan suara warga di {targetCity}...
               </p>
-              <p className="text-xs text-slate-600">
-                Proses ini memetakan potensi tumpang tindih sektor sekaligus merumuskan prioritas kebutuhan.
+              <p className="text-xs text-slate-500">
+                Menyusun pemetaan tumpang tindih sektor serta rekomendasi intervensi terprioritas.
               </p>
             </div>
           )}
 
           {/* Stale Notice */}
           {!isAnalyzing && isStale && (
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between gap-2 animate-in fade-in">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
                 <span>
-                  Lokasi sasaran atau bidang fokus di form telah berubah sejak analisis terakhir. Jalankan{" "}
-                  <strong>Analisis Ulang Wilayah</strong> agar hasil sesuai pilihan terbaru.
+                  Lokasi atau bidang fokus di formulir telah diperbarui. Klik <strong>Analisis Ulang</strong> untuk menyelaraskan rekomendasi.
                 </span>
               </div>
             </div>
           )}
 
           {/* Empty State before running */}
-          {!isAnalyzing && !result && !errorMessage && (
-            <div className="p-5 rounded-xl bg-white border border-slate-200 text-center space-y-1.5">
-              <Compass className="w-6 h-6 text-emerald-700 mx-auto" aria-hidden="true" />
-              <p className="text-xs font-bold text-[#181343]">
-                Siap Memetakan Prioritas &amp; Risiko Tumpang Tindih Wilayah
+          {!isAnalyzing && !result && !errorMessage && currentLocationReady && (
+            <div className="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center space-y-1">
+              <Compass className="w-5 h-5 text-emerald-600 mx-auto" aria-hidden="true" />
+              <p className="text-xs font-semibold text-[#181343]">
+                Siap Menganalisis Prioritas Wilayah {targetCity}
               </p>
-              <p className="text-xs text-slate-600 max-w-xl mx-auto leading-relaxed">
-                Klik tombol <strong>Analisis Prioritas Wilayah (AI)</strong> untuk melihat apakah sektor yang Anda pilih sudah padat di wilayah tersebut, membaca celah suara warga, serta mendapat rekomendasi intervensi terprioritas.
+              <p className="text-xs text-slate-500 max-w-md mx-auto">
+                Klik tombol <strong>Analisis Wilayah Ini</strong> untuk memeriksa potensi tumpang tindih sektor dan rekomendasi sasaran program.
               </p>
             </div>
           )}
 
-          {/* Analysis Results */}
+          {/* Analysis Results View */}
           {!isAnalyzing && result && (
-            <div className="space-y-4">
-              {/* Source & Coverage Header + DB Snapshot Grid */}
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {/* 1. Ringkasan Kejenuhan Sektor & Status Risiko */}
               <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-bold text-[#181343]">
-                      Hasil Analisis: {result.regionalSnapshot.targetCity}, {result.regionalSnapshot.targetProvince}
-                    </span>
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full border text-[11px] font-bold ${
-                        COVERAGE_META[result.regionalSnapshot.dataCoverage].className
-                      }`}
-                    >
-                      {COVERAGE_META[result.regionalSnapshot.dataCoverage].label}
-                    </span>
-                  </div>
-                  <Badge
-                    variant={result.source === "AI_OPENAI" ? "emerald" : "slate"}
-                    size="sm"
-                  >
-                    {result.source === "AI_OPENAI"
-                      ? "Analisis LLM (OpenAI GPT)"
-                      : "Analisis Heuristik Data SIPENA"}
-                  </Badge>
-                </div>
-
-                {/* Snapshot KPIs */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-[11px] font-medium text-slate-600 block">
-                      Program Wilayah (Kota / Prov)
-                    </span>
-                    <span className="text-sm font-bold text-[#181343] mt-0.5 block">
-                      {result.regionalSnapshot.programsInCity} / {result.regionalSnapshot.programsInProvince}
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-[11px] font-medium text-slate-600 block">
-                      Peluang Sedang Dibuka
-                    </span>
-                    <span className="text-sm font-bold text-[#181343] mt-0.5 block">
-                      {result.regionalSnapshot.openOpportunitiesInRegion} peluang
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-[11px] font-medium text-slate-600 block">
-                      Suara Warga Wilayah
-                    </span>
-                    <span className="text-sm font-bold text-[#181343] mt-0.5 block">
-                      {result.regionalSnapshot.totalReviewsInRegion > 0
-                        ? `${result.regionalSnapshot.averageRatingInRegion}/5 (${result.regionalSnapshot.totalReviewsInRegion} ulasan)`
-                        : "Belum ada ulasan"}
-                    </span>
-                  </div>
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-[11px] font-medium text-slate-600 block">
-                      Mitra Lokal Aktif
-                    </span>
-                    <span className="text-sm font-bold text-[#181343] mt-0.5 block">
-                      {result.regionalSnapshot.localPartnersReady} NGO ({result.regionalSnapshot.verifiedPartnersReady} verif.)
-                    </span>
-                  </div>
-                </div>
-
-                {/* Cold Start Explicit Alert */}
-                {result.regionalSnapshot.dataCoverage === "COLD_START" && (
-                  <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
-                    <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" aria-hidden="true" />
-                    <span>
-                      Wilayah ini belum memiliki riwayat program atau survei warga di database SIPENA. Rekomendasi disusun sebagai panduan awal strategis yang perlu dikonfirmasi lewat asesmen lapangan lokal.
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Overlap Assessment Card */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100">
                   <div className="flex items-center gap-2">
                     <ShieldAlert className="w-4 h-4 text-[#181343]" aria-hidden="true" />
-                    <h5 className="text-xs font-bold text-[#181343]">
-                      Analisis Risiko Tumpang Tindih Sektor
-                    </h5>
+                    <span className="text-xs font-bold text-[#181343]">
+                      Status Tumpang Tindih Sektor di {result.regionalSnapshot.targetCity}
+                    </span>
                   </div>
                   <span className={`px-2.5 py-0.5 rounded-full border text-[11px] font-bold ${riskBadgeStyle}`}>
                     {result.overlapAssessment.riskLabel}
@@ -454,9 +433,10 @@ export function AiNeedPrioritizationPanel({
                   {result.overlapAssessment.summary}
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-                    <span className="font-bold text-[#181343] block">
+                {/* Sektor Padat vs Celah Kebutuhan */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
+                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                    <span className="text-[11px] font-semibold text-slate-600 block">
                       Sektor Sudah Terisi / Padat:
                     </span>
                     {result.overlapAssessment.crowdedFocusAreas.length > 0 ? (
@@ -464,21 +444,19 @@ export function AiNeedPrioritizationPanel({
                         {result.overlapAssessment.crowdedFocusAreas.map((area) => (
                           <span
                             key={`crowd-${area}`}
-                            className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold"
+                            className="px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold"
                           >
                             {FOCUS_AREA_CONFIG[area]?.label || area}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-slate-600">
-                        Belum ada sektor yang mengalami kejenuhan tinggi.
-                      </span>
+                      <span className="text-slate-500 text-[11px]">Belum ada sektor yang jenuh.</span>
                     )}
                   </div>
 
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
-                    <span className="font-bold text-[#181343] block">
+                  <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200 space-y-1">
+                    <span className="text-[11px] font-semibold text-emerald-800 block">
                       Sektor Minim Intervensi (Celah Prioritas):
                     </span>
                     {result.overlapAssessment.underservedFocusAreas.length > 0 ? (
@@ -486,119 +464,99 @@ export function AiNeedPrioritizationPanel({
                         {result.overlapAssessment.underservedFocusAreas.map((area) => (
                           <span
                             key={`gap-${area}`}
-                            className="px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold"
+                            className="px-2 py-0.5 rounded bg-emerald-100/70 border border-emerald-300 text-emerald-900 text-[11px] font-semibold"
                           >
                             {FOCUS_AREA_CONFIG[area]?.label || area}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-slate-600">
-                        Distribusi sektor relatif merata; fokuskan pada diferensiasi kecamatan/sasaran.
-                      </span>
+                      <span className="text-slate-500 text-[11px]">Distribusi program relatif merata.</span>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Kondisi & Potensi Wilayah */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-2.5 text-xs">
-                <h5 className="font-bold text-[#181343]">
-                  Kondisi, Potensi Wilayah &amp; Celah Kebutuhan Masyarakat
-                </h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                    <span className="font-semibold text-[#181343] block">
-                      Kondisi &amp; Potensi Ekosistem:
-                    </span>
-                    <p className="text-slate-700 leading-relaxed">
-                      {result.regionalPotentialSummary.conditionsAndPotential}
-                    </p>
-                  </div>
-                  <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                    <span className="font-semibold text-[#181343] block">
-                      Kebutuhan Belum Terpenuhi:
-                    </span>
-                    <p className="text-slate-700 leading-relaxed">
-                      {result.regionalPotentialSummary.socialNeedsGap}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-[11px] text-slate-600">
-                  Basis analisis: {result.regionalPotentialSummary.basisNote}
-                </p>
-              </div>
-
-              {/* Top 3 Priority Needs */}
-              <div className="space-y-2.5">
+              {/* 2. Daftar Rekomendasi Prioritas Utama */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h5 className="text-xs font-bold text-[#181343]">
-                    Peringkat Prioritas Kebutuhan Masyarakat ({result.priorityNeeds.length})
-                  </h5>
+                  <span className="text-xs font-bold text-[#181343] block">
+                    Rekomendasi Prioritas Kebutuhan Masyarakat ({result.priorityNeeds.length})
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Klik tombol untuk langsung menyelaraskan formulir
+                  </span>
                 </div>
 
                 <div className="space-y-3">
                   {result.priorityNeeds.map((item) => {
                     const urgency = URGENCY_BADGE[item.urgencyLevel] || URGENCY_BADGE.MODERATE;
                     const basis = EVIDENCE_BADGE[item.evidenceBasis] || EVIDENCE_BADGE.PLATFORM_DATA;
+                    const actionKey = `priority-${item.rank}`;
+                    const isApplied = appliedActionId === actionKey;
+
                     return (
-                      <article
+                      <div
                         key={`priority-${item.rank}-${item.focusArea}`}
-                        className="bg-white rounded-xl border border-slate-200 p-4 space-y-3"
+                        className={`bg-white rounded-xl border p-4 space-y-3 transition-colors ${
+                          isApplied ? "border-emerald-500 bg-emerald-50/20" : "border-slate-200"
+                        }`}
                       >
-                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                          <div className="space-y-1">
+                        {/* Priority Header: Badges row, then Title & Description with balanced spacing */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="w-6 h-6 rounded-md bg-[#181343] text-white text-xs font-bold inline-flex items-center justify-center">
+                              <span className="w-5 h-5 rounded-md bg-[#181343] text-white text-[11px] font-bold inline-flex items-center justify-center">
                                 #{item.rank}
                               </span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full border text-[11px] font-bold ${urgency.className}`}
-                              >
+                              <span className={`px-2 py-0.5 rounded-full border text-[11px] font-bold ${urgency.className}`}>
                                 {urgency.label}
                               </span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full border text-[11px] font-semibold ${basis.className}`}
-                              >
+                              <span className={`px-2 py-0.5 rounded-full border text-[11px] font-semibold ${basis.className}`}>
                                 {basis.label}
                               </span>
                             </div>
-                            <h6 className="text-xs sm:text-sm font-bold text-[#181343] pt-0.5">
-                              {item.needTitle}
-                            </h6>
+
+                            <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-semibold text-[#181343] shrink-0">
+                              {FOCUS_AREA_CONFIG[item.focusArea]?.label || item.focusArea}
+                            </span>
                           </div>
 
-                          <span className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-bold text-[#181343] shrink-0 self-start">
-                            {FOCUS_AREA_CONFIG[item.focusArea]?.label || item.focusArea}
-                          </span>
+                          <div className="space-y-1.5 pt-0.5">
+                            <h5 className="text-[14px] sm:text-[15px] font-bold text-[#181343] leading-snug">
+                              {item.needTitle}
+                            </h5>
+                            <p className="text-xs text-slate-600 leading-relaxed">
+                              {item.rationale}
+                            </p>
+                          </div>
                         </div>
 
-                        <p className="text-xs text-slate-700 leading-relaxed">{item.rationale}</p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                           <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                            <span className="font-semibold text-[#181343] flex items-center gap-1.5">
-                              <Layers className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
-                              Rekomendasi Intervensi:
+                            <span className="font-semibold text-[#181343] flex items-center gap-1.5 text-[11px]">
+                              <Layers className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                              Saran Intervensi:
                             </span>
-                            <p className="text-slate-700 mt-1 leading-relaxed">
+                            <p className="text-slate-700 mt-0.5 leading-relaxed text-[11px]">
                               {item.recommendedIntervention}
                             </p>
                           </div>
                           <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                            <span className="font-semibold text-[#181343] flex items-center gap-1.5">
+                            <span className="font-semibold text-[#181343] flex items-center gap-1.5 text-[11px]">
                               <Users className="w-3.5 h-3.5 text-[#181343]" aria-hidden="true" />
-                              Sasaran Penerima Manfaat:
+                              Sasaran Penerima:
                             </span>
-                            <p className="text-slate-700 mt-1 leading-relaxed">
+                            <p className="text-slate-700 mt-0.5 leading-relaxed text-[11px]">
                               {item.suggestedBeneficiaries}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-slate-100">
-                          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-700">
-                            <span className="font-semibold text-slate-600">SDGs Terkait:</span>
+                        {/* Bottom Row: SDGs & Action Button */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600">
+                            <span className="font-semibold">SDGs Terkait:</span>
                             {item.suggestedSdgs.map((sdgId) => (
                               <span
                                 key={`p-${item.rank}-sdg-${sdgId}`}
@@ -612,32 +570,43 @@ export function AiNeedPrioritizationPanel({
                           <button
                             type="button"
                             onClick={() =>
-                              applyWithFeedback({
+                              applyWithFeedback(actionKey, {
                                 focusArea: item.focusArea,
                                 sdgs: item.suggestedSdgs,
                                 descriptionSnippet: `Prioritas Wilayah (${result.regionalSnapshot.targetCity} - ${item.needTitle}): ${item.recommendedIntervention} Sasaran penerima manfaat difokuskan kepada ${item.suggestedBeneficiaries.toLowerCase()}.`,
-                                feedbackMessage: `Prioritas #${item.rank} (${FOCUS_AREA_CONFIG[item.focusArea]?.label || item.focusArea}) beserta SDGs & draf deskripsi berhasil diterapkan ke form.`,
+                                feedbackMessage: `Prioritas #${item.rank} (${FOCUS_AREA_CONFIG[item.focusArea]?.label || item.focusArea}) beserta SDGs & draf deskripsi berhasil diterapkan.`,
                               })
                             }
-                            className="min-h-[44px] px-3.5 py-2 rounded-xl border border-emerald-700 bg-white hover:bg-emerald-50 text-xs font-semibold text-emerald-800 inline-flex items-center justify-center gap-1.5 shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                            className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
+                              isApplied
+                                ? "bg-emerald-600 text-white shadow-xs"
+                                : "bg-[#181343] hover:bg-[#26224C] text-white"
+                            }`}
                           >
                             <Check className="w-3.5 h-3.5" aria-hidden="true" />
-                            <span>Terapkan Prioritas #{item.rank} ke Form</span>
+                            <span>
+                              {isApplied
+                                ? `Prioritas #${item.rank} Telah Diterapkan`
+                                : `Terapkan Prioritas #${item.rank} ke Form`}
+                            </span>
                           </button>
                         </div>
-                      </article>
+                      </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Actionable Form Suggestions Footer */}
+              {/* 3. Draf Deskripsi Siap Pakai */}
               <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
                 <div className="space-y-1">
-                  <span className="text-xs font-bold text-[#181343] block">
-                    Saran Diferensiasi &amp; Draf Deskripsi Form
-                  </span>
-                  <p className="text-xs text-slate-700 leading-relaxed">
+                  <div className="flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-[#181343]" />
+                    <span className="text-xs font-bold text-[#181343]">
+                      Draf Kalimat Rekomendasi untuk Deskripsi
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
                     {result.formSuggestions.differentiationTip}
                   </p>
                 </div>
@@ -646,44 +615,140 @@ export function AiNeedPrioritizationPanel({
                   {result.formSuggestions.draftDescriptionSnippet}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() =>
-                      applyWithFeedback({
+                      applyWithFeedback("draft-desc", {
                         descriptionSnippet: result.formSuggestions.draftDescriptionSnippet,
-                        feedbackMessage: "Draf paragraf prioritas berhasil ditambahkan ke kolom deskripsi.",
+                        feedbackMessage: "Draf paragraf prioritas berhasil disisipkan ke kolom deskripsi.",
                       })
                     }
-                    className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                    className={`min-h-[38px] px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                      appliedActionId === "draft-desc"
+                        ? "bg-emerald-50 border-emerald-400 text-emerald-800"
+                        : "border-slate-300 bg-white hover:bg-slate-50 text-[#181343]"
+                    }`}
                   >
-                    + Sisipkan Draf ke Deskripsi
+                    {appliedActionId === "draft-desc"
+                      ? "✓ Draf Berhasil Disisipkan"
+                      : "+ Sisipkan Draf ke Deskripsi"}
                   </button>
 
                   <button
                     type="button"
                     onClick={() =>
-                      applyWithFeedback({
+                      applyWithFeedback("apply-all", {
                         focusArea: result.formSuggestions.recommendedFocusArea,
                         sdgs: result.formSuggestions.recommendedSdgs,
                         descriptionSnippet: result.formSuggestions.draftDescriptionSnippet,
-                        feedbackMessage: `Fokus (${FOCUS_AREA_CONFIG[result.formSuggestions.recommendedFocusArea]?.label}), SDGs rekomendasi, dan draf deskripsi berhasil diterapkan ke form.`,
+                        feedbackMessage: `Fokus (${FOCUS_AREA_CONFIG[result.formSuggestions.recommendedFocusArea]?.label}), SDGs rekomendasi, dan draf deskripsi berhasil diterapkan.`,
                       })
                     }
-                    className="min-h-[44px] px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                    className={`min-h-[38px] px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                      appliedActionId === "apply-all"
+                        ? "bg-emerald-700 text-white"
+                        : "bg-emerald-700 hover:bg-emerald-800 text-white"
+                    }`}
                   >
-                    Terapkan Semua Rekomendasi Terbaik
+                    {appliedActionId === "apply-all"
+                      ? "✓ Semua Rekomendasi Diterapkan"
+                      : "Terapkan Semua Rekomendasi"}
                   </button>
                 </div>
+              </div>
+
+              {/* 4. Accordion: Detail Data & Konteks Wilayah */}
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowDetails((prev) => !prev)}
+                  className="w-full p-3.5 text-left flex items-center justify-between text-xs font-semibold text-[#181343] hover:bg-slate-50 transition cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Info className="w-4 h-4 text-emerald-600" />
+                    <span>
+                      {showDetails
+                        ? "Sembunyikan Detail Statistik & Potensi Wilayah"
+                        : "Lihat Detail Data & Konteks Wilayah (4 Metrik, Potensi Ekosistem)"}
+                    </span>
+                  </span>
+                  {showDetails ? (
+                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                  )}
+                </button>
+
+                {showDetails && (
+                  <div className="p-4 pt-1 border-t border-slate-100 space-y-3.5 animate-in fade-in">
+                    {/* Snapshot 4 KPIs */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                        <span className="text-[11px] text-slate-500 block">Program Wilayah</span>
+                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                          {result.regionalSnapshot.programsInCity} Kota / {result.regionalSnapshot.programsInProvince} Prov
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                        <span className="text-[11px] text-slate-500 block">Peluang Aktif</span>
+                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                          {result.regionalSnapshot.openOpportunitiesInRegion} peluang
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                        <span className="text-[11px] text-slate-500 block">Suara Warga</span>
+                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                          {result.regionalSnapshot.totalReviewsInRegion > 0
+                            ? `${result.regionalSnapshot.averageRatingInRegion}/5 (${result.regionalSnapshot.totalReviewsInRegion} ulasan)`
+                            : "Belum ada ulasan"}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                        <span className="text-[11px] text-slate-500 block">Mitra Lokal Aktif</span>
+                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                          {result.regionalSnapshot.localPartnersReady} NGO ({result.regionalSnapshot.verifiedPartnersReady} verif)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Potensi & Celah Wilayah */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                        <span className="font-semibold text-[#181343] block">
+                          Kondisi &amp; Potensi Ekosistem:
+                        </span>
+                        <p className="text-slate-600 leading-relaxed text-[11px]">
+                          {result.regionalPotentialSummary.conditionsAndPotential}
+                        </p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                        <span className="font-semibold text-[#181343] block">
+                          Kebutuhan Belum Terpenuhi:
+                        </span>
+                        <p className="text-slate-600 leading-relaxed text-[11px]">
+                          {result.regionalPotentialSummary.socialNeedsGap}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                      <span>Basis data: {result.regionalPotentialSummary.basisNote}</span>
+                      <span className={`px-2 py-0.5 rounded border font-semibold ${COVERAGE_META[result.regionalSnapshot.dataCoverage].className}`}>
+                        {COVERAGE_META[result.regionalSnapshot.dataCoverage].label}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
           {/* Decision Support Disclaimer */}
-          <div className="flex items-start gap-2 text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200">
-            <Info className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="flex items-start gap-2 text-[11px] text-slate-500 bg-white p-3 rounded-xl border border-slate-200">
+            <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" aria-hidden="true" />
             <span>
-              <strong>Pemberitahuan:</strong> AI Need Prioritization disusun sebagai pendukung pertimbangan strategis CSR perusahaan (decision support) berdasarkan data program SIPENA dan konteks wilayah, bukan ketetapan otomatis sistem.
+              <strong>Catatan:</strong> Asisten AI dirancang sebagai pendukung pertimbangan strategis perusahaan berbasis data program SIPENA dan kondisi wilayah, bukan ketetapan mutlak sistem.
             </span>
           </div>
         </div>

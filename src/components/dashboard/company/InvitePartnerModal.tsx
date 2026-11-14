@@ -3,17 +3,16 @@
 import React, { useState, useMemo, useEffect } from "react";
 import {
   CheckCircle2,
-  Building2,
   Send,
   MapPin,
   AlertCircle,
   Coins,
   ShieldCheck,
   Clock,
-  Layers,
+  Info,
+  ChevronDown,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PartnerItem, OpportunityItem } from "./types";
@@ -27,7 +26,7 @@ interface InvitePartnerModalProps {
   onSuccess: () => void;
 }
 
-// Fallback Logo Component with error handling
+// Fallback Circular Logo Component matching the updated partner profile system
 function PartnerLogo({
   logoUrl,
   name,
@@ -48,19 +47,19 @@ function PartnerLogo({
 
   if (logoUrl && !hasError) {
     return (
-      <div className="w-12 h-12 rounded-2xl bg-white border border-[#E8E8EA] shrink-0 overflow-hidden shadow-2xs flex items-center justify-center p-0.5">
+      <div className="w-11 h-11 rounded-full bg-slate-100 shrink-0 overflow-hidden flex items-center justify-center">
         <img
           src={logoUrl}
           alt={name}
           onError={() => setHasError(true)}
-          className="w-full h-full object-cover rounded-xl"
+          className="w-full h-full object-cover rounded-full"
         />
       </div>
     );
   }
 
   return (
-    <div className="w-12 h-12 rounded-2xl bg-[#181343] text-white shrink-0 flex items-center justify-center font-bold text-sm tracking-wide shadow-2xs">
+    <div className="w-11 h-11 rounded-full bg-[#181343] text-white shrink-0 flex items-center justify-center font-bold text-xs tracking-wide">
       {initials}
     </div>
   );
@@ -93,8 +92,7 @@ export function InvitePartnerModal({
     return eligibleOpportunities.find((o) => o.id === targetId) || null;
   }, [eligibleOpportunities, selectedOpportunityId]);
 
-  // 3. Resolve partner's actual expertise label (avoid generic "Inisiatif Lainnya")
-  // ALWAYS called before any conditional return to strictly obey the Rules of Hooks
+  // 3. Resolve partner's actual expertise label
   const partnerExpertise = useMemo(() => {
     if (!partner) {
       return {
@@ -109,7 +107,6 @@ export function InvitePartnerModal({
         variant: config?.variant || "emerald",
       };
     }
-    // If LAINNYA, prefer organizationType if available or "Kemitraan Sosial"
     if (partner.organizationType && partner.organizationType.trim()) {
       return {
         label: partner.organizationType,
@@ -149,7 +146,6 @@ export function InvitePartnerModal({
           setIsAlreadyInvited(exists);
         }
       } catch {
-        // Fallback: server will still reject duplicate via 409
         if (isMounted) setIsAlreadyInvited(false);
       } finally {
         if (isMounted) setIsCheckingDuplicate(false);
@@ -225,7 +221,6 @@ export function InvitePartnerModal({
     onClose();
   };
 
-  // Safe early exit AFTER all React Hooks have been declared
   if (!partner) return null;
 
   return (
@@ -235,6 +230,38 @@ export function InvitePartnerModal({
       title="Undang Bermitra CSR"
       description="Pilih peluang program CSR yang relevan untuk mengundang mitra mengajukan proposal kolaborasi."
       maxWidth="lg"
+      footer={
+        !isSuccess ? (
+          <div className="flex items-center justify-end gap-3 w-full">
+            <Button
+              type="button"
+              variant="outline"
+              size="md"
+              onClick={handleReset}
+              disabled={isLoading}
+              className="text-xs rounded-xl cursor-pointer"
+            >
+              Batal
+            </Button>
+            <Button
+              form="invite-partner-form"
+              type="submit"
+              variant="primary"
+              size="md"
+              isLoading={isLoading}
+              disabled={eligibleOpportunities.length === 0 || isAlreadyInvited || isCheckingDuplicate}
+              leftIcon={<Send className="w-4 h-4" />}
+              className="px-5 cursor-pointer text-xs rounded-xl bg-[#181343] hover:bg-[#26224C] text-white"
+            >
+              {isCheckingDuplicate
+                ? "Memeriksa..."
+                : isAlreadyInvited
+                ? "Sudah Diundang"
+                : "Kirim Undangan Kemitraan"}
+            </Button>
+          </div>
+        ) : undefined
+      }
     >
       {isSuccess ? (
         /* Success Notification State */
@@ -256,7 +283,7 @@ export function InvitePartnerModal({
           </p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto pr-0.5">
+        <form id="invite-partner-form" onSubmit={handleSubmit} className="space-y-4">
           {/* Error Message */}
           {errorMessage && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in">
@@ -278,22 +305,19 @@ export function InvitePartnerModal({
             </div>
           )}
 
-          {/* 1. Informasi Calon Mitra */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3.5">
+          {/* 1. Informasi Calon Mitra (Clean Row, Circular Avatar) */}
+          <div className="p-3.5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center gap-3.5">
             <PartnerLogo logoUrl={partner.logoUrl} name={partner.name} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                  Calon Mitra Pelaksana
-                </span>
+                <h4 className="text-sm font-bold text-[#181343] truncate">
+                  {partner.name}
+                </h4>
                 <Badge variant={partnerExpertise.variant as any} size="sm">
                   {partnerExpertise.label}
                 </Badge>
               </div>
-              <h4 className="text-sm sm:text-base font-bold text-[#181343] truncate mt-0.5">
-                {partner.name}
-              </h4>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-[#787680] mt-1">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#64748B] mt-0.5">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                   <span>
@@ -301,116 +325,95 @@ export function InvitePartnerModal({
                   </span>
                 </span>
                 {partner.legalNumber && (
-                  <span className="flex items-center gap-1 text-slate-600">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Dokumen SK Tercatat</span>
-                  </span>
+                  <>
+                    <span className="text-slate-300">·</span>
+                    <span className="flex items-center gap-1 text-slate-500">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>SK Tercatat</span>
+                    </span>
+                  </>
                 )}
               </div>
             </div>
           </div>
 
-          {/* 2. Pemilihan Peluang CSR */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-[#181343] block">
-              Pilih Peluang Program CSR Perusahaan *
+          {/* 2. Pemilihan Peluang CSR & Meta Strip Terpadu (Anti Box-in-a-Box) */}
+          <div className="space-y-2">
+            <label htmlFor="invite-opportunity-select" className="text-xs font-semibold text-[#181343] block">
+              Pilih Peluang Program CSR Perusahaan <span className="text-rose-500">*</span>
             </label>
             {eligibleOpportunities.length === 0 ? (
               <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 space-y-1">
-                <p className="font-semibold">Belum ada Peluang CSR yang aktif (Status OPEN / IN_REVIEW).</p>
+                <p className="font-semibold">Belum ada Peluang CSR yang aktif (Status Terbuka / Ditinjau).</p>
                 <p className="text-[11px] text-amber-700">
                   Silakan buat peluang CSR baru terlebih dahulu di menu &quot;Peluang CSR&quot; sebelum mengundang mitra.
                 </p>
               </div>
             ) : (
-              <select
-                value={selectedOpportunityId || eligibleOpportunities[0]?.id}
-                onChange={(e) => setSelectedOpportunityId(e.target.value)}
-                className="w-full text-xs sm:text-sm bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800 cursor-pointer font-medium"
-                required
-              >
-                {eligibleOpportunities.map((opp) => (
-                  <option key={opp.id} value={opp.id}>
-                    {opp.title} — {opp.status === "OPEN" ? "Terbuka" : "Ditinjau"} ({opp.focusArea})
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-2">
+                <div className="relative">
+                  <select
+                    id="invite-opportunity-select"
+                    value={selectedOpportunityId || eligibleOpportunities[0]?.id}
+                    onChange={(e) => setSelectedOpportunityId(e.target.value)}
+                    className="w-full text-xs sm:text-sm bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl px-3.5 py-2.5 outline-none focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/10 text-[#181343] cursor-pointer font-medium transition-colors pr-9 appearance-none"
+                    required
+                  >
+                    {eligibleOpportunities.map((opp) => (
+                      <option key={opp.id} value={opp.id}>
+                        {opp.title} - {opp.status === "OPEN" ? "Terbuka" : "Ditinjau"} ({opp.focusArea})
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+
+                {/* Detail Peluang Terpilih: Ringkas & Terintegrasi, Bukan Kartu Bertingkat */}
+                {activeOpportunity && (
+                  <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-xs text-[#64748B] px-1">
+                    <div className="inline-flex items-center gap-1.5 font-medium text-[#181343]">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span>{activeOpportunity.status === "OPEN" ? "Peluang Terbuka" : "Dalam Tinjauan"}</span>
+                    </div>
+                    <span className="text-slate-300">·</span>
+                    <div className="inline-flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>{activeOpportunity.targetCity || "Seluruh Sasaran"}</span>
+                    </div>
+                    <span className="text-slate-300">·</span>
+                    <div className="inline-flex items-center gap-1">
+                      <Coins className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="font-semibold text-[#181343]">
+                        {activeOpportunity.estimatedBudget ? formatRupiah(activeOpportunity.estimatedBudget) : "Menyesuaikan Proposal"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Ringkasan Peluang Terpilih */}
-          {activeOpportunity && (
-            <div className="p-4 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-bold text-[#787680] uppercase tracking-wider">
-                  Ringkasan Peluang Terpilih
-                </span>
-                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
-                  {activeOpportunity.status === "OPEN" ? "Status: Terbuka" : "Status: Dalam Tinjauan"}
-                </span>
-              </div>
-              <h5 className="text-xs sm:text-sm font-bold text-[#181343]">
-                {activeOpportunity.title}
-              </h5>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#787680] pt-1">
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="truncate">
-                    Lokasi Program: {activeOpportunity.targetCity || "Seluruh Wilayah Sasaran"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Coins className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="font-semibold text-[#181343]">
-                    Anggaran: {activeOpportunity.estimatedBudget ? formatRupiah(activeOpportunity.estimatedBudget) : "Menyesuaikan Proposal"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* 3. Pesan Tambahan (Opsional) */}
-          <Textarea
-            label="Pesan Tambahan untuk Calon Mitra (Opsional)"
-            placeholder="Tuliskan pesan singkat atau informasi tambahan untuk calon mitra..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={3}
-            className="text-xs"
-          />
-
-          {/* 4. Informasi Alur Kemitraan (Subtle Info Box) */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px] text-[#787680] leading-relaxed">
-            <span className="font-semibold text-[#181343]">Alur Kemitraan:</span> Mitra dapat menerima atau menolak undangan. Jika menerima, mitra dapat mengajukan proposal dan RAB untuk ditinjau perusahaan.
+          <div className="space-y-1.5">
+            <label htmlFor="invite-partner-message" className="text-xs font-semibold text-[#181343] block">
+              Pesan Tambahan untuk Calon Mitra <span className="text-[#64748B] font-normal">(Opsional)</span>
+            </label>
+            <textarea
+              id="invite-partner-message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Tuliskan arahan singkat, fokus kolaborasi, atau jadwal diskusi awal untuk calon mitra..."
+              rows={3}
+              className="w-full text-xs sm:text-sm bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl p-3 text-[#181343] placeholder:text-slate-400 focus:outline-none focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/10 resize-none transition-colors"
+            />
           </div>
 
-          {/* 5. Tombol Aksi */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E8E8EA]">
-            <Button
-              type="button"
-              variant="outline"
-              size="md"
-              onClick={handleReset}
-              disabled={isLoading}
-              className="text-xs rounded-xl"
-            >
-              Batal
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              isLoading={isLoading}
-              disabled={eligibleOpportunities.length === 0 || isAlreadyInvited || isCheckingDuplicate}
-              leftIcon={<Send className="w-4 h-4" />}
-              className="px-5 cursor-pointer text-xs"
-            >
-              {isCheckingDuplicate
-                ? "Memeriksa..."
-                : isAlreadyInvited
-                ? "Sudah Diundang"
-                : "Kirim Undangan Kemitraan"}
-            </Button>
+          {/* 4. Informasi Alur Kemitraan (Petunjuk Ringkas Bersih) */}
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs text-[#47464F] leading-relaxed">
+            <Info className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <p>
+              <strong className="text-[#181343] font-semibold">Alur Kemitraan:</strong> Mitra dapat menerima atau menolak undangan. Jika menerima, mitra dapat mengajukan proposal dan RAB untuk ditinjau perusahaan.
+            </p>
           </div>
         </form>
       )}

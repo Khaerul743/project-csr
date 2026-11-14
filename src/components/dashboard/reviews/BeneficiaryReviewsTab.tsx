@@ -186,59 +186,80 @@ export function BeneficiaryReviewsTab({
         </div>
       </div>
 
-      {/* AI Sentiment Analysis Card (if available) */}
+      {/* AI Sentiment Analysis Card (if available) - Tema Deep Navy SIPENA (#181343) */}
       {sentimentAnalysis && (
-        <div className="p-5 rounded-3xl bg-gradient-to-br from-[#181343] via-[#1A1448] to-[#0A2E28] text-white border border-teal-500/30 shadow-md space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-teal-500/20 text-teal-300 flex items-center justify-center border border-teal-400/30">
-                <Sparkles className="w-3.5 h-3.5" />
+        <div className="p-5 rounded-2xl bg-[#181343] text-white shadow-md border border-[#181343] space-y-4 relative overflow-hidden">
+          {/* Pola titik halus khas brand SIPENA */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none opacity-[0.06]"
+            style={{
+              backgroundImage:
+                "radial-gradient(#ffffff 1px, transparent 1px)",
+              backgroundSize: "20px 20px",
+            }}
+          />
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-white/10 pb-3 relative z-10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center border border-emerald-400/30 shrink-0 shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
               </div>
               <h4 className="text-sm font-bold text-white tracking-tight">
                 Hasil Analisis Sentimen &amp; Aspirasi Masyarakat (AI)
               </h4>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-300">
-                NSS: <strong className="text-teal-300 font-extrabold">{sentimentAnalysis.netSentimentScore >= 0 ? `+${sentimentAnalysis.netSentimentScore}` : sentimentAnalysis.netSentimentScore}</strong>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-xs text-slate-200 font-semibold">
+                NSS: <strong className="text-emerald-300 font-extrabold">{sentimentAnalysis.netSentimentScore >= 0 ? `+${sentimentAnalysis.netSentimentScore}` : sentimentAnalysis.netSentimentScore}</strong>
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                 {sentimentAnalysis.positivePercentage}% Positif
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30">
                 {sentimentAnalysis.criticalPercentage}% Kritis
               </span>
             </div>
           </div>
 
-          <p className="text-xs text-slate-200 leading-relaxed">
+          <p className="text-xs text-slate-200 leading-relaxed relative z-10">
             {sentimentAnalysis.executiveSummary}
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
-              <span className="font-bold text-emerald-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Hal yang Sangat Diapresiasi Warga
-              </span>
-              <ul className="space-y-1 text-slate-300 text-[11px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1 relative z-10">
+            <div className="p-3.5 rounded-xl bg-white/[0.06] border border-emerald-400/30 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-emerald-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Hal yang Sangat Diapresiasi Warga
+                </span>
+                <span className="text-[11px] font-bold text-emerald-300">
+                  {sentimentAnalysis.highlights?.length || 0} Poin
+                </span>
+              </div>
+              <ul className="space-y-1.5 text-slate-200 text-[11px]">
                 {sentimentAnalysis.highlights?.map((h: string, i: number) => (
                   <li key={i} className="flex items-start gap-1.5">
                     <span className="text-emerald-400">•</span>
-                    <span>{h}</span>
+                    <span className="leading-snug">{h}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/5 border border-white/10 space-y-1.5">
-              <span className="font-bold text-blue-400 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
-                <ArrowUpRight className="w-3.5 h-3.5" /> Rekomendasi Tindak Lanjut Program
-              </span>
-              <ul className="space-y-1 text-slate-300 text-[11px]">
+            <div className="p-3.5 rounded-xl bg-white/[0.06] border border-teal-400/30 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-teal-300 text-[11px] uppercase tracking-wider flex items-center gap-1.5">
+                  <ArrowUpRight className="w-3.5 h-3.5 text-teal-300" /> Rekomendasi Tindak Lanjut Program
+                </span>
+                <span className="text-[11px] font-bold text-teal-300">
+                  {sentimentAnalysis.recommendations?.length || 0} Aksi
+                </span>
+              </div>
+              <ul className="space-y-1.5 text-slate-200 text-[11px]">
                 {sentimentAnalysis.recommendations?.map((r: string, i: number) => (
                   <li key={i} className="flex items-start gap-1.5">
-                    <span className="text-blue-400">•</span>
-                    <span>{r}</span>
+                    <span className="text-teal-400">•</span>
+                    <span className="leading-snug">{r}</span>
                   </li>
                 ))}
               </ul>
