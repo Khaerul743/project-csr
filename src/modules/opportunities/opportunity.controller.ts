@@ -10,6 +10,7 @@ import {
   invitePartnerSchema,
   needPrioritizationRequestSchema,
 } from "./opportunity.validation";
+import { sdgRecommendationRequestSchema } from "@/modules/ai";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { OpportunityStatus } from "@/db/schema/opportunities";
 
@@ -214,6 +215,25 @@ export class OpportunityController {
       return ApiResponse.success(
         result,
         "Analisis prioritas kebutuhan wilayah berhasil dibuat"
+      );
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async recommendSdgs(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["CSR_ADMIN", "MANAGEMENT", "SUPER_ADMIN"]);
+
+      const body = await request.json();
+      const validatedInput = sdgRecommendationRequestSchema.parse(body);
+
+      const result = await this.opportunityService.recommendSdgs(validatedInput);
+
+      return ApiResponse.success(
+        result,
+        "Rekomendasi sasaran SDGs berhasil dianalisis"
       );
     } catch (error) {
       return ErrorHandler.handle(error);

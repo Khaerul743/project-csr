@@ -21,6 +21,7 @@ import {
   Clock,
   Sparkles,
   FileText,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,11 +52,11 @@ const DEFAULT_SDGS_BY_FOCUS: Record<CsrFocusArea, number[]> = {
 };
 
 const FORM_STEPS = [
-  { id: 1, label: "Informasi Dasar", shortDesc: "Judul & bidang fokus" },
+  { id: 1, label: "Informasi Dasar", shortDesc: "Judul, bidang & ruang lingkup" },
   { id: 2, label: "Wilayah & AI", shortDesc: "Lokasi sasaran & prioritas" },
-  { id: 3, label: "Sasaran SDGs", shortDesc: "17 Sasaran & pilar ESG" },
+  { id: 3, label: "Sasaran SDGs", shortDesc: "Rekomendasi AI & pilar ESG" },
   { id: 4, label: "Jadwal Program", shortDesc: "Batas pengajuan & periode" },
-  { id: 5, label: "Deskripsi & Pratinjau", shortDesc: "Detail ruang lingkup & simpan" },
+  { id: 5, label: "Banner & Pratinjau", shortDesc: "Sampul & publikasi program" },
 ];
 
 const INPUT_BASE_CLASS =
@@ -284,6 +285,16 @@ export function OpportunityFormPageView({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
 
+  // AI SDG Recommendation states
+  const [isAnalyzingSdgs, setIsAnalyzingSdgs] = useState(false);
+  const [aiSdgResult, setAiSdgResult] = useState<{
+    recommendedSdgs: number[];
+    primarySdg: number;
+    conciseRationale: string;
+    breakdown?: Array<{ sdgId: number; sdgCode: string; relevanceScore: number; reason: string }>;
+  } | null>(null);
+  const [hasAttemptedAutoSdg, setHasAttemptedAutoSdg] = useState(false);
+
   useEffect(() => {
     setImageError(false);
   }, [bannerUrl]);
@@ -307,7 +318,64 @@ export function OpportunityFormPageView({
 
   const handleFocusAreaChange = (newArea: CsrFocusArea) => {
     setFocusArea(newArea);
+    setHasAttemptedAutoSdg(false);
+    setAiSdgResult(null);
   };
+
+  const handleRecommendSdgs = async (overrideTitle?: string, overrideFocus?: CsrFocusArea, overrideDesc?: string) => {
+    const currentTitle = overrideTitle || title;
+    const currentFocus = overrideFocus || focusArea;
+    const currentDesc = overrideDesc || description;
+
+    if (!currentTitle.trim()) return;
+
+    try {
+      setIsAnalyzingSdgs(true);
+      const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+      const response = await fetch("/api/opportunities/recommend-sdgs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          title: currentTitle.trim(),
+          focusArea: currentFocus,
+          description: currentDesc.trim() || undefined,
+          targetProvince: targetProvince || undefined,
+          targetCity: targetCity || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal mengambil rekomendasi SDGs");
+      }
+
+      const resJson = await response.json();
+      if (resJson.success && resJson.data) {
+        setAiSdgResult(resJson.data);
+        if (resJson.data.recommendedSdgs && resJson.data.recommendedSdgs.length > 0) {
+          setSelectedSdgs([...resJson.data.recommendedSdgs].sort((a: number, b: number) => a - b));
+        }
+      }
+    } catch (err) {
+      console.warn("Rekomendasi SDGs AI error, menggunakan fallback:", err);
+      const fallback = DEFAULT_SDGS_BY_FOCUS[currentFocus] || [17];
+      setSelectedSdgs([...fallback].sort((a, b) => a - b));
+    } finally {
+      setIsAnalyzingSdgs(false);
+    }
+  };
+
+  // Otomatis jalankan rekomendasi AI saat pengguna membuka Langkah 3 pertama kali
+  useEffect(() => {
+    if (currentStep === 3 && !hasAttemptedAutoSdg && !isEdit) {
+      setHasAttemptedAutoSdg(true);
+      if (title.trim()) {
+        handleRecommendSdgs();
+      }
+    }
+  }, [currentStep, hasAttemptedAutoSdg, isEdit, title]);
 
   const toggleSdg = (id: number) => {
     setSelectedSdgs((prev) =>
@@ -499,6 +567,10 @@ export function OpportunityFormPageView({
         setErrorMessage("Nama / Judul Peluang CSR wajib diisi sebelum melanjutkan.");
         return false;
       }
+      if (!description.trim()) {
+        setErrorMessage("Deskripsi & ruang lingkup inisiatif wajib diisi sebelum melanjutkan.");
+        return false;
+      }
     }
 
     if (step === 2) {
@@ -584,7 +656,7 @@ export function OpportunityFormPageView({
       }
       if (!description.trim()) {
         setErrorMessage("Deskripsi & ruang lingkup inisiatif wajib diisi sebelum mempublikasikan.");
-        setCurrentStep(5);
+        setCurrentStep(1);
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
@@ -688,7 +760,7 @@ export function OpportunityFormPageView({
     }
     if (!description.trim()) {
       setErrorMessage("Deskripsi inisiatif peluang wajib diisi.");
-      setCurrentStep(5);
+      setCurrentStep(1);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -909,7 +981,7 @@ export function OpportunityFormPageView({
                     Informasi Dasar Inisiatif CSR
                   </h3>
                   <p className="text-xs text-[#64748B]">
-                    Tentukan nama judul inisiatif dan bidang fokus program yang direncanakan.
+                    Tentukan judul inisiatif, bidang fokus, alokasi anggaran, dan uraian ruang lingkup program.
                   </p>
                 </div>
               </div>
@@ -980,6 +1052,36 @@ export function OpportunityFormPageView({
                     Kosongkan jika anggaran program belum dipublikasikan atau bersifat fleksibel.
                   </span>
                 </div>
+              </div>
+
+              {/* Deskripsi & Ruang Lingkup Textarea */}
+              <div className="flex flex-col gap-1.5 pt-1">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="field-description" className="text-[13px] font-semibold text-[#181343] block">
+                    Deskripsi &amp; Ruang Lingkup Inisiatif <span className="text-rose-500">*</span>
+                  </label>
+                  {isDescriptionHighlighted && (
+                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-in fade-in">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      Rekomendasi AI Disisipkan
+                    </span>
+                  )}
+                </div>
+                <textarea
+                  id="field-description"
+                  rows={5}
+                  placeholder="Jelaskan latar belakang program, target masalah sosial yang ingin diselesaikan, sasaran penerima manfaat, ruang lingkup kegiatan yang diharapkan, serta kriteria mitra pelaksana..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className={`w-full p-3.5 rounded-xl border text-[14px] text-[#181343] focus:outline-none transition-all duration-300 leading-relaxed resize-y ${
+                    isDescriptionHighlighted
+                      ? "bg-emerald-50/50 border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm"
+                      : "border-[#E2E8F0] bg-[#F8FAFC] focus:bg-white focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343]"
+                  }`}
+                />
+                <span className="text-[12px] text-[#64748B]">
+                  Uraian yang jelas mempermudah AI memetakan prioritas daerah dan sasaran SDGs yang akurat, serta mempermudah calon mitra menyusun proposal.
+                </span>
               </div>
             </div>
           </div>
@@ -1059,13 +1161,103 @@ export function OpportunityFormPageView({
                     Sasaran SDGs &amp; Pemetaan Pilar ESG
                   </h3>
                   <p className="text-xs text-[#64748B]">
-                    Pilih sasaran SDGs yang relevan dari 17 tujuan resmi PBB. Sistem memetakan pilar ESG secara otomatis.
+                    Sasaran SDGs ditentukan otomatis oleh asisten AI. Sistem memetakan pilar ESG secara instan.
                   </p>
                 </div>
               </div>
               <Badge variant="emerald" size="sm" className="font-bold self-start sm:self-auto">
                 {selectedSdgs.length} SDGs Terpilih
               </Badge>
+            </div>
+
+            {/* AI Recommendation Banner / Card */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-slate-50 border border-emerald-200/80 shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#009E75] text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-[#181343]">
+                        Rekomendasi Cerdas AI Sasaran SDGs
+                      </span>
+                      <Badge variant="emerald" size="sm" className="text-[10px] py-0 px-2 font-bold">
+                        AI Assistant
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Dianalisis otomatis dari judul inisiatif, bidang fokus, dan uraian ruang lingkup program.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleRecommendSdgs()}
+                  disabled={isAnalyzingSdgs}
+                  className="self-start sm:self-auto px-3 py-1.5 rounded-lg border border-emerald-300 hover:border-emerald-400 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-50"
+                >
+                  {isAnalyzingSdgs ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      <span>Menganalisis...</span>
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Analisis Ulang AI</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {isAnalyzingSdgs ? (
+                <div className="p-3.5 rounded-xl bg-white/80 border border-emerald-100 flex items-center gap-2.5 text-xs text-slate-600 animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-600 shrink-0" />
+                  <span>AI sedang memetakan sasaran SDGs paling relevan dari inisiatif Anda...</span>
+                </div>
+              ) : aiSdgResult ? (
+                <div className="p-3.5 rounded-xl bg-white/95 border border-emerald-100/90 space-y-2.5">
+                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                    {aiSdgResult.conciseRationale}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="text-[11px] font-semibold text-slate-500 mr-1">Rekomendasi:</span>
+                    {aiSdgResult.recommendedSdgs.map((sdgId) => {
+                      const goal = ALL_17_SDGS.find((g) => g.id === sdgId);
+                      if (!goal) return null;
+                      const isPrimary = sdgId === aiSdgResult.primarySdg;
+                      return (
+                        <span
+                          key={sdgId}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-2xs"
+                          style={{
+                            backgroundColor: `${goal.color}15`,
+                            borderColor: `${goal.color}40`,
+                            color: goal.color,
+                          }}
+                        >
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: goal.color }}
+                          />
+                          <span>{goal.code}: {goal.name}</span>
+                          {isPrimary && (
+                            <span className="ml-1 text-[9px] bg-[#181343] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                              Utama
+                            </span>
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-white/70 border border-emerald-100 text-[11px] text-slate-500 flex items-center justify-between">
+                  <span>Klik tombol <b>Analisis Ulang AI</b> di atas untuk menjalankan deteksi otomatis sasaran SDGs kapan saja.</span>
+                </div>
+              )}
             </div>
 
             {/* Interactive 17 SDGs Grid */}
@@ -1236,7 +1428,7 @@ export function OpportunityFormPageView({
         )}
 
         {/* ============================================================ */}
-        {/* LANGKAH 5: DESKRIPSI, BANNER & PRATINJAU AKHIR */}
+        {/* LANGKAH 5: BANNER SAMPUL & PRATINJAU AKHIR */}
         {/* ============================================================ */}
         {currentStep === 5 && (
           <div className="space-y-6 animate-in fade-in duration-200">
@@ -1247,47 +1439,17 @@ export function OpportunityFormPageView({
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[#181343]">
-                    Deskripsi, Banner &amp; Pratinjau Akhir
+                    Banner Sampul &amp; Pratinjau Akhir
                   </h3>
                   <p className="text-xs text-[#64748B]">
-                    Lengkapi uraian ruang lingkup inisiatif dan tinjau ringkasan sebelum mempublikasikan.
+                    Lengkapi gambar sampul inisiatif dan tinjau seluruh ringkasan program sebelum mempublikasikannya.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Deskripsi Textarea */}
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <label htmlFor="field-description" className="text-[13px] font-semibold text-[#181343] block">
-                  Deskripsi &amp; Ruang Lingkup Inisiatif <span className="text-rose-500">*</span>
-                </label>
-                {isDescriptionHighlighted && (
-                  <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-in fade-in">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Rekomendasi AI Berhasil Disisipkan
-                  </span>
-                )}
-              </div>
-              <textarea
-                id="field-description"
-                rows={6}
-                placeholder="Jelaskan latar belakang program, sasaran penerima manfaat, ruang lingkup kegiatan yang diharapkan, serta kualifikasi calon mitra pelaksana yang dicari..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className={`w-full p-3.5 rounded-xl border text-[14px] text-[#181343] focus:outline-none transition-all duration-300 leading-relaxed resize-y ${
-                  isDescriptionHighlighted
-                    ? "bg-emerald-50/50 border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm"
-                    : "border-[#E2E8F0] bg-[#F8FAFC] focus:bg-white focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343]"
-                }`}
-              />
-              <span className="text-[12px] text-[#64748B]">
-                Informasi yang lengkap mempermudah mitra pelaksana menyusun proposal teknis dan RAB yang akurat.
-              </span>
-            </div>
-
             {/* Banner Upload / Preview */}
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2">
               <label className="text-[13px] font-semibold text-[#181343] block">
                 Gambar Sampul / Banner Peluang (Opsional)
               </label>
@@ -1368,11 +1530,20 @@ export function OpportunityFormPageView({
 
             {/* Pratinjau Ringkasan Inisiatif */}
             <div className="pt-2">
-              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] space-y-3">
-                <span className="text-xs font-bold text-[#181343] block">
-                  Ringkasan Pratinjau Peluang:
-                </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#181343] block">
+                    Ringkasan Pratinjau Peluang:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="text-[11px] font-bold text-[#009E75] hover:text-emerald-800 transition"
+                  >
+                    Edit Informasi Dasar
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                   <div>
                     <span className="text-[11px] text-[#64748B] block">Judul Inisiatif</span>
                     <span className="font-semibold text-[#181343]">{title || "Belum diisi"}</span>
@@ -1402,6 +1573,14 @@ export function OpportunityFormPageView({
                     <span className="font-medium text-[#181343]">
                       {selectedSdgs.length > 0 ? `${selectedSdgs.length} SDGs (E:${mappedEsgPillars.E.length}, S:${mappedEsgPillars.S.length}, G:${mappedEsgPillars.G.length})` : "Belum dipilih"}
                     </span>
+                  </div>
+
+                  {/* Deskripsi & Ruang Lingkup Preview */}
+                  <div className="sm:col-span-2 pt-2 border-t border-slate-200/70">
+                    <span className="text-[11px] text-[#64748B] block mb-1">Deskripsi &amp; Ruang Lingkup</span>
+                    <p className="font-medium text-[#181343] text-xs leading-relaxed whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200/80">
+                      {description.trim() || "Belum diisi"}
+                    </p>
                   </div>
                 </div>
               </div>

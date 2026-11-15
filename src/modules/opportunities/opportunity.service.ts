@@ -6,7 +6,13 @@ import {
 } from "@/common/errors/app-error";
 import { AppLogger } from "@/common/logger/app-logger";
 import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
-import { needPrioritizationService, NeedPrioritizationResponse } from "@/modules/ai";
+import {
+  needPrioritizationService,
+  NeedPrioritizationResponse,
+  sdgRecommendationService,
+  SdgRecommendationRequestDTO,
+  SdgRecommendationResponse,
+} from "@/modules/ai";
 import { partnerRepository } from "@/modules/partners";
 import { OpportunityRepository } from "./opportunity.repository";
 import {
@@ -278,5 +284,17 @@ export class OpportunityService {
       fieldContextNotes: dto.fieldContextNotes || null,
       territoryData,
     });
+  }
+
+  async recommendSdgs(
+    dto: SdgRecommendationRequestDTO
+  ): Promise<SdgRecommendationResponse> {
+    if (!isAiFeatureEnabled()) {
+      throw new ForBiddenError(
+        "Fitur AI sedang dinonaktifkan oleh administrator sistem (ENABLE_AI_FEATURES / NEXT_PUBLIC_ENABLE_AI = false)"
+      );
+    }
+
+    return sdgRecommendationService.recommend(dto);
   }
 }
