@@ -91,185 +91,185 @@ export function Sidebar({
 
   const navigationSections: NavSection[] = isManagement
     ? [
-        {
-          title: "PENGAWASAN EKSEKUTIF",
-          items: [
-            {
-              id: "overview" as CompanyNavMenu,
-              label: "Ringkasan",
-              icon: LayoutDashboard,
-            },
-            {
-              id: "programs" as CompanyNavMenu,
-              label: "Pengawasan Program",
-              icon: Activity,
-              count: counts?.programs,
-            },
-            {
-              id: "finances" as CompanyNavMenu,
-              label: "Pengawasan Anggaran",
-              icon: Wallet,
-            },
-            {
-              id: "partner-performance" as CompanyNavMenu,
-              label: "Kinerja Mitra",
-              icon: Award,
-            },
-            {
-              id: "sentiment" as CompanyNavMenu,
-              label: "Suara Warga & Sentimen",
-              icon: MessageSquareHeart,
-            },
-            {
-              id: "analytics" as CompanyNavMenu,
-              label: "Laporan & Dampak ESG",
-              icon: BarChart3,
-            },
-          ],
-        },
-        {
-          title: "INISIATIF & MITRA",
-          items: [
-            {
-              id: "opportunities" as CompanyNavMenu,
-              label: "Katalog Peluang CSR",
-              icon: FileText,
-            },
-            {
-              id: "partners" as CompanyNavMenu,
-              label: "Direktori Mitra",
-              icon: HeartHandshake,
-            },
-          ],
-        },
-        ...(aiEnabled
-          ? [
+      {
+        title: "PENGAWASAN EKSEKUTIF",
+        items: [
+          {
+            id: "overview" as CompanyNavMenu,
+            label: "Ringkasan",
+            icon: LayoutDashboard,
+          },
+          {
+            id: "programs" as CompanyNavMenu,
+            label: "Pengawasan Program",
+            icon: Activity,
+            count: counts?.programs,
+          },
+          {
+            id: "finances" as CompanyNavMenu,
+            label: "Pengawasan Anggaran",
+            icon: Wallet,
+          },
+          {
+            id: "partner-performance" as CompanyNavMenu,
+            label: "Kinerja Mitra",
+            icon: Award,
+          },
+          {
+            id: "sentiment" as CompanyNavMenu,
+            label: "Suara Warga & Sentimen",
+            icon: MessageSquareHeart,
+          },
+          {
+            id: "analytics" as CompanyNavMenu,
+            label: "Laporan & Dampak ESG",
+            icon: BarChart3,
+          },
+        ],
+      },
+      {
+        title: "INISIATIF & MITRA",
+        items: [
+          {
+            id: "opportunities" as CompanyNavMenu,
+            label: "Katalog Peluang CSR",
+            icon: FileText,
+          },
+          {
+            id: "partners" as CompanyNavMenu,
+            label: "Direktori Mitra",
+            icon: HeartHandshake,
+          },
+        ],
+      },
+      ...(aiEnabled
+        ? [
+          {
+            title: "KONSULTASI STRATEGIS",
+            items: [
               {
-                title: "KONSULTASI STRATEGIS",
-                items: [
-                  {
-                    id: "chat" as CompanyNavMenu,
-                    label: "AI CSR Advisor",
-                    icon: Sparkles,
-                  },
-                ],
+                id: "chat" as CompanyNavMenu,
+                label: "AI CSR Advisor",
+                icon: Sparkles,
+              },
+            ],
+          },
+        ]
+        : []),
+      {
+        title: "TATA KELOLA KORPORAT",
+        items: [
+          {
+            id: "team" as CompanyNavMenu,
+            label: "Anggota Tim",
+            icon: Users,
+          },
+          {
+            id: "profile" as CompanyNavMenu,
+            label: "Profil Perusahaan",
+            icon: Building2,
+          },
+        ],
+      },
+    ]
+    : [
+      {
+        title: "UTAMA",
+        items: [
+          {
+            id: "overview" as CompanyNavMenu,
+            label: "Ringkasan",
+            icon: LayoutDashboard,
+          },
+          ...(aiEnabled
+            ? [
+              {
+                id: "chat" as CompanyNavMenu,
+                label: "AI CSR Advisor",
+                icon: Sparkles,
               },
             ]
-          : []),
-        {
-          title: "TATA KELOLA KORPORAT",
-          items: [
-            {
-              id: "team" as CompanyNavMenu,
-              label: "Anggota Tim",
-              icon: Users,
-            },
-            {
-              id: "profile" as CompanyNavMenu,
-              label: "Profil Perusahaan",
-              icon: Building2,
-            },
-          ],
-        },
-      ]
-    : [
-        {
-          title: "UTAMA",
-          items: [
-            {
-              id: "overview" as CompanyNavMenu,
-              label: "Ringkasan",
-              icon: LayoutDashboard,
-            },
-            ...(aiEnabled
-              ? [
-                  {
-                    id: "chat" as CompanyNavMenu,
-                    label: "AI CSR Advisor",
-                    icon: Sparkles,
-                  },
-                ]
-              : []),
-            {
-              id: "opportunities" as CompanyNavMenu,
-              label: "Peluang CSR",
-              icon: FileText,
-            },
-          ],
-        },
-        {
-          title: "KOLABORASI & MITRA",
-          items: [
-            {
-              id: "partners" as CompanyNavMenu,
-              label: "Kurasi Mitra",
-              icon: HeartHandshake,
-            },
-            {
-              id: "proposals" as CompanyNavMenu,
-              label: "Kelola Proposal",
-              icon: Inbox,
-              count: counts?.proposals,
-            },
-            {
-              id: "collaborations" as CompanyNavMenu,
-              label: "Kolaborasi & MoU",
-              icon: FileCheck2,
-            },
-            {
-              id: "conversations" as CompanyNavMenu,
-              label: "Pesan & Negosiasi",
-              icon: MessageSquare,
-            },
-          ],
-        },
-        {
-          title: "PELAKSANAAN & DAMPAK",
-          items: [
-            {
-              id: "programs" as CompanyNavMenu,
-              label: "Pelaksanaan Program",
-              icon: Activity,
-              count: counts?.programs,
-            },
-            {
-              id: "finances" as CompanyNavMenu,
-              label: "Pengawasan Anggaran",
-              icon: Wallet,
-            },
-            {
-              id: "partner-performance" as CompanyNavMenu,
-              label: "Kinerja Mitra",
-              icon: Award,
-            },
-            {
-              id: "sentiment" as CompanyNavMenu,
-              label: "Suara Warga & Sentimen",
-              icon: MessageSquareHeart,
-            },
-            {
-              id: "analytics" as CompanyNavMenu,
-              label: "Laporan & Dampak ESG",
-              icon: BarChart3,
-            },
-          ],
-        },
-        {
-          title: "ORGANISASI",
-          items: [
-            {
-              id: "team" as CompanyNavMenu,
-              label: "Anggota Tim",
-              icon: Users,
-            },
-            {
-              id: "profile" as CompanyNavMenu,
-              label: "Profil Perusahaan",
-              icon: Building2,
-            },
-          ],
-        },
-      ];
+            : []),
+          {
+            id: "opportunities" as CompanyNavMenu,
+            label: "Peluang CSR",
+            icon: FileText,
+          },
+        ],
+      },
+      {
+        title: "KOLABORASI & MITRA",
+        items: [
+          {
+            id: "partners" as CompanyNavMenu,
+            label: "Kurasi Mitra",
+            icon: HeartHandshake,
+          },
+          {
+            id: "proposals" as CompanyNavMenu,
+            label: "Kelola Proposal",
+            icon: Inbox,
+            count: counts?.proposals,
+          },
+          {
+            id: "collaborations" as CompanyNavMenu,
+            label: "Kolaborasi & MoU",
+            icon: FileCheck2,
+          },
+          {
+            id: "conversations" as CompanyNavMenu,
+            label: "Pesan & Negosiasi",
+            icon: MessageSquare,
+          },
+        ],
+      },
+      {
+        title: "PELAKSANAAN & DAMPAK",
+        items: [
+          {
+            id: "programs" as CompanyNavMenu,
+            label: "Pelaksanaan Program",
+            icon: Activity,
+            count: counts?.programs,
+          },
+          {
+            id: "finances" as CompanyNavMenu,
+            label: "Pengawasan Anggaran",
+            icon: Wallet,
+          },
+          {
+            id: "partner-performance" as CompanyNavMenu,
+            label: "Kinerja Mitra",
+            icon: Award,
+          },
+          {
+            id: "sentiment" as CompanyNavMenu,
+            label: "Suara Warga & Sentimen",
+            icon: MessageSquareHeart,
+          },
+          {
+            id: "analytics" as CompanyNavMenu,
+            label: "Laporan & Dampak ESG",
+            icon: BarChart3,
+          },
+        ],
+      },
+      {
+        title: "ORGANISASI",
+        items: [
+          {
+            id: "team" as CompanyNavMenu,
+            label: "Anggota Tim",
+            icon: Users,
+          },
+          {
+            id: "profile" as CompanyNavMenu,
+            label: "Profil Perusahaan",
+            icon: Building2,
+          },
+        ],
+      },
+    ];
 
   const handleItemClick = (id: CompanyNavMenu) => {
     onSelectMenu(id);
@@ -299,7 +299,7 @@ export function Sidebar({
       </div>
 
       {/* 2. Navigation Menu */}
-      <div className="flex-1 overflow-y-auto px-3.5 py-4 pb-8 space-y-6">
+      <div className="flex-1 overflow-y-auto px-3.5 py-4 pb-4 space-y-6">
         {navigationSections.map((section) => (
           <div key={section.title} className="space-y-1">
             <span className="px-3 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
@@ -316,17 +316,15 @@ export function Sidebar({
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group ${
-                      isActive
-                        ? "bg-[#181343] text-white shadow-xs font-bold"
-                        : "text-[#181343] hover:bg-[#F4F4F6] hover:text-[#181343]"
-                    }`}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group ${isActive
+                      ? "bg-[#181343] text-white shadow-xs font-bold"
+                      : "text-[#181343] hover:bg-[#F4F4F6] hover:text-[#181343]"
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
-                        className={`w-4 h-4 shrink-0 transition-colors ${
-                          isActive ? "text-white" : "text-[#787680] group-hover:text-[#181343]"
-                        }`}
+                        className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-white" : "text-[#787680] group-hover:text-[#181343]"
+                          }`}
                       />
                       <span className="truncate">{item.label}</span>
                     </div>
@@ -334,11 +332,10 @@ export function Sidebar({
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {item.count !== undefined && item.count > 0 && (
                         <span
-                          className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${
-                            isActive
-                              ? "bg-white/20 text-white"
-                              : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
-                          }`}
+                          className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
+                            }`}
                         >
                           {item.count}
                         </span>
@@ -350,6 +347,37 @@ export function Sidebar({
             </div>
           </div>
         ))}
+      </div>
+
+      {/* 3. Footer Logout di Sudut Kiri Bawah */}
+      <div className="px-3.5 py-2.5 border-t border-[#E5E7EB] bg-white shrink-0">
+        <button
+          type="button"
+          onClick={onLogout}
+          className="group w-full h-11 pl-1 pr-4 rounded-full bg-transparent hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all duration-150 cursor-pointer flex items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+          title="Keluar dari akun"
+        >
+          <div className="w-9 h-9 rounded-full bg-[#2B2D31] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="w-full h-full object-cover rounded-full"
+              />
+            ) : (
+              <span>{user.name ? user.name.trim().charAt(0).toUpperCase() : "U"}</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2.5 ml-5 shrink-0">
+            <LogOut
+              className="w-4 h-4 text-[#181343] group-hover:text-rose-600 transition-colors shrink-0"
+              aria-hidden="true"
+            />
+            <span className="text-xs font-semibold text-[#181343] group-hover:text-rose-700 transition-colors whitespace-nowrap">
+              Keluar dari akun
+            </span>
+          </div>
+        </button>
       </div>
     </div>
   );

@@ -415,22 +415,38 @@ export function OpportunitiesManagementView({
 
                   {/* Body Content */}
                   <div className="p-5 space-y-3">
+                    {/* Judul Peluang */}
                     <div>
                       <h3 className="text-base font-bold text-[#181343] group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
                         {opp.title}
                       </h3>
-                      <p className="text-xs text-[#787680] line-clamp-2 leading-relaxed mt-1.5">
-                        {opp.description}
-                      </p>
                     </div>
 
-                    {/* SDGs Chips */}
+                    {/* Wilayah Sasaran (Di Atas SDG) */}
+                    <div className="flex items-center justify-between gap-2 text-xs text-slate-600">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span
+                          className="font-medium truncate"
+                          title={[opp.targetCity, opp.targetProvince].filter(Boolean).join(", ") || "Wilayah belum ditentukan"}
+                        >
+                          {[opp.targetCity, opp.targetProvince].filter(Boolean).join(", ") || "Wilayah belum ditentukan"}
+                        </span>
+                      </div>
+                      {opp.stats?.proposalsCount !== undefined && opp.stats.proposalsCount > 0 && (
+                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full shrink-0">
+                          {opp.stats.proposalsCount} Proposal
+                        </span>
+                      )}
+                    </div>
+
+                    {/* SDGs Chips (Sejajar 1 Baris, Hanya Nomor/Kode SDG) */}
                     {sdgs.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                        {sdgs.slice(0, 3).map((sdg) => (
+                      <div className="flex items-center gap-1.5 overflow-hidden flex-nowrap pt-0.5">
+                        {sdgs.slice(0, 4).map((sdg) => (
                           <span
                             key={sdg.id}
-                            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0"
+                            className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0"
                             style={{
                               backgroundColor: sdg.color + "14",
                               borderColor: sdg.color + "40",
@@ -438,69 +454,44 @@ export function OpportunitiesManagementView({
                             }}
                             title={`${sdg.code}: ${sdg.name}`}
                           >
-                            <span>{sdg.code}</span>
-                            <span className="font-medium truncate max-w-[100px] hidden sm:inline">
-                              {sdg.name}
-                            </span>
+                            {sdg.code}
                           </span>
                         ))}
-                        {sdgs.length > 3 && (
-                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
-                            +{sdgs.length - 3}
+                        {sdgs.length > 4 && (
+                          <span
+                            className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0"
+                            title={sdgs.slice(4).map((s) => `${s.code}: ${s.name}`).join(", ")}
+                          >
+                            +{sdgs.length - 4}
                           </span>
                         )}
                       </div>
                     )}
 
-                    {/* Metadata Strip */}
-                    <div className="pt-2 border-t border-[#F4F4F6] space-y-2 text-xs">
-                      {/* Estimasi Anggaran (Tidak menampilkan Rp 0) */}
-                      <div className="flex items-center justify-between text-[#47464F]">
-                        <span className="text-[#787680]">Estimasi Anggaran:</span>
-                        <span className="font-extrabold text-[#009E75]">
-                          {opp.estimatedBudget && parseFloat(opp.estimatedBudget) > 0
-                            ? formatRupiah(opp.estimatedBudget)
-                            : "Belum Ditentukan"}
-                        </span>
-                      </div>
-
-                      {/* Wilayah Sasaran */}
-                      <div className="flex items-center justify-between text-[#47464F]">
-                        <span className="text-[#787680]">Wilayah Sasaran:</span>
-                        <span
-                          className="font-medium text-slate-800 truncate max-w-[160px]"
-                          title={[opp.targetCity, opp.targetProvince].filter(Boolean).join(", ") || "Belum ditentukan"}
-                        >
-                          {[opp.targetCity, opp.targetProvince].filter(Boolean).join(", ") || "Belum ditentukan"}
-                        </span>
-                      </div>
-
-                      {/* Status Pengajuan / Respons Mitra */}
-                      <div className="flex items-center justify-between text-[#47464F]">
-                        <span className="text-[#787680]">Status Pengajuan:</span>
-                        <span className="font-semibold text-slate-800">
-                          {opp.status === "DRAFT"
-                            ? "Draf Internal"
-                            : opp.status === "CLOSED"
-                            ? "Peluang Ditutup"
-                            : opp.stats?.proposalsCount && opp.stats.proposalsCount > 0
-                            ? `${opp.stats.proposalsCount} Proposal Masuk`
-                            : "Menunggu Pengajuan Mitra"}
-                        </span>
-                      </div>
-
-                      {/* Batas Pengajuan */}
-                      <div className="flex items-center justify-between text-[#47464F]">
-                        <span className="text-[#787680]">Batas Pengajuan:</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-medium text-slate-800">
-                            {opp.deadline ? formatDate(opp.deadline) : "Belum ditentukan"}
+                    {/* Metadata Strip Bersih (2 Kolom Sejajar: Estimasi Anggaran & Batas Pengajuan) */}
+                    <div className="pt-2.5 border-t border-[#F4F4F6] text-xs">
+                      <div className="grid grid-cols-2 gap-2 items-end">
+                        <div className="min-w-0">
+                          <span className="text-[11px] text-[#787680] block font-medium">Estimasi Anggaran</span>
+                          <span className="text-sm font-extrabold text-[#009E75] block truncate mt-0.5">
+                            {opp.estimatedBudget && parseFloat(opp.estimatedBudget) > 0
+                              ? formatRupiah(opp.estimatedBudget)
+                              : "Fleksibel"}
                           </span>
-                          {daysLeft !== null && daysLeft >= 0 && daysLeft <= 14 && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                              Sisa {daysLeft} hr
+                        </div>
+
+                        <div className="text-right min-w-0">
+                          <span className="text-[11px] text-[#787680] block font-medium">Batas Pengajuan</span>
+                          <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                            <span className="font-semibold text-slate-800 truncate">
+                              {opp.deadline ? formatDate(opp.deadline) : "Terbuka"}
                             </span>
-                          )}
+                            {daysLeft !== null && daysLeft >= 0 && daysLeft <= 14 && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                                Sisa {daysLeft} hr
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

@@ -57,7 +57,7 @@ export class ProgramStageService {
           stages = await this.saveStages(programId, user, {
             stages: extracted.stages.map((m, idx: number) => ({
               orderIndex: m.orderIndex || idx + 1,
-              title: m.title,
+              title: (m.title || "").replace(/^(?:tahap(?:an)?\s*\d*[\s:.-]*)+/i, "").trim() || m.title,
               description: m.description,
               targetTimeline: m.targetTimeline,
               expectedEvidence: m.expectedEvidence,
@@ -128,7 +128,7 @@ export class ProgramStageService {
       id: crypto.randomUUID(),
       programId,
       orderIndex: st.orderIndex || index + 1,
-      title: st.title,
+      title: (st.title || "").replace(/^(?:tahap(?:an)?\s*\d*[\s:.-]*)+/i, "").trim() || st.title,
       description: st.description || null,
       targetTimeline: st.targetTimeline || null,
       expectedEvidence: st.expectedEvidence || null,

@@ -141,7 +141,11 @@ export function InviteMemberModal({
           )}
 
           <Input
-            label="Alamat Email Calon Anggota *"
+            label={
+              <>
+                Alamat Email Calon Anggota <span className="text-rose-500">*</span>
+              </>
+            }
             type="email"
             placeholder="staf.csr@perusahaan.co.id"
             value={email}

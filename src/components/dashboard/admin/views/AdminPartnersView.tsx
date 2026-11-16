@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  CheckCircle2,
+  Clock,
   ExternalLink,
   Eye,
   FileCheck2,
+  HeartHandshake,
   Search,
   ShieldCheck,
 } from "lucide-react";
@@ -21,6 +24,7 @@ import {
 import {
   AdminEmptyState,
   AdminErrorState,
+  AdminKpiCard,
   AdminLoadingState,
   AdminModal,
   AdminPaginationBar,
@@ -112,6 +116,16 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
     setPage(1);
   };
 
+  const partnerStats = useMemo(() => {
+    if (!data) return { total: 0, verified: 0, unverified: 0, active: 0 };
+    return {
+      total: data.total,
+      verified: data.data.filter((p) => p.isVerified).length,
+      unverified: data.data.filter((p) => !p.isVerified).length,
+      active: data.data.filter((p) => p.status === "ACTIVE").length,
+    };
+  }, [data]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80 w-full">
@@ -127,14 +141,48 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
           </p>
         </div>
         {data && (
-          <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-[#181343] self-start sm:self-auto shrink-0">
+          <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E5E7EB] text-xs font-semibold text-[#181343] self-start sm:self-auto shrink-0 shadow-2xs">
             Total {data.total} Mitra NGO
           </div>
         )}
       </div>
 
+      {/* 4 Standard KPI Cards (Anti AI-Slop & Seragam dengan Management/Mitra) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <AdminKpiCard
+          label="Total mitra NGO"
+          value={partnerStats.total}
+          subtitle="Yayasan &amp; komunitas terdaftar"
+          icon={HeartHandshake}
+          iconColor="emerald"
+        />
+        <AdminKpiCard
+          label="Terverifikasi resmi"
+          value={partnerStats.verified}
+          subtitle="SK Kemenkumham &amp; NPWP valid"
+          icon={ShieldCheck}
+          iconColor="blue"
+          valueColor="text-blue-700"
+        />
+        <AdminKpiCard
+          label="Menunggu verifikasi"
+          value={partnerStats.unverified}
+          subtitle="Antrean tinjauan legalitas"
+          icon={Clock}
+          iconColor="amber"
+          valueColor={partnerStats.unverified > 0 ? "text-amber-600" : "text-[#181343]"}
+        />
+        <AdminKpiCard
+          label="Mitra aktif"
+          value={partnerStats.active}
+          subtitle="Siap bermitra &amp; eksekusi"
+          icon={CheckCircle2}
+          iconColor="indigo"
+        />
+      </div>
+
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4">
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-xs">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-5 relative">
             <label htmlFor="admin-partner-search" className="sr-only">

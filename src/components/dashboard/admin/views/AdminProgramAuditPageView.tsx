@@ -3,16 +3,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
+  BarChart3,
   Building2,
   Calendar,
   Camera,
+  Coins,
   ExternalLink,
   FileCheck2,
   FileText,
   HeartHandshake,
+  Layers,
   Lock,
   MapPin,
-  Sparkles,
   Star,
   Wallet,
 } from "lucide-react";
@@ -26,7 +28,8 @@ import {
   formatRupiah,
   getFocusAreaLabel,
 } from "../helpers";
-import { AdminErrorState, AdminLoadingState } from "../AdminSharedPrimitives";
+import { AdminErrorState, AdminKpiCard, AdminLoadingState } from "../AdminSharedPrimitives";
+import { cleanStageTitle } from "../../activities/types";
 
 interface AdminProgramAuditPageViewProps {
   programId: string;
@@ -207,61 +210,52 @@ export function AdminProgramAuditPageView({
         </div>
       </div>
 
-      {/* 4 Audit Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-xs font-semibold text-slate-600 block">Progres Tahapan</span>
-          <div className="text-2xl font-extrabold text-[#181343]">
-            {program.activityProgressPercent}%
-          </div>
-          <span className="text-xs text-slate-600 block">
-            {program.completedActivitiesCount} dari {program.totalActivitiesCount} selesai
-          </span>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-xs font-semibold text-slate-600 block">Pagu &amp; Termin</span>
-          <div className="text-2xl font-extrabold text-[#181343] truncate">
-            {formatCompactRupiah(financialSummary.totalDisbursed)}
-          </div>
-          <span className="text-xs text-slate-600 block truncate">
-            Dari pagu {formatCompactRupiah(financialSummary.agreedBudget)}
-          </span>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-xs font-semibold text-slate-600 block">Nota Terverifikasi</span>
-          <div className="text-2xl font-extrabold text-emerald-700 truncate">
-            {formatCompactRupiah(financialSummary.totalExpensesVerified)}
-          </div>
-          <span className="text-xs text-slate-600 block">
-            Serapan: {financialSummary.absorptionRate}%
-          </span>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-1">
-          <span className="text-xs font-semibold text-slate-600 block">Kepuasan Warga</span>
-          <div className="text-2xl font-extrabold text-[#181343]">
-            {reviewStats.totalReviews > 0 ? `${reviewStats.averageRating} / 5` : "-"}
-          </div>
-          <span className="text-xs text-slate-600 block">
-            Dari {reviewStats.totalReviews} ulasan masyarakat
-          </span>
-        </div>
+      {/* 4 Audit Metrics (Anti AI-Slop & Seragam dengan Management/Mitra) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <AdminKpiCard
+          label="Progres tahapan"
+          value={`${program.activityProgressPercent}%`}
+          subtitle={`${program.completedActivitiesCount} dari ${program.totalActivitiesCount} kegiatan selesai`}
+          icon={Layers}
+          iconColor="blue"
+        />
+        <AdminKpiCard
+          label="Pagu &amp; termin"
+          value={formatCompactRupiah(financialSummary.totalDisbursed)}
+          subtitle={`Dari pagu ${formatCompactRupiah(financialSummary.agreedBudget)}`}
+          icon={Coins}
+          iconColor="indigo"
+        />
+        <AdminKpiCard
+          label="Nota terverifikasi"
+          value={formatCompactRupiah(financialSummary.totalExpensesVerified)}
+          subtitle={`Serapan anggaran: ${financialSummary.absorptionRate}%`}
+          icon={FileCheck2}
+          iconColor="emerald"
+          valueColor="text-emerald-700"
+        />
+        <AdminKpiCard
+          label="Kepuasan warga"
+          value={reviewStats.totalReviews > 0 ? `${reviewStats.averageRating} / 5` : "Belum Ada"}
+          subtitle={`Dari ${reviewStats.totalReviews} ulasan masyarakat`}
+          icon={Star}
+          iconColor="amber"
+          valueColor={reviewStats.totalReviews > 0 ? "text-amber-600" : "text-[#181343]"}
+        />
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] shadow-xs overflow-hidden">
         <div
           role="tablist"
           aria-label="Bagian audit program"
-          className="px-4 sm:px-6 border-b border-slate-200 bg-slate-50 flex items-center gap-2 sm:gap-4 overflow-x-auto"
+          className="px-4 sm:px-6 border-b border-slate-200/80 bg-slate-50/70 flex items-center gap-2 sm:gap-4 overflow-x-auto"
         >
           {[
             { id: "activities" as const, label: "Tahapan & Bukti Lapangan", icon: Camera },
             { id: "finances" as const, label: "Keuangan, Termin & Kuitansi", icon: Wallet },
             { id: "reviews" as const, label: "Ulasan Masyarakat", icon: Star },
-            { id: "esg" as const, label: "Laporan ESG AI", icon: Sparkles },
+            { id: "esg" as const, label: "Laporan ESG", icon: BarChart3 },
             { id: "params" as const, label: "Parameter Program", icon: FileText },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -305,7 +299,7 @@ export function AdminProgramAuditPageView({
                       >
                         <div className="min-w-0">
                           <div className="font-bold text-[#181343]">
-                            {s.orderIndex}. {s.title}
+                            {s.orderIndex}. {cleanStageTitle(s.title)}
                           </div>
                           {s.description && (
                             <p className="text-slate-600 mt-0.5">{s.description}</p>

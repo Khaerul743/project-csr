@@ -34,7 +34,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CompanyCollaborationItem } from "./types";
-import { formatRupiah, formatDate } from "./helpers";
+import { formatRupiah, formatDate, FOCUS_AREA_CONFIG } from "./helpers";
 import {
   parseCollaborationPlan,
   serializeCollaborationPlan,
@@ -78,6 +78,13 @@ function ModalPartnerLogo({ logoUrl, name }: { logoUrl?: string | null; name: st
   );
 }
 
+function cleanProposalTitle(str: string | undefined | null): string {
+  if (!str) return "";
+  return str
+    .replace(/(?:\.\s*|\s+)?Proposal_CSR_[A-Za-z0-9_.]+(?:\.\.\.)?/gi, "")
+    .trim();
+}
+
 export function CollaborationDetailModal({
   isOpen,
   onClose,
@@ -85,6 +92,16 @@ export function CollaborationDetailModal({
   onSuccess,
   onOpenChat,
 }: CollaborationDetailModalProps) {
+  const cleanedProposalTitle = useMemo(() => {
+    const raw = collaboration?.proposalTitle || collaboration?.opportunityTitle || "Program Kemitraan CSR";
+    return cleanProposalTitle(raw) || raw;
+  }, [collaboration?.proposalTitle, collaboration?.opportunityTitle]);
+
+  const focusConfig = useMemo(() => {
+    if (!collaboration?.opportunityFocusArea) return null;
+    return FOCUS_AREA_CONFIG[collaboration.opportunityFocusArea as keyof typeof FOCUS_AREA_CONFIG] || null;
+  }, [collaboration?.opportunityFocusArea]);
+
   const [finalBudget, setFinalBudget] = useState("");
   const [targetBeneficiaries, setTargetBeneficiaries] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -544,32 +561,55 @@ export function CollaborationDetailModal({
             {/* ======================================================== */}
             <div className="lg:col-span-7 xl:col-span-8 space-y-6">
               {/* Snapshot Program & Inisiatif */}
-              <div className="p-4 sm:p-4.5 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
-                <span className="text-xs font-semibold text-slate-500 block">
-                  Program CSR &amp; Inisiatif Terkait
-                </span>
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <h3 className="text-base sm:text-lg font-bold text-[#181343] leading-snug">
-                      {collaboration.proposalTitle || collaboration.opportunityTitle || "Program Kemitraan CSR"}
-                    </h3>
-                    <div className="text-xs text-[#787680]">
-                      Peluang CSR:{" "}
-                      <span className="font-semibold text-slate-700">
-                        {collaboration.opportunityTitle || "Inisiatif CSR"}
-                      </span>
+              <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2.5">
+                {/* Baris 1: Header Meta & Tag Usulan Pagu Mitra */}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-[#181343]/10 text-[#181343] flex items-center justify-center shrink-0">
+                      <FileText className="w-3 h-3" />
                     </div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      Program CSR &amp; Inisiatif Terkait
+                    </span>
+                    {focusConfig && (
+                      <Badge variant={focusConfig.variant} size="sm">
+                        {focusConfig.label}
+                      </Badge>
+                    )}
                   </div>
 
                   {collaboration.proposedBudget && (
-                    <div className="text-left sm:text-right shrink-0">
-                      <span className="text-[11px] text-[#787680] block">Usulan Awal Mitra</span>
-                      <span className="text-xs font-bold text-slate-700">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-[#E8E8EA] text-xs shadow-2xs shrink-0">
+                      <span className="text-slate-400 text-[11px]">Usulan Awal:</span>
+                      <span className="font-bold text-[#181343]">
                         {formatRupiah(collaboration.proposedBudget)}
                       </span>
                     </div>
                   )}
                 </div>
+
+                {/* Baris 2: Judul Proposal (Bersih tanpa residu nama berkas, proporsional, maksimal 2 baris) */}
+                <h3
+                  className="text-sm sm:text-[15px] font-bold text-[#181343] leading-snug line-clamp-2"
+                  title={cleanedProposalTitle}
+                >
+                  {cleanedProposalTitle}
+                </h3>
+
+                {/* Baris 3: Peluang CSR Rujukan */}
+                {collaboration.opportunityTitle && (
+                  <div className="pt-2 border-t border-[#E8E8EA]/70 flex items-center gap-1.5 text-xs text-slate-500">
+                    <span className="text-[11px] text-slate-400 font-medium shrink-0">
+                      Peluang CSR:
+                    </span>
+                    <span
+                      className="font-semibold text-slate-700 truncate"
+                      title={collaboration.opportunityTitle}
+                    >
+                      {collaboration.opportunityTitle}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Grid Field Kesepakatan (2 Kolom) */}

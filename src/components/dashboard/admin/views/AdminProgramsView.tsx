@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Activity, Eye, Search } from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Activity, CheckCircle2, Clock, Eye, Layers, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CsrFocusArea, csrFocusAreaEnum } from "@/db/schema/csr-focus-areas";
 import { AdminProgramListItem, PaginatedResult } from "../types";
@@ -15,6 +15,7 @@ import {
 import {
   AdminEmptyState,
   AdminErrorState,
+  AdminKpiCard,
   AdminLoadingState,
   AdminPaginationBar,
 } from "../AdminSharedPrimitives";
@@ -73,6 +74,20 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
     setPage(1);
   };
 
+  const programStats = useMemo(() => {
+    if (!data) return { total: 0, inProgress: 0, pendingVerif: 0, completed: 0, remainingActivities: 0 };
+    return {
+      total: data.total,
+      inProgress: data.data.filter((p) => p.status === "IN_PROGRESS").length,
+      pendingVerif: data.data.reduce((acc, p) => acc + (p.pendingVerificationCount || 0), 0),
+      completed: data.data.filter((p) => p.status === "COMPLETED").length,
+      remainingActivities: data.data.reduce(
+        (acc, p) => acc + Math.max(0, (p.totalActivitiesCount || 0) - (p.completedActivitiesCount || 0)),
+        0
+      ),
+    };
+  }, [data]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/80 w-full">
@@ -88,14 +103,48 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
           </p>
         </div>
         {data && (
-          <div className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-[#181343] self-start sm:self-auto shrink-0">
+          <div className="px-3.5 py-2 rounded-xl bg-white border border-[#E5E7EB] text-xs font-semibold text-[#181343] self-start sm:self-auto shrink-0 shadow-2xs">
             Total {data.total} Program
           </div>
         )}
       </div>
 
+      {/* 4 Standard KPI Cards (Anti AI-Slop & Seragam dengan Management/Mitra) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <AdminKpiCard
+          label="Program berjalan"
+          value={programStats.inProgress}
+          subtitle="Inisiatif dalam pelaksanaan"
+          icon={Activity}
+          iconColor="emerald"
+          valueColor="text-emerald-700"
+        />
+        <AdminKpiCard
+          label="Aktivitas tersisa"
+          value={programStats.remainingActivities}
+          subtitle="Kegiatan lapangan aktif"
+          icon={Layers}
+          iconColor="blue"
+        />
+        <AdminKpiCard
+          label="Menunggu verifikasi"
+          value={programStats.pendingVerif}
+          subtitle="Laporan nota &amp; bukti audit"
+          icon={Clock}
+          iconColor="amber"
+          valueColor={programStats.pendingVerif > 0 ? "text-amber-600" : "text-[#181343]"}
+        />
+        <AdminKpiCard
+          label="Program selesai"
+          value={programStats.completed}
+          subtitle="Program telah rampung"
+          icon={CheckCircle2}
+          iconColor="purple"
+        />
+      </div>
+
       {/* Filters */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4">
+      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 shadow-xs">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-6 relative">
             <label htmlFor="admin-prog-search" className="sr-only">

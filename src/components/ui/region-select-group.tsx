@@ -108,7 +108,15 @@ export function RegionSelectGroup({
       {/* 1. Field Provinsi */}
       <SearchableSelect
         id="region-province"
-        label={required ? `${provinceLabel} *` : provinceLabel}
+        label={
+          required ? (
+            <>
+              {provinceLabel} <span className="text-rose-500">*</span>
+            </>
+          ) : (
+            provinceLabel
+          )
+        }
         placeholder={provincePlaceholder}
         searchPlaceholder="Cari wilayah..."
         value={province}
@@ -123,7 +131,15 @@ export function RegionSelectGroup({
       {/* 2. Field Kota/Kabupaten */}
       <SearchableSelect
         id="region-city"
-        label={required ? `${cityLabel} *` : cityLabel}
+        label={
+          required ? (
+            <>
+              {cityLabel} <span className="text-rose-500">*</span>
+            </>
+          ) : (
+            cityLabel
+          )
+        }
         placeholder={cityPlaceholder}
         searchPlaceholder="Cari wilayah..."
         value={city}

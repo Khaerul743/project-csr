@@ -83,6 +83,14 @@ export interface PaginatedResult<T> {
   total: number;
   page: number;
   limit: number;
+  summary?: {
+    total: number;
+    verified: number;
+    unverified: number;
+    active: number;
+    suspended: number;
+    [key: string]: any;
+  };
 }
 
 export interface AdminOverviewMonthlyTrend {
@@ -99,6 +107,19 @@ export interface AdminFocusAreaDistribution {
   programCount: number;
   committedBudget: number;
   spentBudget: number;
+}
+
+export interface AdminRegionDistributionItem {
+  region: string;
+  count: number;
+  percentage: number;
+  committedBudget?: number;
+}
+
+export interface AdminGeographicDistribution {
+  topProgramRegions: AdminRegionDistributionItem[];
+  partnerCities: AdminRegionDistributionItem[];
+  companyCities: AdminRegionDistributionItem[];
 }
 
 export interface AdminOverviewResponse {
@@ -137,6 +158,7 @@ export interface AdminOverviewResponse {
   };
   monthlyTrends: AdminOverviewMonthlyTrend[];
   focusAreaDistribution: AdminFocusAreaDistribution[];
+  geographicDistribution: AdminGeographicDistribution;
   conversionFunnel: {
     openOpportunities: number;
     submittedProposals: number;

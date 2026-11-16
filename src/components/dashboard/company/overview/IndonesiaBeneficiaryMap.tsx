@@ -285,7 +285,7 @@ export function IndonesiaBeneficiaryMap({
             <option value="ALL">Semua Sasaran SDGs</option>
             {ALL_17_SDGS.map((sdg) => (
               <option key={sdg.id} value={sdg.id.toString()}>
-                {sdg.code} — {sdg.name}
+                {sdg.code}: {sdg.name}
               </option>
             ))}
           </select>

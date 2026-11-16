@@ -212,11 +212,11 @@ export function DashboardHeader({
     <>
       <header className="sticky top-0 z-30 w-full bg-white/95 backdrop-blur-md border-b border-[#E5E7EB] px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between select-none shadow-xs">
         {/* 1. Sisi Kiri: Hamburger Mobile & Dynamic Breadcrumbs */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-3 sm:mr-6 overflow-hidden">
           <button
             type="button"
             onClick={onOpenMobileSidebar}
-            className="lg:hidden p-2 rounded-xl text-slate-500 hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+            className="lg:hidden p-2 rounded-xl text-slate-500 hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer shrink-0"
             title="Buka Menu Navigasi"
             aria-label="Buka Menu"
           >
@@ -224,21 +224,32 @@ export function DashboardHeader({
           </button>
 
           {/* Breadcrumb Navigation */}
-          <nav aria-label="Breadcrumb" className="flex items-center min-w-0">
-            <ol className="flex items-center flex-wrap gap-1 sm:gap-1.5 text-xs sm:text-sm">
+          <nav aria-label="Breadcrumb" className="flex items-center min-w-0 flex-1 overflow-hidden">
+            <ol className="flex items-center flex-nowrap whitespace-nowrap gap-1 sm:gap-1.5 text-xs sm:text-sm min-w-0 w-full overflow-hidden">
               {activeBreadcrumbs.map((crumb, idx) => {
                 const isLast = idx === activeBreadcrumbs.length - 1;
                 const isClickable = !!crumb.onClick && !isLast;
+                const hideOnMobile = activeBreadcrumbs.length > 2 && idx === 0;
 
                 return (
-                  <li key={`${crumb.label}-${idx}`} className="flex items-center min-w-0">
+                  <li
+                    key={`${crumb.label}-${idx}`}
+                    className={`flex items-center ${
+                      isLast ? "min-w-0 flex-1 overflow-hidden" : "shrink-0"
+                    } ${hideOnMobile ? "hidden sm:flex" : ""}`}
+                  >
                     {idx > 0 && (
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 mx-1 shrink-0" />
+                      <ChevronRight
+                        className={`w-3.5 h-3.5 text-slate-400 mx-1 shrink-0 ${
+                          activeBreadcrumbs.length > 2 && idx === 1 ? "hidden sm:block" : ""
+                        }`}
+                      />
                     )}
 
                     {isLast ? (
                       <span
-                        className="font-bold text-[#181343] truncate leading-tight"
+                        className="font-bold text-[#181343] truncate leading-tight block min-w-0"
+                        title={crumb.label}
                         aria-current="page"
                       >
                         {crumb.label}
@@ -248,7 +259,7 @@ export function DashboardHeader({
                         type="button"
                         onClick={crumb.onClick}
                         disabled={!isClickable}
-                        className={`text-slate-500 transition-colors truncate leading-tight ${
+                        className={`text-slate-500 whitespace-nowrap transition-colors leading-tight ${
                           isClickable
                             ? "hover:text-[#181343] hover:underline cursor-pointer"
                             : "cursor-default"

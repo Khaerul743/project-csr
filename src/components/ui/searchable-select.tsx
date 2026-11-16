@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ChevronDown, Search, Check } from "lucide-react";
 
 export interface SearchableSelectProps {
-  label?: string;
+  label?: React.ReactNode;
   placeholder?: string;
   searchPlaceholder?: string;
   value: string;
@@ -126,7 +126,35 @@ export function SearchableSelect({
     }
   };
 
-  const selectId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+  const selectId =
+    id ||
+    (typeof label === "string"
+      ? label
+          .replace(/\*/g, "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+      : undefined);
+
+  const renderLabelContent = () => {
+    if (typeof label === "string") {
+      if (label.endsWith(" *")) {
+        return (
+          <>
+            {label.slice(0, -2)} <span className="text-rose-500">*</span>
+          </>
+        );
+      }
+      if (label.endsWith("*")) {
+        return (
+          <>
+            {label.slice(0, -1)} <span className="text-rose-500">*</span>
+          </>
+        );
+      }
+    }
+    return label;
+  };
 
   return (
     <div
@@ -139,7 +167,7 @@ export function SearchableSelect({
           htmlFor={selectId}
           className="text-xs font-semibold text-slate-700 tracking-wide select-none"
         >
-          {label}
+          {renderLabelContent()}
         </label>
       )}
 

@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  Activity,
   AlertTriangle,
   CheckCircle2,
   Eye,
@@ -17,7 +18,7 @@ import {
   formatDate,
   getFocusAreaLabel,
 } from "../helpers";
-import { AdminErrorState, AdminLoadingState } from "../AdminSharedPrimitives";
+import { AdminErrorState, AdminKpiCard, AdminLoadingState } from "../AdminSharedPrimitives";
 
 interface AdminImpactViewProps {
   onOpenProgramAudit: (programId: string) => void;
@@ -116,80 +117,74 @@ export function AdminImpactView({ onOpenProgramAudit }: AdminImpactViewProps) {
         </button>
       </div>
 
-      {/* Top Impact Anchor */}
-      <section
-        aria-label="Ringkasan Kepuasan Masyarakat Lintas Platform"
-        className="rounded-2xl bg-[#181343] text-white p-5 sm:p-7 border border-[#26224C] space-y-5"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <span className="text-xs text-emerald-300 font-semibold">
-              Rata-Rata Rating Publik
-            </span>
-            <div className="text-3xl font-extrabold text-white">
-              {summary.totalReviews > 0 ? `${summary.averageRating} / 5` : "Belum Ada"}
-            </div>
-            <span className="text-xs text-slate-200 block">
-              Dari {summary.totalReviews} ulasan penerima manfaat
-            </span>
-          </div>
+      {/* 4 Standard KPI Cards (Anti AI-Slop & Seragam dengan Management/Mitra) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <AdminKpiCard
+          label="Rata-rata rating publik"
+          value={summary.totalReviews > 0 ? `${summary.averageRating} / 5` : "Belum Ada"}
+          subtitle={`Dari ${summary.totalReviews} ulasan penerima manfaat`}
+          icon={Star}
+          iconColor="amber"
+          valueColor="text-amber-600"
+        />
+        <AdminKpiCard
+          label="Program terevaluasi"
+          value={summary.totalProgramsReviewed}
+          subtitle="Telah menerima ulasan langsung"
+          icon={Activity}
+          iconColor="emerald"
+          valueColor="text-emerald-700"
+        />
+        <AdminKpiCard
+          label="Cakupan wilayah"
+          value={summary.totalCitiesCovered}
+          subtitle="Kota &amp; kabupaten sebaran CSR"
+          icon={MapPin}
+          iconColor="blue"
+        />
+        <AdminKpiCard
+          label="Sentimen negatif"
+          value={`${summary.negativeCount} ulasan`}
+          subtitle="Perlu evaluasi kualitas kegiatan"
+          icon={AlertTriangle}
+          iconColor="rose"
+          valueColor={summary.negativeCount > 0 ? "text-rose-600" : "text-[#181343]"}
+        />
+      </div>
 
-          <div className="p-4 rounded-xl bg-white/10 border border-white/15 space-y-1">
-            <span className="text-xs text-slate-200 block">Program Terevaluasi</span>
-            <span className="text-2xl font-bold text-white block">
-              {summary.totalProgramsReviewed}
-            </span>
-            <span className="text-[11px] text-slate-200 block">
-              Telah menerima ulasan langsung
-            </span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-white/10 border border-white/15 space-y-1">
-            <span className="text-xs text-slate-200 block">Cakupan Kota/Kabupaten</span>
-            <span className="text-2xl font-bold text-white block">
-              {summary.totalCitiesCovered}
-            </span>
-            <span className="text-[11px] text-slate-200 block">
-              Wilayah sasaran program CSR
-            </span>
-          </div>
-
-          <div className="p-4 rounded-xl bg-white/10 border border-white/15 space-y-1">
-            <span className="text-xs text-slate-200 block">Sentimen Negatif</span>
-            <span className="text-2xl font-bold text-amber-200 block">
-              {summary.negativeCount} ulasan
-            </span>
-            <span className="text-[11px] text-slate-200 block">
-              Perlu evaluasi kualitas pelaksanaan
-            </span>
-          </div>
-        </div>
-
-        {/* Sentiment Distribution Bar */}
-        {totalSentimentCount > 0 && (
-          <div className="space-y-2 pt-3 border-t border-white/15">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-200">
-              <span className="font-semibold text-white">Proporsi Sentimen Penerima Manfaat</span>
-              <div className="flex flex-wrap gap-4">
-                <span>Positif: {summary.positiveCount} ({posPct}%)</span>
-                <span>Netral: {summary.neutralCount} ({neuPct}%)</span>
-                <span>Negatif: {summary.negativeCount} ({negPct}%)</span>
-              </div>
-            </div>
-            <div className="w-full h-3 rounded-full bg-white/15 overflow-hidden flex">
-              {posPct > 0 && (
-                <div className="h-full bg-emerald-400" style={{ width: `${posPct}%` }} />
-              )}
-              {neuPct > 0 && (
-                <div className="h-full bg-amber-300" style={{ width: `${neuPct}%` }} />
-              )}
-              {negPct > 0 && (
-                <div className="h-full bg-rose-400" style={{ width: `${negPct}%` }} />
-              )}
+      {/* Sentiment Distribution Bar (Clean Corporate Card) */}
+      {totalSentimentCount > 0 && (
+        <section
+          aria-label="Distribusi Proporsi Sentimen Penerima Manfaat"
+          className="rounded-2xl bg-white border border-[#E5E7EB] p-5 shadow-xs space-y-3"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="font-bold text-[#181343]">Proporsi Sentimen Penerima Manfaat</span>
+            <div className="flex flex-wrap gap-4 font-semibold text-slate-600">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" /> Positif: {summary.positiveCount} ({posPct}%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> Netral: {summary.neutralCount} ({neuPct}%)
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-rose-500" /> Negatif: {summary.negativeCount} ({negPct}%)
+              </span>
             </div>
           </div>
-        )}
-      </section>
+          <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden flex">
+            {posPct > 0 && (
+              <div className="h-full bg-emerald-500" style={{ width: `${posPct}%` }} />
+            )}
+            {neuPct > 0 && (
+              <div className="h-full bg-amber-400" style={{ width: `${neuPct}%` }} />
+            )}
+            {negPct > 0 && (
+              <div className="h-full bg-rose-500" style={{ width: `${negPct}%` }} />
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Row 2: Early Warning Low Rated Programs (7) + Geographic Coverage (5) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

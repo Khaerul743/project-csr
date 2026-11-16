@@ -2,7 +2,7 @@
 
 import React from "react";
 import {
-  Sparkles,
+  FileSpreadsheet,
   Camera,
   Layers,
   DollarSign,
@@ -53,7 +53,7 @@ export function FeaturesSection() {
             <div className="p-8 sm:p-10 rounded-3xl bg-[#181343] text-white border border-[#26224C] shadow-lg flex flex-col justify-between relative overflow-hidden group h-full">
               <div className="space-y-4 relative z-10">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold border border-white/15">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Ekstraksi Otomatis PDF &amp; RAB Proposal</span>
                 </div>
 

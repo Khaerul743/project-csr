@@ -28,7 +28,7 @@ export function HeroSection() {
   return (
     <section
       id="beranda"
-      className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 bg-[#FFFFFF]"
+      className="relative overflow-hidden pt-8 pb-12 lg:pt-12 lg:pb-16 bg-[#FFFFFF]"
     >
       {/* Subtle Background Pattern */}
       <div
@@ -50,7 +50,7 @@ export function HeroSection() {
           {/* ----------------------------------------------------------------------- */}
           {/* LEFT COLUMN: Headings, Value Proposition & Actions                      */}
           {/* ----------------------------------------------------------------------- */}
-          <div className="lg:col-span-6 xl:col-span-6 space-y-7">
+          <div className="lg:col-span-6 xl:col-span-6 space-y-6 lg:space-y-7">
 
             {/* Top Eyebrow Badge */}
             <ScrollReveal animation="fade-up" delay={20}>
@@ -114,7 +114,7 @@ export function HeroSection() {
 
             {/* Quick Key Guarantees */}
             <ScrollReveal animation="fade-up" delay={200}>
-              <div className="pt-5 border-t border-[#E5E7EB] flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-slate-600 font-medium">
+              <div className="pt-4 border-t border-[#E5E7EB] flex flex-wrap items-center gap-y-2.5 gap-x-6 text-xs text-slate-600 font-medium">
                 <div className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Prioritas Kebutuhan</span>
@@ -137,7 +137,7 @@ export function HeroSection() {
           <div className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center">
             <ScrollReveal animation="zoom-in" delay={80} duration={900} className="w-full flex items-center justify-center">
               {/* Visual Container Stage */}
-              <div className="relative w-full max-w-[420px] lg:max-w-[460px] xl:max-w-[500px] aspect-square flex items-center justify-center">
+              <div className="relative w-full max-w-[400px] lg:max-w-[440px] xl:max-w-[480px] aspect-square flex items-center justify-center">
 
                 {/* Central Globe Video Stage (Seamless & Borderless Integration) */}
                 <div className="relative w-full h-full flex items-center justify-center select-none pointer-events-none">

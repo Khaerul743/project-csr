@@ -775,7 +775,7 @@ export function EditPartnerProfileModal({
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div className="space-y-1 sm:col-span-2">
                           <label className="text-[11px] font-bold text-slate-600">
-                            Nama / Judul Kegiatan *
+                            Nama / Judul Kegiatan <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -791,7 +791,7 @@ export function EditPartnerProfileModal({
 
                         <div className="space-y-1">
                           <label className="text-[11px] font-bold text-slate-600">
-                            Tahun Pelaksanaan *
+                            Tahun Pelaksanaan <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -837,7 +837,7 @@ export function EditPartnerProfileModal({
 
                         <div className="space-y-1 sm:col-span-3">
                           <label className="text-[11px] font-bold text-slate-600">
-                            Deskripsi Singkat & Capaian Dampak *
+                            Deskripsi Singkat & Capaian Dampak <span className="text-rose-500">*</span>
                           </label>
                           <textarea
                             rows={2}
@@ -952,7 +952,7 @@ export function EditPartnerProfileModal({
                       <div className="space-y-2">
                         <div className="space-y-1">
                           <label className="text-[11px] font-bold text-slate-600">
-                            Nama Lengkap *
+                            Nama Lengkap <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -968,7 +968,7 @@ export function EditPartnerProfileModal({
 
                         <div className="space-y-1">
                           <label className="text-[11px] font-bold text-slate-600">
-                            Jabatan / Peran *
+                            Jabatan / Peran <span className="text-rose-500">*</span>
                           </label>
                           <input
                             type="text"

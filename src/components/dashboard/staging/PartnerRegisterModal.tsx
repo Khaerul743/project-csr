@@ -138,7 +138,11 @@ export function PartnerRegisterModal({
           </div>
 
           <Input
-            label="Nama Yayasan / Lembaga / Komunitas *"
+            label={
+              <>
+                Nama Yayasan / Lembaga / Komunitas <span className="text-rose-500">*</span>
+              </>
+            }
             name="name"
             placeholder="Contoh: Yayasan Konservasi Bahari Nusantara"
             value={formData.name}

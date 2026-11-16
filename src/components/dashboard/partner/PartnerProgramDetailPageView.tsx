@@ -41,6 +41,17 @@ import { ProgramFinancesTab } from "../finances/ProgramFinancesTab";
 import { EsgSustainabilityReportTab } from "../company/programs/EsgSustainabilityReportTab";
 import { CompanyProgramItem } from "../company/types";
 
+function cleanProgramDescription(desc?: string | null, title?: string): string {
+  if (!desc) return "";
+  let cleaned = desc.trim();
+  cleaned = cleaned.replace(/^Program\s*["'][^"']+["']\s*(?:adalah|dirancang untuk|merupakan)?\s*/i, "Dirancang untuk ");
+  if (title) {
+    const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, "\\interface PartnerProgramDetailPageViewProps {");
+    cleaned = cleaned.replace(new RegExp(`^["']?${escaped}["']?\\s*(?:adalah|dirancang untuk|merupakan)?\\s*`, "i"), "Dirancang untuk ");
+  }
+  return cleaned;
+}
+
 interface PartnerProgramDetailPageViewProps {
   program: PartnerProgramItem;
   onBack: () => void;
@@ -209,10 +220,10 @@ export function PartnerProgramDetailPageView({
             variant="outline"
             size="sm"
             onClick={() => setActiveTab("esg-report")}
-            leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-600" />}
-            className="min-h-[44px] text-xs font-extrabold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-300 rounded-xl cursor-pointer shadow-2xs"
+            leftIcon={<FileText className="w-3.5 h-3.5 text-emerald-600" />}
+            className="min-h-[44px] text-xs font-bold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-300 rounded-xl cursor-pointer shadow-2xs"
           >
-            Laporan ESG (AI)
+            Laporan ESG
           </Button>
 
           <Badge variant={statusConfig.variant} size="md" hasDot className="shadow-2xs">
@@ -275,14 +286,6 @@ export function PartnerProgramDetailPageView({
                   <Building2 className="w-3.5 h-3.5 text-teal-600" />
                   Sponsor: {program.companyName || "Perusahaan Donor"}
                 </span>
-                {program.opportunityTitle && (
-                  <>
-                    <span>•</span>
-                    <span className="truncate">
-                      Inisiatif Terkait: <strong className="text-[#181343]">{program.opportunityTitle}</strong>
-                    </span>
-                  </>
-                )}
                 <span>•</span>
                 <span className="flex items-center gap-1 font-medium text-emerald-700">
                   <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
@@ -297,7 +300,7 @@ export function PartnerProgramDetailPageView({
         {program.description && (
           <div className="pt-3 border-t border-[#F4F4F6] text-xs sm:text-sm text-[#47464F] leading-relaxed">
             <p className={isDescriptionExpanded ? "whitespace-pre-line" : "line-clamp-2 sm:line-clamp-3"}>
-              {program.description}
+              {cleanProgramDescription(program.description, program.title)}
             </p>
             {program.description.length > 140 && (
               <button
@@ -323,34 +326,34 @@ export function PartnerProgramDetailPageView({
       </div>
 
       {/* ============================================================ */}
-      {/* 3. EMPAT KPI MONITORING HORIZONTAL                           */}
+      {/* 3. EMPAT KPI MONITORING HORIZONTAL (SERAGAM & TENANG)       */}
       {/* ============================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Progres Aktivitas Proposal */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        {/* KPI 1: Progres Aktivitas */}
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">
-                Progres Aktivitas Proposal
+              <span className="text-xs font-semibold text-slate-500">
+                Progres Aktivitas
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-50 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Activity className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <Activity className="w-4 h-4 text-slate-700" />
               </div>
             </div>
-            <div className="text-2xl font-black text-[#181343] tracking-tight">
+            <div className="text-2xl font-black text-[#181343] tracking-tight tabular-nums">
               {program.activityProgressPercent ?? 0}%
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
+          <div className="pt-3 border-t border-slate-100 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#787680]">Tahapan Selesai</span>
-              <span className="font-bold text-emerald-700">
+              <span className="text-slate-500">Tahapan Selesai</span>
+              <span className="font-bold text-[#181343] tabular-nums">
                 {program.completedActivitiesCount ?? 0} / {program.totalActivitiesCount ?? 0}
               </span>
             </div>
-            <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                className="bg-[#181343] h-full rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(program.activityProgressPercent ?? 0, 100)}%` }}
               />
             </div>
@@ -358,28 +361,28 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 2: Realisasi Dana */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">
+              <span className="text-xs font-semibold text-slate-500">
                 Realisasi Dana
               </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Wallet className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <Wallet className="w-4 h-4 text-slate-700" />
               </div>
             </div>
-            <div className="text-2xl font-black text-[#181343] tracking-tight truncate">
+            <div className="text-2xl font-black text-[#181343] tracking-tight truncate tabular-nums">
               {formatRupiah(currentSpentNum)}
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
+          <div className="pt-3 border-t border-slate-100 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#787680] truncate">Pagu: {formatRupiah(program.budget)}</span>
-              <span className="font-bold text-emerald-700 shrink-0">{progressPercent}%</span>
+              <span className="text-slate-500 truncate">Pagu: {formatRupiah(program.budget)}</span>
+              <span className="font-bold text-[#181343] shrink-0 tabular-nums">{progressPercent}%</span>
             </div>
-            <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                className="bg-[#181343] h-full rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -387,29 +390,24 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 3: Status Laporan Lapangan */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">
+              <span className="text-xs font-semibold text-slate-500">
                 Status Laporan Lapangan
               </span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <FileText className="w-4 h-4 text-amber-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <FileText className="w-4 h-4 text-slate-700" />
               </div>
             </div>
-            <div className="text-2xl font-black text-[#181343] tracking-tight">
-              {program.pendingVerificationCount ?? 0}
+            <div className="text-2xl font-black text-[#181343] tracking-tight flex items-baseline gap-1.5 tabular-nums">
+              <span>{program.pendingVerificationCount ?? 0}</span>
+              <span className="text-sm font-semibold text-slate-500">Laporan</span>
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs text-[#787680]">
-            <span>Status Verifikasi:</span>
-            <span
-              className={`font-bold ${
-                (program.pendingVerificationCount ?? 0) > 0
-                  ? "text-amber-700"
-                  : "text-emerald-700"
-              }`}
-            >
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500">Status Verifikasi:</span>
+            <span className="font-bold text-[#181343]">
               {(program.pendingVerificationCount ?? 0) > 0
                 ? "Menunggu Verifikasi"
                 : "Semua Tertib"}
@@ -418,25 +416,25 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 4: Penerima Manfaat Aktual */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">
+              <span className="text-xs font-semibold text-slate-500">
                 Penerima Manfaat Aktual
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-50 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Users className="w-4 h-4 text-[#181343]" />
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <Users className="w-4 h-4 text-slate-700" />
               </div>
             </div>
-            <div className="text-base font-black text-[#181343] line-clamp-2 min-h-[32px]">
+            <div className="text-base font-bold text-[#181343] line-clamp-2 min-h-[32px]">
               {program.actualBeneficiaries || (
-                <span className="text-xs font-normal text-[#787680] italic">Belum dilaporkan</span>
+                <span className="text-xs font-normal text-slate-400">Belum dilaporkan</span>
               )}
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs">
-            <span className="text-[#787680]">Target Kesepakatan:</span>
-            <span className="font-bold text-[#181343] truncate max-w-[120px]">
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500">Target Kesepakatan:</span>
+            <span className="font-bold text-[#181343] truncate max-w-[130px]">
               {program.targetBeneficiaries || "-"}
             </span>
           </div>
@@ -497,8 +495,8 @@ export function PartnerProgramDetailPageView({
                 : "border-transparent text-[#787680] hover:text-[#181343]"
             }`}
           >
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span>Laporan Keberlanjutan &amp; ESG (AI)</span>
+            <FileText className="w-4 h-4 text-emerald-600" />
+            <span>Laporan Keberlanjutan &amp; ESG</span>
           </button>
 
           <button

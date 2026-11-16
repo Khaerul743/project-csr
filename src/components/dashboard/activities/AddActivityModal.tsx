@@ -17,7 +17,7 @@ import {
   Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProgramStageItem } from "./types";
+import { ProgramStageItem, cleanStageTitle } from "./types";
 
 interface AddActivityModalProps {
   isOpen: boolean;
@@ -62,7 +62,7 @@ export function AddActivityModal({
       setStageId(defaultStageId);
       const st = stages.find((s) => s.id === defaultStageId);
       if (st && !title) {
-        setTitle(st.title);
+        setTitle(cleanStageTitle(st.title));
       }
     }
   }, [defaultStageId, stages]);
@@ -70,8 +70,8 @@ export function AddActivityModal({
   const handleStageChange = (newStageId: string) => {
     setStageId(newStageId);
     const st = stages.find((s) => s.id === newStageId);
-    if (st && (!title || stages.some((s) => s.title === title))) {
-      setTitle(st.title);
+    if (st && (!title || stages.some((s) => s.title === title || cleanStageTitle(s.title) === title))) {
+      setTitle(cleanStageTitle(st.title));
     }
   };
 
@@ -250,7 +250,7 @@ export function AddActivityModal({
                 <option value="">-- Tanpa Tahapan Tertentu (Kegiatan Tambahan) --</option>
                 {stages.map((st) => (
                   <option key={st.id} value={st.id}>
-                    Tahap {st.orderIndex}: {st.title} {st.targetTimeline ? `[${st.targetTimeline}]` : ""}
+                    Tahap {st.orderIndex}: {cleanStageTitle(st.title)} {st.targetTimeline ? `[${st.targetTimeline}]` : ""}
                   </option>
                 ))}
               </select>

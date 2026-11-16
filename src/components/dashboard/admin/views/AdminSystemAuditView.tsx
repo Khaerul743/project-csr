@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import { RefreshCw, Search, ShieldCheck } from "lucide-react";
+import {
+  BarChart3,
+  FileCheck2,
+  Layers,
+  RefreshCw,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AdminSystemStatusResponse } from "../types";
 import {
@@ -12,6 +19,7 @@ import {
 import {
   AdminEmptyState,
   AdminErrorState,
+  AdminKpiCard,
   AdminLoadingState,
   AdminPaginationBar,
 } from "../AdminSharedPrimitives";
@@ -104,6 +112,39 @@ export function AdminSystemAuditView() {
         <AdminErrorState message={error} onRetry={fetchSystem} />
       ) : data ? (
         <>
+          {/* 4 Standard KPI Cards (Anti AI-Slop & Seragam dengan Management/Mitra) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <AdminKpiCard
+              label="Proposal terskrining AI"
+              value={data.aiMetrics.screenedProposalsCount}
+              subtitle="Evaluasi relevansi &amp; RAB"
+              icon={FileCheck2}
+              iconColor="indigo"
+            />
+            <AdminKpiCard
+              label="Tahapan milestone AI"
+              value={data.aiMetrics.aiGeneratedStagesCount}
+              subtitle="Struktur kegiatan proposal"
+              icon={Layers}
+              iconColor="blue"
+            />
+            <AdminKpiCard
+              label="Laporan ESG AI"
+              value={data.aiMetrics.esgReportsGeneratedCount}
+              subtitle="Pemetaan otomatis SDGs"
+              icon={BarChart3}
+              iconColor="emerald"
+              valueColor="text-emerald-700"
+            />
+            <AdminKpiCard
+              label="Log audit admin"
+              value={data.auditLogs.total}
+              subtitle="Rekam jejak tindakan resmi"
+              icon={ShieldCheck}
+              iconColor="purple"
+            />
+          </div>
+
           {/* AI Config & Usage Metrics */}
           <section
             aria-label="Konfigurasi dan Utilisasi AI Platform"

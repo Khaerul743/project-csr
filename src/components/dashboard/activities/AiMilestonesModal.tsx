@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { cleanStageTitle } from "./types";
 
 export interface StageDraft {
   orderIndex: number;
@@ -77,7 +78,7 @@ export function AiMilestonesModal({
       setStages(
         (data.stages || []).map((s: any, idx: number) => ({
           orderIndex: s.orderIndex || idx + 1,
-          title: s.title || `Tahap ${idx + 1}`,
+          title: cleanStageTitle(s.title) || `Kegiatan ${idx + 1}`,
           description: s.description || "",
           targetTimeline: s.targetTimeline || "",
           expectedEvidence: s.expectedEvidence || "",
@@ -109,7 +110,7 @@ export function AiMilestonesModal({
       ...prev,
       {
         orderIndex: prev.length + 1,
-        title: `Tahap ${prev.length + 1}: Kegiatan Lanjutan`,
+        title: `Kegiatan Lanjutan ${prev.length + 1}`,
         description: "",
         targetTimeline: `Bulan ke-${prev.length + 1}`,
         expectedEvidence: "Foto dokumentasi pelaksanaan kegiatan & berita acara",

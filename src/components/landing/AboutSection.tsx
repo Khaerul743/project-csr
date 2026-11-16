@@ -11,13 +11,12 @@ import {
   ShieldAlert,
   ShieldCheck,
   Target,
-  Sparkles,
 } from "lucide-react";
 import { ScrollReveal, StaggerContainer } from "@/components/ui/scroll-reveal";
 
 export function AboutSection() {
   return (
-    <section id="tentang-kami" className="py-20 lg:py-28 bg-[#FFFFFF] relative overflow-hidden">
+    <section id="tentang-kami" className="pt-14 pb-16 lg:pt-20 lg:pb-24 bg-[#FFFFFF] relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <ScrollReveal animation="fade-up" delay={50}>

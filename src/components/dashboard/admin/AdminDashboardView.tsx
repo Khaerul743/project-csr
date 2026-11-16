@@ -217,6 +217,7 @@ export function AdminDashboardView({
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onNavigateMenu={(menu) => handleSelectMenu(menu as AdminNavMenu)}
           notifications={headerNotifications}
+          onLogout={handleLogout}
           rightAction={
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-[#181343]">
               <ShieldCheck className="w-4 h-4 text-emerald-700" aria-hidden="true" />
