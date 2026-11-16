@@ -11,7 +11,7 @@ import {
 } from "./indonesia-geo-coordinates";
 import { formatRupiah } from "../../analytics/helpers";
 
-export type BasemapType = "voyager" | "satellite" | "osm";
+export type BasemapType = "osm" | "satellite";
 
 interface IndonesiaRealLeafletMapProps {
   programs: CompanyProgramItem[];
@@ -53,28 +53,24 @@ export default function IndonesiaRealLeafletMap({
   const [showPrograms, setShowPrograms] = useState(true);
   const [showOpportunities, setShowOpportunities] = useState(true);
   const [showPartners, setShowPartners] = useState(false);
-  const [basemap, setBasemap] = useState<BasemapType>("voyager");
+  const [basemap, setBasemap] = useState<BasemapType>("osm");
 
-  // Tile layer configurations
+  // Tile layer configurations (100% Free, No API Key, No Watermark)
   const getTileConfig = (type: BasemapType) => {
     switch (type) {
       case "satellite":
         return {
           url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          attribution: "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+          attribution:
+            "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
           maxZoom: 18,
         };
       case "osm":
-        return {
-          url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-          maxZoom: 19,
-        };
-      case "voyager":
       default:
         return {
-          url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-          attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors &copy; <a href='https://carto.com/attributions'>CARTO</a>",
+          url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          attribution:
+            "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
           maxZoom: 19,
         };
     }
@@ -103,8 +99,8 @@ export default function IndonesiaRealLeafletMap({
     // Zoom control in bottom right
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // Initial tile layer
-    const tileConfig = getTileConfig("voyager");
+    // Initial tile layer (Default: OpenStreetMap)
+    const tileConfig = getTileConfig("osm");
     const tileLayer = L.tileLayer(tileConfig.url, {
       attribution: tileConfig.attribution,
       maxZoom: tileConfig.maxZoom,
@@ -555,36 +551,25 @@ export default function IndonesiaRealLeafletMap({
           <div className="flex items-center p-1 rounded-xl bg-white/95 backdrop-blur-md border border-[#E8E8EA] shadow-md text-xs font-semibold">
             <button
               type="button"
-              onClick={() => setBasemap("voyager")}
-              className={`px-2 py-1 rounded-lg transition cursor-pointer ${
-                basemap === "voyager"
+              onClick={() => setBasemap("osm")}
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
+                basemap === "osm"
                   ? "bg-[#181343] text-white font-bold"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Terang
+              Peta Standar
             </button>
             <button
               type="button"
               onClick={() => setBasemap("satellite")}
-              className={`px-2 py-1 rounded-lg transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
                 basemap === "satellite"
                   ? "bg-[#181343] text-white font-bold"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
               Satelit
-            </button>
-            <button
-              type="button"
-              onClick={() => setBasemap("osm")}
-              className={`px-2 py-1 rounded-lg transition cursor-pointer ${
-                basemap === "osm"
-                  ? "bg-[#181343] text-white font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              OSM
             </button>
           </div>
 
