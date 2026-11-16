@@ -44,3 +44,4 @@ Deskripsi & Ruang Lingkup Inisiatif:
 Petakan sasaran SDGs yang paling relevan dan terarah sesuai instruksi.`,
   ],
 ]);
+

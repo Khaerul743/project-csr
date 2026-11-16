@@ -215,3 +215,4 @@ export class SdgRecommendationService {
 }
 
 export const sdgRecommendationService = new SdgRecommendationService();
+

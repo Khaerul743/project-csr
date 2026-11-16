@@ -48,3 +48,4 @@ export interface SdgRecommendationResponse extends SdgRecommendationResult {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
   analyzedAt: string;
 }
+
