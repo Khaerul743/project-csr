@@ -1,15 +1,19 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
+  Clock,
+  Compass,
   ExternalLink,
   Eye,
   FileText,
+  Layers,
   Lock,
   RefreshCw,
   Search,
+  ShieldCheck,
   Unlock,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +35,7 @@ import {
 import {
   AdminEmptyState,
   AdminErrorState,
+  AdminKpiCard,
   AdminLoadingState,
   AdminModal,
   AdminPaginationBar,
@@ -191,6 +196,26 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
     }
   };
 
+  const oppStats = useMemo(() => {
+    if (!oppData) return { total: 0, open: 0, review: 0, closed: 0 };
+    return {
+      total: oppData.total,
+      open: oppData.data.filter((o) => o.status === "OPEN").length,
+      review: oppData.data.filter((o) => o.status === "IN_REVIEW").length,
+      closed: oppData.data.filter((o) => o.status === "CLOSED").length,
+    };
+  }, [oppData]);
+
+  const propStats = useMemo(() => {
+    if (!propData) return { total: 0, submitted: 0, review: 0, approved: 0 };
+    return {
+      total: propData.total,
+      submitted: propData.data.filter((p) => p.status === "SUBMITTED").length,
+      review: propData.data.filter((p) => p.status === "UNDER_REVIEW").length,
+      approved: propData.data.filter((p) => p.status === "ACCEPTED").length,
+    };
+  }, [propData]);
+
   return (
     <div className="space-y-6">
       {/* Header + Tabs */}
@@ -210,17 +235,17 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
         <div
           role="tablist"
           aria-label="Tab moderasi peluang dan proposal"
-          className="inline-flex rounded-xl bg-slate-200/70 p-1 border border-slate-200 self-start md:self-auto"
+          className="inline-flex rounded-xl bg-slate-100 p-1 border border-[#E5E7EB] self-start md:self-auto shadow-2xs"
         >
           <button
             type="button"
             role="tab"
             aria-selected={activeTab === "opportunities"}
             onClick={() => setActiveTab("opportunities")}
-            className={`min-h-[44px] px-4 py-2 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] ${
+            className={`min-h-[44px] px-4 py-2 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] cursor-pointer ${
               activeTab === "opportunities"
-                ? "bg-white text-[#181343] font-bold shadow-2xs"
-                : "text-slate-700 hover:text-[#181343]"
+                ? "bg-white text-[#181343] font-bold shadow-xs"
+                : "text-slate-600 hover:text-[#181343]"
             }`}
           >
             Peluang CSR Global
@@ -230,16 +255,84 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
             role="tab"
             aria-selected={activeTab === "proposals"}
             onClick={() => setActiveTab("proposals")}
-            className={`min-h-[44px] px-4 py-2 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] ${
+            className={`min-h-[44px] px-4 py-2 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] cursor-pointer ${
               activeTab === "proposals"
-                ? "bg-white text-[#181343] font-bold shadow-2xs"
-                : "text-slate-700 hover:text-[#181343]"
+                ? "bg-white text-[#181343] font-bold shadow-xs"
+                : "text-slate-600 hover:text-[#181343]"
             }`}
           >
             Arus Proposal Masuk
           </button>
         </div>
       </div>
+
+      {/* 4 Standard KPI Cards (Anti AI-Slop & Seragam dengan Management/Mitra) */}
+      {activeTab === "opportunities" ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <AdminKpiCard
+            label="Total peluang CSR"
+            value={oppStats.total}
+            subtitle="Inisiatif terbuka di platform"
+            icon={Compass}
+            iconColor="indigo"
+          />
+          <AdminKpiCard
+            label="Status terbuka"
+            value={oppStats.open}
+            subtitle="Menerima proposal mitra"
+            icon={CheckCircle2}
+            iconColor="emerald"
+            valueColor="text-emerald-700"
+          />
+          <AdminKpiCard
+            label="Tahap kurasi"
+            value={oppStats.review}
+            subtitle="Seleksi calon mitra pelaksana"
+            icon={Clock}
+            iconColor="amber"
+          />
+          <AdminKpiCard
+            label="Peluang selesai"
+            value={oppStats.closed}
+            subtitle="Kemitraan definitif terbentuk"
+            icon={ShieldCheck}
+            iconColor="blue"
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <AdminKpiCard
+            label="Total proposal masuk"
+            value={propStats.total}
+            subtitle="Usulan program kemitraan"
+            icon={FileText}
+            iconColor="indigo"
+          />
+          <AdminKpiCard
+            label="Menunggu kurasi"
+            value={propStats.submitted}
+            subtitle="Usulan baru belum ditinjau"
+            icon={Clock}
+            iconColor="amber"
+            valueColor={propStats.submitted > 0 ? "text-amber-600" : "text-[#181343]"}
+          />
+          <AdminKpiCard
+            label="Tahap negosiasi"
+            value={propStats.review}
+            subtitle="Penyesuaian teknis &amp; RAB"
+            icon={Layers}
+            iconColor="blue"
+          />
+          <AdminKpiCard
+            label="Proposal disetujui"
+            value={propStats.approved}
+            subtitle="MoU disahkan bersama mitra"
+            icon={CheckCircle2}
+            iconColor="emerald"
+            valueColor="text-emerald-700"
+          />
+        </div>
+      )}
 
       {bannerSuccess && (
         <div
@@ -804,7 +897,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
 
           <div className="space-y-1.5">
             <label htmlFor="moderate-opp-reason" className="block text-xs font-bold text-[#181343]">
-              Alasan Moderasi (Wajib Minimal 5 Karakter) *
+              Alasan Moderasi (Wajib Minimal 5 Karakter) <span className="text-rose-500">*</span>
             </label>
             <textarea
               id="moderate-opp-reason"

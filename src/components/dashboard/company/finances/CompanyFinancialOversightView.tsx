@@ -372,8 +372,8 @@ export function CompanyFinancialOversightView({
             {activeMetrics.absorptionRate >= 70
               ? "Kategori serapan sangat baik"
               : activeMetrics.absorptionRate >= 35
-              ? "Berjalan sesuai target"
-              : "Perlu akselerasi realisasi"}
+                ? "Berjalan sesuai target"
+                : "Perlu akselerasi realisasi"}
           </p>
         </div>
 

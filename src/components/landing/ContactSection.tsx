@@ -217,7 +217,7 @@ export function ContactSection() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                        Nama Lengkap Narahubung *
+                        Nama Lengkap Narahubung <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -233,7 +233,7 @@ export function ContactSection() {
 
                     <div>
                       <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                        Email Institusi Resmi *
+                        Email Institusi Resmi <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -266,7 +266,7 @@ export function ContactSection() {
 
                     <div>
                       <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                        Tipe Institusi *
+                        Tipe Institusi <span className="text-rose-500">*</span>
                       </label>
                       <select
                         value={formData.institutionType}
@@ -286,7 +286,7 @@ export function ContactSection() {
 
                   <div>
                     <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                      Fokus Kebutuhan Kolaborasi *
+                      Fokus Kebutuhan Kolaborasi <span className="text-rose-500">*</span>
                     </label>
                     <select
                       required
@@ -310,7 +310,7 @@ export function ContactSection() {
 
                   <div>
                     <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                      Deskripsi Kebutuhan atau Pesan *
+                      Deskripsi Kebutuhan atau Pesan <span className="text-rose-500">*</span>
                     </label>
                     <textarea
                       rows={4}

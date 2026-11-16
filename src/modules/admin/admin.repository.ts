@@ -23,6 +23,7 @@ import {
   AdminCompaniesQuery,
   AdminCompanyDetail,
   AdminCompanyListItem,
+  AdminGeographicDistribution,
   AdminImpactOverviewResponse,
   AdminOpportunitiesQuery,
   AdminOpportunityListItem,
@@ -36,6 +37,7 @@ import {
   AdminProgramsQuery,
   AdminProposalListItem,
   AdminProposalsQuery,
+  AdminRegionDistributionItem,
   AdminUserListItem,
   AdminUsersQuery,
   PaginatedResult,
@@ -157,6 +159,8 @@ export class AdminRepository {
           focusArea: programs.focusArea,
           budget: programs.budget,
           spentBudget: programs.spentBudget,
+          targetCity: programs.targetCity,
+          targetProvince: programs.targetProvince,
           status: programs.status,
           createdAt: programs.createdAt,
           updatedAt: programs.updatedAt,
@@ -238,6 +242,72 @@ export class AdminRepository {
     const focusAreaDistribution = Array.from(focusStats.entries())
       .map(([focusArea, stats]) => ({ focusArea, ...stats }))
       .sort((a, b) => b.programCount - a.programCount);
+
+    // 2b. Geographic Distribution (Pusat Program, Asal Mitra, Asal Perusahaan)
+    const partnerCityMap = new Map(allPartners.map((p) => [p.id, p.city]));
+    const companyCityMap = new Map(allCompanies.map((c) => [c.id, c.city]));
+
+    // Top Program Regions
+    const programRegionStats = new Map<string, { count: number; committedBudget: number }>();
+    for (const pr of allPrograms) {
+      const reg =
+        pr.targetCity ||
+        pr.targetProvince ||
+        partnerCityMap.get(pr.partnerId) ||
+        companyCityMap.get(pr.companyId) ||
+        "Wilayah Belum Diisi";
+      const bNum = Number(pr.budget || 0);
+      const curr = programRegionStats.get(reg) || { count: 0, committedBudget: 0 };
+      curr.count += 1;
+      curr.committedBudget += bNum;
+      programRegionStats.set(reg, curr);
+    }
+
+    const totalProgramsCount = Math.max(1, allPrograms.length);
+    const topProgramRegions: AdminRegionDistributionItem[] = Array.from(programRegionStats.entries())
+      .map(([region, stat]) => ({
+        region,
+        count: stat.count,
+        committedBudget: stat.committedBudget,
+        percentage: Math.round((stat.count / totalProgramsCount) * 100),
+      }))
+      .sort((a, b) => b.count - a.count || (b.committedBudget ?? 0) - (a.committedBudget ?? 0));
+
+    // Partner Cities (Sebaran Asal Mitra NGO)
+    const partnerCityStats = new Map<string, number>();
+    for (const p of allPartners) {
+      const c = p.city || "Kota Belum Terdata";
+      partnerCityStats.set(c, (partnerCityStats.get(c) || 0) + 1);
+    }
+    const totalPartnersCount = Math.max(1, allPartners.length);
+    const partnerCities: AdminRegionDistributionItem[] = Array.from(partnerCityStats.entries())
+      .map(([region, count]) => ({
+        region,
+        count,
+        percentage: Math.round((count / totalPartnersCount) * 100),
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Company Cities (Sebaran Asal Perusahaan Sponsor)
+    const companyCityStats = new Map<string, number>();
+    for (const c of allCompanies) {
+      const city = c.city || "Kota Belum Terdata";
+      companyCityStats.set(city, (companyCityStats.get(city) || 0) + 1);
+    }
+    const totalCompaniesCount = Math.max(1, allCompanies.length);
+    const companyCities: AdminRegionDistributionItem[] = Array.from(companyCityStats.entries())
+      .map(([region, count]) => ({
+        region,
+        count,
+        percentage: Math.round((count / totalCompaniesCount) * 100),
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    const geographicDistribution: AdminGeographicDistribution = {
+      topProgramRegions,
+      partnerCities,
+      companyCities,
+    };
 
     // 3. Disbursement & Expense Totals
     let totalDisbursedFunds = 0;
@@ -329,6 +399,7 @@ export class AdminRepository {
       },
       monthlyTrends,
       focusAreaDistribution,
+      geographicDistribution,
       conversionFunnel: {
         openOpportunities: openOpportunitiesCount,
         submittedProposals: allProposals.filter((p) => p.status !== "WITHDRAWN").length,
@@ -400,19 +471,34 @@ export class AdminRepository {
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    const [[totalRes], rows] = await Promise.all([
-      db.select({ count: count() }).from(companies).where(whereClause),
-      db
-        .select()
-        .from(companies)
-        .where(whereClause)
-        .orderBy(desc(companies.createdAt))
-        .limit(limit)
-        .offset(offset),
-    ]);
+    const [[[totalRes], rows], [totalAllRes], [verifiedAllRes], [activeAllRes], [suspendedAllRes]] =
+      await Promise.all([
+        Promise.all([
+          db.select({ count: count() }).from(companies).where(whereClause),
+          db
+            .select()
+            .from(companies)
+            .where(whereClause)
+            .orderBy(desc(companies.createdAt))
+            .limit(limit)
+            .offset(offset),
+        ]),
+        db.select({ count: count() }).from(companies),
+        db.select({ count: count() }).from(companies).where(eq(companies.isVerified, true)),
+        db.select({ count: count() }).from(companies).where(eq(companies.status, "ACTIVE")),
+        db.select({ count: count() }).from(companies).where(eq(companies.status, "SUSPENDED")),
+      ]);
+
+    const summary = {
+      total: Number(totalAllRes?.count ?? 0),
+      verified: Number(verifiedAllRes?.count ?? 0),
+      unverified: Math.max(0, Number(totalAllRes?.count ?? 0) - Number(verifiedAllRes?.count ?? 0)),
+      active: Number(activeAllRes?.count ?? 0),
+      suspended: Number(suspendedAllRes?.count ?? 0),
+    };
 
     if (rows.length === 0) {
-      return { data: [], total: Number(totalRes?.count ?? 0), page, limit };
+      return { data: [], total: Number(totalRes?.count ?? 0), page, limit, summary };
     }
 
     const ids = rows.map((c) => c.id);
@@ -445,7 +531,7 @@ export class AdminRepository {
       programsCount: progMap.get(c.id) ?? 0,
     }));
 
-    return { data, total: Number(totalRes?.count ?? 0), page, limit };
+    return { data, total: Number(totalRes?.count ?? 0), page, limit, summary };
   }
 
   async findCompanyById(id: string): Promise<Company | null> {

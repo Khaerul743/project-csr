@@ -41,6 +41,13 @@ import {
   MilestonePlanStatus,
 } from "../common/collaboration-plan";
 
+function cleanProposalTitle(str: string | undefined | null): string {
+  if (!str) return "";
+  return str
+    .replace(/(?:\.\s*|\s+)?Proposal_CSR_[A-Za-z0-9_.]+(?:\.\.\.)?/gi, "")
+    .trim();
+}
+
 interface PartnerCollaborationDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -373,8 +380,8 @@ export function PartnerCollaborationDetailModal({
             </h4>
             <div className="pt-2 border-t border-slate-200/60 space-y-1">
               <span className="text-[11px] text-slate-400 font-medium">Judul Proposal Anda:</span>
-              <p className="text-xs font-bold text-slate-800">
-                {collaboration.proposalTitle || "Proposal Program CSR"}
+              <p className="text-xs font-bold text-slate-800 line-clamp-2" title={cleanProposalTitle(collaboration.proposalTitle) || "Proposal Program CSR"}>
+                {cleanProposalTitle(collaboration.proposalTitle) || "Proposal Program CSR"}
               </p>
               {collaboration.proposalSummary && (
                 <p className="text-xs text-slate-600 leading-relaxed pt-1">

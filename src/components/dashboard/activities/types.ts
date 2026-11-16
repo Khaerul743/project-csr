@@ -55,3 +55,12 @@ export const ACTIVITY_STATUS_CONFIG: Record<
   VERIFIED: { label: "Diverifikasi & Sah", variant: "emerald" },
   REVISION_REQUESTED: { label: "Perlu Revisi", variant: "rose" },
 };
+
+/**
+ * Membersihkan judul tahapan dari awalan berulang seperti "Tahap 1:", "Tahap 1 -", dll.
+ * sehingga tidak terjadi duplikasi kata "Tahap" pada UI kartu, panel samping, maupun dropdown.
+ */
+export function cleanStageTitle(title?: string | null): string {
+  if (!title) return "";
+  return title.replace(/^(?:tahap(?:an)?\s*\d*[\s:.-]*)+/i, "").trim() || title;
+}

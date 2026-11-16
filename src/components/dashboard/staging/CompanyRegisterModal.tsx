@@ -138,7 +138,11 @@ export function CompanyRegisterModal({
           </div>
 
           <Input
-            label="Nama Resmi Perusahaan *"
+            label={
+              <>
+                Nama Resmi Perusahaan <span className="text-rose-500">*</span>
+              </>
+            }
             name="name"
             placeholder="Contoh: PT Sumber Daya Hijau Nusantara"
             value={formData.name}

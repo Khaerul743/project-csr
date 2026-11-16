@@ -390,7 +390,7 @@ export class CollaborationRepository {
             id: crypto.randomUUID(),
             programId,
             orderIndex: idx + 1,
-            title: act.title,
+            title: (act.title || "").replace(/^(?:tahap(?:an)?\s*\d*[\s:.-]*)+/i, "").trim() || act.title,
             description: act.description,
             targetTimeline: act.targetTimeline,
             expectedEvidence: act.expectedEvidence,

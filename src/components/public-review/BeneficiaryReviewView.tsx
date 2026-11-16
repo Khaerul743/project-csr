@@ -9,18 +9,15 @@ import {
   CheckCircle2,
   AlertCircle,
   Camera,
-  UploadCloud,
   X,
-  Sparkles,
   ArrowRight,
   ShieldCheck,
-  HeartHandshake,
   MessageSquare,
   Calendar,
   Image as ImageIcon,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ProgramReviewResponse } from "@/modules/reviews/review.interface";
 
 interface BeneficiaryReviewViewProps {
@@ -39,28 +36,28 @@ const PRESET_ROLES = [
 const RATING_LABELS: Record<number, { text: string; color: string; desc: string }> = {
   1: {
     text: "Sangat Kurang",
-    color: "text-rose-500",
-    desc: "Program kurang tepat sasaran atau ada kendala berat",
+    color: "text-rose-600",
+    desc: "Program kurang tepat sasaran atau ada kendala berat di lapangan",
   },
   2: {
     text: "Kurang Memuaskan",
-    color: "text-amber-500",
-    desc: "Manfaat terasa minim atau butuh banyak perbaikan",
+    color: "text-amber-600",
+    desc: "Manfaat terasa minim dan membutuhkan banyak perbaikan",
   },
   3: {
     text: "Cukup Bermanfaat",
     color: "text-yellow-600",
-    desc: "Program terlaksana dengan cukup baik",
+    desc: "Program terlaksana dengan cukup baik dan memberikan manfaat pokok",
   },
   4: {
-    text: "Sangat Baik & Bermanfaat",
-    color: "text-teal-600",
-    desc: "Dampak nyata dirasakan oleh penerima manfaat",
+    text: "Baik & Bermanfaat",
+    color: "text-emerald-600",
+    desc: "Dampak positif dirasakan langsung oleh masyarakat",
   },
   5: {
-    text: "Luar Biasa & Sangat Berdampak!",
-    color: "text-emerald-600",
-    desc: "Program sangat sukses dan membawa perubahan positif nyata",
+    text: "Sangat Baik & Berdampak",
+    color: "text-emerald-700",
+    desc: "Pelaksanaan program prima dan membawa dampak nyata yang berkelanjutan",
   },
 };
 
@@ -150,9 +147,10 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
     setIsSubmitting(true);
     setSubmitError(null);
 
-    const finalRole = reviewerRole === "Lainnya" && customRole.trim()
-      ? customRole.trim()
-      : reviewerRole;
+    const finalRole =
+      reviewerRole === "Lainnya" && customRole.trim()
+        ? customRole.trim()
+        : reviewerRole;
 
     try {
       const res = await fetch(`/api/programs/${programId}/reviews`, {
@@ -187,10 +185,21 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-semibold text-slate-600">
+      <div className="min-h-screen bg-[#F9F9FB] flex items-center justify-center p-4 font-sans relative overflow-hidden">
+        {/* Pola titik latar khas SIPENA */}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(24, 19, 67, 0.12) 1.25px, transparent 1.25px), radial-gradient(rgba(24, 19, 67, 0.08) 1.25px, transparent 1.25px)",
+            backgroundSize: "32px 32px",
+            backgroundPosition: "0 0, 16px 16px",
+          }}
+        />
+        <div className="flex flex-col items-center gap-3 relative z-10">
+          <div className="w-8 h-8 border-3 border-[#181343] border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-600">
             Memuat formulir survei masyarakat...
           </p>
         </div>
@@ -200,16 +209,27 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
 
   if (fetchError || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 border border-slate-200 text-center shadow-lg">
-          <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mx-auto mb-4">
-            <AlertCircle className="w-7 h-7" />
+      <div className="min-h-screen bg-[#F9F9FB] flex items-center justify-center p-4 font-sans relative overflow-hidden">
+        {/* Pola titik latar khas SIPENA */}
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 pointer-events-none z-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(24, 19, 67, 0.12) 1.25px, transparent 1.25px), radial-gradient(rgba(24, 19, 67, 0.08) 1.25px, transparent 1.25px)",
+            backgroundSize: "32px 32px",
+            backgroundPosition: "0 0, 16px 16px",
+          }}
+        />
+        <div className="max-w-md w-full bg-white rounded-2xl p-8 border border-slate-200/90 text-center shadow-xs relative z-10">
+          <div className="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 mx-auto mb-4">
+            <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-slate-900 mb-2">Program Tidak Ditemukan</h2>
+          <h2 className="text-base font-bold text-[#181343] mb-2">Program Tidak Ditemukan</h2>
           <p className="text-xs text-slate-500 mb-6">{fetchError}</p>
           <Button
             onClick={() => window.location.reload()}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+            className="w-full bg-[#181343] hover:bg-[#120e33] text-white font-semibold text-xs py-2.5 rounded-xl cursor-pointer"
           >
             Muat Ulang Halaman
           </Button>
@@ -226,62 +246,226 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
   const currentRatingInfo = RATING_LABELS[activeStar];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-slate-800 pb-20">
-      {/* Top Hero Banner */}
-      <div className="relative pt-10 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-white">
-        {/* Glow Effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-teal-500/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#F9F9FB] text-[#181343] pb-20 font-sans relative overflow-hidden">
+      {/* Fixed Background Canvas: tetap diam/fixed di viewport saat halaman di-scroll */}
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      >
+        {/* Pola titik latar khas halaman auth SIPENA (login & register) */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(rgba(24, 19, 67, 0.12) 1.25px, transparent 1.25px), radial-gradient(rgba(24, 19, 67, 0.08) 1.25px, transparent 1.25px)",
+            backgroundSize: "32px 32px",
+            backgroundPosition: "0 0, 16px 16px",
+          }}
+        />
 
-        <div className="relative z-10 flex flex-col items-center text-center">
-          {/* Partnership Logos Pill */}
-          <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/15 mb-6">
-            <span className="text-xs font-bold text-teal-300 flex items-center gap-1.5">
-              <HeartHandshake className="w-4 h-4" />
-              Kolaborasi CSR Berdampak
+        {/* Ambient glow mint & ice-blue sesuai token globals.css SIPENA */}
+        <div className="absolute -top-24 -right-16 w-[480px] h-[480px] rounded-full bg-[#EDF5FA] blur-[90px] opacity-90" />
+        <div className="absolute top-1/3 -left-20 w-[480px] h-[480px] rounded-full bg-[#EAF8F4] blur-[90px] opacity-90" />
+        <div className="absolute bottom-10 -right-20 w-[500px] h-[500px] rounded-full bg-[#EDF5FA] blur-[100px] opacity-80" />
+
+        {/* Aksen garis gelombang halus khas SIPENA pada sudut kanan atas */}
+        <div className="absolute -top-10 -right-10 w-[380px] sm:w-[500px] select-none opacity-80">
+          <svg
+            viewBox="0 0 700 280"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto block transform rotate-180"
+          >
+            <defs>
+              <linearGradient
+                id="sipena-rev-hill-back"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#181343" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#059669" stopOpacity="0.05" />
+              </linearGradient>
+              <linearGradient
+                id="sipena-rev-hill-mid"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#059669" stopOpacity="0.14" />
+                <stop offset="100%" stopColor="#181343" stopOpacity="0.06" />
+              </linearGradient>
+              <linearGradient
+                id="sipena-rev-wave-stroke"
+                x1="0%"
+                y1="100%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#059669" stopOpacity="0.4" />
+                <stop offset="55%" stopColor="#181343" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#10B981" stopOpacity="0.1" />
+              </linearGradient>
+            </defs>
+
+            <path
+              d="M0 150C120 90 250 130 375 180C495 228 595 215 700 250V280H0V150Z"
+              fill="url(#sipena-rev-hill-back)"
+            />
+            <path
+              d="M0 198C115 162 245 198 365 232C480 264 585 250 700 280H0V198Z"
+              fill="url(#sipena-rev-hill-mid)"
+            />
+            <path
+              d="M-20 175C120 112 255 152 380 202C500 248 600 232 710 268"
+              stroke="url(#sipena-rev-wave-stroke)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <path
+              d="M-20 220C115 182 240 218 360 250C475 280 580 266 690 288"
+              stroke="#181343"
+              strokeOpacity="0.2"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <circle cx="148" cy="138" r="5" fill="#059669" fillOpacity="0.4" />
+            <circle cx="298" cy="176" r="4" fill="#181343" fillOpacity="0.3" />
+            <circle cx="445" cy="222" r="4.5" fill="#10B981" fillOpacity="0.4" />
+          </svg>
+        </div>
+
+        {/* Aksen garis gelombang halus khas SIPENA pada sudut kiri bawah */}
+        <div className="absolute bottom-0 left-0 w-[420px] sm:w-[620px] select-none">
+          <svg
+            viewBox="0 0 700 280"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto block"
+          >
+            <defs>
+              <linearGradient
+                id="sipena-rev-hill-back-bottom"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#181343" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#059669" stopOpacity="0.05" />
+              </linearGradient>
+              <linearGradient
+                id="sipena-rev-hill-mid-bottom"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#059669" stopOpacity="0.14" />
+                <stop offset="100%" stopColor="#181343" stopOpacity="0.06" />
+              </linearGradient>
+              <linearGradient
+                id="sipena-rev-wave-stroke-bottom"
+                x1="0%"
+                y1="100%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#059669" stopOpacity="0.4" />
+                <stop offset="55%" stopColor="#181343" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#10B981" stopOpacity="0.1" />
+              </linearGradient>
+            </defs>
+
+            <path
+              d="M0 150C120 90 250 130 375 180C495 228 595 215 700 250V280H0V150Z"
+              fill="url(#sipena-rev-hill-back-bottom)"
+            />
+            <path
+              d="M0 198C115 162 245 198 365 232C480 264 585 250 700 280H0V198Z"
+              fill="url(#sipena-rev-hill-mid-bottom)"
+            />
+            <path
+              d="M-20 175C120 112 255 152 380 202C500 248 600 232 710 268"
+              stroke="url(#sipena-rev-wave-stroke-bottom)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <path
+              d="M-20 220C115 182 240 218 360 250C475 280 580 266 690 288"
+              stroke="#181343"
+              strokeOpacity="0.2"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <circle cx="148" cy="138" r="5" fill="#059669" fillOpacity="0.4" />
+            <circle cx="298" cy="176" r="4" fill="#181343" fillOpacity="0.3" />
+            <circle cx="445" cy="222" r="4.5" fill="#10B981" fillOpacity="0.4" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Top Hero Section */}
+      <div className="pt-10 pb-6 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto relative z-10">
+        <div className="flex flex-col items-center text-center">
+          {/* Institutional Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-emerald-50 rounded-full border border-emerald-200/80 mb-4 shadow-2xs">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span className="text-xs font-bold text-emerald-800">
+              SIPENA • Portal Aspirasi &amp; Penilaian Masyarakat
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white max-w-2xl leading-tight">
-            Suara & Penilaian Masyarakat
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#181343] max-w-2xl leading-tight">
+            Suara &amp; Penilaian Masyarakat
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mt-3 leading-relaxed">
-            Sampaikan pengalaman, kepuasan, dan dampak yang Anda rasakan dari program CSR ini. 
-            Partisipasi Anda mewujudkan transparansi dan kemajuan bersama.
+          <p className="text-xs sm:text-sm text-slate-600 max-w-xl mt-2.5 leading-relaxed">
+            Sampaikan pengalaman dan manfaat riil yang Anda rasakan dari program CSR ini. 
+            Aspirasi Anda dicatat secara transparan untuk evaluasi pelaksanaan kegiatan di lapangan.
           </p>
 
-          {/* Program Card in Hero */}
-          <div className="mt-8 w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 text-left shadow-2xl">
+          {/* Program Card in Hero - Format Penuh Warna Biru Sesuai Referensi Pengguna */}
+          <div
+            className="mt-8 w-full bg-[#181343] border border-white/10 rounded-3xl p-6 sm:p-8 text-left shadow-lg text-white relative overflow-hidden"
+            style={{
+              backgroundImage:
+                "radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px)",
+              backgroundSize: "16px 16px",
+            }}
+          >
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
-              <div className="space-y-1">
-                <span className="text-[11px] font-bold text-teal-300 uppercase tracking-wider">
-                  Program CSR
+              <div className="space-y-1.5 flex-1 pr-2">
+                <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">
+                  PROGRAM CSR
                 </span>
-                <h2 className="text-lg sm:text-xl font-extrabold text-white">
-                  {program.title}
+                <h2 className="text-lg sm:text-xl font-extrabold text-white leading-snug">
+                  {program.title.replace(/[\u2013\u2014]/g, "-")}
                 </h2>
                 <div className="flex items-center gap-3 text-xs text-slate-300 flex-wrap pt-1">
                   {program.targetCity && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-teal-400" />
+                    <span className="flex items-center gap-1 font-medium">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
                       {program.targetCity}
                       {program.targetProvince ? `, ${program.targetProvince}` : ""}
                     </span>
                   )}
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-400/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 uppercase">
                     {program.focusArea}
                   </span>
                 </div>
               </div>
 
               {/* Status Badge */}
-              <div className="shrink-0">
+              <div className="shrink-0 self-start sm:self-center">
                 <span
-                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold border inline-flex items-center gap-1.5 ${
                     program.status === "COMPLETED"
-                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-400/30"
+                      ? "bg-emerald-950/80 text-emerald-300 border-emerald-500/40"
                       : program.status === "IN_PROGRESS"
-                      ? "bg-teal-500/20 text-teal-300 border-teal-400/30"
-                      : "bg-amber-500/20 text-amber-300 border-amber-400/30"
+                      ? "bg-teal-950/80 text-teal-300 border-teal-500/40"
+                      : "bg-amber-950/80 text-amber-300 border-amber-500/40"
                   }`}
                 >
                   {program.status === "COMPLETED"
@@ -293,10 +477,10 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
               </div>
             </div>
 
-            {/* Stakeholders Banner */}
+            {/* Stakeholders Banner - 2 Kolom Sejajar Sesuai Referensi Pengguna */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-5 text-xs">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center font-bold text-teal-300 shrink-0 overflow-hidden">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.06] border border-white/10">
+                <div className="w-11 h-11 rounded-full bg-white/10 border border-white/15 flex items-center justify-center font-bold text-white shrink-0 overflow-hidden text-xs shadow-2xs">
                   {program.companyLogo ? (
                     <img
                       src={program.companyLogo}
@@ -307,18 +491,18 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                     (program.companyName || "PT").slice(0, 2).toUpperCase()
                   )}
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                    Perusahaan Sponsor
+                <div className="min-w-0">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    PERUSAHAAN SPONSOR
                   </span>
-                  <strong className="text-white font-bold text-sm">
+                  <strong className="text-white font-bold text-sm truncate block">
                     {program.companyName || "Perusahaan Mitra"}
                   </strong>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center font-bold text-teal-300 shrink-0 overflow-hidden">
+              <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.06] border border-white/10">
+                <div className="w-11 h-11 rounded-full bg-white border border-white/20 flex items-center justify-center font-bold text-[#181343] shrink-0 overflow-hidden text-xs shadow-2xs">
                   {program.partnerLogo ? (
                     <img
                       src={program.partnerLogo}
@@ -329,11 +513,11 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                     (program.partnerName || "M").slice(0, 2).toUpperCase()
                   )}
                 </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                    Mitra Pelaksana Lapangan
+                <div className="min-w-0">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                    MITRA PELAKSANA LAPANGAN
                   </span>
-                  <strong className="text-white font-bold text-sm">
+                  <strong className="text-white font-bold text-sm truncate block">
                     {program.partnerName || "Mitra Lapangan"}
                   </strong>
                 </div>
@@ -344,30 +528,30 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
       </div>
 
       {/* Main Body Section */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-2 space-y-6 relative z-10">
         {/* Guard for PLANNED or CANCELLED programs */}
         {!isAvailableForReview ? (
-          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-xl text-center space-y-3">
+          <div className="bg-white rounded-3xl p-8 border border-slate-200/90 shadow-xs text-center space-y-3">
             <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 mx-auto">
               <AlertCircle className="w-7 h-7" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-[#181343]">
               Formulir Survei Belum Dibuka
             </h3>
             <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-              Program ini masih dalam tahap persiapan / perencanaan. Pengisian survei dan ulasan
+              Program ini masih dalam tahap persiapan atau perencanaan. Pengisian survei dan ulasan
               kepuasan masyarakat akan aktif secara otomatis saat kegiatan lapangan mulai dilaksanakan.
             </p>
           </div>
         ) : isSubmitted ? (
           /* Submission Success State */
-          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-2xl text-center space-y-5 animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mx-auto shadow-sm">
+          <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/90 shadow-xs text-center space-y-5">
+            <div className="w-16 h-16 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mx-auto shadow-2xs">
               <CheckCircle2 className="w-9 h-9" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-xl sm:text-2xl font-black text-slate-900">
-                Terima Kasih Atas Aspirasi & Ulasan Anda!
+              <h3 className="text-xl sm:text-2xl font-bold text-[#181343]">
+                Terima Kasih Atas Ulasan &amp; Aspirasi Anda
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
                 Ulasan Anda telah berhasil disimpan dan diteruskan secara transparan kepada pihak{" "}
@@ -387,13 +571,13 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                   setPhotoUrl(null);
                 }}
                 variant="outline"
-                className="text-xs font-bold border-slate-300 text-slate-700"
+                className="text-xs font-bold border-slate-300 text-slate-700 cursor-pointer"
               >
                 Kirim Ulasan Lain
               </Button>
               <a
                 href="#reviews-feed"
-                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20 transition-all"
+                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-xs font-bold bg-[#181343] hover:bg-[#120e33] text-white shadow-xs transition-all cursor-pointer"
               >
                 Lihat Suara Warga Lainnya
                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
@@ -402,29 +586,29 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
           </div>
         ) : (
           /* Review Submission Form */
-          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xl p-6 sm:p-10">
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-6 sm:p-10">
             <div className="border-b border-slate-100 pb-5 mb-8">
-              <div className="flex items-center gap-2 text-teal-600 mb-1">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-xs font-extrabold uppercase tracking-wider">
-                  Formulir Penilaian Tanpa Login
+              <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                <ShieldCheck className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">
+                  Formulir Penilaian Masyarakat
                 </span>
               </div>
-              <h3 className="text-xl font-extrabold text-slate-900">
-                Bagikan Kesan & Kepuasan Anda
+              <h3 className="text-xl font-bold text-[#181343]">
+                Bagikan Kesan &amp; Kepuasan Anda
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Hanya butuh 1-2 menit. Identitas Anda dapat berupa nama lengkap atau inisial warga.
+                Hanya butuh 1-2 menit. Identitas Anda dapat berupa nama lengkap atau nama panggilan/inisial warga.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-7">
               {/* Star Rating Picker */}
               <div className="space-y-3">
-                <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
                   1. Bagaimana Penilaian Kualitas Program Ini? <span className="text-rose-500">*</span>
                 </label>
-                <div className="p-5 bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                   {/* Stars */}
                   <div className="flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -434,12 +618,13 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                         onClick={() => setRating(star)}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(null)}
-                        className="p-1 focus:outline-none transition-transform hover:scale-125 active:scale-95"
+                        className="p-1 focus:outline-none transition-colors cursor-pointer"
+                        aria-label={`Beri nilai ${star} dari 5 bintang`}
                       >
                         <Star
                           className={`w-9 h-9 sm:w-10 sm:h-10 transition-colors ${
                             star <= activeStar
-                              ? "text-amber-400 fill-amber-400 drop-shadow-sm"
+                              ? "text-amber-400 fill-amber-400 drop-shadow-2xs"
                               : "text-slate-300"
                           }`}
                         />
@@ -449,8 +634,8 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
 
                   {/* Rating Description */}
                   <div className="text-center sm:text-right">
-                    <span className={`text-base font-black ${currentRatingInfo.color}`}>
-                      {currentRatingInfo.text}
+                    <span className={`text-base font-bold ${currentRatingInfo.color}`}>
+                      Skor {activeStar} / 5 : {currentRatingInfo.text}
                     </span>
                     <p className="text-[11px] text-slate-500 max-w-xs mt-0.5">
                       {currentRatingInfo.desc}
@@ -463,16 +648,17 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Reviewer Name */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
+                  <label htmlFor="reviewer-name" className="text-xs font-bold text-slate-700 block">
                     Nama / Inisial Anda <span className="text-rose-500">*</span>
                   </label>
                   <input
+                    id="reviewer-name"
                     type="text"
                     required
                     value={reviewerName}
                     onChange={(e) => setReviewerName(e.target.value)}
                     placeholder="Contoh: Pak Budi Santoso / Ibu Siti"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#181343]/20 focus:border-[#181343] transition-all"
                   />
                   <p className="text-[11px] text-slate-400">
                     Boleh mencantumkan inisial jika ingin lebih privat
@@ -481,63 +667,70 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
 
                 {/* City / Location */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-700">
+                  <label htmlFor="reviewer-city" className="text-xs font-bold text-slate-700 block">
                     Desa / Kelurahan / Kota (Opsional)
                   </label>
                   <input
+                    id="reviewer-city"
                     type="text"
                     value={reviewerCity}
                     onChange={(e) => setReviewerCity(e.target.value)}
                     placeholder="Contoh: Kel. Sukamaju, Karawang"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#181343]/20 focus:border-[#181343] transition-all"
                   />
                 </div>
               </div>
 
-              {/* Reviewer Role Chips */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700">
+              {/* Reviewer Role Dropdown */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="reviewer-role"
+                  className="text-xs font-bold text-slate-700 block"
+                >
                   Peran / Kaitan Anda dengan Program Ini <span className="text-rose-500">*</span>
                 </label>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_ROLES.map((role) => (
-                    <button
-                      key={role}
-                      type="button"
-                      onClick={() => setReviewerRole(role)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                        reviewerRole === role
-                          ? "bg-teal-600 text-white shadow-sm shadow-teal-600/30 font-bold"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-600"
-                      }`}
-                    >
-                      {role}
-                    </button>
-                  ))}
+                <div className="relative">
+                  <select
+                    id="reviewer-role"
+                    required
+                    value={reviewerRole}
+                    onChange={(e) => setReviewerRole(e.target.value)}
+                    className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 pr-10 text-xs font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#181343]/20 focus:border-[#181343] transition-all cursor-pointer"
+                  >
+                    {PRESET_ROLES.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
                 {reviewerRole === "Lainnya" && (
-                  <input
-                    type="text"
-                    required
-                    value={customRole}
-                    onChange={(e) => setCustomRole(e.target.value)}
-                    placeholder="Sebutkan peran Anda..."
-                    className="mt-2 w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
-                  />
+                  <div className="pt-1 animate-in fade-in duration-200">
+                    <input
+                      type="text"
+                      required
+                      value={customRole}
+                      onChange={(e) => setCustomRole(e.target.value)}
+                      placeholder="Sebutkan peran atau kaitan spesifik Anda..."
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#181343]/20 focus:border-[#181343] transition-all"
+                    />
+                  </div>
                 )}
               </div>
 
               {/* Testimonial / Feedback Text */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700">
-                    Testimoni & Masukan Anda <span className="text-rose-500">*</span>
+                  <label htmlFor="review-comment" className="text-xs font-bold text-slate-700 block">
+                    Testimoni &amp; Masukan Anda <span className="text-rose-500">*</span>
                   </label>
                   <span className="text-[11px] text-slate-400">
                     {comment.length}/1500 karakter (min. 10)
                   </span>
                 </div>
                 <textarea
+                  id="review-comment"
                   required
                   rows={4}
                   minLength={10}
@@ -545,18 +738,18 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Ceritakan apa dampak yang Anda rasakan, manfaat langsung dari bantuan/kegiatan ini, serta saran perbaikan untuk masa depan..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 leading-relaxed transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#181343]/20 focus:border-[#181343] leading-relaxed transition-all resize-y min-h-[90px]"
                 />
               </div>
 
               {/* Optional Photo Attachment */}
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700">
+                <label className="text-xs font-bold text-slate-700 block">
                   Foto Bukti Penerima Manfaat / Dokumentasi Lapangan (Opsional)
                 </label>
 
                 {photoUrl ? (
-                  <div className="relative inline-block rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+                  <div className="relative inline-block rounded-2xl overflow-hidden border border-slate-200 shadow-2xs">
                     <img
                       src={photoUrl}
                       alt="Foto bukti ulasan"
@@ -565,7 +758,8 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                     <button
                       type="button"
                       onClick={() => setPhotoUrl(null)}
-                      className="absolute top-2 right-2 p-1.5 bg-slate-900/80 hover:bg-rose-600 text-white rounded-full transition-colors"
+                      className="absolute top-2 right-2 p-1.5 bg-[#181343]/80 hover:bg-rose-600 text-white rounded-full transition-colors cursor-pointer"
+                      aria-label="Hapus foto lampiran"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -582,19 +776,19 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                     />
                     <label
                       htmlFor="review-photo-upload"
-                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-slate-300 hover:border-teal-500 bg-slate-50 hover:bg-teal-50/50 text-xs font-bold text-slate-600 hover:text-teal-700 cursor-pointer transition-all ${
+                      className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-slate-300 hover:border-slate-500 bg-slate-50 hover:bg-white text-xs font-bold text-slate-600 hover:text-slate-800 cursor-pointer transition-all ${
                         isUploadingPhoto ? "opacity-50 pointer-events-none" : ""
                       }`}
                     >
                       {isUploadingPhoto ? (
                         <>
-                          <div className="w-3.5 h-3.5 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
-                          Mengunggah Foto...
+                          <div className="w-3.5 h-3.5 border-2 border-[#181343] border-t-transparent rounded-full animate-spin" />
+                          <span>Mengunggah Foto...</span>
                         </>
                       ) : (
                         <>
-                          <Camera className="w-4 h-4 text-teal-600" />
-                          Unggah Foto Bukti (Maks. 5MB)
+                          <Camera className="w-4 h-4 text-slate-600" />
+                          <span>Unggah Foto Bukti (Maks. 5MB)</span>
                         </>
                       )}
                     </label>
@@ -620,23 +814,23 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                 <Button
                   type="submit"
                   disabled={isSubmitting || isUploadingPhoto}
-                  className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-black text-sm py-6 rounded-2xl shadow-xl shadow-teal-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                  className="w-full bg-[#181343] hover:bg-[#120e33] text-white font-bold text-sm py-4 rounded-xl shadow-xs active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Menyimpan Ulasan...
+                      <span>Menyimpan Ulasan...</span>
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-5 h-5 text-emerald-200" />
-                      Kirim Penilaian & Ulasan Saya
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                      <span>Kirim Penilaian &amp; Ulasan Saya</span>
                     </>
                   )}
                 </Button>
                 <div className="flex items-center justify-center gap-2 mt-3 text-[11px] text-slate-400">
-                  <ShieldCheck className="w-3.5 h-3.5 text-teal-600" />
-                  <span>Transparansi Terverifikasi • Aspirasi Langsung Tersampaikan</span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Aspirasi diteruskan secara objektif dan transparan ke evaluasi program.</span>
                 </div>
               </div>
             </form>
@@ -645,23 +839,23 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
 
         {/* Public Feed of Existing Reviews */}
         <div id="reviews-feed" className="mt-12 space-y-6">
-          <div className="flex items-center justify-between text-white border-b border-slate-700/60 pb-4">
+          <div className="flex items-center justify-between text-[#181343] border-b border-slate-200 pb-4">
             <div className="flex items-center gap-2.5">
-              <MessageSquare className="w-5 h-5 text-teal-400" />
-              <h3 className="text-lg font-extrabold">
-                Suara Warga & Penerima Manfaat Lainnya ({reviews.length})
+              <MessageSquare className="w-5 h-5 text-emerald-600" />
+              <h3 className="text-lg font-bold">
+                Suara Warga &amp; Penerima Manfaat Lainnya ({reviews.length})
               </h3>
             </div>
             {stats.totalReviews > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full border border-white/10 text-xs font-bold text-amber-300">
-                <Star className="w-3.5 h-3.5 fill-current" />
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full border border-amber-200/80 text-xs font-bold text-amber-800">
+                <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
                 <span>Rata-rata: {stats.averageRating.toFixed(1)} / 5.0</span>
               </div>
             )}
           </div>
 
           {reviews.length === 0 ? (
-            <div className="p-8 text-center bg-white/5 border border-white/10 rounded-3xl text-slate-400">
+            <div className="p-8 text-center bg-white border border-slate-200/90 rounded-3xl text-slate-500 shadow-2xs">
               <p className="text-xs">
                 Jadilah warga pertama yang memberikan ulasan dan masukan untuk program ini!
               </p>
@@ -671,30 +865,30 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
               {reviews.map((rev) => (
                 <div
                   key={rev.id}
-                  className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3"
+                  className="p-5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs space-y-3"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center font-extrabold text-teal-700 text-xs shrink-0">
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-[#181343] text-xs shrink-0">
                         {rev.reviewerName.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-900">
+                        <h4 className="text-xs font-bold text-[#181343]">
                           {rev.reviewerName}
                         </h4>
                         <div className="flex items-center gap-2 text-[10px] text-slate-400">
-                          <span className="text-teal-700 font-semibold">{rev.reviewerRole}</span>
+                          <span className="text-slate-600 font-semibold">{rev.reviewerRole}</span>
                           {rev.reviewerCity && <span>• {rev.reviewerCity}</span>}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200/60 text-xs font-black text-amber-700 shrink-0">
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-lg border border-amber-200/60 text-xs font-bold text-amber-700 shrink-0">
                       <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                       <span>{rev.rating}.0</span>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-600 leading-relaxed font-normal bg-slate-50 p-3 rounded-xl">
+                  <p className="text-xs text-slate-600 leading-relaxed font-normal bg-slate-50/80 p-3 rounded-xl border border-slate-100">
                     "{rev.comment}"
                   </p>
 
@@ -703,14 +897,14 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
                       <button
                         type="button"
                         onClick={() => setPreviewPhoto(rev.photoUrl)}
-                        className="group relative inline-block rounded-xl overflow-hidden border border-slate-200"
+                        className="group relative inline-block rounded-xl overflow-hidden border border-slate-200 cursor-pointer"
                       >
                         <img
                           src={rev.photoUrl}
                           alt="Foto bukti ulasan masyarakat"
                           className="w-24 h-16 object-cover group-hover:scale-105 transition-transform"
                         />
-                        <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold">
+                        <div className="absolute inset-0 bg-[#181343]/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[9px] font-bold">
                           Lihat
                         </div>
                       </button>
@@ -734,7 +928,7 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
       {/* Photo Lightbox */}
       {previewPhoto && (
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs"
           onClick={() => setPreviewPhoto(null)}
         >
           <div
@@ -743,7 +937,8 @@ export function BeneficiaryReviewView({ programId }: BeneficiaryReviewViewProps)
           >
             <button
               onClick={() => setPreviewPhoto(null)}
-              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white bg-white/10 rounded-full hover:bg-white/20 transition-all"
+              className="absolute -top-12 right-0 p-2 text-white/80 hover:text-white bg-white/10 rounded-full hover:bg-white/20 transition-all cursor-pointer"
+              aria-label="Tutup pratinjau foto"
             >
               <X className="w-5 h-5" />
             </button>

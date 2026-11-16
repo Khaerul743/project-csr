@@ -1,7 +1,7 @@
 import React from "react";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string;
+  label?: React.ReactNode;
   error?: string;
   helperText?: string;
   leftIcon?: React.ReactNode;
@@ -22,7 +22,35 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     },
     ref
   ) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, "-") : undefined);
+    const inputId =
+      id ||
+      (typeof label === "string"
+        ? label
+            .replace(/\*/g, "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-")
+        : undefined);
+
+    const renderLabelContent = () => {
+      if (typeof label === "string") {
+        if (label.endsWith(" *")) {
+          return (
+            <>
+              {label.slice(0, -2)} <span className="text-rose-500">*</span>
+            </>
+          );
+        }
+        if (label.endsWith("*")) {
+          return (
+            <>
+              {label.slice(0, -1)} <span className="text-rose-500">*</span>
+            </>
+          );
+        }
+      }
+      return label;
+    };
 
     return (
       <div className="w-full flex flex-col gap-1.5">
@@ -31,7 +59,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             htmlFor={inputId}
             className="text-xs font-semibold text-slate-700 tracking-wide"
           >
-            {label}
+            {renderLabelContent()}
           </label>
         )}
 

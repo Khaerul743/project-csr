@@ -214,3 +214,37 @@ export function AdminPaginationBar({
   );
 }
 
+export interface AdminKpiCardProps {
+  label: string;
+  value: React.ReactNode;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor?: "emerald" | "blue" | "indigo" | "amber" | "rose" | "slate" | "purple" | "teal";
+  valueColor?: string;
+}
+
+export function AdminKpiCard({
+  label,
+  value,
+  subtitle,
+  icon: Icon,
+  valueColor = "text-[#181343]",
+}: AdminKpiCardProps) {
+  return (
+    <div className="group bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1 transition-all hover:border-slate-300 flex flex-col justify-between">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-slate-600 block">
+          {label}
+        </span>
+        <Icon className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors shrink-0" aria-hidden="true" />
+      </div>
+      <div className={`text-xl sm:text-2xl font-extrabold tracking-tight tabular-nums ${valueColor}`}>
+        {value}
+      </div>
+      <span className="text-[11px] text-slate-500 block truncate">
+        {subtitle}
+      </span>
+    </div>
+  );
+}
+

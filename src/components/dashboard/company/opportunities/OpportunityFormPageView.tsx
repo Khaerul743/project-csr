@@ -72,7 +72,7 @@ function SearchableSelect({
   disabled = false,
   helperText,
 }: {
-  label: string;
+  label: React.ReactNode;
   placeholder: string;
   value: string;
   onChange: (val: string) => void;
@@ -99,10 +99,30 @@ function SearchableSelect({
     return options.filter((item) => item.toLowerCase().includes(query.toLowerCase()));
   }, [options, query]);
 
+  const renderLabel = () => {
+    if (typeof label === "string") {
+      if (label.endsWith(" *")) {
+        return (
+          <>
+            {label.slice(0, -2)} <span className="text-rose-500">*</span>
+          </>
+        );
+      }
+      if (label.endsWith("*")) {
+        return (
+          <>
+            {label.slice(0, -1)} <span className="text-rose-500">*</span>
+          </>
+        );
+      }
+    }
+    return label;
+  };
+
   return (
     <div className="flex flex-col relative" ref={dropdownRef}>
       <label className="text-[13px] font-semibold text-[#181343] mb-1.5 block">
-        {label}
+        {renderLabel()}
       </label>
 
       <button
@@ -1000,9 +1020,6 @@ export function OpportunityFormPageView({
                   onChange={(e) => setTitle(e.target.value)}
                   className={INPUT_BASE_CLASS}
                 />
-                <span className="text-[12px] text-[#64748B]">
-                  Gunakan judul yang jelas, ringkas, dan merefleksikan sasaran intervensi sosial.
-                </span>
               </div>
 
               {/* Grid 2 Kolom: Bidang Fokus & Estimasi Anggaran */}
@@ -1023,9 +1040,6 @@ export function OpportunityFormPageView({
                       </option>
                     ))}
                   </select>
-                  <span className="text-[12px] text-[#64748B]">
-                    Pilih pilar tematik CSR yang paling sesuai dengan mandat perusahaan.
-                  </span>
                 </div>
 
                 {/* Estimasi Alokasi Anggaran */}
@@ -1048,9 +1062,6 @@ export function OpportunityFormPageView({
                       className={`${INPUT_BASE_CLASS} pl-10`}
                     />
                   </div>
-                  <span className="text-[12px] text-[#64748B]">
-                    Kosongkan jika anggaran program belum dipublikasikan atau bersifat fleksibel.
-                  </span>
                 </div>
               </div>
 
@@ -1111,22 +1122,28 @@ export function OpportunityFormPageView({
             {/* Connected Dropdowns */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <SearchableSelect
-                label="Provinsi Sasaran *"
+                label={
+                  <>
+                    Provinsi Sasaran <span className="text-rose-500">*</span>
+                  </>
+                }
                 placeholder="Pilih Provinsi..."
                 value={targetProvince}
                 onChange={handleProvinceChange}
                 options={provinceOptions}
-                helperText="Pilih provinsi utama pelaksanaan program"
               />
 
               <SearchableSelect
-                label="Kota / Kabupaten Sasaran *"
+                label={
+                  <>
+                    Kota / Kabupaten Sasaran <span className="text-rose-500">*</span>
+                  </>
+                }
                 placeholder="Pilih Kota / Kabupaten..."
                 value={targetCity}
                 onChange={setTargetCity}
                 options={cityOptions}
                 disabled={!targetProvince}
-                helperText={!targetProvince ? "Pilih provinsi untuk mengaktifkan daftar kota" : "Pilih kabupaten/kota sasaran"}
               />
             </div>
 
@@ -1379,7 +1396,7 @@ export function OpportunityFormPageView({
               {/* Batas Pengajuan Proposal */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#181343] block">
-                  Batas Pengajuan Proposal *
+                  Batas Pengajuan Proposal <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -1387,9 +1404,6 @@ export function OpportunityFormPageView({
                   onChange={(e) => setDeadline(e.target.value)}
                   className={INPUT_BASE_CLASS}
                 />
-                <span className="text-[11px] text-[#64748B]">
-                  Batas akhir mitra mengajukan proposal teknis &amp; RAB
-                </span>
               </div>
 
               {/* Tanggal Mulai Program */}
@@ -1403,9 +1417,6 @@ export function OpportunityFormPageView({
                   onChange={(e) => setStartDate(e.target.value)}
                   className={INPUT_BASE_CLASS}
                 />
-                <span className="text-[11px] text-[#64748B]">
-                  Perkiraan kick-off kegiatan di lapangan
-                </span>
               </div>
 
               {/* Tanggal Selesai Program */}
@@ -1419,9 +1430,6 @@ export function OpportunityFormPageView({
                   onChange={(e) => setEndDate(e.target.value)}
                   className={INPUT_BASE_CLASS}
                 />
-                <span className="text-[11px] text-[#64748B]">
-                  Target rampung seluruh kegiatan program
-                </span>
               </div>
             </div>
           </div>
@@ -1447,6 +1455,7 @@ export function OpportunityFormPageView({
                 </div>
               </div>
             </div>
+
 
             {/* Banner Upload / Preview */}
             <div className="space-y-2">

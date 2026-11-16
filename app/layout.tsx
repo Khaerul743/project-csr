@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SIPENA — Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR",
+  title: "SIPENA - Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR",
   description:
     "Mencatat Aksi, Mengukur Dampak. Platform tata kelola CSR modern dan akuntabel yang menghubungkan perusahaan, yayasan/NGO, dan masyarakat secara transparan.",
   icons: {

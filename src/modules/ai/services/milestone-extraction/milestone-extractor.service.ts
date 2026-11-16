@@ -73,7 +73,7 @@ export class MilestoneExtractorService {
           summaryRationale: result.summaryRationale,
           stages: result.stages.map((st, idx) => ({
             orderIndex: st.orderIndex || idx + 1,
-            title: st.title,
+            title: (st.title || "").replace(/^(?:tahap(?:an)?\s*\d*[\s:.-]*)+/i, "").trim() || st.title,
             description: st.description,
             targetTimeline: st.targetTimeline,
             expectedEvidence: st.expectedEvidence,
@@ -110,7 +110,7 @@ export class MilestoneExtractorService {
     const stages = [
       {
         orderIndex: 1,
-        title: "Tahap 1: Sosialisasi & Koordinasi Stakeholder Lokal",
+        title: "Sosialisasi & Koordinasi Stakeholder Lokal",
         description: `Melakukan koordinasi awal bersama aparat wilayah, pemetaan data warga sasaran (${beneficiaries}), dan pembentukan tim pelaksana di lapangan.`,
         targetTimeline: "Bulan ke-1",
         expectedEvidence: "Foto rembug warga / koordinasi, daftar hadir peserta, dan berita acara kesepakatan pelaksanaan",
@@ -118,7 +118,7 @@ export class MilestoneExtractorService {
       },
       {
         orderIndex: 2,
-        title: `Tahap 2: Pengadaan Logistik & Pembekalan Teknis Pelaksanaan`,
+        title: `Pengadaan Logistik & Pembekalan Teknis Pelaksanaan`,
         description: `Persiapan material teknis, pengadaan sarana/prasarana pendukung program ${title}, serta pelatihan dasar bagi fasilitator dan masyarakat.`,
         targetTimeline: duration > 1 ? "Bulan ke-1 - Bulan ke-2" : "Bulan ke-1",
         expectedEvidence: "Foto logistik/alat yang tiba di lokasi, dokumentasi pelatihan/pembekalan, dan tanda terima barang",
@@ -126,7 +126,7 @@ export class MilestoneExtractorService {
       },
       {
         orderIndex: 3,
-        title: `Tahap 3: Implementasi Aksi Utama di Lapangan`,
+        title: `Implementasi Aksi Utama di Lapangan`,
         description: `Pelaksanaan kegiatan inti dari program ${title} bersama ${beneficiaries} sesuai dengan metodologi yang telah disepakati.`,
         targetTimeline: duration >= 3 ? "Bulan ke-2 - Bulan ke-3" : "Bulan ke-2",
         expectedEvidence: "Foto aksi kegiatan di lapangan bersama masyarakat, video dokumentasi singkat, lembar monitoring harian",
@@ -134,7 +134,7 @@ export class MilestoneExtractorService {
       },
       {
         orderIndex: 4,
-        title: "Tahap 4: Monitoring Capaian Dampak & Serah Terima Program",
+        title: "Monitoring Capaian Dampak & Serah Terima Program",
         description: "Evaluasi hasil kegiatan, pengukuran indikator keberhasilan program, penyusunan laporan pertanggungjawaban akhir, dan serah terima manfaat program.",
         targetTimeline: `Bulan ke-${duration}`,
         expectedEvidence: "Foto serah terima program (BAST), testimoni penerima manfaat, laporan akhir dampak",

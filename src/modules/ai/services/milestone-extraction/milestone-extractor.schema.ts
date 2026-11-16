@@ -7,7 +7,7 @@ export const milestoneItemSchema = z.object({
     .describe("Nomor urut tahapan kegiatan, mulai dari 1, 2, 3, dan seterusnya secara kronologis"),
   title: z
     .string()
-    .describe("Judul padat dan jelas untuk tahapan kegiatan (contoh: 'Tahap 1: Sosialisasi & Rembug Warga Desa')"),
+    .describe("Judul padat dan jelas untuk tahapan kegiatan tanpa awalan 'Tahap X' (contoh: 'Sosialisasi & Rembug Warga Desa')"),
   description: z
     .string()
     .describe("Uraian lengkap kegiatan operasional yang akan dilaksanakan di lapangan pada tahapan ini"),
