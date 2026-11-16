@@ -18,6 +18,19 @@ export const singleSdgRationaleSchema = z.object({
   reason: z.string().describe("Alasan konkret padat 1 kalimat mengapa program ini selaras dengan sasaran SDG ini"),
 });
 
+export const singleSdgProbabilitySchema = z.object({
+  sdgId: z.number().int().min(1).max(17).describe("Nomor sasaran SDG (1-17)"),
+  percentage: z
+    .number()
+    .min(0)
+    .max(100)
+    .describe(
+      "Persentase probabilitas atau tingkat kedekatan relevansi sasaran SDG ini terhadap judul dan deskripsi inisiatif (0-100%)"
+    ),
+});
+
+export type SingleSdgProbability = z.infer<typeof singleSdgProbabilitySchema>;
+
 export const sdgRecommendationOutputSchema = z.object({
   recommendedSdgs: z
     .array(z.number().int().min(1).max(17))
@@ -40,6 +53,11 @@ export const sdgRecommendationOutputSchema = z.object({
     .min(1)
     .max(4)
     .describe("Rincian sasaran per SDG terpilih"),
+  probabilities: z
+    .array(singleSdgProbabilitySchema)
+    .describe(
+      "Distribusi probabilitas / persentase kedekatan untuk seluruh 17 sasaran SDG (SDG 1 sampai 17). Menunjukkan seberapa dekat inisiatif program dengan masing-masing SDG."
+    ),
 });
 
 export type SdgRecommendationResult = z.infer<typeof sdgRecommendationOutputSchema>;
@@ -47,5 +65,6 @@ export type SdgRecommendationResult = z.infer<typeof sdgRecommendationOutputSche
 export interface SdgRecommendationResponse extends SdgRecommendationResult {
   source: "AI_OPENAI" | "HEURISTIC_FALLBACK";
   analyzedAt: string;
+  probabilityMap: Record<number, number>;
 }
 
