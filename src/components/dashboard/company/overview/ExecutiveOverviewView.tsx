@@ -78,7 +78,7 @@ interface ExecutiveOverviewViewProps {
     budgetAbsorptionRate: number;
   };
   onNavigateMenu: (menu: CompanyNavMenu) => void;
-  onOpenCreateOpportunity?: () => void;
+  onOpenCreateOpportunity?: (provinceName?: string) => void;
   onSelectOpportunityDetail: (opp: OpportunityItem) => void;
 }
 
@@ -779,7 +779,7 @@ export function ExecutiveOverviewView({
               <Button
                 variant="primary"
                 size="sm"
-                onClick={onOpenCreateOpportunity}
+                onClick={() => onOpenCreateOpportunity()}
                 leftIcon={<Plus className="w-3.5 h-3.5" />}
                 className="text-xs font-semibold cursor-pointer"
               >
@@ -1676,11 +1676,21 @@ export function ExecutiveOverviewView({
 
             <IndonesiaBeneficiaryMap
               programs={filteredPrograms}
+              opportunities={opportunities}
+              partners={partners}
               selectedSdgFilter={selectedSdgFilter}
               onSelectSdgFilter={(sdgId) => setSelectedSdgFilter(sdgId)}
               selectedProvince={selectedProvince}
               onSelectProvince={(prov) => setSelectedProvince(prov)}
               onNavigateToProgramDetail={() => onNavigateMenu("programs")}
+              onNavigateToOpportunityDetail={(opp) => {
+                if (onSelectOpportunityDetail) {
+                  onSelectOpportunityDetail(opp);
+                } else {
+                  onNavigateMenu("opportunities");
+                }
+              }}
+              onOpenCreateOpportunity={onOpenCreateOpportunity}
             />
           </div>
         )}
@@ -1697,7 +1707,7 @@ export function ExecutiveOverviewView({
                   <Button
                     variant="primary"
                     size="sm"
-                    onClick={onOpenCreateOpportunity}
+                    onClick={() => onOpenCreateOpportunity()}
                     leftIcon={<Plus className="w-4 h-4" />}
                     className="text-xs cursor-pointer"
                   >

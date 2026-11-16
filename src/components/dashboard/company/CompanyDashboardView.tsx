@@ -169,6 +169,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
   // Modal and sub-view states
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
+  const [opportunityPrefillProvince, setOpportunityPrefillProvince] = useState<string | null>(null);
   const [selectedOppForEdit, setSelectedOppForEdit] = useState<OpportunityItem | null>(null);
   const [selectedOppForDetail, setSelectedOppForDetail] = useState<OpportunityItem | null>(null);
   const [selectedPartnerForInvite, setSelectedPartnerForInvite] = useState<PartnerItem | null>(null);
@@ -1166,9 +1167,14 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               onNavigateMenu={(menu) => setActiveMenu(menu)}
               onOpenCreateOpportunity={
                 !isManagement
-                  ? () => {
+                  ? (initialProvince) => {
                     setActiveMenu("opportunities");
                     setIsCreatingOpportunity(true);
+                    if (initialProvince) {
+                      setOpportunityPrefillProvince(initialProvince);
+                    } else {
+                      setOpportunityPrefillProvince(null);
+                    }
                   }
                   : undefined
               }
@@ -1182,9 +1188,14 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {activeMenu === "opportunities" && (
             !isManagement && isCreatingOpportunity ? (
               <CreateOpportunityPageView
-                onBack={() => setIsCreatingOpportunity(false)}
+                initialProvince={opportunityPrefillProvince || undefined}
+                onBack={() => {
+                  setIsCreatingOpportunity(false);
+                  setOpportunityPrefillProvince(null);
+                }}
                 onSuccess={() => {
                   setIsCreatingOpportunity(false);
+                  setOpportunityPrefillProvince(null);
                   fetchOpportunities();
                 }}
               />

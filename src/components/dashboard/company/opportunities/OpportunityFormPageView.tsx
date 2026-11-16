@@ -37,6 +37,7 @@ import { AiNeedPrioritizationPanel } from "./AiNeedPrioritizationPanel";
 export interface OpportunityFormPageViewProps {
   mode: "create" | "edit";
   opportunity?: OpportunityItem | null;
+  initialProvince?: string;
   onBack: () => void;
   onSuccess: () => void;
 }
@@ -203,6 +204,7 @@ function SearchableSelect({
 export function OpportunityFormPageView({
   mode,
   opportunity,
+  initialProvince,
   onBack,
   onSuccess,
 }: OpportunityFormPageViewProps) {
@@ -255,7 +257,9 @@ export function OpportunityFormPageView({
   const [estimatedBudget, setEstimatedBudget] = useState<string>(
     opportunity?.estimatedBudget ? String(Math.round(parseFloat(opportunity.estimatedBudget))) : ""
   );
-  const [targetProvince, setTargetProvince] = useState(opportunity?.targetProvince || "");
+  const [targetProvince, setTargetProvince] = useState(
+    opportunity?.targetProvince || initialProvince || ""
+  );
   const [targetCity, setTargetCity] = useState(opportunity?.targetCity || "");
   const [startDate, setStartDate] = useState(
     opportunity?.startDate ? new Date(opportunity.startDate).toISOString().split("T")[0] : ""
@@ -1834,7 +1838,11 @@ export function OpportunityFormPageView({
 }
 
 // Wrapper for Create Opportunity
-export function CreateOpportunityPageView(props: { onBack: () => void; onSuccess: () => void }) {
+export function CreateOpportunityPageView(props: {
+  onBack: () => void;
+  onSuccess: () => void;
+  initialProvince?: string;
+}) {
   return <OpportunityFormPageView mode="create" {...props} />;
 }
 
