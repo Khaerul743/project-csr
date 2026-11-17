@@ -26,7 +26,7 @@ import {
   Camera,
   Layers,
   HeartHandshake,
-  DollarSign,
+  Coins,
   TrendingUp,
   Filter,
   Check,
@@ -700,7 +700,7 @@ export function CompanyFullProfileView({
             <span className="text-xs font-semibold text-slate-500">
               Realisasi Anggaran CSR
             </span>
-            <DollarSign className="w-4 h-4 text-[#059669] shrink-0" />
+            <Coins className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
           <div>
             <span className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight block tabular-nums">
@@ -762,7 +762,7 @@ export function CompanyFullProfileView({
             <span className="text-xs font-semibold text-slate-500">
               Penilaian Penerima Manfaat
             </span>
-            <Star className="w-4 h-4 text-amber-400 fill-amber-400 shrink-0" />
+            <Star className="w-4 h-4 text-slate-400 shrink-0" />
           </div>
           <div>
             {realMetrics.totalReviews > 0 && realMetrics.averageRating > 0 ? (

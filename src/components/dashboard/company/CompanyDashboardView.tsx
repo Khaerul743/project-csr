@@ -1293,21 +1293,21 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                   </div>
                 </div>
 
-                {/* 3 KPI Cards Horizontal (Statistik Read-Only) */}
+                {/* 3 KPI Cards Horizontal (Statistik Read-Only - Seragam & Anti-Slop) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                   {/* KPI 1: Menunggu Tinjauan */}
                   <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex items-center gap-4 cursor-default">
-                    <div className="p-3.5 rounded-2xl bg-blue-50 text-blue-600 shrink-0">
-                      <FileSearch className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                      <FileSearch className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-slate-600 block">
                         Menunggu Tinjauan
                       </span>
-                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5 tabular-nums">
                         {proposalKpis.waitingReview}
                       </div>
-                      <span className="text-xs text-[#787680] block">
+                      <span className="text-xs text-slate-400 block">
                         Proposal baru masuk
                       </span>
                     </div>
@@ -1315,17 +1315,17 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                   {/* KPI 2: Dalam Tinjauan */}
                   <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex items-center gap-4 cursor-default">
-                    <div className="p-3.5 rounded-2xl bg-purple-50 text-purple-600 shrink-0">
-                      <ClipboardList className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                      <ClipboardList className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-slate-600 block">
                         Dalam Tinjauan
                       </span>
-                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5 tabular-nums">
                         {proposalKpis.underReview}
                       </div>
-                      <span className="text-xs text-[#787680] block">
+                      <span className="text-xs text-slate-400 block">
                         Sedang dievaluasi tim CSR
                       </span>
                     </div>
@@ -1333,17 +1333,17 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                   {/* KPI 3: Perlu Revisi */}
                   <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex items-center gap-4 cursor-default">
-                    <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-600 shrink-0">
-                      <FileEdit className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                      <FileEdit className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-slate-600 block">
                         Perlu Revisi
                       </span>
-                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5 tabular-nums">
                         {proposalKpis.needsRevision}
                       </div>
-                      <span className="text-xs text-[#787680] block">
+                      <span className="text-xs text-slate-400 block">
                         Menunggu pembaruan mitra
                       </span>
                     </div>
