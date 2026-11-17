@@ -24,6 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.54.0",
+    "mammoth": "^1.13.0",
     "mysql2": "^3.24.5",
     "next": "^16.4.3",
     "pdf-parse": "^2.4.5",

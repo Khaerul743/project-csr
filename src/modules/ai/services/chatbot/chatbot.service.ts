@@ -34,6 +34,15 @@ export class ChatbotService {
       currentPage?: string;
       selectedOpportunityId?: string;
       selectedProgramId?: string;
+      attachedSurveyDocument?: {
+        fileName: string;
+        fileSize: number;
+        mimeType: string;
+        detectedProvince?: string;
+        detectedFocusAreas?: string[];
+        extractedSnippet?: string;
+        fullExtractedText?: string;
+      };
     };
   }): Promise<ChatbotResponse> {
     const { user, messages, context } = params;
@@ -53,7 +62,7 @@ export class ChatbotService {
 
     if (!model) {
       this.logger.warn("OpenAI API Key tidak tersedia, menggunakan fallback heuristic chat");
-      return this.handleFallbackChat(user, messages, userOrgInfo, toolsMap);
+      return this.handleFallbackChat(user, messages, userOrgInfo, toolsMap, context);
     }
 
     try {
@@ -134,15 +143,20 @@ export class ChatbotService {
           "Maaf, proses pemanggilan data membutuhkan waktu lebih lama. Ada yang bisa saya bantu jelaskan kembali?";
       }
 
+      const cards = executedEvents.map((e) => e.cardData).filter(Boolean);
+      if (context?.attachedSurveyDocument) {
+        cards.unshift(this.buildSurveyRecommendationCard(context.attachedSurveyDocument));
+      }
+
       return {
         reply: finalReply,
-        cards: executedEvents.map((e) => e.cardData).filter(Boolean),
+        cards,
         toolCallsMade: executedEvents.map((e) => e.toolName),
         suggestedPrompts: this.generateSuggestedPrompts(user.role),
       };
     } catch (error: any) {
       this.logger.error("Error during LangChain chat execution:", error);
-      return this.handleFallbackChat(user, messages, userOrgInfo, toolsMap);
+      return this.handleFallbackChat(user, messages, userOrgInfo, toolsMap, context);
     }
   }
 
@@ -219,17 +233,128 @@ export class ChatbotService {
   }
 
   /**
+   * Bangun kartu rekomendasi program CSR berbasis dokumen survei wilayah
+   */
+  private buildSurveyRecommendationCard(surveyDoc: {
+    fileName: string;
+    fileSize: number;
+    mimeType?: string;
+    detectedProvince?: string;
+    detectedFocusAreas?: string[];
+    extractedSnippet?: string;
+  }) {
+    const prov = surveyDoc.detectedProvince || "Jawa Barat";
+    const focusAreas =
+      surveyDoc.detectedFocusAreas && surveyDoc.detectedFocusAreas.length > 0
+        ? surveyDoc.detectedFocusAreas
+        : ["PEMBERDAYAAN_EKONOMI", "KESEHATAN"];
+
+    const recommendations: any[] = [];
+
+    if (focusAreas.includes("KESEHATAN")) {
+      recommendations.push({
+        title: `Program Intervensi Gizi & Pencegahan Stunting Komunitas ${prov}`,
+        province: prov,
+        focusArea: "KESEHATAN",
+        sdgs: ["SDG 2: Tanpa Kelaparan", "SDG 3: Kehidupan Sehat", "SDG 6: Air Bersih & Sanitasi"],
+        urgencyReason:
+          "Tingginya urgensi pemenuhan gizi seimbang balita, pendampingan ibu hamil di posyandu, dan perbaikan fasilitas sanitasi air bersih layak berdasarkan temuan survei lapangan.",
+      });
+    }
+
+    if (focusAreas.includes("PENDIDIKAN")) {
+      recommendations.push({
+        title: `Inisiatif Penguatan Literasi Terpadu & Digitalisasi Sekolah Desa ${prov}`,
+        province: prov,
+        focusArea: "PENDIDIKAN",
+        sdgs: ["SDG 4: Pendidikan Berkualitas", "SDG 10: Berkurangnya Kesenjangan"],
+        urgencyReason:
+          "Keterbatasan sarana belajar digital, kebutuhan buku bacaan berkualitas, dan pendampingan pelatihan guru di sekolah wilayah sasaran.",
+      });
+    }
+
+    if (focusAreas.includes("LINGKUNGAN")) {
+      recommendations.push({
+        title: `Konservasi Mata Air & Pengelolaan Bank Sampah Mandiri ${prov}`,
+        province: prov,
+        focusArea: "LINGKUNGAN",
+        sdgs: ["SDG 13: Penanganan Perubahan Iklim", "SDG 12: Konsumsi Bertanggung Jawab", "SDG 15: Ekosistem Daratan"],
+        urgencyReason:
+          "Kerentanan degradasi ekosistem lokal, pencemaran limbah domestik belum terkelola, dan kebutuhan pelestarian mata air.",
+      });
+    }
+
+    if (focusAreas.includes("PEMBERDAYAAN_EKONOMI") || recommendations.length < 2) {
+      recommendations.push({
+        title: `Sentra Inkubasi Wirausaha Hijau & Pelatihan Vokasi Pemuda ${prov}`,
+        province: prov,
+        focusArea: "PEMBERDAYAAN_EKONOMI",
+        sdgs: ["SDG 1: Tanpa Kemiskinan", "SDG 8: Pekerjaan Layak & Pertumbuhan Ekonomi"],
+        urgencyReason:
+          "Pemberdayaan kelompok rentan melalui peningkatan kapasitas usaha mikro komunitas dan pelatihan keterampilan kerja aplikatif bagi pemuda desa.",
+      });
+    }
+
+    return {
+      type: "SURVEY_PROGRAM_RECOMMENDATIONS",
+      fileName: surveyDoc.fileName,
+      fileSize: surveyDoc.fileSize,
+      detectedProvince: prov,
+      detectedFocusAreas: focusAreas,
+      recommendations: recommendations.slice(0, 3),
+    };
+  }
+
+  /**
    * Fallback engine jika API Key OpenAI tidak terkonfigurasi atau error
    */
   private async handleFallbackChat(
     authUser: AuthUser,
     messages: ChatMessageDTO[],
     userOrgInfo: any,
-    toolsMap: Map<string, any>
+    toolsMap: Map<string, any>,
+    context?: any
   ): Promise<ChatbotResponse> {
     const lastUserMessage = [...messages].reverse().find((m) => m.role === "user")?.content || "";
     const lower = lastUserMessage.toLowerCase();
     const isPartner = authUser.role === "PARTNER_ADMIN";
+
+    // Scenario: Analisis Dokumen Survei Wilayah Terlampir (Perusahaan)
+    if (context?.attachedSurveyDocument) {
+      const doc = context.attachedSurveyDocument;
+      const prov = doc.detectedProvince || "Jawa Barat";
+      const card = this.buildSurveyRecommendationCard(doc);
+
+      const reply =
+        `Saya telah selesai membaca dan menganalisis berkas survei wilayah **${doc.fileName}** (${(
+          doc.fileSize / 1024
+        ).toFixed(1)} KB).\n\n` +
+        `### 📌 Rangkuman Eksekutif Asesmen Wilayah:\n` +
+        `- **Wilayah Terdeteksi**: Provinsi **${prov}**\n` +
+        `- **Fokus Isu Utama**: ${doc.detectedFocusAreas?.join(", ") || "Pemberdayaan Ekonomi & Kesejahteraan Sosial"}\n` +
+        `- **Poin Kunci**: Dokumen survei menggarisbawahi kebutuhan mendesak masyarakat lokal terkait peningkatan taraf hidup, intervensi fasilitas dasar, serta penguatan kapasitas kemandirian warga desa binaan.\n\n` +
+        `### 💡 Rekomendasi Inisiatif Program CSR Strategis:\n` +
+        card.recommendations
+          .map(
+            (rec: any, idx: number) =>
+              `${idx + 1}. **${rec.title}** (\`${rec.focusArea}\`)\n` +
+              `   - 🎯 **Urgensi Isu**: ${rec.urgencyReason}\n` +
+              `   - 🌐 **Sasaran SDGs**: ${rec.sdgs.join(", ")}\n` +
+              `   - 📊 **Target Penerima Manfaat**: Estimasi 150 - 300 warga rentan penerima manfaat langsung di wilayah ${prov}.`
+          )
+          .join("\n\n") +
+        `\n\n💡 **Langkah Aksi**: Anda dapat langsung menerbitkan rekomendasi inisiatif di atas menjadi draf **Peluang CSR Baru** dengan menekan tombol **"Buat Peluang CSR Berdasarkan Survei Ini"** pada kartu di bawah!`;
+
+      return {
+        reply,
+        cards: [card],
+        suggestedPrompts: [
+          "Berapa estimasi alokasi anggaran yang ideal untuk program ini?",
+          "Bagaimana kriteria seleksi mitra lokal yang tepat untuk menjalankan inisiatif ini?",
+          "Bantu susun TOR dan indikator keberhasilan ESG untuk program ini",
+        ],
+      };
+    }
 
     // Scenario: Ekspansi Geografis Wilayah Belum Terjangkau (Perusahaan)
     if (

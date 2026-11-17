@@ -22,6 +22,9 @@ import {
   Plus,
   Users,
   Globe,
+  Paperclip,
+  X,
+  FileUp,
 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
@@ -37,6 +40,11 @@ export interface ChatMessage {
   timestamp: string;
   isError?: boolean;
   failedPrompt?: string;
+  attachedDocument?: {
+    fileName: string;
+    fileSize: number;
+    mimeType?: string;
+  };
 }
 
 interface ChatbotViewProps {
@@ -62,12 +70,36 @@ export function ChatbotView({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [lastUserPrompt, setLastUserPrompt] = useState<string | null>(null);
   const [isConfirmingReset, setIsConfirmingReset] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isNearBottomRef = useRef(true);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    const allowed = ["pdf", "docx", "doc"];
+    if (!allowed.includes(ext)) {
+      alert("Hanya berkas berformat PDF atau Word (.docx, .doc) yang didukung untuk dokumen survei wilayah.");
+      e.target.value = "";
+      return;
+    }
+
+    const MAX_MB = 15;
+    if (file.size > MAX_MB * 1024 * 1024) {
+      alert(`Ukuran berkas terlalu besar. Maksimal ${MAX_MB}MB.`);
+      e.target.value = "";
+      return;
+    }
+
+    setAttachedFile(file);
+  };
 
   // 4 Standardized Quick Prompts for NGO Mitra
   const defaultPrompts = isPartner
@@ -186,9 +218,23 @@ export function ChatbotView({
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
-    if (!text || isLoading) return;
+    const fileToUpload = attachedFile;
 
-    setLastUserPrompt(text);
+    if ((!text && !fileToUpload) || isLoading) return;
+
+    // Reset attached file & input
+    setAttachedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+    const displayText =
+      text ||
+      (fileToUpload
+        ? `Tolong analisis hasil survei kondisi dan kebutuhan wilayah dari berkas "${fileToUpload.name}" ini, kemudian berikan rekomendasi inisiatif program CSR yang tepat sasaran.`
+        : "");
+
+    setLastUserPrompt(displayText);
 
     // Stop any active typing
     if (typingTimerRef.current) {
@@ -199,7 +245,14 @@ export function ChatbotView({
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: text,
+      content: displayText,
+      attachedDocument: fileToUpload
+        ? {
+            fileName: fileToUpload.name,
+            fileSize: fileToUpload.size,
+            mimeType: fileToUpload.type,
+          }
+        : undefined,
       timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
     };
 
@@ -220,19 +273,51 @@ export function ChatbotView({
 
     try {
       const token = localStorage.getItem("accessToken");
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          messages: newMessages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
-        }),
-      });
+      let res: Response;
+
+      if (fileToUpload) {
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
+        formData.append(
+          "messages",
+          JSON.stringify(
+            newMessages.map((m) => ({
+              role: m.role,
+              content: m.content,
+              attachedDocument: m.attachedDocument,
+            }))
+          )
+        );
+        formData.append(
+          "context",
+          JSON.stringify({
+            currentPage: typeof window !== "undefined" ? window.location.pathname : undefined,
+          })
+        );
+
+        res = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: formData,
+        });
+      } else {
+        res = await fetch("/api/ai/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            messages: newMessages.map((m) => ({
+              role: m.role,
+              content: m.content,
+              attachedDocument: m.attachedDocument,
+            })),
+          }),
+        });
+      }
 
       if (!res.ok) {
         const errJson = await res.json().catch(() => null);
@@ -498,8 +583,23 @@ export function ChatbotView({
 
                   {/* Konten Pesan */}
                   {msg.role === "user" ? (
-                    <div className="whitespace-pre-wrap leading-relaxed select-text font-normal">
-                      {msg.content}
+                    <div className="space-y-2 select-text font-normal text-left">
+                      {msg.attachedDocument && (
+                        <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/15 border border-white/20 text-xs">
+                          <FileText className="w-4 h-4 text-emerald-300 shrink-0" />
+                          <div className="truncate flex-1 min-w-0">
+                            <span className="font-semibold text-white truncate block">
+                              {msg.attachedDocument.fileName}
+                            </span>
+                            <span className="text-[10px] text-emerald-200">
+                              {(msg.attachedDocument.fileSize / 1024).toFixed(1)} KB (Survei Wilayah)
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      <div className="whitespace-pre-wrap leading-relaxed">
+                        {msg.content}
+                      </div>
                     </div>
                   ) : msg.isError ? (
                     <div className="space-y-2">
@@ -716,6 +816,99 @@ export function ChatbotView({
                           );
                         }
 
+                        // 4. Survey Recommendations Card (Rekomendasi Berdasarkan Survei Wilayah)
+                        if (card.type === "SURVEY_PROGRAM_RECOMMENDATIONS" && card.recommendations) {
+                          return (
+                            <div key={cIdx} className="space-y-3 mt-3">
+                              <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200/80">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-8 h-8 rounded-lg bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0">
+                                    <FileUp className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <h5 className="font-bold text-xs text-[#181343]">
+                                        Hasil Telaah Survei Wilayah
+                                      </h5>
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        {card.detectedProvince || "Provinsi Teridentifikasi"}
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-600 mt-0.5">
+                                      Berkas: <span className="font-semibold">{card.fileName}</span> ({(card.fileSize / 1024).toFixed(1)} KB)
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="px-2 py-0.5 rounded-md bg-white text-[#059669] text-[10px] font-extrabold border border-emerald-200 shrink-0">
+                                  {card.recommendations.length} Usulan Program
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 gap-2.5">
+                                {card.recommendations.map((rec: any, rIdx: number) => (
+                                  <div
+                                    key={rIdx}
+                                    className="p-3.5 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#059669]/60 transition shadow-2xs space-y-2.5 text-left"
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="font-extrabold text-[#181343] text-xs">
+                                            {rec.title}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-500">
+                                          <MapPin className="w-3 h-3 text-emerald-600" />
+                                          <span>Wilayah Sasaran: <strong>{rec.province}</strong></span>
+                                        </div>
+                                      </div>
+                                      <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-bold shrink-0">
+                                        {rec.focusArea ? rec.focusArea.replace(/_/g, " ") : "UMUM"}
+                                      </span>
+                                    </div>
+
+                                    <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50/80 p-2.5 rounded-lg border border-slate-100">
+                                      <strong className="text-slate-700">Urgensi Isu Lapangan: </strong>
+                                      {rec.urgencyReason}
+                                    </p>
+
+                                    {rec.sdgs && rec.sdgs.length > 0 && (
+                                      <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                                        <span className="text-[10px] font-bold text-slate-400 mr-1">Sasaran SDGs:</span>
+                                        {rec.sdgs.map((sdg: string, sIdx: number) => (
+                                          <span
+                                            key={sIdx}
+                                            className="px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60"
+                                          >
+                                            {sdg}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-[11px]">
+                                      <span className="text-slate-400 text-[10px]">
+                                        Disesuaikan dengan temuan survei
+                                      </span>
+
+                                      {onOpenCreateOpportunity && (
+                                        <button
+                                          type="button"
+                                          onClick={() => onOpenCreateOpportunity(rec.province)}
+                                          className="px-3 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer shrink-0"
+                                        >
+                                          <Plus className="w-3.5 h-3.5" />
+                                          <span>Buat Peluang CSR Berdasarkan Survei Ini</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+
                         return null;
                       })}
                     </div>
@@ -798,7 +991,34 @@ export function ChatbotView({
             </span>
           </div>
         )}
-        <div className="rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] focus-within:border-[#059669] focus-within:ring-2 focus-within:ring-[#059669]/20 transition-all p-2 space-y-1.5">
+        <div className="rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] focus-within:border-[#059669] focus-within:ring-2 focus-within:ring-[#059669]/20 transition-all p-2 space-y-2">
+          {/* File Attachment Chip Preview */}
+          {attachedFile && (
+            <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200/80 text-xs text-emerald-900 animate-in fade-in duration-150">
+              <div className="flex items-center gap-2 truncate min-w-0">
+                <FileText className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span className="font-bold truncate">{attachedFile.name}</span>
+                <span className="text-[11px] text-emerald-700/80 shrink-0">
+                  ({(attachedFile.size / 1024).toFixed(1)} KB)
+                </span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-extrabold shrink-0">
+                  Survei Wilayah
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setAttachedFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="p-1 rounded-md text-emerald-700 hover:text-emerald-950 hover:bg-emerald-100/80 transition cursor-pointer shrink-0"
+                title="Hapus berkas"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
           <textarea
             ref={textareaRef}
             rows={2}
@@ -809,30 +1029,48 @@ export function ChatbotView({
             placeholder={
               !aiEnabled
                 ? "Fitur AI saat ini sedang dinonaktifkan via environment variable..."
+                : attachedFile
+                ? `Berkas "${attachedFile.name}" siap dianalisis. Tekan Kirim atau tambahkan instruksi khusus...`
                 : isPartner
                 ? "Tanyakan peluang CSR, bantuan draf proposal, atau status pengajuan..."
-                : "Tanyakan ide program baru, rekapitulasi data program, atau kriteria evaluasi..."
+                : "Tanyakan ide program baru, rekapitulasi data program, atau unggah survei wilayah..."
             }
             className="w-full bg-transparent resize-none border-none focus:outline-hidden text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 px-2 py-1 leading-relaxed max-h-32 disabled:opacity-60 disabled:cursor-not-allowed"
           />
 
-          <div className="flex items-center justify-between pt-1 border-t border-slate-200/50 px-1">
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-              <span className="hidden sm:inline">Tekan</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-medium">
-                Enter
-              </kbd>
-              <span className="hidden sm:inline">untuk mengirim,</span>
-              <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-medium">
-                Shift + Enter
-              </kbd>
-              <span className="hidden sm:inline">baris baru</span>
+          <div className="flex items-center justify-between pt-1 border-t border-slate-200/50 px-1 gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword"
+                className="hidden"
+                onChange={handleFileSelect}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || !aiEnabled}
+                className="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-[#059669] hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Unggah berkas survei wilayah (PDF / DOCX)"
+              >
+                <Paperclip className="w-3.5 h-3.5 text-slate-500" />
+                <span className="hidden sm:inline">Unggah Survei Wilayah</span>
+              </button>
+
+              <div className="hidden md:flex items-center gap-1 text-[11px] text-slate-400">
+                <span>Tekan</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono font-medium">
+                  Enter
+                </kbd>
+                <span>untuk kirim</span>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={() => handleSendMessage()}
-              disabled={!inputText.trim() || isLoading || !aiEnabled}
+              disabled={(!inputText.trim() && !attachedFile) || isLoading || !aiEnabled}
               className="px-4 py-1.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
             >
               <span>Kirim</span>

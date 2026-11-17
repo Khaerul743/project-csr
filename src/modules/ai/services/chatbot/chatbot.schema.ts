@@ -6,6 +6,13 @@ import { programStatusEnum } from "@/db/schema/programs";
 export const chatMessageSchema = z.object({
   role: z.enum(["user", "assistant", "system"]),
   content: z.string().min(1, "Pesan tidak boleh kosong"),
+  attachedDocument: z
+    .object({
+      fileName: z.string(),
+      fileSize: z.number(),
+      mimeType: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type ChatMessageDTO = z.infer<typeof chatMessageSchema>;
@@ -17,6 +24,16 @@ export const chatRequestSchema = z.object({
       currentPage: z.string().optional(),
       selectedOpportunityId: z.string().optional(),
       selectedProgramId: z.string().optional(),
+      attachedSurveyDocument: z
+        .object({
+          fileName: z.string(),
+          fileSize: z.number(),
+          mimeType: z.string(),
+          extractedSnippet: z.string().optional(),
+          detectedProvince: z.string().optional(),
+          detectedFocusAreas: z.array(z.string()).optional(),
+        })
+        .optional(),
     })
     .optional(),
 });
