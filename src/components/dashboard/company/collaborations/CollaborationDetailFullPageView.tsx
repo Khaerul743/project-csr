@@ -436,6 +436,31 @@ export function CollaborationDetailFullPageView({
     }
   };
 
+  // Next Step with Validation
+  const handleNextStep = () => {
+    setErrorMsg(null);
+    if (currentStep === 1) {
+      const budgetNum = finalBudget ? Number(finalBudget) : null;
+      if (!budgetNum || budgetNum <= 0) {
+        setErrorMsg("Nilai anggaran yang disepakati wajib diisi.");
+        return;
+      }
+      if (!startDate) {
+        setErrorMsg("Tanggal mulai pelaksanaan wajib diisi.");
+        return;
+      }
+      if (!endDate) {
+        setErrorMsg("Tanggal selesai pelaksanaan wajib diisi.");
+        return;
+      }
+      if (new Date(endDate) < new Date(startDate)) {
+        setErrorMsg("Tanggal selesai pelaksanaan tidak boleh lebih awal dari tanggal mulai.");
+        return;
+      }
+    }
+    setCurrentStep((prev) => Math.min(3, prev + 1));
+  };
+
   // Main Submit Handler (Draft vs Agreed vs Cancelled)
   const handleSubmit = async (chosenStatus: string) => {
     setErrorMsg(null);
@@ -447,8 +472,25 @@ export function CollaborationDetailFullPageView({
         setErrorMsg("Nilai anggaran yang disepakati wajib diisi sebelum mengesahkan MoU.");
         return;
       }
+      if (!startDate) {
+        setErrorMsg("Tanggal mulai pelaksanaan wajib diisi sebelum mengesahkan MoU.");
+        return;
+      }
+      if (!endDate) {
+        setErrorMsg("Tanggal selesai pelaksanaan wajib diisi sebelum mengesahkan MoU.");
+        return;
+      }
+      if (new Date(endDate) < new Date(startDate)) {
+        setErrorMsg("Tanggal selesai pelaksanaan tidak boleh lebih awal dari tanggal mulai.");
+        return;
+      }
       if (!mouDocumentUrl) {
         setErrorMsg("Unggah atau lampirkan berkas dokumen MoU sebelum melakukan pengesahan.");
+        return;
+      }
+    } else if (chosenStatus === "NEGOTIATION") {
+      if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+        setErrorMsg("Tanggal selesai pelaksanaan tidak boleh lebih awal dari tanggal mulai.");
         return;
       }
     }
@@ -663,7 +705,34 @@ export function CollaborationDetailFullPageView({
               <button
                 key={step.id}
                 type="button"
-                onClick={() => setCurrentStep(step.id)}
+                onClick={() => {
+                  if (step.id <= currentStep) {
+                    setErrorMsg(null);
+                    setCurrentStep(step.id);
+                  } else {
+                    if (currentStep === 1) {
+                      const budgetNum = finalBudget ? Number(finalBudget) : null;
+                      if (!budgetNum || budgetNum <= 0) {
+                        setErrorMsg("Nilai anggaran yang disepakati wajib diisi.");
+                        return;
+                      }
+                      if (!startDate) {
+                        setErrorMsg("Tanggal mulai pelaksanaan wajib diisi.");
+                        return;
+                      }
+                      if (!endDate) {
+                        setErrorMsg("Tanggal selesai pelaksanaan wajib diisi.");
+                        return;
+                      }
+                      if (new Date(endDate) < new Date(startDate)) {
+                        setErrorMsg("Tanggal selesai pelaksanaan tidak boleh lebih awal dari tanggal mulai.");
+                        return;
+                      }
+                    }
+                    setErrorMsg(null);
+                    setCurrentStep(step.id);
+                  }
+                }}
                 className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all cursor-pointer ${
                   isCurrent
                     ? "bg-[#181343]/5 border border-[#181343]/20 shadow-2xs"
@@ -814,7 +883,7 @@ export function CollaborationDetailFullPageView({
               {/* Field 3: Tanggal Mulai Pelaksanaan */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#181343] block">
-                  Tanggal Mulai Pelaksanaan
+                  Tanggal Mulai Pelaksanaan <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -822,7 +891,11 @@ export function CollaborationDetailFullPageView({
                     type="date"
                     disabled={isAgreed || isCancelled}
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    max={endDate || undefined}
+                    onChange={(e) => {
+                      setStartDate(e.target.value);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
                     className="w-full h-11 pl-10 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl text-[14px] text-[#181343] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:bg-white focus-visible:border-[#181343] focus-visible:ring-2 focus-visible:ring-[#181343]/15 transition-all font-medium disabled:opacity-75 disabled:cursor-not-allowed"
                   />
                 </div>
@@ -831,7 +904,7 @@ export function CollaborationDetailFullPageView({
               {/* Field 4: Tanggal Selesai Pelaksanaan */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-[13px] font-semibold text-[#181343] block">
-                  Tanggal Selesai Pelaksanaan
+                  Tanggal Selesai Pelaksanaan <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -839,7 +912,11 @@ export function CollaborationDetailFullPageView({
                     type="date"
                     disabled={isAgreed || isCancelled}
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    min={startDate || undefined}
+                    onChange={(e) => {
+                      setEndDate(e.target.value);
+                      if (errorMsg) setErrorMsg(null);
+                    }}
                     className="w-full h-11 pl-10 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl text-[14px] text-[#181343] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:bg-white focus-visible:border-[#181343] focus-visible:ring-2 focus-visible:ring-[#181343]/15 transition-all font-medium disabled:opacity-75 disabled:cursor-not-allowed"
                   />
                 </div>
@@ -1383,7 +1460,7 @@ export function CollaborationDetailFullPageView({
                 type="button"
                 variant="primary"
                 size="md"
-                onClick={() => setCurrentStep((prev) => Math.min(3, prev + 1))}
+                onClick={handleNextStep}
                 disabled={isSubmitting}
                 className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-6 py-2.5 shadow-2xs cursor-pointer inline-flex items-center justify-center gap-2"
               >

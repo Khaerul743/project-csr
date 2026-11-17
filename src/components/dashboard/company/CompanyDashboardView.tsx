@@ -1126,7 +1126,12 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                             { label: "Konsultasi Strategis" },
                                             { label: "AI CSR Advisor" },
                                           ]
-                                          : undefined
+                                          : activeMenu === "conversations"
+                                            ? [
+                                              { label: "Kolaborasi & Mitra" },
+                                              { label: "Pesan & Negosiasi" },
+                                            ]
+                                            : undefined
           }
           title={
             activeMenu === "opportunities" && isCreatingOpportunity
@@ -2413,9 +2418,28 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               <ConversationCenterView
                 userRole="CSR_ADMIN"
                 initialCollaborationId={activeCollaborationChatId}
-                onViewCollaborationDetails={(collabId) => {
-                  const found = collaborations.find((c) => c.id === collabId);
-                  if (found) setSelectedCollabForDetail(found);
+                onViewCollaborationDetails={async (collabId) => {
+                  let found = collaborations.find((c) => c.id === collabId);
+                  if (!found) {
+                    try {
+                      const token = localStorage.getItem("accessToken");
+                      if (token) {
+                        const res = await fetch(`/api/collaborations/${collabId}`, {
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        if (res.ok) {
+                          const json = await res.json();
+                          found = json.data?.data || json.data;
+                        }
+                      }
+                    } catch (err) {
+                      console.error("Gagal memuat detail kolaborasi:", err);
+                    }
+                  }
+                  if (found) {
+                    setSelectedCollabForDetail(found);
+                  }
+                  setActiveMenu("collaborations");
                 }}
               />
             </div>

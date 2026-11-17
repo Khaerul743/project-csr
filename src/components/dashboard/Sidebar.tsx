@@ -212,14 +212,14 @@ export function Sidebar({
             count: counts?.proposals,
           },
           {
-            id: "collaborations" as CompanyNavMenu,
-            label: "Kolaborasi & MoU",
-            icon: FileCheck2,
-          },
-          {
             id: "conversations" as CompanyNavMenu,
             label: "Pesan & Negosiasi",
             icon: MessageSquare,
+          },
+          {
+            id: "collaborations" as CompanyNavMenu,
+            label: "Kolaborasi & MoU",
+            icon: FileCheck2,
           },
         ],
       },

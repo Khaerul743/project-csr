@@ -110,14 +110,14 @@ export function PartnerSidebar({
           icon: FileText,
         },
         {
-          id: "collaborations",
-          label: "Kolaborasi Aktif",
-          icon: HeartHandshake,
-        },
-        {
           id: "conversations",
           label: "Pesan & Negosiasi",
           icon: MessageSquare,
+        },
+        {
+          id: "collaborations",
+          label: "Kolaborasi Aktif",
+          icon: HeartHandshake,
         },
       ],
     },

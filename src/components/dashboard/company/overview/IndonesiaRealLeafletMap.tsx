@@ -12,12 +12,16 @@ import {
 import { formatRupiah } from "../../analytics/helpers";
 
 export type BasemapType = "osm" | "satellite";
+export type ActiveDataLayer = "PROGRAM" | "OPPORTUNITY" | "PARTNER";
 
 interface IndonesiaRealLeafletMapProps {
   programs: CompanyProgramItem[];
   opportunities: OpportunityItem[];
   partners: PartnerItem[];
   selectedProvince: string | null;
+  isDetailOpen?: boolean;
+  activeLayer?: ActiveDataLayer;
+  onActiveLayerChange?: (layer: ActiveDataLayer) => void;
   onSelectProvince: (provName: string | null) => void;
   onNavigateToProgramDetail?: (prog: CompanyProgramItem) => void;
   onNavigateToOpportunityDetail?: (opp: OpportunityItem) => void;
@@ -39,6 +43,9 @@ export default function IndonesiaRealLeafletMap({
   opportunities,
   partners,
   selectedProvince,
+  isDetailOpen = false,
+  activeLayer: externalActiveLayer,
+  onActiveLayerChange,
   onSelectProvince,
   onNavigateToProgramDetail,
   onNavigateToOpportunityDetail,
@@ -49,11 +56,18 @@ export default function IndonesiaRealLeafletMap({
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
   const baseTileLayerRef = useRef<L.TileLayer | null>(null);
 
-  // Layer filters
-  const [showPrograms, setShowPrograms] = useState(true);
-  const [showOpportunities, setShowOpportunities] = useState(true);
-  const [showPartners, setShowPartners] = useState(false);
+  // Single-select active data layer (Controlled or Uncontrolled)
+  const [internalActiveLayer, setInternalActiveLayer] = useState<ActiveDataLayer>("PROGRAM");
+  const activeLayer = externalActiveLayer ?? internalActiveLayer;
+  const showPrograms = activeLayer === "PROGRAM";
+  const showOpportunities = activeLayer === "OPPORTUNITY";
+  const showPartners = activeLayer === "PARTNER";
   const [basemap, setBasemap] = useState<BasemapType>("osm");
+
+  const handleSelectLayer = (layer: ActiveDataLayer) => {
+    setInternalActiveLayer(layer);
+    onActiveLayerChange?.(layer);
+  };
 
   // Tile layer configurations (100% Free, No API Key, No Watermark)
   const getTileConfig = (type: BasemapType) => {
@@ -163,25 +177,25 @@ export default function IndonesiaRealLeafletMap({
       };
     });
 
-    // Aggregate Programs
+    // Aggregate Programs (match by province or deduce from targetCity / partnerCity)
     programs.forEach((p) => {
-      const provName = matchGeoProvinceName(p.targetProvince);
+      const provName = matchGeoProvinceName(p.targetProvince, p.targetCity || p.partnerCity);
       if (provName && provAggregates[provName]) {
         provAggregates[provName].programs.push(p);
       }
     });
 
-    // Aggregate Opportunities
+    // Aggregate Opportunities (match by province or deduce from targetCity)
     opportunities.forEach((o) => {
-      const provName = matchGeoProvinceName(o.targetProvince);
+      const provName = matchGeoProvinceName(o.targetProvince, o.targetCity);
       if (provName && provAggregates[provName]) {
         provAggregates[provName].opportunities.push(o);
       }
     });
 
-    // Aggregate Partners
+    // Aggregate Partners (match by province or deduce from city)
     partners.forEach((partner) => {
-      const provName = matchGeoProvinceName(partner.province);
+      const provName = matchGeoProvinceName(partner.province, partner.city);
       if (provName && provAggregates[provName]) {
         provAggregates[provName].partners.push(partner);
       }
@@ -198,41 +212,39 @@ export default function IndonesiaRealLeafletMap({
         (showOpportunities && hasOpportunities) ||
         (showPartners && hasPartners);
 
-      // A. Active Region with Data
+      // A. Active Region with Data (Clean, Precision GIS Marker without Emojis)
       if (shouldShow) {
         let primaryColor = "#10B981"; // default emerald
         let badgeCount = 0;
-        let badgeIcon = "📋";
 
         if (showPrograms && hasPrograms) {
-          primaryColor = FOCUS_COLORS[data.programs[0].focusArea]?.hex || "#10B981";
+          primaryColor = FOCUS_COLORS[data.programs[0]?.focusArea]?.hex || "#10B981";
           badgeCount = data.programs.length;
-          badgeIcon = "🌱";
         } else if (showOpportunities && hasOpportunities) {
           primaryColor = "#6366F1"; // indigo
           badgeCount = data.opportunities.length;
-          badgeIcon = "✨";
         } else if (showPartners && hasPartners) {
           primaryColor = "#F59E0B"; // amber
           badgeCount = data.partners.length;
-          badgeIcon = "🤝";
         }
 
         const isCurrentSelected = selectedProvince === provName;
 
-        // Custom HTML Marker Pin
+        // Custom HTML Marker Pin (Enterprise Grade - Crisp & Readable)
         const markerHtml = `
           <div class="relative group cursor-pointer select-none">
             ${
               isCurrentSelected
-                ? `<div class="absolute -inset-2 rounded-full animate-ping opacity-30" style="background-color: ${primaryColor};"></div>`
+                ? `<div class="absolute -inset-1.5 rounded-xl animate-ping opacity-30" style="background-color: ${primaryColor};"></div>`
                 : ""
             }
-            <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full shadow-lg border-2 text-white font-bold text-xs transition-transform transform group-hover:scale-110"
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-white shadow-md border transition-all duration-150 transform group-hover:-translate-y-0.5 group-hover:shadow-lg ${
+              isCurrentSelected ? "ring-2 ring-white/80" : ""
+            }"
                  style="background-color: #181343; border-color: ${primaryColor};">
-              <span class="text-sm">${badgeIcon}</span>
-              <span class="tracking-tight">${provName}</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[10px] font-black text-white" style="background-color: ${primaryColor};">
+              <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${primaryColor};"></span>
+              <span class="tracking-tight text-white font-semibold text-xs whitespace-nowrap">${provName}</span>
+              <span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold text-white tabular-nums leading-none" style="background-color: ${primaryColor};">
                 ${badgeCount}
               </span>
             </div>
@@ -242,8 +254,8 @@ export default function IndonesiaRealLeafletMap({
         const customIcon = L.divIcon({
           html: markerHtml,
           className: "custom-leaflet-marker",
-          iconSize: [120, 36],
-          iconAnchor: [60, 18],
+          iconSize: [140, 32],
+          iconAnchor: [70, 16],
         });
 
         const marker = L.marker([data.coord.lat, data.coord.lng], {
@@ -381,12 +393,19 @@ export default function IndonesiaRealLeafletMap({
 
         layer.addLayer(marker);
       } else {
+        const unreachedLabel =
+          activeLayer === "PROGRAM"
+            ? "Belum Ada Program"
+            : activeLayer === "OPPORTUNITY"
+            ? "Belum Ada Peluang"
+            : "Belum Ada Mitra";
+
         // B. Unreached Province: Subtle clickable dot
         const unreachedHtml = `
           <div class="group relative cursor-pointer flex items-center justify-center">
-            <div class="w-3.5 h-3.5 rounded-full bg-slate-400/80 border-2 border-white shadow hover:scale-125 transition"></div>
-            <div class="absolute bottom-5 hidden group-hover:block bg-[#181343] text-white text-[10px] font-bold px-2 py-1 rounded shadow-md whitespace-nowrap z-50">
-              ${provName} (Belum Ada Program)
+            <div class="w-2.5 h-2.5 rounded-full bg-slate-300 border-2 border-white shadow-2xs hover:bg-slate-600 hover:scale-125 transition-all"></div>
+            <div class="absolute bottom-4 hidden group-hover:block bg-[#181343] text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-md whitespace-nowrap z-50">
+              ${provName} (${unreachedLabel})
             </div>
           </div>
         `;
@@ -394,8 +413,8 @@ export default function IndonesiaRealLeafletMap({
         const unreachedIcon = L.divIcon({
           html: unreachedHtml,
           className: "custom-unreached-marker",
-          iconSize: [16, 16],
-          iconAnchor: [8, 8],
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
         });
 
         const unreachedMarker = L.marker([data.coord.lat, data.coord.lng], {
@@ -403,30 +422,42 @@ export default function IndonesiaRealLeafletMap({
           zIndexOffset: 10,
         });
 
-        // Unreached Popup with Direct Call to Action
+        // Unreached Popup with Clean Call to Action (Anti-Slop, No Emojis)
         const unreachedPopupDiv = document.createElement("div");
         unreachedPopupDiv.className = "p-4 space-y-3 min-w-[240px] text-slate-800 text-xs";
         unreachedPopupDiv.innerHTML = `
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Wilayah Sasaran Baru</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              ${
+                activeLayer === "PROGRAM"
+                  ? "Wilayah Sasaran Baru"
+                  : activeLayer === "OPPORTUNITY"
+                  ? "Peluang Wilayah"
+                  : "Jaringan Kemitraan"
+              }
+            </span>
             <h4 class="text-sm font-extrabold text-[#181343] mt-0.5">${provName}</h4>
             <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
-              Perusahaan Anda belum menjalankan program CSR di wilayah ini.
+              ${
+                activeLayer === "PROGRAM"
+                  ? "Perusahaan belum menjalankan inisiatif program CSR di wilayah ini."
+                  : activeLayer === "OPPORTUNITY"
+                  ? "Belum ada peluang terbuka untuk inisiatif CSR di wilayah ini."
+                  : "Belum ada mitra pelaksana resmi yang terdaftar di wilayah ini."
+              }
             </p>
           </div>
-          <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 space-y-1">
-            <div class="font-bold flex items-center gap-1.5 text-xs">
-              <span>✨ Potensi Ekspansi CSR</span>
-            </div>
-            <p class="text-[11px] text-emerald-700 leading-snug">
-              Buat peluang CSR baru untuk menjangkau masyarakat di ${provName}.
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 space-y-1">
+            <div class="font-bold text-xs text-[#181343]">Peluang Kemitraan Baru</div>
+            <p class="text-[11px] text-slate-500 leading-snug">
+              Buka peluang kemitraan CSR untuk menjangkau masyarakat di ${provName}.
             </p>
           </div>
           ${
             onOpenCreateOpportunity
               ? `
             <button id="btn-create-opp-${provName.replace(/\s+/g, "-")}"
-                    class="w-full py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm">
+                    class="w-full py-2 px-3 rounded-xl bg-[#181343] hover:bg-[#25205c] text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
@@ -460,9 +491,7 @@ export default function IndonesiaRealLeafletMap({
     programs,
     opportunities,
     partners,
-    showPrograms,
-    showOpportunities,
-    showPartners,
+    activeLayer,
     selectedProvince,
     onSelectProvince,
     onOpenCreateOpportunity,
@@ -489,119 +518,179 @@ export default function IndonesiaRealLeafletMap({
   };
 
   return (
-    <div className="relative w-full h-[450px] sm:h-[500px] rounded-2xl overflow-hidden border border-[#E8E8EA] bg-slate-100 shadow-inner">
-      {/* Map Target Div */}
-      <div ref={mapContainerRef} className="w-full h-full z-0" />
-
-      {/* Top Floating Toolbar: Layer Toggles & Basemap Switcher */}
-      <div className="absolute top-3 left-3 right-3 z-[400] flex flex-wrap items-center justify-between gap-2 pointer-events-none">
-        {/* Layer Filters (Interactive Pill Group) */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/95 backdrop-blur-md border border-[#E8E8EA] shadow-md pointer-events-auto">
-          <span className="text-[11px] font-bold text-slate-400 px-2 flex items-center gap-1">
-            <Layers className="w-3.5 h-3.5" />
-            <span>Layer:</span>
-          </span>
-
-          {/* Program Toggle */}
-          <button
-            type="button"
-            onClick={() => setShowPrograms((prev) => !prev)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              showPrograms
-                ? "bg-emerald-600 text-white shadow-2xs"
-                : "bg-slate-50 text-slate-500 hover:bg-slate-100"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-white shrink-0" />
-            <span>Program ({programs.length})</span>
-          </button>
-
-          {/* Opportunities Toggle */}
-          <button
-            type="button"
-            onClick={() => setShowOpportunities((prev) => !prev)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              showOpportunities
-                ? "bg-indigo-600 text-white shadow-2xs"
-                : "bg-slate-50 text-slate-500 hover:bg-slate-100"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-white shrink-0" />
-            <span>Peluang ({opportunities.length})</span>
-          </button>
-
-          {/* Partners Toggle */}
-          <button
-            type="button"
-            onClick={() => setShowPartners((prev) => !prev)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-              showPartners
-                ? "bg-amber-600 text-white shadow-2xs"
-                : "bg-slate-50 text-slate-500 hover:bg-slate-100"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-white shrink-0" />
-            <span>Mitra ({partners.length})</span>
-          </button>
-        </div>
-
-        {/* Right Tools: Basemap Switcher & Reset Button */}
-        <div className="flex items-center gap-1.5 pointer-events-auto">
-          {/* Basemap Selection */}
-          <div className="flex items-center p-1 rounded-xl bg-white/95 backdrop-blur-md border border-[#E8E8EA] shadow-md text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setBasemap("osm")}
-              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
-                basemap === "osm"
-                  ? "bg-[#181343] text-white font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Peta Standar
-            </button>
-            <button
-              type="button"
-              onClick={() => setBasemap("satellite")}
-              className={`px-2.5 py-1 rounded-lg transition cursor-pointer ${
-                basemap === "satellite"
-                  ? "bg-[#181343] text-white font-bold"
-                  : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              Satelit
-            </button>
+    <div className="space-y-3">
+      {/* Dedicated Map Control Bar (Grounded, Clean, Responsive to Detail Panel) */}
+      <div
+        className={`p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs ${
+          isDetailOpen
+            ? "space-y-2.5"
+            : "flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        }`}
+      >
+        {/* Header Row: Label on Left, Map Type & Reset on Right (when detail is open) */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-slate-400" />
+            <span className="text-xs font-semibold text-slate-500">Lapisan Data:</span>
           </div>
 
-          {/* Reset View Button */}
+          {/* When detail is open, show Basemap & Reset on the right of Row 1 */}
+          {isDetailOpen && (
+            <div className="flex items-center gap-2">
+              <div className="flex items-center p-0.5 rounded-xl bg-slate-200/70 border border-slate-300/60 text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => setBasemap("osm")}
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                    basemap === "osm"
+                      ? "bg-white text-[#181343] font-bold shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Peta Standar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBasemap("satellite")}
+                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                    basemap === "satellite"
+                      ? "bg-white text-[#181343] font-bold shadow-2xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  Satelit
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleResetView}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-semibold transition-all cursor-pointer shadow-2xs text-xs"
+                title="Reset ke Tampilan Seluruh Indonesia"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                <span className="hidden sm:inline">Reset Posisi</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Layer Selection (Single Choice / Clean Tabs without Top Badge) */}
+        <div className={`flex items-center gap-2 flex-wrap ${isDetailOpen ? "pt-0.5" : ""}`}>
+          {/* Program Option */}
           <button
             type="button"
-            onClick={handleResetView}
-            className="p-2 rounded-xl bg-white/95 backdrop-blur-md border border-[#E8E8EA] shadow-md hover:bg-slate-50 text-slate-700 transition cursor-pointer"
-            title="Reset ke Tampilan Seluruh Indonesia"
+            onClick={() => handleSelectLayer("PROGRAM")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeLayer === "PROGRAM"
+                ? "bg-[#181343] text-white shadow-2xs"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+            }`}
           >
-            <RotateCcw className="w-4 h-4" />
+            <span className={`w-2 h-2 rounded-full ${activeLayer === "PROGRAM" ? "bg-emerald-400" : "bg-slate-300"}`} />
+            <span>Program</span>
+          </button>
+
+          {/* Opportunities Option */}
+          <button
+            type="button"
+            onClick={() => handleSelectLayer("OPPORTUNITY")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeLayer === "OPPORTUNITY"
+                ? "bg-[#181343] text-white shadow-2xs"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${activeLayer === "OPPORTUNITY" ? "bg-indigo-400" : "bg-slate-300"}`} />
+            <span>Peluang</span>
+          </button>
+
+          {/* Partners Option */}
+          <button
+            type="button"
+            onClick={() => handleSelectLayer("PARTNER")}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+              activeLayer === "PARTNER"
+                ? "bg-[#181343] text-white shadow-2xs"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${activeLayer === "PARTNER" ? "bg-amber-400" : "bg-slate-300"}`} />
+            <span>Mitra</span>
           </button>
         </div>
+
+        {/* When detail is NOT open, show Basemap & Reset on the right of the single horizontal row */}
+        {!isDetailOpen && (
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* Basemap Selection */}
+            <div className="flex items-center p-0.5 rounded-xl bg-slate-200/70 border border-slate-300/60 text-xs font-medium">
+              <button
+                type="button"
+                onClick={() => setBasemap("osm")}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  basemap === "osm"
+                    ? "bg-white text-[#181343] font-bold shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Peta Standar
+              </button>
+              <button
+                type="button"
+                onClick={() => setBasemap("satellite")}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  basemap === "satellite"
+                    ? "bg-white text-[#181343] font-bold shadow-2xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Satelit
+              </button>
+            </div>
+
+            {/* Reset View Button */}
+            <button
+              type="button"
+              onClick={handleResetView}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-semibold transition-all cursor-pointer shadow-2xs text-xs"
+              title="Reset ke Tampilan Seluruh Indonesia"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+              <span className="hidden sm:inline">Reset Posisi</span>
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Bottom Floating Legend Bar */}
-      <div className="absolute bottom-3 left-3 z-[400] hidden sm:flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/90 backdrop-blur-md border border-[#E8E8EA] shadow-sm text-[11px] text-slate-600">
-        <div className="flex items-center gap-1.5 font-medium">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-          <span>Program CSR</span>
-        </div>
-        <div className="flex items-center gap-1.5 font-medium">
-          <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
-          <span>Peluang Terbuka</span>
-        </div>
-        <div className="flex items-center gap-1.5 font-medium">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-          <span>Mitra Lokal</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-slate-400">
-          <span className="w-2 h-2 rounded-full bg-slate-400" />
-          <span>Belum Ada Program</span>
+      {/* Map Target Canvas Container */}
+      <div className="relative w-full h-[480px] sm:h-[530px] rounded-2xl overflow-hidden border border-[#E8E8EA] bg-slate-100 shadow-2xs">
+        <div ref={mapContainerRef} className="w-full h-full z-0" />
+
+        {/* Minimal Grounded Legend in Bottom-Left with Layer Counts */}
+        <div className="absolute bottom-3 left-3 z-[400] hidden sm:flex items-center gap-3 px-3.5 py-2 rounded-xl bg-white/95 border border-slate-200/80 shadow-2xs text-[11px] text-slate-600 select-none">
+          {activeLayer === "PROGRAM" && (
+            <div className="flex items-center gap-2 font-medium text-slate-800">
+              <span className="w-2 h-2 rounded-full bg-[#10B981]" />
+              <span>Program CSR ({programs.length})</span>
+            </div>
+          )}
+          {activeLayer === "OPPORTUNITY" && (
+            <div className="flex items-center gap-2 font-medium text-slate-800">
+              <span className="w-2 h-2 rounded-full bg-[#6366F1]" />
+              <span>Peluang Terbuka ({opportunities.length})</span>
+            </div>
+          )}
+          {activeLayer === "PARTNER" && (
+            <div className="flex items-center gap-2 font-medium text-slate-800">
+              <span className="w-2 h-2 rounded-full bg-[#F59E0B]" />
+              <span>Mitra Lokal ({partners.length})</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-300" />
+            <span>Wilayah Lainnya</span>
+          </div>
         </div>
       </div>
     </div>

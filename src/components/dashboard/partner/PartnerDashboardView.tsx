@@ -3215,12 +3215,28 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
           <ConversationCenterView
             userRole="PARTNER_ADMIN"
             initialCollaborationId={activeCollaborationChatId}
-            onViewCollaborationDetails={(collabId) => {
-              const found = collaborations.find((c) => c.id === collabId);
+            onViewCollaborationDetails={async (collabId) => {
+              let found = collaborations.find((c) => c.id === collabId);
+              if (!found) {
+                try {
+                  const token = localStorage.getItem("accessToken");
+                  if (token) {
+                    const res = await fetch(`/api/collaborations/${collabId}`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                      const json = await res.json();
+                      found = json.data?.data || json.data;
+                    }
+                  }
+                } catch (err) {
+                  console.error("Gagal memuat detail kolaborasi:", err);
+                }
+              }
               if (found) {
                 setSelectedCollabForDetail(found);
-                setActiveMenu("collaborations");
               }
+              setActiveMenu("collaborations");
             }}
           />
         </div>

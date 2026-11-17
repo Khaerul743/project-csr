@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpDown,
   MapPin,
   Calendar,
   AlertCircle,
@@ -22,6 +23,7 @@ import {
   Sparkles,
   FileText,
   RotateCcw,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -1044,14 +1046,14 @@ export function OpportunityFormPageView({
 
       {/* Banner Informasi Draf Otomatis AI Advisor */}
       {!isEdit && initialDraft && (
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200/80 text-xs text-emerald-950 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
-          <div className="w-8 h-8 rounded-xl bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
-            <Sparkles className="w-4 h-4" />
+        <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
+          <div className="w-8 h-8 rounded-lg bg-[#181343] text-white flex items-center justify-center shrink-0 mt-0.5">
+            <FileText className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="font-bold text-xs sm:text-sm text-[#181343] flex items-center gap-1.5 flex-wrap">
-              <span>Draf Program Otomatis dari AI CSR Advisor Diterapkan</span>
-              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+              <span>Draf Inisiatif dari Analisis Prioritas Wilayah</span>
+              <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[10px] font-bold">
                 {targetProvince || initialDraft.targetProvince || "Wilayah Terpilih"}
               </span>
             </h4>
@@ -1271,7 +1273,7 @@ export function OpportunityFormPageView({
                     Sasaran SDGs &amp; Pemetaan Pilar ESG
                   </h3>
                   <p className="text-xs text-[#64748B]">
-                    Sasaran SDGs ditentukan otomatis oleh asisten AI. Sistem memetakan pilar ESG secara instan.
+                    Tentukan sasaran SDGs yang relevan dengan inisiatif. Sistem memetakan pilar ESG secara terintegrasi.
                   </p>
                 </div>
               </div>
@@ -1280,22 +1282,17 @@ export function OpportunityFormPageView({
               </Badge>
             </div>
 
-            {/* AI Recommendation Banner / Card */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-slate-50 border border-emerald-200/80 shadow-2xs space-y-3">
+            {/* Recommendation Banner / Card */}
+            <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#009E75] text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <Sparkles className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-[#181343]/5 text-[#181343] flex items-center justify-center shrink-0">
+                    <Target className="w-4 h-4 text-[#181343]" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#181343]">
-                        Rekomendasi Cerdas AI Sasaran SDGs
-                      </span>
-                      <Badge variant="emerald" size="sm" className="text-[10px] py-0 px-2 font-bold">
-                        AI Assistant
-                      </Badge>
-                    </div>
+                    <h4 className="text-xs font-bold text-[#181343]">
+                      Rekomendasi Sasaran SDGs
+                    </h4>
                     <p className="text-[11px] text-slate-500">
                       Dianalisis otomatis dari judul inisiatif, bidang fokus, dan uraian ruang lingkup program.
                     </p>
@@ -1306,34 +1303,34 @@ export function OpportunityFormPageView({
                   type="button"
                   onClick={() => handleRecommendSdgs()}
                   disabled={isAnalyzingSdgs}
-                  className="self-start sm:self-auto px-3 py-1.5 rounded-lg border border-emerald-300 hover:border-emerald-400 bg-white hover:bg-emerald-50 text-emerald-800 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-50"
+                  className="self-start sm:self-auto px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-50"
                 >
                   {isAnalyzingSdgs ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" />
                       <span>Menganalisis...</span>
                     </>
                   ) : (
                     <>
-                      <RotateCcw className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Analisis Ulang AI</span>
+                      <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Analisis Ulang</span>
                     </>
                   )}
                 </button>
               </div>
 
               {isAnalyzingSdgs ? (
-                <div className="p-3.5 rounded-xl bg-white/80 border border-emerald-100 flex items-center gap-2.5 text-xs text-slate-600 animate-pulse">
-                  <Loader2 className="w-4 h-4 animate-spin text-emerald-600 shrink-0" />
-                  <span>AI sedang memetakan sasaran SDGs paling relevan dari inisiatif Anda...</span>
+                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2.5 text-xs text-slate-600 animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-slate-500 shrink-0" />
+                  <span>Sistem sedang memetakan sasaran SDGs paling relevan dari inisiatif Anda...</span>
                 </div>
               ) : aiSdgResult ? (
-                <div className="p-3.5 rounded-xl bg-white/95 border border-emerald-100/90 space-y-2.5">
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                <div className="p-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 space-y-2.5">
+                  <p className="text-xs text-slate-700 leading-relaxed font-normal">
                     {aiSdgResult.conciseRationale}
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                    <span className="text-[11px] font-semibold text-slate-500 mr-1">Rekomendasi Utama:</span>
+                    <span className="text-[11px] font-semibold text-slate-500 mr-1">Rekomendasi Teratas:</span>
                     {aiSdgResult.recommendedSdgs.map((sdgId) => {
                       const goal = ALL_17_SDGS.find((g) => g.id === sdgId);
                       if (!goal) return null;
@@ -1345,12 +1342,7 @@ export function OpportunityFormPageView({
                       return (
                         <span
                           key={sdgId}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-2xs"
-                          style={{
-                            backgroundColor: `${goal.color}15`,
-                            borderColor: `${goal.color}40`,
-                            color: goal.color,
-                          }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-white border border-slate-200 text-slate-800 shadow-2xs"
                         >
                           <span
                             className="w-2 h-2 rounded-full shrink-0"
@@ -1358,12 +1350,12 @@ export function OpportunityFormPageView({
                           />
                           <span>{goal.code}: {goal.name}</span>
                           {prob !== undefined && (
-                            <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-white/90 border border-slate-200 text-slate-800 shadow-2xs">
-                              {prob}%
+                            <span className="text-[10px] font-bold text-slate-600">
+                              ({prob}%)
                             </span>
                           )}
                           {isPrimary && (
-                            <span className="ml-0.5 text-[9px] bg-[#181343] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                            <span className="ml-0.5 text-[9px] bg-[#181343] text-white px-1.5 py-0.2 rounded font-bold uppercase tracking-wider">
                               Utama
                             </span>
                           )}
@@ -1373,8 +1365,8 @@ export function OpportunityFormPageView({
                   </div>
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-white/70 border border-emerald-100 text-[11px] text-slate-500 flex items-center justify-between">
-                  <span>Klik tombol <b>Analisis Ulang AI</b> di atas untuk menjalankan deteksi otomatis sasaran SDGs kapan saja.</span>
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-500 flex items-center justify-between">
+                  <span>Klik tombol <b>Analisis Ulang</b> di atas untuk menjalankan deteksi otomatis sasaran SDGs kapan saja.</span>
                 </div>
               )}
             </div>
@@ -1387,7 +1379,7 @@ export function OpportunityFormPageView({
                     Pilih Sasaran SDGs yang Ditargetkan:
                   </span>
                   <span className="text-[11px] text-slate-500">
-                    Nilai persentase menunjukkan probabilitas dan kedekatan relevansi sasaran SDG dengan inisiatif Anda.
+                    Nilai persentase menunjukkan kedekatan relevansi sasaran SDG dengan inisiatif Anda.
                   </span>
                 </div>
 
@@ -1409,18 +1401,18 @@ export function OpportunityFormPageView({
                       onClick={() => setSdgSortMode("relevance")}
                       className={`px-2.5 py-1 rounded-md transition flex items-center gap-1 cursor-pointer ${
                         sdgSortMode === "relevance"
-                          ? "bg-white text-emerald-800 font-bold shadow-2xs"
+                          ? "bg-white text-[#181343] font-bold shadow-2xs"
                           : "hover:text-slate-900"
                       }`}
                     >
-                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <ArrowUpDown className="w-3 h-3 text-slate-500" />
                       <span>Relevansi Tertinggi</span>
                     </button>
                   </div>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
                 {displaySdgs.map((sdg) => {
                   const isChecked = selectedSdgs.includes(sdg.id);
                   const prob =
@@ -1433,100 +1425,72 @@ export function OpportunityFormPageView({
                       key={sdg.id}
                       type="button"
                       onClick={() => toggleSdg(sdg.id)}
-                      className={`p-3.5 rounded-xl text-left transition-all duration-200 border flex flex-col justify-between gap-2.5 cursor-pointer ${
+                      className={`p-3 rounded-xl text-left transition-all duration-150 border flex items-center justify-between gap-2.5 cursor-pointer ${
                         isChecked
-                          ? "bg-[#EDF9F3] border-[#35B98E] text-[#181343] shadow-2xs ring-1 ring-[#35B98E]/25"
+                          ? "bg-emerald-50/60 border-[#35B98E] text-[#181343] shadow-2xs ring-1 ring-[#35B98E]/30"
                           : prob !== undefined && prob >= 20
-                          ? "bg-white hover:bg-slate-50 border-emerald-300/80 text-[#181343] shadow-2xs"
-                          : "bg-[#F9F9FB] hover:bg-slate-100/80 border-[#E5E7EB] text-[#181343]"
+                          ? "bg-white hover:bg-slate-50 border-slate-300 text-[#181343] shadow-2xs"
+                          : "bg-white hover:bg-slate-50/80 border-slate-200 text-[#181343]"
                       }`}
                     >
-                      <div className="w-full flex items-start gap-2.5">
-                        <div
-                          className="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5"
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: sdg.color }}
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="font-bold text-xs text-[#181343] flex items-center justify-between gap-1.5">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span>{sdg.code}</span>
-                              {isPrimary && (
-                                <span className="text-[9px] bg-[#181343] text-white px-1.5 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
-                                  Utama
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {prob !== undefined ? (
-                                <span
-                                  className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold tracking-tight ${
-                                    prob >= 20
-                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                                      : prob >= 10
-                                      ? "bg-teal-50 text-teal-700 border border-teal-200"
-                                      : prob >= 4
-                                      ? "bg-slate-100 text-slate-700 border border-slate-200"
-                                      : "bg-slate-50 text-slate-400 border border-slate-100"
-                                  }`}
-                                >
-                                  {prob}%
-                                </span>
-                              ) : isAnalyzingSdgs ? (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 font-semibold animate-pulse">
-                                  ...%
-                                </span>
-                              ) : null}
-
-                              {isChecked && (
-                                <Check className="w-3.5 h-3.5 text-[#009E75] shrink-0" />
-                              )}
-                            </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-[#181343]">
+                              {sdg.code}
+                            </span>
+                            {isPrimary && (
+                              <span className="text-[9px] bg-[#181343] text-white px-1.5 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
+                                Utama
+                              </span>
+                            )}
                           </div>
-
-                          <span
-                            className={`text-[11px] line-clamp-1 block mt-0.5 ${
-                              isChecked ? "text-[#181343]/85 font-medium" : "text-[#787680]"
+                          <p
+                            className={`text-[11px] truncate mt-0.5 ${
+                              isChecked ? "text-slate-900 font-medium" : "text-slate-500"
                             }`}
+                            title={sdg.name}
                           >
                             {sdg.name}
-                          </span>
+                          </p>
                         </div>
                       </div>
 
-                      {/* Visual Probability Bar & Label */}
-                      {prob !== undefined ? (
-                        <div className="w-full pt-1.5 border-t border-slate-200/50 space-y-1">
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all duration-700 ease-out"
-                              style={{
-                                width: `${Math.max(prob, prob > 0 ? 4 : 0)}%`,
-                                backgroundColor: prob >= 10 ? sdg.color : "#94A3B8",
-                              }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
-                            <span>Kedekatan Relevansi</span>
-                            <span
-                              className={`font-bold ${
-                                prob >= 20
-                                  ? "text-emerald-700"
-                                  : prob >= 10
-                                  ? "text-teal-700"
-                                  : "text-slate-500"
-                              }`}
-                            >
-                              {prob}%
-                            </span>
-                          </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {prob !== undefined ? (
+                          <span
+                            className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${
+                              prob >= 20
+                                ? "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300/60"
+                                : prob >= 10
+                                ? "bg-teal-50 text-teal-700 font-semibold border border-teal-200/60"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            {prob}%
+                          </span>
+                        ) : isAnalyzingSdgs ? (
+                          <span className="text-[11px] text-slate-400 animate-pulse">
+                            ...
+                          </span>
+                        ) : null}
+
+                        <div
+                          className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors ${
+                            isChecked
+                              ? "bg-[#009E75] text-white"
+                              : "border border-slate-300 bg-white"
+                          }`}
+                        >
+                          {isChecked && (
+                            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                          )}
                         </div>
-                      ) : isAnalyzingSdgs ? (
-                        <div className="w-full pt-1.5 border-t border-slate-200/50 space-y-1 animate-pulse">
-                          <div className="w-full h-1.5 bg-slate-100 rounded-full" />
-                          <div className="h-2.5 bg-slate-100 rounded w-16" />
-                        </div>
-                      ) : null}
+                      </div>
                     </button>
                   );
                 })}

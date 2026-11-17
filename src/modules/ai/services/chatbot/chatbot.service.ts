@@ -326,13 +326,13 @@ export class ChatbotService {
       const card = this.buildSurveyRecommendationCard(doc);
 
       const reply =
-        `Saya telah selesai membaca dan menganalisis berkas survei wilayah **${doc.fileName}** (${(
+        `Saya telah selesai membaca dan menganalisis berkas dokumen **${doc.fileName}** (${(
           doc.fileSize / 1024
         ).toFixed(1)} KB).\n\n` +
-        `### 📌 Rangkuman Eksekutif Asesmen Wilayah:\n` +
+        `### 📌 Rangkuman Eksekutif Telaah Dokumen:\n` +
         `- **Wilayah Terdeteksi**: Provinsi **${prov}**\n` +
         `- **Fokus Isu Utama**: ${doc.detectedFocusAreas?.join(", ") || "Pemberdayaan Ekonomi & Kesejahteraan Sosial"}\n` +
-        `- **Poin Kunci**: Dokumen survei menggarisbawahi kebutuhan mendesak masyarakat lokal terkait peningkatan taraf hidup, intervensi fasilitas dasar, serta penguatan kapasitas kemandirian warga desa binaan.\n\n` +
+        `- **Poin Kunci**: Dokumen menggarisbawahi kebutuhan mendesak masyarakat lokal terkait peningkatan taraf hidup, intervensi fasilitas dasar, serta penguatan kapasitas kemandirian warga desa binaan.\n\n` +
         `### 💡 Rekomendasi Inisiatif Program CSR Strategis:\n` +
         card.recommendations
           .map(
@@ -343,7 +343,7 @@ export class ChatbotService {
               `   - 📊 **Target Penerima Manfaat**: Estimasi 150 - 300 warga rentan penerima manfaat langsung di wilayah ${prov}.`
           )
           .join("\n\n") +
-        `\n\n💡 **Langkah Aksi**: Anda dapat langsung menerbitkan rekomendasi inisiatif di atas menjadi draf **Peluang CSR Baru** dengan menekan tombol **"Buat Peluang CSR Berdasarkan Survei Ini"** pada kartu di bawah!`;
+        `\n\n💡 **Langkah Aksi**: Anda dapat langsung menerbitkan rekomendasi inisiatif di atas menjadi draf **Peluang CSR Baru** dengan menekan tombol **"Buat Peluang CSR Berdasarkan Rekomendasi Ini"** pada kartu di bawah!`;
 
       return {
         reply,
@@ -540,9 +540,9 @@ export class ChatbotService {
    - **Tahap 3: Evaluasi & Exit Strategy** (Pengukuran SROI, serah terima mandiri ke komunitas).
 
 4. **Alokasi Anggaran Proporsional (RAB)**:
-   - Belanja modal & fasilitas fisik: 50–60%
-   - Pelatihan & operasional pendampingan: 25–35%
-   - Monitoring & evaluasi: 10–15%
+   - Belanja modal & fasilitas fisik: 50-60%
+   - Pelatihan & operasional pendampingan: 25-35%
+   - Monitoring & evaluasi: 10-15%
 
 Ceritakan tema atau topik apa yang ingin Anda rancang (misalnya: *Pengelolaan Sampah Pesisir*, *Beasiswa Vokasi*, atau *Pemberdayaan UMKM Perempuan*), dan saya akan buatkan draf detailnya!`,
         suggestedPrompts: this.generateSuggestedPrompts(authUser.role),
@@ -551,7 +551,7 @@ Ceritakan tema atau topik apa yang ingin Anda rancang (misalnya: *Pengelolaan Sa
 
     // Default Greeting & Assistance
     return {
-      reply: `Halo **${userOrgInfo.userName}**! Saya adalah **SIPENA AI Advisor** — asisten cerdas Anda dalam pengelolaan program dan kolaborasi CSR.
+      reply: `Halo **${userOrgInfo.userName}**! Saya adalah **SIPENA AI Advisor**, asisten cerdas Anda dalam pengelolaan program dan kolaborasi CSR.
 
 Beberapa hal yang dapat saya bantu:
 ${
