@@ -231,6 +231,72 @@ export class ChatbotService {
     const lower = lastUserMessage.toLowerCase();
     const isPartner = authUser.role === "PARTNER_ADMIN";
 
+    // Scenario: Ekspansi Geografis Wilayah Belum Terjangkau (Perusahaan)
+    if (
+      !isPartner &&
+      (lower.includes("wilayah") ||
+        lower.includes("jangkau") ||
+        lower.includes("ekspansi") ||
+        lower.includes("provinsi") ||
+        lower.includes("daerah baru") ||
+        lower.includes("peta"))
+    ) {
+      const geoTool = toolsMap.get("getCompanyGeographicFootprint");
+      if (geoTool && authUser.companyId) {
+        try {
+          const raw = await geoTool.invoke({});
+          const parsed = JSON.parse(raw);
+          if (parsed.topUnreachedTerritoriesRecommendations) {
+            const items = parsed.topUnreachedTerritoriesRecommendations;
+            const recSummary = items
+              .map(
+                (item: any, idx: number) =>
+                  `${idx + 1}. **${item.province}** (${item.islandGroup})\n` +
+                  `   - 💡 **Usulan Program**: *${item.proposedInitiativeTitle}* (\`${item.suggestedFocusArea}\`)\n` +
+                  `   - 🎯 **Urgensi Isu**: ${item.dominantSocialNeed}\n` +
+                  `   - 🌐 **Sasaran SDGs**: ${item.relevantSdgs.join(", ")}\n` +
+                  `   - 🤝 **Mitra Terverifikasi**: ${
+                    item.registeredLocalPartnersCount > 0
+                      ? item.readyPartnerNames.join(", ")
+                      : "Dapat mempublikasikan peluang untuk mengundang mitra lokal"
+                  }`
+              )
+              .join("\n\n");
+
+            return {
+              reply:
+                `Berdasarkan data sebaran geografis platform SIPENA, portofolio program CSR perusahaan Anda saat ini telah menjangkau **${parsed.nationalCoverage.coveredCount} dari ${parsed.nationalCoverage.totalProvinces} provinsi** di Indonesia.\n\n` +
+                `Masih terdapat **${parsed.nationalCoverage.unreachedCount} provinsi** yang belum pernah dijangkau. Berikut adalah rekomendasi wilayah prioritas ekspansi program CSR yang paling potensial:\n\n` +
+                recSummary +
+                `\n\n💡 **Langkah Aksi**: Anda dapat langsung membuat inisiatif peluang CSR baru untuk provinsi tersebut melalui kartu interaktif di bawah ini. Kolom wilayah sasaran akan otomatis terisi!`,
+              cards: [
+                {
+                  type: "TERRITORY_EXPANSION",
+                  companyName: parsed.companyName,
+                  coveredCount: parsed.nationalCoverage.coveredCount,
+                  totalNational: parsed.nationalCoverage.totalProvinces,
+                  unreachedCount: parsed.nationalCoverage.unreachedCount,
+                  recommendations: items.map((it: any) => ({
+                    province: it.province,
+                    island: it.islandGroup,
+                    urgencyTopic: it.dominantSocialNeed,
+                    proposedProgramTitle: it.proposedInitiativeTitle,
+                    focusArea: it.suggestedFocusArea,
+                    sdgs: it.relevantSdgs,
+                    verifiedPartnersCount: it.registeredLocalPartnersCount,
+                    samplePartners: it.readyPartnerNames,
+                  })),
+                },
+              ],
+              suggestedPrompts: this.generateSuggestedPrompts(authUser.role),
+            };
+          }
+        } catch (err: any) {
+          this.logger.warn(`Fallback geo tool execution failed: ${err.message}`);
+        }
+      }
+    }
+
     // Scenario 1: Cari / Rekomendasi Peluang CSR
     if (lower.includes("peluang") || lower.includes("opportunity") || lower.includes("cari") || lower.includes("rekomendasi")) {
       const searchTool = toolsMap.get("searchOpportunities");
@@ -391,10 +457,10 @@ Silakan ketik pertanyaan Anda atau pilih salah satu topik cepat di bawah!`,
     }
 
     return [
+      "Rekomendasikan ekspansi wilayah program CSR baru",
       "Berapa total serapan anggaran program CSR yang aktif?",
       "Ide program CSR ramah lingkungan selaras SDG 13 & 15",
       "Bagaimana progres capaian penerima manfaat program kami?",
-      "Panduan indikator keberlanjutan dan pilar ESG",
     ];
   }
 }

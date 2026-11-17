@@ -18,6 +18,10 @@ import {
   ChevronRight,
   RotateCcw,
   AlertCircle,
+  MapPin,
+  Plus,
+  Users,
+  Globe,
 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { isAiFeatureEnabled } from "@/common/config/ai-feature-flag";
@@ -40,6 +44,7 @@ interface ChatbotViewProps {
   userName: string;
   organizationName?: string;
   onNavigate?: (menu: string) => void;
+  onOpenCreateOpportunity?: (provinceName?: string) => void;
 }
 
 export function ChatbotView({
@@ -47,6 +52,7 @@ export function ChatbotView({
   userName,
   organizationName,
   onNavigate,
+  onOpenCreateOpportunity,
 }: ChatbotViewProps) {
   const isPartner = role === "PARTNER_ADMIN";
   const aiEnabled = isAiFeatureEnabled();
@@ -97,6 +103,12 @@ export function ChatbotView({
       ]
     : [
         {
+          icon: Globe,
+          title: "Rekomendasi Wilayah Baru",
+          subtitle: "Analisis provinsi belum terjangkau dan peluang ekspansi.",
+          prompt: "Rekomendasikan ekspansi wilayah program CSR baru yang belum pernah dijangkau oleh perusahaan kami.",
+        },
+        {
           icon: Activity,
           title: "Rekap Program Aktif",
           subtitle: "Pantau serapan anggaran dan progres program berjalan.",
@@ -113,12 +125,6 @@ export function ChatbotView({
           title: "Evaluasi Proposal Masuk",
           subtitle: "Tinjau proposal mitra yang membutuhkan seleksi.",
           prompt: "Ada berapa proposal mitra yang statusnya masih UNDER_REVIEW?",
-        },
-        {
-          icon: CheckCircle2,
-          title: "Indikator ESG & Dampak",
-          subtitle: "Panduan pengukuran dampak sosial-lingkungan terukur.",
-          prompt: "Panduan indikator keberlanjutan terukur untuk laporan tahunan CSR",
         },
       ];
 
@@ -608,6 +614,101 @@ export function ChatbotView({
                                     <p className="text-[11px] text-slate-500 mt-1">
                                       Inisiatif: {item.opportunityTitle || item.opportunity}
                                     </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        // 3. Territory Expansion Card (Rekomendasi Ekspansi Wilayah Baru)
+                        if (card.type === "TERRITORY_EXPANSION" && card.recommendations) {
+                          return (
+                            <div key={cIdx} className="space-y-2.5 mt-2">
+                              <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200/70">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-lg bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0">
+                                    <MapPin className="w-3.5 h-3.5" />
+                                  </div>
+                                  <div>
+                                    <h5 className="font-bold text-xs text-[#181343]">
+                                      Analisis Jangkauan Peta Nasional
+                                    </h5>
+                                    <p className="text-[11px] text-slate-600">
+                                      Terjangkau: <span className="font-bold text-emerald-700">{card.coveredCount}</span> dari {card.totalNational} provinsi ({card.unreachedCount} provinsi belum pernah terjangkau)
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="px-2 py-0.5 rounded-md bg-white text-[#181343] text-[10px] font-bold border border-slate-200 shrink-0">
+                                  {Math.round(((card.coveredCount || 0) / (card.totalNational || 38)) * 100)}% Cakupan
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 gap-2">
+                                {card.recommendations.map((rec: any, rIdx: number) => (
+                                  <div
+                                    key={rIdx}
+                                    className="p-3.5 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#059669]/60 transition shadow-2xs space-y-2 text-left"
+                                  >
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div>
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="font-extrabold text-[#181343] text-xs">
+                                            {rec.province}
+                                          </span>
+                                          <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
+                                            {rec.island}
+                                          </span>
+                                        </div>
+                                        <h6 className="text-[11px] font-bold text-emerald-800 mt-1">
+                                          {rec.proposedProgramTitle}
+                                        </h6>
+                                      </div>
+                                      <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-bold shrink-0">
+                                        {rec.focusArea ? rec.focusArea.replace(/_/g, " ") : "UMUM"}
+                                      </span>
+                                    </div>
+
+                                    <p className="text-[11px] text-slate-600 leading-relaxed bg-slate-50/80 p-2 rounded-lg border border-slate-100">
+                                      <strong className="text-slate-700">Urgensi Daerah: </strong>
+                                      {rec.urgencyTopic}
+                                    </p>
+
+                                    {rec.sdgs && rec.sdgs.length > 0 && (
+                                      <div className="flex items-center gap-1 flex-wrap pt-0.5">
+                                        <span className="text-[10px] font-bold text-slate-400 mr-1">SDGs:</span>
+                                        {rec.sdgs.map((sdg: string, sIdx: number) => (
+                                          <span
+                                            key={sIdx}
+                                            className="px-1.5 py-0.5 rounded text-[9.5px] font-medium bg-amber-50 text-amber-800 border border-amber-200/60"
+                                          >
+                                            {sdg}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-[11px]">
+                                      <div className="flex items-center gap-1 text-slate-500 text-[11px]">
+                                        <Users className="w-3.5 h-3.5 text-slate-400" />
+                                        <span>
+                                          {rec.verifiedPartnersCount > 0
+                                            ? `${rec.verifiedPartnersCount} mitra lokal terverifikasi`
+                                            : "Peluang terbuka untuk mitra lokal"}
+                                        </span>
+                                      </div>
+
+                                      {onOpenCreateOpportunity && (
+                                        <button
+                                          type="button"
+                                          onClick={() => onOpenCreateOpportunity(rec.province)}
+                                          className="px-2.5 py-1 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs transition cursor-pointer shrink-0"
+                                        >
+                                          <Plus className="w-3 h-3" />
+                                          <span>Buat Peluang di Sini</span>
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 ))}
                               </div>

@@ -2439,6 +2439,15 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               userName={user.name}
               organizationName={company?.name}
               onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
+              onOpenCreateOpportunity={
+                !isManagement
+                  ? (initialProvince) => {
+                      setActiveMenu("opportunities");
+                      setIsCreatingOpportunity(true);
+                      setOpportunityPrefillProvince(initialProvince || null);
+                    }
+                  : undefined
+              }
             />
           )}
         </main>
