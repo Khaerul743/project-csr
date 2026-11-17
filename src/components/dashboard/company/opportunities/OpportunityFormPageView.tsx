@@ -34,10 +34,21 @@ import { SdgGoal } from "@/components/dashboard/analytics/types";
 import { INDONESIAN_REGIONS } from "./indonesian-regions";
 import { AiNeedPrioritizationPanel } from "./AiNeedPrioritizationPanel";
 
+export interface OpportunityDraftData {
+  title?: string;
+  focusArea?: CsrFocusArea;
+  targetProvince?: string;
+  targetCity?: string;
+  description?: string;
+  estimatedBudget?: string | number;
+  sdgs?: number[];
+}
+
 export interface OpportunityFormPageViewProps {
   mode: "create" | "edit";
   opportunity?: OpportunityItem | null;
   initialProvince?: string;
+  initialDraft?: OpportunityDraftData | null;
   onBack: () => void;
   onSuccess: () => void;
 }
@@ -205,6 +216,7 @@ export function OpportunityFormPageView({
   mode,
   opportunity,
   initialProvince,
+  initialDraft,
   onBack,
   onSuccess,
 }: OpportunityFormPageViewProps) {
@@ -251,16 +263,24 @@ export function OpportunityFormPageView({
     return [];
   };
 
-  // Form States
-  const [title, setTitle] = useState(opportunity?.title || "");
-  const [focusArea, setFocusArea] = useState<CsrFocusArea>(opportunity?.focusArea || "LINGKUNGAN");
+  // Form States with initialDraft support
+  const [title, setTitle] = useState(opportunity?.title || initialDraft?.title || "");
+  const [focusArea, setFocusArea] = useState<CsrFocusArea>(
+    opportunity?.focusArea || initialDraft?.focusArea || "LINGKUNGAN"
+  );
   const [estimatedBudget, setEstimatedBudget] = useState<string>(
-    opportunity?.estimatedBudget ? String(Math.round(parseFloat(opportunity.estimatedBudget))) : ""
+    opportunity?.estimatedBudget
+      ? String(Math.round(parseFloat(opportunity.estimatedBudget)))
+      : initialDraft?.estimatedBudget
+      ? String(initialDraft.estimatedBudget)
+      : ""
   );
   const [targetProvince, setTargetProvince] = useState(
-    opportunity?.targetProvince || initialProvince || ""
+    opportunity?.targetProvince || initialDraft?.targetProvince || initialProvince || ""
   );
-  const [targetCity, setTargetCity] = useState(opportunity?.targetCity || "");
+  const [targetCity, setTargetCity] = useState(
+    opportunity?.targetCity || initialDraft?.targetCity || ""
+  );
   const [startDate, setStartDate] = useState(
     opportunity?.startDate ? new Date(opportunity.startDate).toISOString().split("T")[0] : ""
   );
@@ -270,9 +290,44 @@ export function OpportunityFormPageView({
   const [deadline, setDeadline] = useState(
     opportunity?.deadline ? new Date(opportunity.deadline).toISOString().split("T")[0] : ""
   );
-  const [description, setDescription] = useState(parseCleanDescription(opportunity?.description));
+  const [description, setDescription] = useState(
+    parseCleanDescription(opportunity?.description) || initialDraft?.description || ""
+  );
   const [bannerUrl, setBannerUrl] = useState<string>(opportunity?.bannerUrl || "");
-  const [selectedSdgs, setSelectedSdgs] = useState<number[]>(parseInitialSdgs(opportunity));
+  const [selectedSdgs, setSelectedSdgs] = useState<number[]>(
+    isEdit
+      ? parseInitialSdgs(opportunity)
+      : initialDraft?.sdgs && initialDraft.sdgs.length > 0
+      ? initialDraft.sdgs
+      : parseInitialSdgs(opportunity)
+  );
+
+  const [hasAttemptedAutoSdg, setHasAttemptedAutoSdg] = useState<boolean>(
+    Boolean(initialDraft?.sdgs && initialDraft.sdgs.length > 0)
+  );
+
+  // Sync state if initialDraft updates when creating
+  useEffect(() => {
+    if (!isEdit && initialDraft) {
+      if (initialDraft.title) setTitle(initialDraft.title);
+      if (initialDraft.focusArea) setFocusArea(initialDraft.focusArea);
+      if (initialDraft.targetProvince) setTargetProvince(initialDraft.targetProvince);
+      if (initialDraft.targetCity) setTargetCity(initialDraft.targetCity);
+      if (initialDraft.description) setDescription(initialDraft.description);
+      if (initialDraft.estimatedBudget) setEstimatedBudget(String(initialDraft.estimatedBudget));
+      if (initialDraft.sdgs && initialDraft.sdgs.length > 0) {
+        setSelectedSdgs([...initialDraft.sdgs].sort((a, b) => a - b));
+        setHasAttemptedAutoSdg(true);
+      }
+    }
+  }, [initialDraft, isEdit]);
+
+  // Sync province if initialProvince updates
+  useEffect(() => {
+    if (!isEdit && initialProvince && !targetProvince) {
+      setTargetProvince(initialProvince);
+    }
+  }, [initialProvince, isEdit, targetProvince]);
 
   // Sync state if opportunity prop updates
   useEffect(() => {
@@ -319,7 +374,6 @@ export function OpportunityFormPageView({
     probabilities?: Array<{ sdgId: number; percentage: number }>;
     probabilityMap?: Record<number, number>;
   } | null>(null);
-  const [hasAttemptedAutoSdg, setHasAttemptedAutoSdg] = useState(false);
   const [sdgSortMode, setSdgSortMode] = useState<"default" | "relevance">("default");
 
   useEffect(() => {
@@ -985,6 +1039,26 @@ export function OpportunityFormPageView({
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-800 flex items-start gap-2.5 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
           <span className="font-medium">{successMessage}</span>
+        </div>
+      )}
+
+      {/* Banner Informasi Draf Otomatis AI Advisor */}
+      {!isEdit && initialDraft && (
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200/80 text-xs text-emerald-950 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
+          <div className="w-8 h-8 rounded-xl bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-bold text-xs sm:text-sm text-[#181343] flex items-center gap-1.5 flex-wrap">
+              <span>Draf Program Otomatis dari AI CSR Advisor Diterapkan</span>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                {targetProvince || initialDraft.targetProvince || "Wilayah Terpilih"}
+              </span>
+            </h4>
+            <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed">
+              Judul inisiatif, bidang fokus, provinsi sasaran, sasaran SDGs, dan draf deskripsi telah diisikan ke dalam formulir. Anda dapat meninjau dan melengkapi setiap tahapan sebelum mempublikasikannya.
+            </p>
+          </div>
         </div>
       )}
 
@@ -1842,6 +1916,7 @@ export function CreateOpportunityPageView(props: {
   onBack: () => void;
   onSuccess: () => void;
   initialProvince?: string;
+  initialDraft?: OpportunityDraftData | null;
 }) {
   return <OpportunityFormPageView mode="create" {...props} />;
 }

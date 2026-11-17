@@ -52,8 +52,25 @@ interface ChatbotViewProps {
   userName: string;
   organizationName?: string;
   onNavigate?: (menu: string) => void;
-  onOpenCreateOpportunity?: (provinceName?: string) => void;
+  onOpenCreateOpportunity?: (provinceName?: string, draftData?: any) => void;
 }
+
+const parseSdgsFromList = (sdgsList: any[]): number[] => {
+  const result: number[] = [];
+  if (!Array.isArray(sdgsList)) return result;
+  sdgsList.forEach((item) => {
+    if (typeof item === "number" && item >= 1 && item <= 17) {
+      if (!result.includes(item)) result.push(item);
+    } else if (typeof item === "string") {
+      const match = item.match(/\b(?:SDG\s*)?(\d+)\b/i);
+      if (match && match[1]) {
+        const num = parseInt(match[1], 10);
+        if (num >= 1 && num <= 17 && !result.includes(num)) result.push(num);
+      }
+    }
+  });
+  return result.sort((a, b) => a - b);
+};
 
 export function ChatbotView({
   role,
@@ -801,7 +818,16 @@ export function ChatbotView({
                                       {onOpenCreateOpportunity && (
                                         <button
                                           type="button"
-                                          onClick={() => onOpenCreateOpportunity(rec.province)}
+                                          onClick={() => {
+                                            const sdgNums = parseSdgsFromList(rec.sdgs);
+                                            onOpenCreateOpportunity(rec.province, {
+                                              title: rec.proposedProgramTitle,
+                                              targetProvince: rec.province,
+                                              focusArea: rec.focusArea,
+                                              description: `Program CSR "${rec.proposedProgramTitle}" diinisiasi sebagai langkah strategis ekspansi jangkauan wilayah berkelanjutan di Provinsi ${rec.province} (${rec.island}).\n\nUrgensi Kebutuhan Daerah:\n${rec.urgencyTopic}\n\nKomitmen Dampak:\nMendorong pemberdayaan inklusif dan kolaborasi bersama pemangku kepentingan serta mitra lokal terverifikasi di wilayah sasaran.`,
+                                              sdgs: sdgNums,
+                                            });
+                                          }}
                                           className="px-2.5 py-1 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs transition cursor-pointer shrink-0"
                                         >
                                           <Plus className="w-3 h-3" />
@@ -894,7 +920,16 @@ export function ChatbotView({
                                       {onOpenCreateOpportunity && (
                                         <button
                                           type="button"
-                                          onClick={() => onOpenCreateOpportunity(rec.province)}
+                                          onClick={() => {
+                                            const sdgNums = parseSdgsFromList(rec.sdgs);
+                                            onOpenCreateOpportunity(rec.province, {
+                                              title: rec.title,
+                                              targetProvince: rec.province,
+                                              focusArea: rec.focusArea,
+                                              description: `Inisiatif program CSR "${rec.title}" dirancang berdasarkan telaah berkas survei kondisi dan kebutuhan wilayah di ${rec.province}.\n\nLatar Belakang & Urgensi Lapangan:\n${rec.urgencyReason}\n\nFokus Sasaran & Dampak:\nProgram ini diarahkan untuk mempercepat pemenuhan kebutuhan riil warga lokal dan pencapaian target SDGs prioritas melalui kemitraan strategis dengan organisasi pelaksana yang terverifikasi.`,
+                                              sdgs: sdgNums,
+                                            });
+                                          }}
                                           className="px-3 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer shrink-0"
                                         >
                                           <Plus className="w-3.5 h-3.5" />
