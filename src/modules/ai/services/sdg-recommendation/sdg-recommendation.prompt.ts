@@ -25,9 +25,14 @@ REFERENSI 17 SASARAN SDGS RESMI PBB:
 17. SDG 17: Kemitraan untuk Mencapai Tujuan (Kolaborasi multi-pihak pemerintah, yayasan, korporasi, dan universitas)
 
 PANDUAN PEMETAAN:
-- Pilih hanya 1 sampai maksimal 4 SDGs yang BENAR-BENAR LANGSUNG dan PALING BERDAMPAK (Direct Impact) berdasarkan Judul dan Uraian Ruang Lingkup Program.
-- Jangan memilih terlalu banyak sasaran (cukup 2-3 sasaran yang paling fokus dan nyata).
-- Tentukan 1 sasaran sebagai primarySdg yang menjadi denyut utama inisiatif tersebut.
+- Hitung persentase probabilitas / tingkat kedekatan relevansi untuk SELURUH 17 sasaran SDG (nomor 1 sampai 17).
+- Persentase harus mencerminkan seberapa dekat inisiatif program dengan masing-masing sasaran SDG berdasarkan Judul, Bidang Fokus, dan Deskripsi Ruang Lingkup:
+  * Sasaran utama yang paling berdampak langsung memperoleh persentase tertinggi (misal 20%-40%, contoh: SDG 4 33%, SDG 2 22%).
+  * Sasaran pendukung yang relevan memperoleh persentase moderat (10%-20%).
+  * Sasaran yang kurang atau tidak berkaitan langsung memperoleh persentase rendah (0%-5%).
+  * Pastikan seluruh 17 nomor SDG (1 sampai 17) ada di dalam array 'probabilities' dan total persentase seluruh 17 sasaran mendekati/berjumlah 100%.
+- Masukkan 1 sampai maksimal 4 sasaran dengan persentase tertinggi ke dalam 'recommendedSdgs'.
+- Tentukan 1 sasaran dengan persentase tertinggi sebagai 'primarySdg'.
 - Buat 'conciseRationale' dalam 1-2 kalimat ringkas, padat, profesional, tanpa basa-basi.
 - Setiap sasaran dalam 'breakdown' harus memiliki 1 kalimat alasan konkret keterkaitannya.`,
   ],

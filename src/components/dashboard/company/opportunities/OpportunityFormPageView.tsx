@@ -34,9 +34,21 @@ import { SdgGoal } from "@/components/dashboard/analytics/types";
 import { INDONESIAN_REGIONS } from "./indonesian-regions";
 import { AiNeedPrioritizationPanel } from "./AiNeedPrioritizationPanel";
 
+export interface OpportunityDraftData {
+  title?: string;
+  focusArea?: CsrFocusArea;
+  targetProvince?: string;
+  targetCity?: string;
+  description?: string;
+  estimatedBudget?: string | number;
+  sdgs?: number[];
+}
+
 export interface OpportunityFormPageViewProps {
   mode: "create" | "edit";
   opportunity?: OpportunityItem | null;
+  initialProvince?: string;
+  initialDraft?: OpportunityDraftData | null;
   onBack: () => void;
   onSuccess: () => void;
 }
@@ -203,6 +215,8 @@ function SearchableSelect({
 export function OpportunityFormPageView({
   mode,
   opportunity,
+  initialProvince,
+  initialDraft,
   onBack,
   onSuccess,
 }: OpportunityFormPageViewProps) {
@@ -249,14 +263,24 @@ export function OpportunityFormPageView({
     return [];
   };
 
-  // Form States
-  const [title, setTitle] = useState(opportunity?.title || "");
-  const [focusArea, setFocusArea] = useState<CsrFocusArea>(opportunity?.focusArea || "LINGKUNGAN");
-  const [estimatedBudget, setEstimatedBudget] = useState<string>(
-    opportunity?.estimatedBudget ? String(Math.round(parseFloat(opportunity.estimatedBudget))) : ""
+  // Form States with initialDraft support
+  const [title, setTitle] = useState(opportunity?.title || initialDraft?.title || "");
+  const [focusArea, setFocusArea] = useState<CsrFocusArea>(
+    opportunity?.focusArea || initialDraft?.focusArea || "LINGKUNGAN"
   );
-  const [targetProvince, setTargetProvince] = useState(opportunity?.targetProvince || "");
-  const [targetCity, setTargetCity] = useState(opportunity?.targetCity || "");
+  const [estimatedBudget, setEstimatedBudget] = useState<string>(
+    opportunity?.estimatedBudget
+      ? String(Math.round(parseFloat(opportunity.estimatedBudget)))
+      : initialDraft?.estimatedBudget
+      ? String(initialDraft.estimatedBudget)
+      : ""
+  );
+  const [targetProvince, setTargetProvince] = useState(
+    opportunity?.targetProvince || initialDraft?.targetProvince || initialProvince || ""
+  );
+  const [targetCity, setTargetCity] = useState(
+    opportunity?.targetCity || initialDraft?.targetCity || ""
+  );
   const [startDate, setStartDate] = useState(
     opportunity?.startDate ? new Date(opportunity.startDate).toISOString().split("T")[0] : ""
   );
@@ -266,9 +290,44 @@ export function OpportunityFormPageView({
   const [deadline, setDeadline] = useState(
     opportunity?.deadline ? new Date(opportunity.deadline).toISOString().split("T")[0] : ""
   );
-  const [description, setDescription] = useState(parseCleanDescription(opportunity?.description));
+  const [description, setDescription] = useState(
+    parseCleanDescription(opportunity?.description) || initialDraft?.description || ""
+  );
   const [bannerUrl, setBannerUrl] = useState<string>(opportunity?.bannerUrl || "");
-  const [selectedSdgs, setSelectedSdgs] = useState<number[]>(parseInitialSdgs(opportunity));
+  const [selectedSdgs, setSelectedSdgs] = useState<number[]>(
+    isEdit
+      ? parseInitialSdgs(opportunity)
+      : initialDraft?.sdgs && initialDraft.sdgs.length > 0
+      ? initialDraft.sdgs
+      : parseInitialSdgs(opportunity)
+  );
+
+  const [hasAttemptedAutoSdg, setHasAttemptedAutoSdg] = useState<boolean>(
+    Boolean(initialDraft?.sdgs && initialDraft.sdgs.length > 0)
+  );
+
+  // Sync state if initialDraft updates when creating
+  useEffect(() => {
+    if (!isEdit && initialDraft) {
+      if (initialDraft.title) setTitle(initialDraft.title);
+      if (initialDraft.focusArea) setFocusArea(initialDraft.focusArea);
+      if (initialDraft.targetProvince) setTargetProvince(initialDraft.targetProvince);
+      if (initialDraft.targetCity) setTargetCity(initialDraft.targetCity);
+      if (initialDraft.description) setDescription(initialDraft.description);
+      if (initialDraft.estimatedBudget) setEstimatedBudget(String(initialDraft.estimatedBudget));
+      if (initialDraft.sdgs && initialDraft.sdgs.length > 0) {
+        setSelectedSdgs([...initialDraft.sdgs].sort((a, b) => a - b));
+        setHasAttemptedAutoSdg(true);
+      }
+    }
+  }, [initialDraft, isEdit]);
+
+  // Sync province if initialProvince updates
+  useEffect(() => {
+    if (!isEdit && initialProvince && !targetProvince) {
+      setTargetProvince(initialProvince);
+    }
+  }, [initialProvince, isEdit, targetProvince]);
 
   // Sync state if opportunity prop updates
   useEffect(() => {
@@ -312,8 +371,10 @@ export function OpportunityFormPageView({
     primarySdg: number;
     conciseRationale: string;
     breakdown?: Array<{ sdgId: number; sdgCode: string; relevanceScore: number; reason: string }>;
+    probabilities?: Array<{ sdgId: number; percentage: number }>;
+    probabilityMap?: Record<number, number>;
   } | null>(null);
-  const [hasAttemptedAutoSdg, setHasAttemptedAutoSdg] = useState(false);
+  const [sdgSortMode, setSdgSortMode] = useState<"default" | "relevance">("default");
 
   useEffect(() => {
     setImageError(false);
@@ -421,6 +482,18 @@ export function OpportunityFormPageView({
     });
     return pillars;
   }, [selectedSdgs]);
+
+  const displaySdgs = useMemo(() => {
+    if (sdgSortMode === "relevance" && aiSdgResult?.probabilityMap) {
+      return [...ALL_17_SDGS].sort((a, b) => {
+        const probA = aiSdgResult.probabilityMap?.[a.id] ?? 0;
+        const probB = aiSdgResult.probabilityMap?.[b.id] ?? 0;
+        if (probB !== probA) return probB - probA;
+        return a.id - b.id;
+      });
+    }
+    return ALL_17_SDGS;
+  }, [sdgSortMode, aiSdgResult]);
 
   const handleApplyAiRecommendation = ({
     focusArea: nextFocusArea,
@@ -969,6 +1042,26 @@ export function OpportunityFormPageView({
         </div>
       )}
 
+      {/* Banner Informasi Draf Otomatis AI Advisor */}
+      {!isEdit && initialDraft && (
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border border-emerald-200/80 text-xs text-emerald-950 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
+          <div className="w-8 h-8 rounded-xl bg-[#181343] text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className="font-bold text-xs sm:text-sm text-[#181343] flex items-center gap-1.5 flex-wrap">
+              <span>Draf Program Otomatis dari AI CSR Advisor Diterapkan</span>
+              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                {targetProvince || initialDraft.targetProvince || "Wilayah Terpilih"}
+              </span>
+            </h4>
+            <p className="text-[11px] sm:text-xs text-slate-600 mt-1 leading-relaxed">
+              Judul inisiatif, bidang fokus, provinsi sasaran, sasaran SDGs, dan draf deskripsi telah diisikan ke dalam formulir. Anda dapat meninjau dan melengkapi setiap tahapan sebelum mempublikasikannya.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Notice if opportunity already has submitted proposals */}
       {isEdit && opportunity?.stats?.proposalsCount && opportunity.stats.proposalsCount > 0 ? (
         <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs sm:text-sm text-amber-900 flex items-start gap-3">
@@ -1240,15 +1333,19 @@ export function OpportunityFormPageView({
                     {aiSdgResult.conciseRationale}
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                    <span className="text-[11px] font-semibold text-slate-500 mr-1">Rekomendasi:</span>
+                    <span className="text-[11px] font-semibold text-slate-500 mr-1">Rekomendasi Utama:</span>
                     {aiSdgResult.recommendedSdgs.map((sdgId) => {
                       const goal = ALL_17_SDGS.find((g) => g.id === sdgId);
                       if (!goal) return null;
                       const isPrimary = sdgId === aiSdgResult.primarySdg;
+                      const prob =
+                        aiSdgResult.probabilityMap?.[sdgId] ??
+                        aiSdgResult.probabilities?.find((p) => p.sdgId === sdgId)?.percentage;
+
                       return (
                         <span
                           key={sdgId}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border shadow-2xs"
                           style={{
                             backgroundColor: `${goal.color}15`,
                             borderColor: `${goal.color}40`,
@@ -1260,8 +1357,13 @@ export function OpportunityFormPageView({
                             style={{ backgroundColor: goal.color }}
                           />
                           <span>{goal.code}: {goal.name}</span>
+                          {prob !== undefined && (
+                            <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-white/90 border border-slate-200 text-slate-800 shadow-2xs">
+                              {prob}%
+                            </span>
+                          )}
                           {isPrimary && (
-                            <span className="ml-1 text-[9px] bg-[#181343] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                            <span className="ml-0.5 text-[9px] bg-[#181343] text-white px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
                               Utama
                             </span>
                           )}
@@ -1278,41 +1380,153 @@ export function OpportunityFormPageView({
             </div>
 
             {/* Interactive 17 SDGs Grid */}
-            <div className="space-y-2.5">
-              <span className="text-[13px] font-semibold text-[#181343] block">
-                Pilih Sasaran SDGs yang Ditargetkan:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                {ALL_17_SDGS.map((sdg) => {
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <span className="text-[13px] font-semibold text-[#181343] block">
+                    Pilih Sasaran SDGs yang Ditargetkan:
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Nilai persentase menunjukkan probabilitas dan kedekatan relevansi sasaran SDG dengan inisiatif Anda.
+                  </span>
+                </div>
+
+                {aiSdgResult?.probabilityMap && (
+                  <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[11px] font-medium text-slate-600 self-start sm:self-auto shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setSdgSortMode("default")}
+                      className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                        sdgSortMode === "default"
+                          ? "bg-white text-[#181343] font-bold shadow-2xs"
+                          : "hover:text-slate-900"
+                      }`}
+                    >
+                      Nomor 1-17
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSdgSortMode("relevance")}
+                      className={`px-2.5 py-1 rounded-md transition flex items-center gap-1 cursor-pointer ${
+                        sdgSortMode === "relevance"
+                          ? "bg-white text-emerald-800 font-bold shadow-2xs"
+                          : "hover:text-slate-900"
+                      }`}
+                    >
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>Relevansi Tertinggi</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {displaySdgs.map((sdg) => {
                   const isChecked = selectedSdgs.includes(sdg.id);
+                  const prob =
+                    aiSdgResult?.probabilityMap?.[sdg.id] ??
+                    aiSdgResult?.probabilities?.find((p) => p.sdgId === sdg.id)?.percentage;
+                  const isPrimary = aiSdgResult?.primarySdg === sdg.id;
+
                   return (
                     <button
                       key={sdg.id}
                       type="button"
                       onClick={() => toggleSdg(sdg.id)}
-                      className={`p-3 rounded-xl text-left transition-colors duration-150 border flex items-start gap-2.5 cursor-pointer ${
+                      className={`p-3.5 rounded-xl text-left transition-all duration-200 border flex flex-col justify-between gap-2.5 cursor-pointer ${
                         isChecked
-                          ? "bg-[#EDF9F3] border-[#35B98E] text-[#181343]"
+                          ? "bg-[#EDF9F3] border-[#35B98E] text-[#181343] shadow-2xs ring-1 ring-[#35B98E]/25"
+                          : prob !== undefined && prob >= 20
+                          ? "bg-white hover:bg-slate-50 border-emerald-300/80 text-[#181343] shadow-2xs"
                           : "bg-[#F9F9FB] hover:bg-slate-100/80 border-[#E5E7EB] text-[#181343]"
                       }`}
                     >
-                      <div
-                        className="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5"
-                        style={{ backgroundColor: sdg.color }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="font-bold text-xs text-[#181343] flex items-center justify-between">
-                          <span>{sdg.code}</span>
-                          {isChecked && <Check className="w-3.5 h-3.5 text-[#009E75] shrink-0" />}
+                      <div className="w-full flex items-start gap-2.5">
+                        <div
+                          className="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5"
+                          style={{ backgroundColor: sdg.color }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-bold text-xs text-[#181343] flex items-center justify-between gap-1.5">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span>{sdg.code}</span>
+                              {isPrimary && (
+                                <span className="text-[9px] bg-[#181343] text-white px-1.5 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
+                                  Utama
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {prob !== undefined ? (
+                                <span
+                                  className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold tracking-tight ${
+                                    prob >= 20
+                                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                      : prob >= 10
+                                      ? "bg-teal-50 text-teal-700 border border-teal-200"
+                                      : prob >= 4
+                                      ? "bg-slate-100 text-slate-700 border border-slate-200"
+                                      : "bg-slate-50 text-slate-400 border border-slate-100"
+                                  }`}
+                                >
+                                  {prob}%
+                                </span>
+                              ) : isAnalyzingSdgs ? (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-400 font-semibold animate-pulse">
+                                  ...%
+                                </span>
+                              ) : null}
+
+                              {isChecked && (
+                                <Check className="w-3.5 h-3.5 text-[#009E75] shrink-0" />
+                              )}
+                            </div>
+                          </div>
+
+                          <span
+                            className={`text-[11px] line-clamp-1 block mt-0.5 ${
+                              isChecked ? "text-[#181343]/85 font-medium" : "text-[#787680]"
+                            }`}
+                          >
+                            {sdg.name}
+                          </span>
                         </div>
-                        <span
-                          className={`text-[11px] line-clamp-1 block mt-0.5 ${
-                            isChecked ? "text-[#181343]/80 font-medium" : "text-[#787680]"
-                          }`}
-                        >
-                          {sdg.name}
-                        </span>
                       </div>
+
+                      {/* Visual Probability Bar & Label */}
+                      {prob !== undefined ? (
+                        <div className="w-full pt-1.5 border-t border-slate-200/50 space-y-1">
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700 ease-out"
+                              style={{
+                                width: `${Math.max(prob, prob > 0 ? 4 : 0)}%`,
+                                backgroundColor: prob >= 10 ? sdg.color : "#94A3B8",
+                              }}
+                            />
+                          </div>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                            <span>Kedekatan Relevansi</span>
+                            <span
+                              className={`font-bold ${
+                                prob >= 20
+                                  ? "text-emerald-700"
+                                  : prob >= 10
+                                  ? "text-teal-700"
+                                  : "text-slate-500"
+                              }`}
+                            >
+                              {prob}%
+                            </span>
+                          </div>
+                        </div>
+                      ) : isAnalyzingSdgs ? (
+                        <div className="w-full pt-1.5 border-t border-slate-200/50 space-y-1 animate-pulse">
+                          <div className="w-full h-1.5 bg-slate-100 rounded-full" />
+                          <div className="h-2.5 bg-slate-100 rounded w-16" />
+                        </div>
+                      ) : null}
                     </button>
                   );
                 })}
@@ -1698,7 +1912,12 @@ export function OpportunityFormPageView({
 }
 
 // Wrapper for Create Opportunity
-export function CreateOpportunityPageView(props: { onBack: () => void; onSuccess: () => void }) {
+export function CreateOpportunityPageView(props: {
+  onBack: () => void;
+  onSuccess: () => void;
+  initialProvince?: string;
+  initialDraft?: OpportunityDraftData | null;
+}) {
   return <OpportunityFormPageView mode="create" {...props} />;
 }
 

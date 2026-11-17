@@ -70,28 +70,72 @@ export class SdgRecommendationService {
         description: input.description?.trim() || "Tidak ada deskripsi rinci.",
       })) as SdgRecommendationResult;
 
-      // Pastikan SDGs hasil rekomendasi unik dan valid antara 1-17
-      const validSdgs = Array.from(
+      // 1. Olah dan pastikan seluruh 17 sasaran SDG memiliki persentase probabilitas
+      const rawProbabilities = result.probabilities || [];
+      const probMap: Record<number, number> = {};
+
+      for (let i = 1; i <= 17; i++) {
+        const found = rawProbabilities.find((p) => p.sdgId === i);
+        probMap[i] =
+          found && typeof found.percentage === "number"
+            ? Math.max(0, Math.round(found.percentage))
+            : 0;
+      }
+
+      // Normalisasi jika deviasi total persentase cukup signifikan
+      const totalProb = Object.values(probMap).reduce((acc, curr) => acc + curr, 0);
+      if (totalProb > 0 && (totalProb < 80 || totalProb > 120)) {
+        for (let i = 1; i <= 17; i++) {
+          probMap[i] = Math.round((probMap[i] / totalProb) * 100);
+        }
+      }
+
+      const formattedProbabilities = Object.entries(probMap).map(([idStr, pct]) => ({
+        sdgId: Number(idStr),
+        percentage: pct,
+      }));
+
+      // 2. Tentukan sasaran rekomendasi utama
+      const sortedByProb = [...formattedProbabilities].sort(
+        (a, b) => b.percentage - a.percentage
+      );
+
+      let finalSdgs = Array.from(
         new Set(result.recommendedSdgs.filter((id) => id >= 1 && id <= 17))
       ).slice(0, 4);
 
-      const finalSdgs = validSdgs.length > 0 ? validSdgs : [17];
+      if (finalSdgs.length === 0) {
+        finalSdgs = sortedByProb
+          .filter((p) => p.percentage > 0)
+          .slice(0, 3)
+          .map((p) => p.sdgId);
+      }
+      if (finalSdgs.length === 0) {
+        finalSdgs = [17];
+      }
+
+      const topProbSdg = sortedByProb[0]?.sdgId || finalSdgs[0];
       const primarySdg = finalSdgs.includes(result.primarySdg)
         ? result.primarySdg
+        : finalSdgs.includes(topProbSdg)
+        ? topProbSdg
         : finalSdgs[0];
 
       return {
         recommendedSdgs: finalSdgs,
         primarySdg,
         conciseRationale: result.conciseRationale,
-        breakdown: result.breakdown && result.breakdown.length > 0
-          ? result.breakdown.filter((b) => finalSdgs.includes(b.sdgId))
-          : finalSdgs.map((id) => ({
-              sdgId: id,
-              sdgCode: SDG_METADATA[id]?.code || `SDG ${id}`,
-              relevanceScore: id === primarySdg ? 95 : 85,
-              reason: `Selaras dengan inisiatif bidang ${input.focusArea.toLowerCase()} program.`,
-            })),
+        breakdown:
+          result.breakdown && result.breakdown.length > 0
+            ? result.breakdown.filter((b) => finalSdgs.includes(b.sdgId))
+            : finalSdgs.map((id) => ({
+                sdgId: id,
+                sdgCode: SDG_METADATA[id]?.code || `SDG ${id}`,
+                relevanceScore: probMap[id] || (id === primarySdg ? 90 : 80),
+                reason: `Selaras dengan inisiatif bidang ${input.focusArea.toLowerCase()} program.`,
+              })),
+        probabilities: formattedProbabilities,
+        probabilityMap: probMap,
         source: "AI_OPENAI",
         analyzedAt: new Date().toISOString(),
       };
@@ -190,6 +234,40 @@ export class SdgRecommendationService {
     const recommendedSdgs = Array.from(sdgSet).slice(0, 4);
     const primarySdg = recommendedSdgs[0] || 17;
 
+    // 3. Hitung bobot dan persentase probabilitas untuk seluruh 17 sasaran SDG
+    const rawWeights: Record<number, number> = {};
+    for (let i = 1; i <= 17; i++) {
+      rawWeights[i] = 1; // baseline minimum
+    }
+
+    // Sasaran rekomendasi memperoleh bobot signifikan
+    if (recommendedSdgs[0]) rawWeights[recommendedSdgs[0]] = 34;
+    if (recommendedSdgs[1]) rawWeights[recommendedSdgs[1]] = 23;
+    if (recommendedSdgs[2]) rawWeights[recommendedSdgs[2]] = 16;
+    if (recommendedSdgs[3]) rawWeights[recommendedSdgs[3]] = 10;
+
+    // Kemitraan (SDG 17) memiliki kedekatan moderat jika bukan utama
+    if (!recommendedSdgs.includes(17)) {
+      rawWeights[17] = 4;
+    }
+
+    const totalWeight = Object.values(rawWeights).reduce((a, b) => a + b, 0);
+    const probMap: Record<number, number> = {};
+    let accumulated = 0;
+
+    for (let i = 1; i <= 16; i++) {
+      const pct = Math.round((rawWeights[i] / totalWeight) * 100);
+      probMap[i] = pct;
+      accumulated += pct;
+    }
+    // Genapkan pada sasaran ke-17 agar total pas 100%
+    probMap[17] = Math.max(0, 100 - accumulated);
+
+    const formattedProbabilities = Object.entries(probMap).map(([idStr, pct]) => ({
+      sdgId: Number(idStr),
+      percentage: pct,
+    }));
+
     const names = recommendedSdgs
       .map((id) => `${SDG_METADATA[id]?.code} (${SDG_METADATA[id]?.name})`)
       .join(" dan ");
@@ -199,7 +277,7 @@ export class SdgRecommendationService {
     const breakdown = recommendedSdgs.map((id) => ({
       sdgId: id,
       sdgCode: SDG_METADATA[id]?.code || `SDG ${id}`,
-      relevanceScore: id === primarySdg ? 90 : 80,
+      relevanceScore: probMap[id] || (id === primarySdg ? 90 : 80),
       reason: `Program secara aktif mengintervensi target sasaran ${SDG_METADATA[id]?.name}.`,
     }));
 
@@ -208,6 +286,8 @@ export class SdgRecommendationService {
       primarySdg,
       conciseRationale,
       breakdown,
+      probabilities: formattedProbabilities,
+      probabilityMap: probMap,
       source: "HEURISTIC_FALLBACK",
       analyzedAt: new Date().toISOString(),
     };

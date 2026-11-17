@@ -1,26 +1,33 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
+import dynamic from "next/dynamic";
 import {
   MapPin,
-  Users,
   Building2,
-  TrendingUp,
-  AlertCircle,
-  CheckCircle2,
-  ExternalLink,
   ChevronRight,
   Filter,
   Sparkles,
-  Info,
   X,
-  Layers,
-  ArrowRight,
+  Plus,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CompanyProgramItem } from "../types";
+import { CompanyProgramItem, OpportunityItem, PartnerItem } from "../types";
 import { ALL_17_SDGS, getProgramSdgs, parseBeneficiariesCount, formatRupiah } from "../../analytics/helpers";
+
+const IndonesiaRealLeafletMap = dynamic(
+  () => import("./IndonesiaRealLeafletMap"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[450px] sm:h-[500px] rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-slate-400 gap-2.5 border border-[#E8E8EA]">
+        <div className="w-8 h-8 border-3 border-[#181343] border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs font-semibold text-slate-600">Memuat Peta Geografis Indonesia...</span>
+      </div>
+    ),
+  }
+);
 
 export interface ProvinceCoordinate {
   x: number;
@@ -103,25 +110,31 @@ export function matchProvinceName(provName?: string | null): string | null {
   return null;
 }
 
-interface IndonesiaBeneficiaryMapProps {
+export interface IndonesiaBeneficiaryMapProps {
   programs: CompanyProgramItem[];
+  opportunities?: OpportunityItem[];
+  partners?: PartnerItem[];
   selectedSdgFilter: string;
   onSelectSdgFilter: (sdgId: string) => void;
   onSelectProvince: (provName: string | null) => void;
   selectedProvince: string | null;
   onNavigateToProgramDetail?: (prog: CompanyProgramItem) => void;
+  onNavigateToOpportunityDetail?: (opp: OpportunityItem) => void;
+  onOpenCreateOpportunity?: (provinceName?: string) => void;
 }
 
 export function IndonesiaBeneficiaryMap({
   programs,
+  opportunities = [],
+  partners = [],
   selectedSdgFilter,
   onSelectSdgFilter,
   onSelectProvince,
   selectedProvince,
   onNavigateToProgramDetail,
+  onNavigateToOpportunityDetail,
+  onOpenCreateOpportunity,
 }: IndonesiaBeneficiaryMapProps) {
-  const [hoveredProvince, setHoveredProvince] = useState<string | null>(null);
-
   // Filter programs based on selected SDGs filter on the map
   const activePrograms = useMemo(() => {
     return programs.filter((p) => {
@@ -245,11 +258,39 @@ export function IndonesiaBeneficiaryMap({
   const highestRegion = insights.highest;
   const lowestRegion = insights.lowest;
 
-  // Selected region details
-  const activeRegionDetail = useMemo(() => {
+  // Comprehensive active province info (includes programs, opportunities, and partners)
+  const activeProvinceInfo = useMemo(() => {
     if (!selectedProvince) return null;
-    return regionalData.get(selectedProvince) || null;
-  }, [selectedProvince, regionalData]);
+    const existing = regionalData.get(selectedProvince);
+
+    const oppsInProv = opportunities.filter((o) => {
+      const match = matchProvinceName(o.targetProvince);
+      return match === selectedProvince;
+    });
+
+    const partnersInProv = partners.filter((pt) => {
+      const match = matchProvinceName(pt.province);
+      return match === selectedProvince;
+    });
+
+    const island =
+      existing?.coord.island ||
+      PROVINCE_COORDINATES[selectedProvince]?.island ||
+      "Indonesia";
+
+    return {
+      province: selectedProvince,
+      island,
+      hasPrograms: !!(existing && existing.programsCount > 0),
+      programsCount: existing ? existing.programsCount : 0,
+      programsList: existing ? existing.programsList : [],
+      targetBeneficiaries: existing ? existing.targetBeneficiaries : 0,
+      actualBeneficiaries: existing ? existing.actualBeneficiaries : 0,
+      cities: existing ? existing.cities : new Set<string>(),
+      opportunities: oppsInProv,
+      partners: partnersInProv,
+    };
+  }, [selectedProvince, regionalData, opportunities, partners]);
 
   return (
     <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden">
@@ -262,10 +303,10 @@ export function IndonesiaBeneficiaryMap({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-bold text-[#181343] tracking-tight">
-                Peta Persebaran Penerima Manfaat CSR
+                Peta Geografis &amp; Persebaran Program CSR
               </h3>
               <p className="text-xs text-[#787680]">
-                Pantau cakupan geografis program, capaian penerima manfaat riil, dan integrasi SDGs per wilayah.
+                Eksplorasi jangkauan wilayah interaktif, multi-layer program, peluang kolaborasi, dan sebaran mitra pelaksana.
               </p>
             </div>
           </div>
@@ -302,189 +343,40 @@ export function IndonesiaBeneficiaryMap({
         </div>
       </div>
 
-      {/* Main Map Body: Canvas + Side Detail Panel */}
+      {/* Main Map Body: Interactive Leaflet Map + Side Detail Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 relative">
-        {/* Left/Center: Interactive SVG Map (8 or 12 cols depending on active selection) */}
-        <div className={`${activeRegionDetail ? "lg:col-span-8" : "lg:col-span-12"} p-4 sm:p-6 flex flex-col justify-between transition-all`}>
-          {/* SVG Map Container */}
-          <div className="relative w-full rounded-2xl bg-gradient-to-b from-slate-50/70 to-slate-100/40 border border-[#E8E8EA] p-2 sm:p-4 overflow-hidden">
-            {/* Subtle Longitude & Latitude Grid */}
-            <div className="absolute inset-0 pointer-events-none opacity-40">
-              <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <pattern id="geo-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#CBD5E1" strokeWidth="0.5" strokeDasharray="3 3" />
-                  </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#geo-grid)" />
-              </svg>
-            </div>
-
-            {/* Indonesia Map SVG */}
-            <svg
-              viewBox="0 0 950 420"
-              className="w-full h-auto max-h-[380px] drop-shadow-sm select-none"
-            >
-              {/* Landmass Paths for Indonesia */}
-              <g className="fill-slate-200 stroke-slate-300 stroke-[1.2] transition-colors">
-                {/* Sumatra */}
-                <path
-                  d="M 50 65 L 75 50 L 95 60 L 130 110 L 170 145 L 205 180 L 250 250 L 260 285 L 235 305 L 205 275 L 175 250 L 140 215 L 115 155 L 75 105 Z"
-                  className="hover:fill-slate-300 transition-colors"
-                />
-                {/* Bangka Belitung */}
-                <path d="M 255 210 L 270 215 L 265 235 L 250 230 Z" />
-
-                {/* Java & Madura */}
-                <path
-                  d="M 270 325 L 340 330 L 400 335 L 450 340 L 470 345 L 465 360 L 420 355 L 360 355 L 310 350 L 275 345 Z"
-                  className="hover:fill-slate-300 transition-colors"
-                />
-                <path d="M 430 325 L 455 330 L 450 340 L 425 335 Z" />
-
-                {/* Bali, Lombok, Sumbawa, Flores, Timor */}
-                <path d="M 480 352 L 495 352 L 492 360 L 478 358 Z" />
-                <path d="M 505 352 L 525 353 L 522 362 L 502 360 Z" />
-                <path d="M 535 350 L 565 352 L 560 365 L 532 362 Z" />
-                <path d="M 575 352 L 625 352 L 620 365 L 570 362 Z" />
-                <path d="M 635 355 L 675 365 L 665 378 L 625 368 Z" />
-
-                {/* Kalimantan */}
-                <path
-                  d="M 305 180 L 350 145 L 415 130 L 465 105 L 475 145 L 480 180 L 470 230 L 440 260 L 390 265 L 350 250 L 310 220 Z"
-                  className="hover:fill-slate-300 transition-colors"
-                />
-
-                {/* Sulawesi */}
-                <path
-                  d="M 495 240 L 515 240 L 525 210 L 520 170 L 540 140 L 575 130 L 600 110 L 610 125 L 585 145 L 560 160 L 555 195 L 575 220 L 580 260 L 555 270 L 535 240 L 520 280 L 495 285 Z"
-                  className="hover:fill-slate-300 transition-colors"
-                />
-
-                {/* Maluku & Halmahera */}
-                <path d="M 645 130 L 665 140 L 660 175 L 640 160 Z" />
-                <path d="M 675 235 L 705 240 L 695 255 L 670 250 Z" />
-                <path d="M 675 280 L 700 290 L 690 305 L 670 295 Z" />
-
-                {/* Papua */}
-                <path
-                  d="M 725 180 L 760 170 L 800 185 L 845 200 L 910 200 L 910 330 L 870 340 L 840 300 L 795 255 L 745 230 L 715 205 Z"
-                  className="hover:fill-slate-300 transition-colors"
-                />
-              </g>
-
-              {/* Active Region Highlights & Interactive Marker Pins */}
-              {Array.from(regionalData.entries()).map(([prov, data]) => {
-                const isSelected = selectedProvince === prov;
-                const isHovered = hoveredProvince === prov;
-                const hasActual = data.actualBeneficiaries > 0;
-
-                // Scale pin size based on program count (6px to 10px)
-                const pinRadius = Math.min(11, 7 + data.programsCount);
-
-                return (
-                  <g
-                    key={prov}
-                    className="cursor-pointer group"
-                    onClick={() => {
-                      if (selectedProvince === prov) {
-                        onSelectProvince(null);
-                      } else {
-                        onSelectProvince(prov);
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredProvince(prov)}
-                    onMouseLeave={() => setHoveredProvince(null)}
-                  >
-                    {/* Pulsing Radar Ring */}
-                    <circle
-                      cx={data.coord.x}
-                      cy={data.coord.y}
-                      r={pinRadius + 7}
-                      className={isSelected ? "fill-emerald-400/30 animate-pulse" : "fill-emerald-500/15"}
-                    />
-
-                    {/* Active Pin Circle */}
-                    <circle
-                      cx={data.coord.x}
-                      cy={data.coord.y}
-                      r={pinRadius}
-                      className={`transition-all duration-200 ${
-                        isSelected
-                          ? "fill-[#181343] stroke-white stroke-2 drop-shadow-md scale-110"
-                          : isHovered
-                          ? "fill-emerald-600 stroke-white stroke-2 drop-shadow-sm scale-110"
-                          : "fill-[#009E75] stroke-white stroke-2"
-                      }`}
-                    />
-
-                    {/* Badge number inside pin */}
-                    <text
-                      x={data.coord.x}
-                      y={data.coord.y + 3}
-                      textAnchor="middle"
-                      className="fill-white font-extrabold text-[9px] pointer-events-none select-none"
-                    >
-                      {data.programsCount}
-                    </text>
-
-                    {/* Province Name Tag */}
-                    <text
-                      x={data.coord.x}
-                      y={data.coord.y + pinRadius + 11}
-                      textAnchor="middle"
-                      className={`text-[9.5px] font-bold transition-colors pointer-events-none select-none ${
-                        isSelected
-                          ? "fill-[#181343] font-black"
-                          : isHovered
-                          ? "fill-emerald-800 font-extrabold"
-                          : "fill-slate-700"
-                      }`}
-                    >
-                      {prov}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-
-            {/* Map Legend Floating on Bottom Left */}
-            <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-xs p-2.5 rounded-xl border border-[#E8E8EA] shadow-2xs text-[11px] space-y-1.5 hidden sm:block">
-              <span className="font-bold text-slate-800 block text-[10px] uppercase tracking-wider">
-                Indikator Peta:
-              </span>
-              <div className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#009E75] border border-white" />
-                <span>Wilayah Program Aktif</span>
-              </div>
-              <div className="flex items-center gap-2 text-slate-600">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#181343] border border-white" />
-                <span>Wilayah Terpilih</span>
-              </div>
-            </div>
-
-            {/* Instruction Badge Floating on Top Right */}
-            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-[#E8E8EA] text-[10px] font-semibold text-slate-600 hidden sm:flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-emerald-600" />
-              <span>Klik marker wilayah untuk melihat detail</span>
-            </div>
-          </div>
+        {/* Left/Center: Real Geographic Leaflet Map */}
+        <div
+          className={`${
+            activeProvinceInfo ? "lg:col-span-8" : "lg:col-span-12"
+          } p-4 sm:p-6 transition-all`}
+        >
+          <IndonesiaRealLeafletMap
+            programs={activePrograms}
+            opportunities={opportunities}
+            partners={partners}
+            selectedProvince={selectedProvince}
+            onSelectProvince={onSelectProvince}
+            onNavigateToProgramDetail={onNavigateToProgramDetail}
+            onNavigateToOpportunityDetail={onNavigateToOpportunityDetail}
+            onOpenCreateOpportunity={onOpenCreateOpportunity}
+          />
         </div>
 
-        {/* Right Column: Selected Region Detail Panel (If region is clicked) */}
-        {activeRegionDetail && (
+        {/* Right Column: Selected Region Detail Panel */}
+        {activeProvinceInfo && (
           <div className="lg:col-span-4 p-5 sm:p-6 bg-[#F9F9FB] border-t lg:border-t-0 lg:border-l border-[#E8E8EA] space-y-4 animate-in fade-in duration-200">
             <div className="flex items-start justify-between">
               <div>
                 <span className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider">
-                  Wilayah Terpilih ({activeRegionDetail.coord.island})
+                  Wilayah Terpilih ({activeProvinceInfo.island})
                 </span>
                 <h4 className="text-base font-bold text-[#181343] mt-0.5">
-                  {activeRegionDetail.province}
+                  {activeProvinceInfo.province}
                 </h4>
-                {activeRegionDetail.cities.size > 0 && (
+                {activeProvinceInfo.cities.size > 0 && (
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {Array.from(activeRegionDetail.cities).join(", ")}
+                    {Array.from(activeProvinceInfo.cities).join(", ")}
                   </p>
                 )}
               </div>
@@ -498,88 +390,187 @@ export function IndonesiaBeneficiaryMap({
               </button>
             </div>
 
-            {/* Target vs Realisasi Beneficiaries Box */}
-            <div className="p-3.5 rounded-2xl bg-white border border-[#E8E8EA] space-y-2.5">
-              <span className="text-xs font-bold text-slate-800 block">
-                Capaian Penerima Manfaat:
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-                  <span className="text-[10px] uppercase font-semibold text-slate-400 block">
-                    Target Program
+            {/* A. If province HAS programs */}
+            {activeProvinceInfo.hasPrograms ? (
+              <div className="space-y-3.5">
+                {/* Target vs Realisasi Beneficiaries Box */}
+                <div className="p-3.5 rounded-2xl bg-white border border-[#E8E8EA] space-y-2.5">
+                  <span className="text-xs font-bold text-slate-800 block">
+                    Capaian Penerima Manfaat:
                   </span>
-                  <span className="text-sm font-bold text-slate-800 block mt-0.5">
-                    {activeRegionDetail.targetBeneficiaries > 0
-                      ? `${activeRegionDetail.targetBeneficiaries.toLocaleString("id-ID")} Jiwa`
-                      : "Belum Ditetapkan"}
-                  </span>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
-                  <span className="text-[10px] uppercase font-semibold text-emerald-700 block">
-                    Realisasi Dilaporkan
-                  </span>
-                  <span className="text-sm font-bold text-emerald-800 block mt-0.5">
-                    {activeRegionDetail.actualBeneficiaries > 0
-                      ? `${activeRegionDetail.actualBeneficiaries.toLocaleString("id-ID")} Jiwa`
-                      : "Belum Ada Data Realisasi"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Program List in Region */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold text-[#181343] block">
-                Program Berjalan di Wilayah Ini ({activeRegionDetail.programsCount}):
-              </span>
-              <div className="space-y-2 max-h-52 overflow-y-auto pr-1 text-xs">
-                {activeRegionDetail.programsList.map((prog) => (
-                  <div
-                    key={prog.id}
-                    className="p-3 rounded-xl bg-white border border-[#E8E8EA] space-y-1.5 hover:border-slate-300 transition"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-bold text-[#181343] line-clamp-1 leading-snug">
-                        {prog.title}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                      <span className="text-[10px] uppercase font-semibold text-slate-400 block">
+                        Target Program
                       </span>
-                      <Badge
-                        variant={
-                          prog.status === "COMPLETED"
-                            ? "blue"
-                            : prog.status === "IN_PROGRESS"
-                            ? "emerald"
-                            : "amber"
-                        }
-                        size="sm"
-                      >
-                        {prog.status === "COMPLETED"
-                          ? "Selesai"
-                          : prog.status === "IN_PROGRESS"
-                          ? "Berjalan"
-                          : "Persiapan"}
-                      </Badge>
+                      <span className="text-sm font-bold text-slate-800 block mt-0.5">
+                        {activeProvinceInfo.targetBeneficiaries > 0
+                          ? `${activeProvinceInfo.targetBeneficiaries.toLocaleString("id-ID")} Jiwa`
+                          : "Belum Ditetapkan"}
+                      </span>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Mitra: <strong className="text-slate-700">{prog.partnerName || "Mitra CSR"}</strong></span>
-                      <span className="font-semibold text-emerald-700">{formatRupiah(prog.budget)}</span>
+                    <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                      <span className="text-[10px] uppercase font-semibold text-emerald-700 block">
+                        Realisasi Dilaporkan
+                      </span>
+                      <span className="text-sm font-bold text-emerald-800 block mt-0.5">
+                        {activeProvinceInfo.actualBeneficiaries > 0
+                          ? `${activeProvinceInfo.actualBeneficiaries.toLocaleString("id-ID")} Jiwa`
+                          : "Belum Ada Data Realisasi"}
+                      </span>
                     </div>
-
-                    {onNavigateToProgramDetail && (
-                      <button
-                        type="button"
-                        onClick={() => onNavigateToProgramDetail(prog)}
-                        className="text-[11px] font-bold text-[#181343] hover:text-emerald-700 flex items-center gap-1 pt-1 cursor-pointer"
-                      >
-                        <span>Lihat Detail Program</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    )}
                   </div>
-                ))}
+                </div>
+
+                {/* Program List in Region */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-[#181343] block">
+                    Program Berjalan ({activeProvinceInfo.programsCount}):
+                  </span>
+                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                    {activeProvinceInfo.programsList.map((prog) => (
+                      <div
+                        key={prog.id}
+                        className="p-3 rounded-xl bg-white border border-[#E8E8EA] space-y-1.5 hover:border-slate-300 transition"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-bold text-[#181343] line-clamp-1 leading-snug">
+                            {prog.title}
+                          </span>
+                          <Badge
+                            variant={
+                              prog.status === "COMPLETED"
+                                ? "blue"
+                                : prog.status === "IN_PROGRESS"
+                                ? "emerald"
+                                : "amber"
+                            }
+                            size="sm"
+                          >
+                            {prog.status === "COMPLETED"
+                              ? "Selesai"
+                              : prog.status === "IN_PROGRESS"
+                              ? "Berjalan"
+                              : "Persiapan"}
+                          </Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[11px] text-slate-500">
+                          <span>
+                            Mitra: <strong className="text-slate-700">{prog.partnerName || "Mitra CSR"}</strong>
+                          </span>
+                          <span className="font-semibold text-emerald-700">
+                            {formatRupiah(prog.budget)}
+                          </span>
+                        </div>
+
+                        {onNavigateToProgramDetail && (
+                          <button
+                            type="button"
+                            onClick={() => onNavigateToProgramDetail(prog)}
+                            className="text-[11px] font-bold text-[#181343] hover:text-emerald-700 flex items-center gap-1 pt-1 cursor-pointer"
+                          >
+                            <span>Lihat Detail Program</span>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* B. If province has NO programs (Unreached) */
+              <div className="p-4 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
+                <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto">
+                  <MapPin className="w-5 h-5 text-slate-400" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-[#181343] block">
+                    Belum Ada Program Berjalan
+                  </span>
+                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                    Perusahaan Anda belum menjalankan inisiatif program CSR di wilayah{" "}
+                    <strong>{activeProvinceInfo.province}</strong>.
+                  </p>
+                </div>
+
+                {onOpenCreateOpportunity && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => onOpenCreateOpportunity(activeProvinceInfo.province)}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                    className="w-full text-xs font-bold cursor-pointer"
+                  >
+                    + Buat Peluang CSR di Wilayah Ini
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* C. Opportunities in this province if any */}
+            {activeProvinceInfo.opportunities.length > 0 && (
+              <div className="space-y-2 pt-2 border-t border-slate-200">
+                <span className="text-xs font-bold text-indigo-900 block flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Peluang Terbuka di Wilayah Ini ({activeProvinceInfo.opportunities.length}):</span>
+                </span>
+                <div className="space-y-2 max-h-36 overflow-y-auto pr-1 text-xs">
+                  {activeProvinceInfo.opportunities.map((opp) => (
+                    <div
+                      key={opp.id}
+                      className="p-2.5 rounded-xl bg-indigo-50/50 border border-indigo-100 space-y-1 hover:border-indigo-300 transition"
+                    >
+                      <div className="font-bold text-indigo-950 line-clamp-1">{opp.title}</div>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500">
+                        <span>{opp.focusArea.replace("_", " ")}</span>
+                        {opp.stats && (
+                          <span className="font-semibold text-indigo-700">
+                            {opp.stats.proposalsCount} Proposal Masuk
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* D. Partners in this province if any */}
+            {activeProvinceInfo.partners.length > 0 && (
+              <div className="space-y-1.5 pt-2 border-t border-slate-200 text-xs">
+                <span className="text-[11px] font-bold text-amber-800 block flex items-center gap-1">
+                  <Building2 className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Mitra Terverifikasi di {activeProvinceInfo.province} ({activeProvinceInfo.partners.length}):</span>
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  {activeProvinceInfo.partners.map((pt) => (
+                    <span
+                      key={pt.id}
+                      className="px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-[10px] font-semibold text-amber-900 truncate max-w-full"
+                    >
+                      {pt.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Bottom action if has programs: allow creating new opportunity as well */}
+            {activeProvinceInfo.hasPrograms && onOpenCreateOpportunity && (
+              <div className="pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => onOpenCreateOpportunity(activeProvinceInfo.province)}
+                  className="w-full py-2 px-3 rounded-xl border border-dashed border-[#181343]/30 hover:border-[#181343] hover:bg-[#181343]/5 text-[#181343] text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>+ Tambah Peluang Baru di {activeProvinceInfo.province}</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,5 +1,5 @@
 import { tool } from "@langchain/core/tools";
-import { eq, and, or, like, desc, sql } from "drizzle-orm";
+import { eq, ne, and, or, like, desc, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { opportunities } from "@/db/schema/opportunities";
 import { companies } from "@/db/schema/companies";
@@ -17,7 +17,12 @@ import {
   getMyProgramsOverviewInputSchema,
   getProgramMilestonesProgressInputSchema,
   getCsrSdgsBenchmarkInputSchema,
+  getCompanyGeographicFootprintInputSchema,
 } from "./chatbot.schema";
+import {
+  INDONESIA_PROVINCE_GEO,
+  matchGeoProvinceName,
+} from "@/components/dashboard/company/overview/indonesia-geo-coordinates";
 
 export interface ToolExecutionEvent {
   toolName: string;
@@ -572,6 +577,239 @@ export function createChatbotTools(authUser: AuthUser, onToolExecuted?: (event: 
     }
   );
 
+  // 9. Get Company Geographic Footprint & Unreached Territories Tool
+  const getCompanyGeographicFootprint = tool(
+    async (input) => {
+      try {
+        const companyId = authUser.companyId;
+        if (!companyId) {
+          return JSON.stringify({
+            message:
+              "Tool ini dikhususkan untuk akun Perusahaan (Company / CSR Admin). Pengguna saat ini tidak terikat pada entitas perusahaan tertentu.",
+          });
+        }
+
+        // Fetch company name & profile
+        const [companyRow] = await db
+          .select({ id: companies.id, name: companies.name, csrVision: companies.csrVision })
+          .from(companies)
+          .where(eq(companies.id, companyId))
+          .limit(1);
+
+        // Fetch all active & completed programs and opportunities of this company
+        const [progRows, oppRows, allVerifiedPartners] = await Promise.all([
+          db
+            .select({
+              id: programs.id,
+              title: programs.title,
+              targetProvince: programs.targetProvince,
+              targetCity: programs.targetCity,
+              focusArea: programs.focusArea,
+              status: programs.status,
+              budget: programs.budget,
+              actualBeneficiaries: programs.actualBeneficiaries,
+            })
+            .from(programs)
+            .where(and(eq(programs.companyId, companyId), ne(programs.status, "CANCELLED"))),
+          db
+            .select({
+              id: opportunities.id,
+              title: opportunities.title,
+              targetProvince: opportunities.targetProvince,
+              targetCity: opportunities.targetCity,
+              focusArea: opportunities.focusArea,
+              status: opportunities.status,
+            })
+            .from(opportunities)
+            .where(eq(opportunities.companyId, companyId)),
+          db
+            .select({
+              id: partners.id,
+              name: partners.name,
+              province: partners.province,
+              city: partners.city,
+              focusArea: partners.focusArea,
+              status: partners.status,
+            })
+            .from(partners)
+            .where(and(eq(partners.status, "ACTIVE"), eq(partners.isVerified, true))),
+        ]);
+
+        // Map covered provinces
+        const coveredSet = new Set<string>();
+        progRows.forEach((p) => {
+          const matched = matchGeoProvinceName(p.targetProvince);
+          if (matched) coveredSet.add(matched);
+        });
+        oppRows.forEach((o) => {
+          const matched = matchGeoProvinceName(o.targetProvince);
+          if (matched) coveredSet.add(matched);
+        });
+
+        const coveredProvincesList = Array.from(coveredSet);
+        const totalNational = 38;
+        const unreachedCount = Math.max(0, totalNational - coveredProvincesList.length);
+
+        // Unreached provinces list
+        let unreachedCandidates = Object.entries(INDONESIA_PROVINCE_GEO)
+          .filter(([name]) => !coveredSet.has(name))
+          .map(([name, geo]) => ({ name, island: geo.island }));
+
+        if (input.islandGroup) {
+          const islandFilter = input.islandGroup.toLowerCase().trim();
+          const filtered = unreachedCandidates.filter(
+            (c) =>
+              c.island.toLowerCase().includes(islandFilter) ||
+              islandFilter.includes(c.island.toLowerCase())
+          );
+          if (filtered.length > 0) {
+            unreachedCandidates = filtered;
+          }
+        }
+
+        // Regional benchmark data
+        const getRegionalRecommendationContext = (provName: string, island: string) => {
+          if (provName.includes("Nusa Tenggara Timur") || provName.includes("Nusa Tenggara Barat")) {
+            return {
+              urgency:
+                "Tingginya angka prevalensi stunting balita pedesaan, kerentanan pangan keluarga, dan terbatasnya akses fasilitas MCK/sanitasi higienis.",
+              proposedTitle: "Program Air Bersih Pedesaan & Kebun Gizi Mandiri Pencegah Stunting",
+              focusArea: "KESEHATAN",
+              sdgs: ["SDG 2: Tanpa Kelaparan", "SDG 3: Kehidupan Sehat", "SDG 6: Air Bersih & Sanitasi"],
+            };
+          }
+          if (island === "Papua") {
+            return {
+              urgency:
+                "Kesenjangan sarana ruang kelas sekolah 3T, akses buku literasi digital pemuda, dan kebutuhan elektrifikasi surya mandiri di pelosok.",
+              proposedTitle: "Revitalisasi Sarana Sekolah 3T & Laboratorium Belajar Mandiri Tenaga Surya",
+              focusArea: "PENDIDIKAN",
+              sdgs: ["SDG 4: Pendidikan Berkualitas", "SDG 7: Energi Bersih", "SDG 9: Industri & Infrastruktur"],
+            };
+          }
+          if (island === "Maluku") {
+            return {
+              urgency:
+                "Degradasi ekosistem terumbu karang dan pesisir, ancaman abrasi pulau terluar, serta keterbatasan rantai pasok ekonomi nelayan tradisional.",
+              proposedTitle: "Konservasi Pesisir Terpadu & Sentra Pemberdayaan Ekonomi Nelayan Pesisir",
+              focusArea: "LINGKUNGAN",
+              sdgs: ["SDG 14: Ekosistem Laut", "SDG 8: Pekerjaan Layak", "SDG 13: Aksi Iklim"],
+            };
+          }
+          if (island === "Kalimantan") {
+            return {
+              urgency:
+                "Restorasi ekosistem gambut, pencegahan karhutla, dan penyediaan infrastruktur dasar air bersih perpipaan komunal warga pedesaan.",
+              proposedTitle: "Restorasi Ekosistem Gambut Berbasis Masyarakat & Penyediaan Air Bersih Komunal",
+              focusArea: "LINGKUNGAN",
+              sdgs: ["SDG 15: Ekosistem Darat", "SDG 6: Air Bersih", "SDG 13: Aksi Iklim"],
+            };
+          }
+          if (island === "Sulawesi") {
+            return {
+              urgency:
+                "Pendampingan pascapanen komoditas perkebunan kakao/kopi UMKM tani, mitigasi kerentanan gempa/longsor, dan nutrisi keluarga.",
+              proposedTitle: "Inkubasi Bisnis UMKM Tani Berkelanjutan & Ketangguhan Bencana Komunal",
+              focusArea: "PEMBERDAYAAN_EKONOMI",
+              sdgs: ["SDG 8: Pekerjaan Layak", "SDG 11: Kota & Permukiman Tangguh", "SDG 1: Tanpa Kemiskinan"],
+            };
+          }
+          return {
+            urgency:
+              "Pemberdayaan ekonomi produktif keluarga prasejahtera, peningkatan keterampilan kerja vokasi pemuda, dan pengelolaan sampah terpadu.",
+            proposedTitle: "Sentra Inkubasi Wirausaha Hijau & Pelatihan Vokasi Keterampilan Kerja Pemuda",
+            focusArea: "PEMBERDAYAAN_EKONOMI",
+            sdgs: ["SDG 1: Tanpa Kemiskinan", "SDG 8: Pekerjaan Layak", "SDG 12: Konsumsi Berkelanjutan"],
+          };
+        };
+
+        // Enrich candidates with partners & scoring
+        const enriched = unreachedCandidates.map((c) => {
+          const partnersInProv = allVerifiedPartners.filter((p) => {
+            const match = matchGeoProvinceName(p.province);
+            return match === c.name;
+          });
+
+          const recContext = getRegionalRecommendationContext(c.name, c.island);
+          let score = 10;
+          if (partnersInProv.length > 0) score += 20; // Bonus: verified partners ready in the area
+          if (input.focusArea && recContext.focusArea === input.focusArea) score += 30; // Matches requested focus
+
+          return {
+            province: c.name,
+            island: c.island,
+            urgencyTopic: recContext.urgency,
+            proposedProgramTitle: recContext.proposedTitle,
+            focusArea: recContext.focusArea,
+            sdgs: recContext.sdgs,
+            verifiedPartnersCount: partnersInProv.length,
+            samplePartners: partnersInProv.slice(0, 3).map((p) => ({
+              id: p.id,
+              name: p.name,
+              focusArea: p.focusArea,
+              city: p.city || c.name,
+            })),
+            score,
+          };
+        });
+
+        // Sort by score descending and take limit
+        enriched.sort((a, b) => b.score - a.score);
+        const topRecommendations = enriched.slice(0, input.limit || 5);
+
+        // Emit card event for interactive rendering in Chatbot UI
+        if (onToolExecuted) {
+          onToolExecuted({
+            toolName: "getCompanyGeographicFootprint",
+            args: input,
+            resultSummary: `Cakupan saat ini: ${coveredProvincesList.length} dari 38 provinsi. Menemukan ${topRecommendations.length} wilayah rekomendasi ekspansi baru.`,
+            cardData: {
+              type: "TERRITORY_EXPANSION",
+              companyName: companyRow?.name || "Perusahaan",
+              coveredCount: coveredProvincesList.length,
+              totalNational: totalNational,
+              unreachedCount: unreachedCount,
+              coveredProvinces: coveredProvincesList,
+              recommendations: topRecommendations,
+            },
+          });
+        }
+
+        return JSON.stringify({
+          companyName: companyRow?.name || "Perusahaan",
+          nationalCoverage: {
+            coveredCount: coveredProvincesList.length,
+            totalProvinces: totalNational,
+            unreachedCount: unreachedCount,
+            coveredProvinces: coveredProvincesList,
+          },
+          topUnreachedTerritoriesRecommendations: topRecommendations.map((r) => ({
+            province: r.province,
+            islandGroup: r.island,
+            dominantSocialNeed: r.urgencyTopic,
+            proposedInitiativeTitle: r.proposedProgramTitle,
+            suggestedFocusArea: r.focusArea,
+            relevantSdgs: r.sdgs,
+            registeredLocalPartnersCount: r.verifiedPartnersCount,
+            readyPartnerNames: r.samplePartners.map((p) => `${p.name} (${p.city})`),
+          })),
+          guidanceForAdvisor:
+            "Jelaskan status cakupan saat ini secara apresiatif, lalu paparkan 2-3 usulan program ekspansi wilayah dengan detail urgensi lokal, sasaran SDGs, dan ajak pengguna membuat peluang CSR di wilayah tersebut melalui kartu interaktif yang tersedia.",
+        });
+      } catch (err: any) {
+        return JSON.stringify({
+          error: `Gagal menganalisis jangkauan geografis perusahaan: ${err.message}`,
+        });
+      }
+    },
+    {
+      name: "getCompanyGeographicFootprint",
+      description:
+        "Menganalisis peta sebaran geografis program CSR perusahaan (provinsi yang sudah terjangkau vs yang belum pernah dijangkau), lalu merekomendasikan inisiatif program CSR baru di wilayah belum terjangkau berdasarkan urgensi daerah dan ketersediaan mitra lokal terverifikasi.",
+      schema: getCompanyGeographicFootprintInputSchema,
+    }
+  );
+
   return [
     searchOpportunities,
     getOpportunityDetail,
@@ -581,5 +819,6 @@ export function createChatbotTools(authUser: AuthUser, onToolExecuted?: (event: 
     getProgramMilestonesProgress,
     getMyOrganizationProfile,
     getCsrSdgsBenchmark,
+    getCompanyGeographicFootprint,
   ];
 }

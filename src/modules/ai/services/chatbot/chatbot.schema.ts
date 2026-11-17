@@ -6,6 +6,13 @@ import { programStatusEnum } from "@/db/schema/programs";
 export const chatMessageSchema = z.object({
   role: z.enum(["user", "assistant", "system"]),
   content: z.string().min(1, "Pesan tidak boleh kosong"),
+  attachedDocument: z
+    .object({
+      fileName: z.string(),
+      fileSize: z.number(),
+      mimeType: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type ChatMessageDTO = z.infer<typeof chatMessageSchema>;
@@ -17,6 +24,16 @@ export const chatRequestSchema = z.object({
       currentPage: z.string().optional(),
       selectedOpportunityId: z.string().optional(),
       selectedProgramId: z.string().optional(),
+      attachedSurveyDocument: z
+        .object({
+          fileName: z.string(),
+          fileSize: z.number(),
+          mimeType: z.string(),
+          extractedSnippet: z.string().optional(),
+          detectedProvince: z.string().optional(),
+          detectedFocusAreas: z.array(z.string()).optional(),
+        })
+        .optional(),
     })
     .optional(),
 });
@@ -79,3 +96,24 @@ export const getCsrSdgsBenchmarkInputSchema = z.object({
     .optional()
     .describe("Topik CSR atau target SDG yang ingin dicari panduannya (contoh: 'SDG 13', 'Pendidikan', 'Stunting')"),
 });
+
+export const getCompanyGeographicFootprintInputSchema = z.object({
+  focusArea: z
+    .enum(csrFocusAreaEnum)
+    .optional()
+    .describe("Filter bidang fokus CSR jika perusahaan ingin ekspansi program pada bidang tertentu"),
+  islandGroup: z
+    .string()
+    .optional()
+    .describe("Filter gugus kepulauan sasaran ekspansi (misal: 'Sumatra', 'Jawa', 'Kalimantan', 'Sulawesi', 'Bali & Nusa Tenggara', 'Maluku', 'Papua')"),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(10)
+    .optional()
+    .default(5)
+    .describe("Jumlah rekomendasi wilayah yang belum terjangkau (default: 5)"),
+});
+
+export type GetCompanyGeographicFootprintInput = z.infer<typeof getCompanyGeographicFootprintInputSchema>;

@@ -50,7 +50,7 @@ import { opportunityStatusEnum, OpportunityStatus } from "@/db/schema/opportunit
 import { InviteMemberModal } from "../InviteMemberModal";
 import { Sidebar, CompanyNavMenu } from "../Sidebar";
 import { DashboardHeader, NotificationItem } from "../DashboardHeader";
-import { CreateOpportunityPageView } from "./opportunities/CreateOpportunityPageView";
+import { CreateOpportunityPageView, type OpportunityDraftData } from "./opportunities/CreateOpportunityPageView";
 import { EditOpportunityPageView } from "./opportunities/EditOpportunityPageView";
 import { InvitePartnerModal } from "./InvitePartnerModal";
 import { OpportunityDetailModal } from "./OpportunityDetailModal";
@@ -169,6 +169,8 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
   // Modal and sub-view states
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
+  const [opportunityPrefillProvince, setOpportunityPrefillProvince] = useState<string | null>(null);
+  const [opportunityPrefillDraft, setOpportunityPrefillDraft] = useState<OpportunityDraftData | null>(null);
   const [selectedOppForEdit, setSelectedOppForEdit] = useState<OpportunityItem | null>(null);
   const [selectedOppForDetail, setSelectedOppForDetail] = useState<OpportunityItem | null>(null);
   const [selectedPartnerForInvite, setSelectedPartnerForInvite] = useState<PartnerItem | null>(null);
@@ -1166,9 +1168,14 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               onNavigateMenu={(menu) => setActiveMenu(menu)}
               onOpenCreateOpportunity={
                 !isManagement
-                  ? () => {
+                  ? (initialProvince) => {
                     setActiveMenu("opportunities");
                     setIsCreatingOpportunity(true);
+                    if (initialProvince) {
+                      setOpportunityPrefillProvince(initialProvince);
+                    } else {
+                      setOpportunityPrefillProvince(null);
+                    }
                   }
                   : undefined
               }
@@ -1182,9 +1189,17 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {activeMenu === "opportunities" && (
             !isManagement && isCreatingOpportunity ? (
               <CreateOpportunityPageView
-                onBack={() => setIsCreatingOpportunity(false)}
+                initialProvince={opportunityPrefillProvince || undefined}
+                initialDraft={opportunityPrefillDraft || undefined}
+                onBack={() => {
+                  setIsCreatingOpportunity(false);
+                  setOpportunityPrefillProvince(null);
+                  setOpportunityPrefillDraft(null);
+                }}
                 onSuccess={() => {
                   setIsCreatingOpportunity(false);
+                  setOpportunityPrefillProvince(null);
+                  setOpportunityPrefillDraft(null);
                   fetchOpportunities();
                 }}
               />
@@ -2428,6 +2443,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               userName={user.name}
               organizationName={company?.name}
               onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
+              onOpenCreateOpportunity={
+                !isManagement
+                  ? (initialProvince, draftData) => {
+                      setActiveMenu("opportunities");
+                      setIsCreatingOpportunity(true);
+                      setOpportunityPrefillProvince(initialProvince || null);
+                      setOpportunityPrefillDraft(draftData || null);
+                    }
+                  : undefined
+              }
             />
           )}
         </main>
