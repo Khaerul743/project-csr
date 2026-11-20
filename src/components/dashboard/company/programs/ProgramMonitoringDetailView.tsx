@@ -16,9 +16,7 @@ import {
   Sparkles,
   Check,
   Percent,
-  Camera,
   FileText,
-  Star,
   Wallet,
   MessageSquare,
   TrendingUp,
@@ -35,6 +33,8 @@ import {
   FOCUS_AREA_CONFIG,
   formatRupiah,
   formatDate,
+  formatCurrencyInput,
+  parseCurrencyInput,
 } from "../helpers";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
@@ -104,7 +104,7 @@ export function ProgramMonitoringDetailView({
     : null;
 
   const totalBudgetNum = parseFloat(program.budget || "0") || 1;
-  const currentSpentNum = parseFloat(spentBudget || "0") || 0;
+  const currentSpentNum = parseCurrencyInput(spentBudget);
   const progressPercent = Math.min(100, Math.round((currentSpentNum / totalBudgetNum) * 100));
 
   const handleUpdateStatus = async (e: React.FormEvent) => {
@@ -126,7 +126,7 @@ export function ProgramMonitoringDetailView({
         },
         body: JSON.stringify({
           status,
-          spentBudget: spentBudget ? parseFloat(spentBudget) : 0,
+          spentBudget: parseCurrencyInput(spentBudget),
           actualBeneficiaries: actualBeneficiaries.trim() || null,
           description: description.trim() || null,
         }),
@@ -138,7 +138,7 @@ export function ProgramMonitoringDetailView({
       }
 
       setSuccessMsg("Pembaruan status dan progres program berhasil disimpan!");
-      
+
       // Update local state
       setCurrentProgram((prev) => ({
         ...prev,
@@ -184,11 +184,11 @@ export function ProgramMonitoringDetailView({
               href={program.collaborationMouUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#181343] hover:text-[#047857] bg-white hover:bg-emerald-50 border border-[#E5E7EB] hover:border-emerald-300 px-3 py-1.5 rounded-xl shadow-2xs transition-all"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#181343] hover:bg-slate-50 bg-white border border-[#E5E7EB] hover:border-slate-300 px-3 py-1.5 rounded-xl shadow-2xs transition-all"
             >
-              <FileCheck2 className="w-4 h-4 text-emerald-600" />
+              <FileCheck2 className="w-4 h-4 text-[#181343]" />
               <span>Dokumen MoU</span>
-              <ExternalLink className="w-3 h-3 text-[#787680]" />
+              <ExternalLink className="w-3 h-3 text-[#181343]" />
             </a>
           )}
 
@@ -198,8 +198,8 @@ export function ProgramMonitoringDetailView({
               variant="outline"
               size="sm"
               onClick={() => onOpenChat(program.collaborationId)}
-              leftIcon={<MessageSquare className="w-3.5 h-3.5 text-teal-600" />}
-              className="text-xs font-bold text-teal-800 bg-teal-50/70 hover:bg-teal-100 border-teal-200/80 rounded-xl cursor-pointer"
+              leftIcon={<MessageSquare className="w-3.5 h-3.5 text-[#181343]" />}
+              className="text-xs font-bold text-[#181343] bg-slate-50 hover:bg-slate-100 border-slate-200 rounded-xl cursor-pointer"
             >
               Pesan Mitra
             </Button>
@@ -210,8 +210,8 @@ export function ProgramMonitoringDetailView({
             variant="outline"
             size="sm"
             onClick={() => setActiveTab("esg-report")}
-            leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-600" />}
-            className="text-xs font-extrabold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-300 rounded-xl cursor-pointer shadow-2xs"
+            leftIcon={<Sparkles className="w-3.5 h-3.5 text-[#181343]" />}
+            className="text-xs font-extrabold text-[#181343] bg-slate-50 hover:bg-slate-100 border-slate-200 rounded-xl cursor-pointer shadow-2xs"
           >
             Laporan ESG (AI)
           </Button>
@@ -229,7 +229,7 @@ export function ProgramMonitoringDetailView({
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
           <div className="flex items-start gap-4 min-w-0">
             {/* Logo Mitra dengan graceful fallback initial */}
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-center justify-center font-black text-emerald-800 text-lg overflow-hidden shrink-0 shadow-2xs">
+            <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center font-black text-[#181343] text-lg overflow-hidden shrink-0 shadow-2xs">
               {program.partnerLogo && !partnerLogoError ? (
                 <img
                   src={program.partnerLogo}
@@ -249,13 +249,13 @@ export function ProgramMonitoringDetailView({
                     {focusConfig.label}
                   </Badge>
                 )}
-                <span className="text-xs text-[#787680] flex items-center gap-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-[#181343]" />
                   {program.targetCity
                     ? `${program.targetCity}${program.targetProvince ? `, ${program.targetProvince}` : ""}`
                     : "Wilayah Sasaran"}
                 </span>
-                <span className="text-xs text-[#787680] flex items-center gap-1 font-medium">
+                <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
                   <Calendar className="w-3.5 h-3.5 text-[#181343]" />
                   {program.startDate && program.endDate
                     ? `${formatDate(program.startDate)} s/d ${formatDate(program.endDate)}`
@@ -271,22 +271,22 @@ export function ProgramMonitoringDetailView({
                 {program.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#787680]">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
                 <span className="font-semibold text-[#181343] flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 text-teal-600" />
+                  <Building2 className="w-3.5 h-3.5 text-[#181343]" />
                   {program.partnerName || "Mitra Pelaksana"}
                 </span>
                 {program.opportunityTitle && (
                   <>
-                    <span>•</span>
+                    <span>&bull;</span>
                     <span className="truncate">
                       Peluang Asal: <strong className="text-[#181343]">{program.opportunityTitle}</strong>
                     </span>
                   </>
                 )}
-                <span>•</span>
-                <span className="flex items-center gap-1 font-medium text-emerald-700">
-                  <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>&bull;</span>
+                <span className="flex items-center gap-1 font-medium text-slate-700">
+                  <FileCheck2 className="w-3.5 h-3.5 text-[#181343]" />
                   {program.collaborationMouUrl ? "MoU Telah Disepakati" : "MoU Dalam Pengesahan"}
                 </span>
               </div>
@@ -304,17 +304,17 @@ export function ProgramMonitoringDetailView({
               <button
                 type="button"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="text-xs font-bold text-[#059669] hover:text-[#047857] hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-[#181343] hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
               >
                 {isDescriptionExpanded ? (
                   <>
                     <span>Ciutkan Deskripsi</span>
-                    <ChevronUp className="w-3.5 h-3.5" />
+                    <ChevronUp className="w-3.5 h-3.5 text-[#181343]" />
                   </>
                 ) : (
                   <>
                     <span>Lihat Selengkapnya</span>
-                    <ChevronDown className="w-3.5 h-3.5" />
+                    <ChevronDown className="w-3.5 h-3.5 text-[#181343]" />
                   </>
                 )}
               </button>
@@ -328,30 +328,30 @@ export function ProgramMonitoringDetailView({
       {/* ============================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Progres Aktivitas Proposal */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-600">
                 Progres Aktivitas Proposal
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-50 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Activity className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Activity className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight">
               {program.activityProgressPercent ?? 0}%
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
+          <div className="pt-3 border-t border-slate-100 mt-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#5B5966]">Tahapan Proposal Selesai</span>
-              <span className="font-bold text-emerald-700">
+              <span className="text-slate-500">Tahapan Proposal Selesai</span>
+              <span className="font-bold text-[#181343]">
                 {program.completedActivitiesCount ?? 0} / {program.totalActivitiesCount ?? 0}
               </span>
             </div>
-            <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                className="bg-[#181343] h-full rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(program.activityProgressPercent ?? 0, 100)}%` }}
               />
             </div>
@@ -359,28 +359,28 @@ export function ProgramMonitoringDetailView({
         </div>
 
         {/* KPI 2: Realisasi Dana */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-600">
                 Realisasi Dana
               </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Wallet className="w-4 h-4 text-emerald-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Wallet className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight truncate">
               {formatRupiah(currentSpentNum)}
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 space-y-1.5">
+          <div className="pt-3 border-t border-slate-100 mt-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-[#787680] truncate">Pagu: {formatRupiah(program.budget)}</span>
-              <span className="font-bold text-emerald-700 shrink-0">{progressPercent}%</span>
+              <span className="text-slate-500 truncate">Pagu: {formatRupiah(program.budget)}</span>
+              <span className="font-bold text-[#181343] shrink-0">{progressPercent}%</span>
             </div>
-            <div className="w-full bg-[#EEEEF0] rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                className="bg-[#181343] h-full rounded-full transition-all duration-500"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -388,56 +388,55 @@ export function ProgramMonitoringDetailView({
         </div>
 
         {/* KPI 3: Laporan Menunggu Verifikasi */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-600">
                 Laporan Menunggu Verifikasi
               </span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <FileText className="w-4 h-4 text-amber-600" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <FileText className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight">
               {program.pendingVerificationCount ?? 0}
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs text-[#787680]">
-            <span>Status Verifikasi:</span>
+          <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs">
+            <span className="text-slate-500">Status Verifikasi:</span>
             <span
-              className={`font-bold ${
-                (program.pendingVerificationCount ?? 0) > 0
-                  ? "text-amber-700"
-                  : "text-emerald-700"
-              }`}
+              className={`font-bold ${(program.pendingVerificationCount ?? 0) > 0
+                ? "text-amber-700"
+                : "text-[#181343]"
+                }`}
             >
               {(program.pendingVerificationCount ?? 0) > 0
-                ? "Perlu Pemeriksaan"
+                ? `${program.pendingVerificationCount} Perlu Pemeriksaan`
                 : "Semua Tertib"}
             </span>
           </div>
         </div>
 
         {/* KPI 4: Penerima Manfaat Aktual */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E5E7EB] hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-600">
                 Penerima Manfaat Aktual
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-50 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
                 <Users className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
-            <div className="text-base font-black text-[#181343] line-clamp-2 min-h-[32px]">
+            <div className="text-base font-black text-[#181343] line-clamp-2 min-h-[32px] flex items-center">
               {program.actualBeneficiaries || (
-                <span className="text-xs font-normal text-[#787680] italic">Belum dilaporkan</span>
+                <span className="text-xs font-normal text-slate-400 italic">Belum dilaporkan</span>
               )}
             </div>
           </div>
-          <div className="pt-3 border-t border-[#F4F4F6] mt-3 flex items-center justify-between text-xs">
-            <span className="text-[#787680]">Target Kesepakatan:</span>
-            <span className="font-bold text-[#181343] truncate max-w-[120px]">
+          <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs">
+            <span className="text-slate-500">Target Kesepakatan:</span>
+            <span className="font-bold text-[#181343] truncate max-w-[140px]">
               {program.targetBeneficiaries || "-"}
             </span>
           </div>
@@ -449,71 +448,66 @@ export function ProgramMonitoringDetailView({
       {/* ============================================================ */}
       <div className="bg-white rounded-3xl border border-[#E5E7EB] shadow-2xs overflow-hidden">
         {/* Navigation Bar */}
-        <div className="px-6 border-b border-[#E5E7EB] flex items-center gap-2 sm:gap-6 bg-[#F9F9FB] overflow-x-auto scrollbar-none">
+        <div className="px-6 border-b border-[#E5E7EB] flex items-center gap-4 sm:gap-7 bg-[#F9F9FB] overflow-x-auto scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab("activities")}
-            className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "activities"
-                ? "border-[#059669] text-[#047857] font-extrabold"
-                : "border-transparent text-[#5B5966] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Camera className="w-4 h-4" />
-            <span>Log &amp; Timeline Bukti Lapangan</span>
+            Log &amp; Timeline Bukti Lapangan
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("finances")}
-            className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "finances"
-                ? "border-[#059669] text-[#047857] font-extrabold"
-                : "border-transparent text-[#5B5966] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Wallet className="w-4 h-4" />
-            <span>Realisasi Dana &amp; Audit Keuangan</span>
+            Realisasi Dana &amp; Audit Keuangan
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("reviews")}
-            className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "reviews"
-                ? "border-[#059669] text-[#047857] font-extrabold"
-                : "border-transparent text-[#5B5966] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>Suara &amp; Ulasan Penerima Manfaat</span>
+            Suara &amp; Ulasan Penerima Manfaat
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("esg-report")}
-            className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "esg-report"
-                ? "border-[#059669] text-[#047857] font-extrabold"
-                : "border-transparent text-[#5B5966] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span>Laporan Keberlanjutan &amp; ESG (AI)</span>
+            Laporan Keberlanjutan &amp; ESG (AI)
           </button>
 
           {!isManagement && (
             <button
               type="button"
               onClick={() => setActiveTab("settings")}
-              className={`py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+              className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
                 activeTab === "settings"
-                  ? "border-[#059669] text-[#047857] font-extrabold"
-                  : "border-transparent text-[#5B5966] hover:text-[#181343]"
+                  ? "border-[#181343] text-[#181343] font-extrabold"
+                  : "border-transparent text-slate-500 hover:text-[#181343]"
               }`}
             >
-              <FileText className="w-4 h-4" />
-              <span>Parameter &amp; Evaluasi Status</span>
+              Parameter &amp; Evaluasi Status
             </button>
           )}
         </div>
@@ -526,6 +520,9 @@ export function ProgramMonitoringDetailView({
               programTitle={program.title}
               role="COMPANY"
               isManagement={isManagement}
+              collaborationId={program.collaborationId}
+              onOpenChat={onOpenChat}
+              onNavigateToFinances={() => setActiveTab("finances")}
               onActivityChanged={onProgramUpdated}
             />
           )}
@@ -596,15 +593,14 @@ export function ProgramMonitoringDetailView({
                           type="button"
                           key={st}
                           onClick={() => setStatus(st)}
-                          className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            isSelected
-                              ? "border-[#059669] bg-emerald-50/80 text-emerald-950 shadow-xs ring-1 ring-[#059669]"
-                              : "border-[#E5E7EB] bg-white text-[#47464F] hover:border-emerald-300"
-                          }`}
+                          className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${isSelected
+                            ? "border-[#181343] bg-[#181343]/5 text-[#181343] shadow-xs ring-1 ring-[#181343]"
+                            : "border-[#E5E7EB] bg-white text-[#47464F] hover:border-slate-300"
+                            }`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold">{cfg.label}</span>
-                            {isSelected && <Check className="w-4 h-4 text-[#059669]" />}
+                            {isSelected && <Check className="w-4 h-4 text-[#181343]" />}
                           </div>
                           <span className="text-[10px] text-[#5B5966]">
                             {st === "PLANNED" && "Persiapan awal program"}
@@ -630,13 +626,16 @@ export function ProgramMonitoringDetailView({
                         Rp
                       </span>
                       <input
-                        type="number"
-                        value={spentBudget}
-                        onChange={(e) => setSpentBudget(e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        value={formatCurrencyInput(spentBudget)}
+                        onChange={(e) => {
+                          const clean = e.target.value.replace(/[^\d]/g, "");
+                          setSpentBudget(clean);
+                        }}
                         placeholder="0"
-                        min="0"
-                        max={totalBudgetNum}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E8EA] text-xs font-bold text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E8EA] text-xs font-bold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343] transition-all"
                       />
                     </div>
                     <span className="text-[11px] text-[#787680] block">
@@ -653,7 +652,7 @@ export function ProgramMonitoringDetailView({
                       value={actualBeneficiaries}
                       onChange={(e) => setActualBeneficiaries(e.target.value)}
                       placeholder="Contoh: 150 KK Petani & 40 Anak Sekolah Dasar"
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#E8E8EA] text-xs text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#E8E8EA] text-xs text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343] transition-all"
                     />
                     <span className="text-[11px] text-[#787680] block">
                       Target kesepakatan: <strong>{program.targetBeneficiaries || "-"}</strong>
@@ -671,14 +670,14 @@ export function ProgramMonitoringDetailView({
                     onChange={(e) => setDescription(e.target.value)}
                     rows={4}
                     placeholder="Tuliskan catatan perkembangan kegiatan lapangan, kepatuhan jadwal, tantangan yang dihadapi, atau rekomendasi perbaikan..."
-                    className="w-full p-4 rounded-2xl border border-[#E8E8EA] text-xs text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 leading-relaxed resize-none transition-all"
+                    className="w-full p-4 rounded-2xl border border-[#E8E8EA] text-xs text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]/10 focus:border-[#181343] leading-relaxed resize-none transition-all"
                   />
                 </div>
 
                 {/* Submit Row */}
                 <div className="pt-4 border-t border-[#E8E8EA] flex items-center justify-between">
                   <span className="text-xs text-[#787680] flex items-center gap-1.5">
-                    <Info className="w-4 h-4 text-emerald-600" />
+                    <Info className="w-4 h-4 text-[#181343]" />
                     Pembaruan ini akan otomatis tersinkronisasi pada laporan ESG eksekutif.
                   </span>
                   {!isManagement && (

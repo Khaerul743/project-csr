@@ -79,7 +79,7 @@ export function AdminProgramAuditPageView({
         <button
           type="button"
           onClick={onBack}
-          className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-2"
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Kembali ke Daftar Program</span>
@@ -95,7 +95,7 @@ export function AdminProgramAuditPageView({
         <button
           type="button"
           onClick={onBack}
-          className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-2"
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Kembali ke Daftar Program</span>
@@ -131,7 +131,7 @@ export function AdminProgramAuditPageView({
         <button
           type="button"
           onClick={onBack}
-          className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-2 self-start sm:self-auto"
+          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 shadow-2xs cursor-pointer self-start sm:self-auto"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           <span>Kembali ke Daftar Program</span>
@@ -148,7 +148,7 @@ export function AdminProgramAuditPageView({
               href={program.collaborationMouUrl}
               target="_blank"
               rel="noreferrer"
-              className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
             >
               <FileCheck2 className="w-4 h-4 text-emerald-700" aria-hidden="true" />
               <span>Dokumen MoU</span>
@@ -249,16 +249,15 @@ export function AdminProgramAuditPageView({
         <div
           role="tablist"
           aria-label="Bagian audit program"
-          className="px-4 sm:px-6 border-b border-slate-200/80 bg-slate-50/70 flex items-center gap-2 sm:gap-4 overflow-x-auto"
+          className="px-4 sm:px-6 border-b border-slate-200/80 bg-slate-50/70 flex items-center gap-4 sm:gap-7 overflow-x-auto scrollbar-none"
         >
           {[
-            { id: "activities" as const, label: "Tahapan & Bukti Lapangan", icon: Camera },
-            { id: "finances" as const, label: "Keuangan, Termin & Kuitansi", icon: Wallet },
-            { id: "reviews" as const, label: "Ulasan Masyarakat", icon: Star },
-            { id: "esg" as const, label: "Laporan ESG", icon: BarChart3 },
-            { id: "params" as const, label: "Parameter Program", icon: FileText },
+            { id: "activities" as const, label: "Tahapan & Bukti Lapangan" },
+            { id: "finances" as const, label: "Keuangan, Termin & Kuitansi" },
+            { id: "reviews" as const, label: "Ulasan Masyarakat" },
+            { id: "esg" as const, label: "Laporan ESG" },
+            { id: "params" as const, label: "Parameter Program" },
           ].map((tab) => {
-            const Icon = tab.icon;
             const selected = activeTab === tab.id;
             return (
               <button
@@ -267,13 +266,12 @@ export function AdminProgramAuditPageView({
                 role="tab"
                 aria-selected={selected}
                 onClick={() => setActiveTab(tab.id)}
-                className={`min-h-[48px] py-3 px-2 border-b-2 text-xs font-semibold inline-flex items-center gap-2 shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] ${
+                className={`min-h-[48px] py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] ${
                   selected
-                    ? "border-[#181343] text-[#181343] font-bold"
-                    : "border-transparent text-slate-600 hover:text-[#181343]"
+                    ? "border-[#181343] text-[#181343] font-extrabold"
+                    : "border-transparent text-slate-500 hover:text-[#181343]"
                 }`}
               >
-                <Icon className="w-4 h-4" aria-hidden="true" />
                 <span>{tab.label}</span>
               </button>
             );
@@ -389,7 +387,7 @@ export function AdminProgramAuditPageView({
                                   href={url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-[#181343] hover:bg-slate-50 inline-flex items-center gap-1.5"
+                                  className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-[#181343] hover:bg-slate-50 inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
                                 >
                                   <Camera className="w-3.5 h-3.5" aria-hidden="true" />
                                   <span>Foto #{idx + 1}</span>
@@ -400,7 +398,7 @@ export function AdminProgramAuditPageView({
                                   href={act.documentUrl}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 inline-flex items-center gap-1.5"
+                                  className="px-3 py-1.5 rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100/80 inline-flex items-center gap-1.5 shadow-2xs cursor-pointer"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                                   <span>Lampiran PDF</span>

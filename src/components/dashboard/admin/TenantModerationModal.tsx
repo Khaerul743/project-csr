@@ -124,7 +124,7 @@ export function TenantModerationModal({
               type="button"
               onClick={() => setIsVerified(true)}
               aria-pressed={isVerified}
-              className={`min-h-[44px] p-3 rounded-xl border text-left transition-colors flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
+              className={`py-2.5 px-3 rounded-xl border text-left transition-colors flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] cursor-pointer ${
                 isVerified
                   ? "border-emerald-700 bg-emerald-50 text-emerald-900 font-bold"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
@@ -138,7 +138,7 @@ export function TenantModerationModal({
               type="button"
               onClick={() => setIsVerified(false)}
               aria-pressed={!isVerified}
-              className={`min-h-[44px] p-3 rounded-xl border text-left transition-colors flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
+              className={`py-2.5 px-3 rounded-xl border text-left transition-colors flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] cursor-pointer ${
                 !isVerified
                   ? "border-amber-700 bg-amber-50 text-amber-900 font-bold"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
@@ -162,7 +162,7 @@ export function TenantModerationModal({
             id="tenant-status-select"
             value={status}
             onChange={(e) => setStatus(e.target.value as "ACTIVE" | "INACTIVE" | "SUSPENDED")}
-            className="w-full min-h-[44px] px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+            className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
           >
             <option value="ACTIVE">Aktif (Dapat beroperasi penuh)</option>
             <option value="INACTIVE">Nonaktif (Diarsipkan sementara)</option>
@@ -194,14 +194,14 @@ export function TenantModerationModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+            className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] shadow-2xs cursor-pointer"
           >
             Batal
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="min-h-[44px] px-5 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] disabled:opacity-60"
+            className="px-4 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] disabled:opacity-60 shadow-2xs cursor-pointer"
           >
             {isSubmitting ? (
               <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />

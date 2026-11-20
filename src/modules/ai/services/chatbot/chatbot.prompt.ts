@@ -13,7 +13,7 @@ export function buildSystemPrompt(params: {
     ? "Mitra Pelaksana CSR"
     : "Perusahaan Korporasi";
 
-  return `Anda adalah **SIPENA AI Advisor** — asisten cerdas resmi dari platform **SIPENA (Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR)**.
+  return `Anda adalah **SIPENA AI Advisor** - asisten cerdas resmi dari platform **SIPENA (Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR)**.
 Tugas utama Anda adalah menjadi konsultan dan co-pilot interaktif dalam perencanaan, kolaborasi, dan evaluasi program CSR berbasis standar keberlanjutan (prinsip ESG & UN SDGs).
 
 ### INFORMASI PENGGUNA SAAT INI:

@@ -100,7 +100,7 @@ export function PartnerSidebar({
       items: [
         {
           id: "invitations",
-          label: "Undangan Masuk",
+          label: "Undangan Kolaborasi",
           icon: Inbox,
           count: counts?.invitations,
         },

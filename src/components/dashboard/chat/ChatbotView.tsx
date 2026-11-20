@@ -430,7 +430,7 @@ export function ChatbotView({
   const displayName = organizationName || userName;
 
   return (
-    <div className="flex flex-col h-full w-full max-w-[1120px] mx-auto bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
+    <div className="w-full h-full flex-1 flex flex-col max-w-[1120px] mx-auto bg-white rounded-2xl border border-[#E5E7EB] shadow-xs overflow-hidden">
       {/* ========================================================================= */}
       {/* 1. HEADER AI (Clean, Sederhana, Tanpa Jargon Teknis) */}
       {/* ========================================================================= */}
@@ -505,13 +505,13 @@ export function ChatbotView({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#F9F9FB]"
+        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#F9F9FB] flex flex-col"
       >
         {messages.length === 0 ? (
           /* ========================================================================= */
           /* EMPTY STATE: CLEAN WELCOME & 4 QUICK PROMPTS */
           /* ========================================================================= */
-          <div className="h-full min-h-[380px] flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-7 py-6">
+          <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-7 py-6 my-auto">
             <div className="space-y-2 max-w-lg mx-auto">
               <h3 className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight">
                 Halo, {displayName}!

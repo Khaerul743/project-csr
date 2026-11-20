@@ -434,7 +434,7 @@ export function CompanyFinancialOversightView({
         </div>
       )}
 
-      {/* 4. Distribusi Pagu Anggaran per Fokus Area CSR */}
+      {/* 4. Distribusi Pagu Anggaran per Fokus Area CSR (Tabel) */}
       <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div>
@@ -450,46 +450,79 @@ export function CompanyFinancialOversightView({
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 pt-1">
-          {focusDistribution.map((item) => (
-            <div
-              key={item.area}
-              className="p-4 rounded-xl bg-slate-50/70 border border-slate-200/70 space-y-2.5"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-extrabold text-xs text-slate-900 truncate">
-                  {item.label}
-                </span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700">
-                  {item.count} Program
-                </span>
-              </div>
+        <div className="overflow-x-auto -mx-5 sm:mx-0">
+          <table className="w-full text-left text-xs border-collapse min-w-[800px]">
+            <thead>
+              <tr className="border-b border-slate-200/90 text-slate-500 font-bold uppercase tracking-wider text-[10px] bg-slate-50/50">
+                <th className="py-3 px-4 whitespace-nowrap">Fokus Area</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Jumlah Program</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Pagu Anggaran</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Realisasi Belanja</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Porsi Anggaran</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Tingkat Serapan</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {focusDistribution.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                    Belum ada data alokasi anggaran fokus area.
+                  </td>
+                </tr>
+              ) : (
+                focusDistribution.map((item) => (
+                  <tr key={item.area} className="hover:bg-slate-50/60 transition-colors">
+                    {/* Fokus Area (Teks badge tanpa icon) */}
+                    <td className="py-3.5 px-4 whitespace-nowrap">
+                      <Badge variant={item.config.variant as any} size="sm" className="whitespace-nowrap">
+                        {item.label}
+                      </Badge>
+                    </td>
 
-              <div className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Pagu:</span>
-                  <span className="font-bold text-slate-900">{formatRupiah(item.totalBudget)}</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500">Terserap:</span>
-                  <span className="font-bold text-emerald-700">{formatRupiah(item.totalSpent)}</span>
-                </div>
-              </div>
+                    {/* Jumlah Program */}
+                    <td className="py-3.5 px-4 text-center font-semibold text-slate-700 whitespace-nowrap">
+                      {item.count} Program
+                    </td>
 
-              <div className="space-y-1 pt-1">
-                <div className="flex items-center justify-between text-[10px] text-slate-500">
-                  <span>Serapan {item.absorption.toFixed(1)}%</span>
-                  <span>{item.percentOfTotal.toFixed(1)}% dari total CSR</span>
-                </div>
-                <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden">
-                  <div
-                    className="bg-emerald-600 h-full rounded-full"
-                    style={{ width: `${Math.min(100, item.absorption)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+                    {/* Pagu Anggaran */}
+                    <td className="py-3.5 px-4 text-right font-extrabold text-[#181343] whitespace-nowrap">
+                      {formatRupiah(item.totalBudget)}
+                    </td>
+
+                    {/* Realisasi Belanja */}
+                    <td className="py-3.5 px-4 text-right font-extrabold text-[#009E75] whitespace-nowrap">
+                      {formatRupiah(item.totalSpent)}
+                    </td>
+
+                    {/* Porsi Anggaran */}
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <span className="font-bold text-slate-800">
+                        {item.percentOfTotal.toFixed(1)}%
+                      </span>
+                      <span className="text-[10px] text-slate-400 block">
+                        dari total CSR
+                      </span>
+                    </td>
+
+                    {/* Tingkat Serapan */}
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                      <div className="inline-flex flex-col items-center gap-1 min-w-[70px]">
+                        <span className="font-black text-slate-900 text-xs">
+                          {item.absorption.toFixed(1)}%
+                        </span>
+                        <div className="w-16 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className="bg-emerald-600 h-full rounded-full"
+                            style={{ width: `${Math.min(100, item.absorption)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -499,7 +532,7 @@ export function CompanyFinancialOversightView({
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-extrabold text-[#181343]">
-              Rincian Keuangan per Program Pelaksanaan
+              Rincian Keuangan per Program
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Menampilkan {filteredPrograms.length} dari {programs.length} program terdaftar
@@ -552,31 +585,32 @@ export function CompanyFinancialOversightView({
               onChange={(e) => setSortBy(e.target.value as any)}
               className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-[#181343] bg-slate-50/50 cursor-pointer focus:outline-none"
             >
-              <option value="budget-desc">Pagu Terbesar</option>
-              <option value="spent-desc">Serapan Terbesar</option>
-              <option value="rate-desc">Serapan % Tertinggi</option>
-              <option value="rate-asc">Serapan % Terendah</option>
+              <option value="budget-desc">Urutkan: Pagu Terbesar</option>
+              <option value="spent-desc">Urutkan: Serapan Terbesar</option>
+              <option value="rate-desc">Urutkan: Serapan % Tertinggi</option>
+              <option value="rate-asc">Urutkan: Serapan % Terendah</option>
             </select>
           </div>
         </div>
 
         {/* Tabel Data Finansial */}
         <div className="overflow-x-auto -mx-5 sm:mx-0">
-          <table className="w-full text-left text-xs border-collapse min-w-[750px]">
+          <table className="w-full text-left text-xs border-collapse min-w-[850px]">
             <thead>
               <tr className="border-b border-slate-200/90 text-slate-500 font-bold uppercase tracking-wider text-[10px] bg-slate-50/50">
-                <th className="py-3 px-4">Program &amp; Mitra</th>
-                <th className="py-3 px-4">Fokus &amp; Status</th>
-                <th className="py-3 px-4 text-right">Pagu Anggaran</th>
-                <th className="py-3 px-4 text-right">Realisasi Belanja</th>
-                <th className="py-3 px-4 text-center">Tingkat Serapan</th>
-                <th className="py-3 px-4 text-center">Aksi Pengawasan</th>
+                <th className="py-3 px-4 max-w-[240px]">Program &amp; Mitra</th>
+                <th className="py-3 px-4 whitespace-nowrap">Fokus Area</th>
+                <th className="py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Pagu Anggaran</th>
+                <th className="py-3 px-4 text-right whitespace-nowrap">Realisasi Belanja</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Tingkat Serapan</th>
+                <th className="py-3 px-4 text-center whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredPrograms.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                  <td colSpan={7} className="py-8 text-center text-slate-400 italic">
                     Tidak ditemukan program yang sesuai dengan filter pencarian.
                   </td>
                 </tr>
@@ -598,41 +632,43 @@ export function CompanyFinancialOversightView({
                   return (
                     <tr key={prog.id} className="hover:bg-slate-50/60 transition-colors">
                       {/* Program & Mitra */}
-                      <td className="py-3.5 px-4 min-w-[200px]">
-                        <p className="font-extrabold text-slate-900 line-clamp-1">
+                      <td className="py-3.5 px-4 max-w-[240px]">
+                        <p className="font-extrabold text-slate-900 truncate" title={prog.title}>
                           {prog.title}
                         </p>
-                        <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                          <span>{prog.partnerName || "Mitra Pelaksana"}</span>
-                          <span>&bull;</span>
-                          <span>{prog.targetCity || "Nasional"}</span>
+                        <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 truncate">
+                          <span className="truncate">{prog.partnerName || "Mitra Pelaksana"}</span>
+                          <span className="shrink-0">&bull;</span>
+                          <span className="shrink-0">{prog.targetCity || "Nasional"}</span>
                         </p>
                       </td>
 
-                      {/* Fokus & Status */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex flex-col gap-1 items-start">
-                          <Badge variant={focusConf.variant as any} size="sm">
-                            {focusConf.label}
-                          </Badge>
-                          <Badge variant={statusConf.variant as any} size="sm" hasDot>
-                            {statusConf.label}
-                          </Badge>
-                        </div>
+                      {/* Fokus Area (Teks badge tanpa icon, pasti 1 baris) */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <Badge variant={focusConf.variant as any} size="sm" className="whitespace-nowrap">
+                          {focusConf.label}
+                        </Badge>
+                      </td>
+
+                      {/* Status (Teks badge tanpa icon / dot, pasti 1 baris) */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <Badge variant={statusConf.variant as any} size="sm" hasDot={false} className="whitespace-nowrap">
+                          {statusConf.label}
+                        </Badge>
                       </td>
 
                       {/* Pagu Anggaran */}
-                      <td className="py-3.5 px-4 text-right font-extrabold text-[#181343]">
+                      <td className="py-3.5 px-4 text-right font-extrabold text-[#181343] whitespace-nowrap">
                         {formatRupiah(budget)}
                       </td>
 
                       {/* Realisasi Belanja */}
-                      <td className="py-3.5 px-4 text-right font-extrabold text-[#009E75]">
+                      <td className="py-3.5 px-4 text-right font-extrabold text-[#009E75] whitespace-nowrap">
                         {formatRupiah(spent)}
                       </td>
 
                       {/* Tingkat Serapan */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <div className="inline-flex flex-col items-center gap-1 min-w-[70px]">
                           <span className="font-black text-slate-900 text-xs">
                             {rate.toFixed(1)}%
@@ -646,15 +682,15 @@ export function CompanyFinancialOversightView({
                         </div>
                       </td>
 
-                      {/* Aksi Pengawasan */}
-                      <td className="py-3.5 px-4 text-center">
+                      {/* Aksi */}
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
                         <Button
                           type="button"
                           variant="outline"
                           size="sm"
                           onClick={() => onSelectProgramFinances(prog)}
                           leftIcon={<Wallet className="w-3.5 h-3.5 text-emerald-700" />}
-                          className="text-xs font-semibold text-[#181343] hover:bg-emerald-50 hover:border-emerald-200 shadow-2xs cursor-pointer"
+                          className="text-xs font-semibold text-[#181343] hover:bg-emerald-50 hover:border-emerald-200 shadow-2xs cursor-pointer whitespace-nowrap"
                         >
                           Audit Finansial
                         </Button>

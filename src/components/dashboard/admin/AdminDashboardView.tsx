@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ShieldCheck } from "lucide-react";
 import { DashboardHeader, NotificationItem } from "../DashboardHeader";
 import { UserProfileData, UserProfileModal } from "../UserProfileModal";
 import { AdminSidebar } from "./AdminSidebar";
@@ -208,7 +207,7 @@ export function AdminDashboardView({
         onOpenProfile={() => setIsUserProfileModalOpen(true)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         <DashboardHeader
           user={currentUser}
           onOpenProfile={() => setIsUserProfileModalOpen(true)}
@@ -218,12 +217,6 @@ export function AdminDashboardView({
           onNavigateMenu={(menu) => handleSelectMenu(menu as AdminNavMenu)}
           notifications={headerNotifications}
           onLogout={handleLogout}
-          rightAction={
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200 text-xs font-semibold text-[#181343]">
-              <ShieldCheck className="w-4 h-4 text-emerald-700" aria-hidden="true" />
-              <span>Platform Oversight</span>
-            </div>
-          }
         />
 
         <main

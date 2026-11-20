@@ -5,7 +5,6 @@ import {
   Calendar,
   MapPin,
   Users,
-  DollarSign,
   Wallet,
   FileCheck2,
   ExternalLink,
@@ -29,6 +28,8 @@ import {
   Eye,
   X,
   FileText,
+  Lock,
+  Coins,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,12 +46,17 @@ import { VerifyActivityModal } from "./VerifyActivityModal";
 import { PhotoLightboxModal } from "./PhotoLightboxModal";
 import { AiMilestonesModal } from "./AiMilestonesModal";
 import { Modal } from "@/components/ui/modal";
+import { DisburseFundModal } from "../finances/DisburseFundModal";
+import { ProgramFinancialSummary, ProgramDisbursementItem } from "../finances/types";
 
 interface ActivityTimelineProps {
   programId: string;
   programTitle: string;
   role: "COMPANY" | "PARTNER";
   isManagement?: boolean;
+  collaborationId?: string | null;
+  onOpenChat?: (collabId?: string | null) => void;
+  onNavigateToFinances?: () => void;
   onActivityChanged?: () => void;
 }
 
@@ -64,6 +70,9 @@ export function ActivityTimeline({
   programTitle,
   role,
   isManagement = false,
+  collaborationId,
+  onOpenChat,
+  onNavigateToFinances,
   onActivityChanged,
 }: ActivityTimelineProps) {
   const [activities, setActivities] = useState<ProgramActivityItem[]>([]);
@@ -86,8 +95,14 @@ export function ActivityTimeline({
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isDisburseModalOpen, setIsDisburseModalOpen] = useState(false);
   const [selectedActivityForVerify, setSelectedActivityForVerify] =
     useState<ProgramActivityItem | null>(null);
+
+  // Financial State for Tranche Prerequisite Guard
+  const [financialSummary, setFinancialSummary] = useState<ProgramFinancialSummary | null>(null);
+  const [disbursements, setDisbursements] = useState<ProgramDisbursementItem[]>([]);
+  const [isLoadingFinances, setIsLoadingFinances] = useState(true);
 
   // Lightbox state
   const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
@@ -161,10 +176,39 @@ export function ActivityTimeline({
     }
   };
 
+  const fetchFinances = async () => {
+    setIsLoadingFinances(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+
+      const res = await fetch(`/api/programs/${programId}/finances`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data?.summary) {
+          setFinancialSummary(json.data.summary);
+        }
+        if (Array.isArray(json.data?.disbursements)) {
+          setDisbursements(json.data.disbursements);
+        }
+      }
+    } catch {
+      // silent fallback
+    } finally {
+      setIsLoadingFinances(false);
+    }
+  };
+
   useEffect(() => {
     if (programId) {
       fetchActivities();
       fetchStages();
+      fetchFinances();
     }
   }, [programId]);
 
@@ -179,6 +223,13 @@ export function ActivityTimeline({
     stageId: string,
     newStatus: "PENDING" | "IN_PROGRESS" | "COMPLETED"
   ) => {
+    if (!hasConfirmedDisbursement && (newStatus === "IN_PROGRESS" || newStatus === "COMPLETED")) {
+      alert(
+        "Tahapan pelaksanaan belum dapat dimulai atau diselesaikan karena dana termin awal (Termin 1) belum dicairkan oleh perusahaan ke rekening kas mitra."
+      );
+      return;
+    }
+
     try {
       const token = localStorage.getItem("accessToken");
       if (!token) return;
@@ -195,9 +246,36 @@ export function ActivityTimeline({
       if (res.ok) {
         fetchStages();
         if (onActivityChanged) onActivityChanged();
+      } else {
+        const errJson = await res.json();
+        alert(errJson.message || "Gagal memperbarui status tahapan");
       }
     } catch {
       // silent fallback
+    }
+  };
+
+  const handleContactCompany = () => {
+    if (onOpenChat) {
+      onOpenChat(collaborationId);
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("sipena:open-chat", {
+          detail: { collaborationId: collaborationId || undefined },
+        })
+      );
+    }
+  };
+
+  const handleNavigateToFinances = () => {
+    if (onNavigateToFinances) {
+      onNavigateToFinances();
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("sipena:navigate-program-tab", {
+          detail: { tab: "finances", programId },
+        })
+      );
     }
   };
 
@@ -295,6 +373,17 @@ export function ActivityTimeline({
 
   const selectedStage = stages.find((s) => s.id === selectedStageFilter);
 
+  // Prasyarat Pencairan Termin Awal
+  const hasConfirmedDisbursement =
+    !isLoadingFinances && (financialSummary?.totalConfirmedReceived || 0) > 0;
+  const hasPendingDisbursement =
+    !isLoadingFinances && (financialSummary?.totalPendingConfirmation || 0) > 0;
+  const nextTrancheNumber = disbursements.length + 1;
+  const remainingBudgetToDisburse = financialSummary
+    ? Math.max(0, financialSummary.agreedBudget - financialSummary.totalDisbursed)
+    : 0;
+  const remainingPartnerBalance = financialSummary?.remainingPartnerBalance || 0;
+
   return (
     <div className="space-y-6">
       {/* ========================================================================= */}
@@ -334,9 +423,17 @@ export function ActivityTimeline({
 
             {role === "PARTNER" && (
               <Button
-                variant="primary"
+                variant={hasConfirmedDisbursement ? "primary" : "outline"}
                 size="sm"
                 onClick={() => {
+                  if (!hasConfirmedDisbursement) {
+                    alert(
+                      hasPendingDisbursement
+                        ? "Penyaluran dana termin dari perusahaan sedang menunggu konfirmasi penerimaan rekening di kas mitra. Buka tab Realisasi Dana & Keuangan untuk mengonfirmasi penerimaan dana terlebih dahulu."
+                        : "Pelaksanaan tahapan dan pelaporan kegiatan lapangan belum dapat dimulai karena perusahaan belum mencairkan dana termin awal (Termin 1). Pastikan dana termin awal telah disalurkan dan dikonfirmasi."
+                    );
+                    return;
+                  }
                   setActiveStageForAdd(
                     selectedStageFilter && selectedStageFilter !== "UNASSIGNED"
                       ? selectedStageFilter
@@ -344,14 +441,114 @@ export function ActivityTimeline({
                   );
                   setIsAddModalOpen(true);
                 }}
-                leftIcon={<Plus className="w-4 h-4" />}
-                className="text-xs font-semibold bg-[#181343] hover:bg-[#25205c] text-white rounded-xl shadow-xs cursor-pointer"
+                disabled={!hasConfirmedDisbursement}
+                leftIcon={
+                  hasConfirmedDisbursement ? (
+                    <Plus className="w-4 h-4" />
+                  ) : (
+                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                  )
+                }
+                className={`text-xs font-semibold rounded-xl shadow-xs transition-all ${
+                  hasConfirmedDisbursement
+                    ? "bg-[#181343] hover:bg-[#25205c] text-white cursor-pointer"
+                    : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-80"
+                }`}
+                title={
+                  !hasConfirmedDisbursement
+                    ? "Menunggu pencairan dana termin awal dari perusahaan"
+                    : "Tambah Laporan Bukti Lapangan"
+                }
               >
                 Tambah Laporan
               </Button>
             )}
           </div>
         </div>
+
+        {/* Notifikasi Status Pencairan Termin Awal (Kontras Kuning & Proporsional) */}
+        {!isLoadingFinances && !hasConfirmedDisbursement && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-4.5 rounded-2xl bg-amber-50/90 border border-amber-200/90 shadow-2xs">
+            <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                <Lock className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 space-y-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="text-sm font-bold text-amber-950">
+                    {hasPendingDisbursement
+                      ? "Dana Termin Menunggu Konfirmasi Rekening Kas Mitra"
+                      : "Menunggu Pencairan Termin 1 dari Perusahaan"}
+                  </h4>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-950 border border-amber-300">
+                    Prasyarat Tahapan
+                  </span>
+                </div>
+                <p className="text-xs text-amber-900/90 leading-relaxed">
+                  {hasPendingDisbursement
+                    ? role === "PARTNER"
+                      ? "Pencairan dana telah diproses oleh perusahaan. Konfirmasi penerimaan di tab Keuangan agar kas operasional aktif."
+                      : "Pencairan dana telah dikirimkan ke mitra dan sedang menunggu konfirmasi penerimaan rekening."
+                    : role === "PARTNER"
+                    ? "Pelaporan kegiatan lapangan akan aktif setelah Termin 1 disalurkan oleh perusahaan ke rekening kas program."
+                    : "Salurkan dana termin awal (Termin 1) agar mitra pelaksana dapat memulai kegiatan lapangan."}
+                </p>
+              </div>
+            </div>
+
+            {hasPendingDisbursement ? (
+              role === "COMPANY" && !isManagement ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={handleContactCompany}
+                  leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
+                  className="bg-[#181343] hover:bg-[#25205c] text-white rounded-xl text-xs font-bold h-9 px-4 shrink-0 whitespace-nowrap cursor-pointer shadow-xs self-start sm:self-auto"
+                >
+                  Hubungi Mitra
+                </Button>
+              ) : role === "PARTNER" ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
+                  onClick={handleNavigateToFinances}
+                  leftIcon={<Wallet className="w-3.5 h-3.5" />}
+                  className="bg-[#181343] hover:bg-[#25205c] text-white rounded-xl text-xs font-bold h-9 px-4 shrink-0 whitespace-nowrap cursor-pointer shadow-xs self-start sm:self-auto"
+                >
+                  Konfirmasi Realisasi Dana
+                </Button>
+              ) : (
+                <span className="text-xs font-bold text-amber-900 bg-amber-200/80 px-3 py-1 rounded-lg border border-amber-300/80 shrink-0 self-start sm:self-auto">
+                  Menunggu Konfirmasi Rekening
+                </span>
+              )
+            ) : role === "COMPANY" && !isManagement ? (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => setIsDisburseModalOpen(true)}
+                leftIcon={<Coins className="w-4 h-4" />}
+                className="bg-[#181343] hover:bg-[#25205c] text-white rounded-xl text-xs font-bold h-9 px-4 shrink-0 whitespace-nowrap cursor-pointer shadow-xs self-start sm:self-auto"
+              >
+                Salurkan Termin 1
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={handleContactCompany}
+                leftIcon={<MessageSquare className="w-3.5 h-3.5" />}
+                className="bg-[#181343] hover:bg-[#25205c] text-white rounded-xl text-xs font-bold h-9 px-4 shrink-0 whitespace-nowrap cursor-pointer shadow-xs self-start sm:self-auto"
+              >
+                Hubungi Perusahaan
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* 2. Bar Filter & Ringkasan Progres Milestone (Kompak Dropdown) */}
         {stages.length > 0 && (
@@ -426,16 +623,20 @@ export function ActivityTimeline({
                     : "Belum Ada Laporan Kegiatan"}
                 </h4>
                 <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
-                  {role === "PARTNER"
+                  {!hasConfirmedDisbursement
+                    ? "Dokumentasi kegiatan akan aktif setelah dana termin awal (Termin 1) disalurkan."
+                    : role === "PARTNER"
                     ? "Mulai laporkan jalannya kegiatan lapangan dengan mengunggah narasi progres, target penerima manfaat, dan foto dokumentasi."
                     : "Mitra pelaksana belum menambahkan laporan kegiatan lapangan untuk tahapan ini."}
                 </p>
               </div>
               {role === "PARTNER" && (
                 <Button
-                  variant="primary"
+                  variant={hasConfirmedDisbursement ? "primary" : "outline"}
                   size="sm"
+                  disabled={!hasConfirmedDisbursement}
                   onClick={() => {
+                    if (!hasConfirmedDisbursement) return;
                     setActiveStageForAdd(
                       selectedStageFilter && selectedStageFilter !== "UNASSIGNED"
                         ? selectedStageFilter
@@ -443,10 +644,20 @@ export function ActivityTimeline({
                     );
                     setIsAddModalOpen(true);
                   }}
-                  leftIcon={<Plus className="w-4 h-4" />}
-                  className="text-xs font-semibold bg-[#181343] hover:bg-[#25205c] text-white rounded-xl px-4 py-2 cursor-pointer shadow-xs"
+                  leftIcon={
+                    hasConfirmedDisbursement ? (
+                      <Plus className="w-4 h-4" />
+                    ) : (
+                      <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    )
+                  }
+                  className={`text-xs font-semibold rounded-xl px-4 py-2 shadow-xs transition-all ${
+                    hasConfirmedDisbursement
+                      ? "bg-[#181343] hover:bg-[#25205c] text-white cursor-pointer"
+                      : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-80"
+                  }`}
                 >
-                  Unggah Bukti Lapangan
+                  {hasConfirmedDisbursement ? "Unggah Bukti Lapangan" : "Menunggu Pencairan Dana"}
                 </Button>
               )}
             </div>
@@ -868,7 +1079,7 @@ export function ActivityTimeline({
         </Modal>
       )}
 
-      {/* --- Modals Tambah, Verifikasi, Lightbox, AI --- */}
+      {/* --- Modals Tambah, Verifikasi, Lightbox, AI, Penyaluran --- */}
       <AddActivityModal
         isOpen={isAddModalOpen}
         onClose={() => {
@@ -879,12 +1090,31 @@ export function ActivityTimeline({
         programTitle={programTitle}
         stages={stages}
         defaultStageId={activeStageForAdd}
+        hasConfirmedDisbursement={hasConfirmedDisbursement}
+        remainingPartnerBalance={remainingPartnerBalance}
         onSuccess={() => {
           fetchActivities();
           fetchStages();
+          fetchFinances();
           if (onActivityChanged) onActivityChanged();
         }}
       />
+
+      {role === "COMPANY" && (
+        <DisburseFundModal
+          isOpen={isDisburseModalOpen}
+          onClose={() => setIsDisburseModalOpen(false)}
+          programId={programId}
+          nextTrancheNumber={nextTrancheNumber}
+          remainingBudget={remainingBudgetToDisburse}
+          onSuccess={() => {
+            fetchFinances();
+            fetchActivities();
+            fetchStages();
+            if (onActivityChanged) onActivityChanged();
+          }}
+        />
+      )}
 
       <VerifyActivityModal
         isOpen={Boolean(selectedActivityForVerify)}

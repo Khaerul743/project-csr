@@ -163,7 +163,7 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
                 setPage(1);
               }}
               placeholder="Cari nama program, kota target, perusahaan, atau mitra..."
-              className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
             />
           </div>
 
@@ -178,7 +178,7 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
                 setFocusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Bidang Fokus</option>
               {csrFocusAreaEnum.map((fa: CsrFocusArea) => (
@@ -200,7 +200,7 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Status</option>
               <option value="PLANNED">Persiapan</option>
@@ -304,9 +304,9 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
                         <button
                           type="button"
                           onClick={() => onOpenProgramAudit(prog.id)}
-                          className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                         >
-                          <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                          <Eye className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                           <span>Audit Program</span>
                         </button>
                       </td>
@@ -374,9 +374,9 @@ export function AdminProgramsView({ onOpenProgramAudit }: AdminProgramsViewProps
                   <button
                     type="button"
                     onClick={() => onOpenProgramAudit(prog.id)}
-                    className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5"
+                    className="w-full px-3 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                   >
-                    <Activity className="w-4 h-4" aria-hidden="true" />
+                    <Activity className="w-3.5 h-3.5" aria-hidden="true" />
                     <span>Buka Detail Audit</span>
                   </button>
                 </div>

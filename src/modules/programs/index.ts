@@ -4,6 +4,7 @@ import { ProgramController } from "./program.controller";
 import { ProgramStageRepository } from "./program-stage.repository";
 import { ProgramStageService } from "./program-stage.service";
 import { ProgramStageController } from "./program-stage.controller";
+import { financeRepository } from "../finances";
 
 export const programRepository = new ProgramRepository();
 export const programService = new ProgramService(programRepository);
@@ -12,7 +13,8 @@ export const programController = new ProgramController(programService);
 export const programStageRepository = new ProgramStageRepository();
 export const programStageService = new ProgramStageService(
   programRepository,
-  programStageRepository
+  programStageRepository,
+  financeRepository
 );
 export const programStageController = new ProgramStageController(programStageService);
 

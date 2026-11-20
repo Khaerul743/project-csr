@@ -199,6 +199,20 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
     }
   }, [isManagement, activeMenu]);
 
+  useEffect(() => {
+    const handleOpenChatEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ collaborationId?: string }>;
+      setSelectedProgramForDetail(null);
+      if (customEvent.detail?.collaborationId) {
+        setActiveCollaborationChatId(customEvent.detail.collaborationId);
+      }
+      setActiveMenu("conversations");
+    };
+
+    window.addEventListener("sipena:open-chat", handleOpenChatEvent);
+    return () => window.removeEventListener("sipena:open-chat", handleOpenChatEvent);
+  }, []);
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
@@ -971,7 +985,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   };
 
   return (
-    <div className={`min-h-screen bg-[#F9F9FB] flex ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
+    <div className={`min-h-screen bg-[#F9F9FB] flex ${activeMenu === "chat" || activeMenu === "conversations" ? "h-screen overflow-hidden" : ""}`}>
       {/* 1. Sidebar Navigation */}
       <Sidebar
         user={currentUser}
@@ -1002,7 +1016,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       />
 
       {/* 2. Main Workspace Layout */}
-      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" || activeMenu === "conversations" ? "h-screen overflow-hidden" : ""}`}>
         {/* Sticky Dashboard Header */}
         <DashboardHeader
           user={currentUser}
@@ -1156,7 +1170,20 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
         />
 
         {/* Content Body Container */}
-        <main className={`w-full mx-auto ${activeMenu === "chat" ? "p-3 sm:p-4 lg:p-5 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden" : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"}`}>
+        <main
+          style={
+            activeMenu === "chat" || activeMenu === "conversations"
+              ? { height: "calc(100vh - 72px)", maxHeight: "calc(100vh - 72px)" }
+              : undefined
+          }
+          className={`w-full mx-auto ${
+            activeMenu === "chat"
+              ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
+              : activeMenu === "conversations"
+              ? "p-4 sm:p-5 lg:p-6 max-w-7xl flex-1 flex flex-col min-h-0 overflow-hidden"
+              : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"
+          }`}
+        >
           {/* ============================================================ */}
           {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF & BI ANALYTICS) */}
           {/* ============================================================ */}
@@ -2414,7 +2441,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {/* VIEW: CONVERSATIONS (PESAN & NEGOSIASI - KHUSUS CSR_ADMIN) */}
           {/* ============================================================ */}
           {!isManagement && activeMenu === "conversations" && (
-            <div className="space-y-4">
+            <div className="w-full h-full min-h-0 flex-1 flex flex-col">
               <ConversationCenterView
                 userRole="CSR_ADMIN"
                 initialCollaborationId={activeCollaborationChatId}
@@ -2462,22 +2489,24 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {/* VIEW: AI CHATBOT (FULL-SCREEN AI ADVISOR) */}
           {/* ============================================================ */}
           {activeMenu === "chat" && (
-            <ChatbotView
-              role={user.role}
-              userName={user.name}
-              organizationName={company?.name}
-              onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
-              onOpenCreateOpportunity={
-                !isManagement
-                  ? (initialProvince, draftData) => {
-                      setActiveMenu("opportunities");
-                      setIsCreatingOpportunity(true);
-                      setOpportunityPrefillProvince(initialProvince || null);
-                      setOpportunityPrefillDraft(draftData || null);
-                    }
-                  : undefined
-              }
-            />
+            <div className="w-full h-full min-h-0 flex-1 flex flex-col">
+              <ChatbotView
+                role={user.role}
+                userName={user.name}
+                organizationName={company?.name}
+                onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
+                onOpenCreateOpportunity={
+                  !isManagement
+                    ? (initialProvince, draftData) => {
+                        setActiveMenu("opportunities");
+                        setIsCreatingOpportunity(true);
+                        setOpportunityPrefillProvince(initialProvince || null);
+                        setOpportunityPrefillDraft(draftData || null);
+                      }
+                    : undefined
+                }
+              />
+            </div>
           )}
         </main>
       </div>

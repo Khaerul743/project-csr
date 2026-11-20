@@ -612,15 +612,17 @@ export function EditPartnerProfilePageView({
             <button
               type="button"
               onClick={() => setActiveCategory("info")}
-              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer ${
+              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
                 activeCategory === "info"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                  activeCategory === "info" ? "bg-white/10 text-white" : "bg-slate-100 text-[#181343]"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                  activeCategory === "info"
+                    ? "bg-white/10 text-white"
+                    : "bg-slate-100 text-[#181343] group-hover:bg-slate-200/70"
                 }`}
               >
                 <Building2 className="w-4 h-4" />
@@ -631,7 +633,7 @@ export function EditPartnerProfilePageView({
                 </span>
                 <span
                   className={`text-[11px] block mt-0.5 truncate ${
-                    activeCategory === "info" ? "text-slate-300" : "text-slate-400"
+                    activeCategory === "info" ? "text-slate-300" : "text-slate-500"
                   }`}
                 >
                   Nama resmi, bentuk & kontak
@@ -643,15 +645,17 @@ export function EditPartnerProfilePageView({
             <button
               type="button"
               onClick={() => setActiveCategory("branding")}
-              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer ${
+              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
                 activeCategory === "branding"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                  activeCategory === "branding" ? "bg-white/10 text-white" : "bg-slate-100 text-emerald-700"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                  activeCategory === "branding"
+                    ? "bg-white/10 text-white"
+                    : "bg-slate-100 text-[#181343] group-hover:bg-slate-200/70"
                 }`}
               >
                 <Palette className="w-4 h-4" />
@@ -662,7 +666,7 @@ export function EditPartnerProfilePageView({
                 </span>
                 <span
                   className={`text-[11px] block mt-0.5 truncate ${
-                    activeCategory === "branding" ? "text-slate-300" : "text-slate-400"
+                    activeCategory === "branding" ? "text-slate-300" : "text-slate-500"
                   }`}
                 >
                   Logo resmi, foto sampul & tagline
@@ -674,15 +678,17 @@ export function EditPartnerProfilePageView({
             <button
               type="button"
               onClick={() => setActiveCategory("portfolio")}
-              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer ${
+              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
                 activeCategory === "portfolio"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                  activeCategory === "portfolio" ? "bg-white/10 text-white" : "bg-slate-100 text-teal-700"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                  activeCategory === "portfolio"
+                    ? "bg-white/10 text-white"
+                    : "bg-slate-100 text-[#181343] group-hover:bg-slate-200/70"
                 }`}
               >
                 <Award className="w-4 h-4" />
@@ -693,7 +699,7 @@ export function EditPartnerProfilePageView({
                 </span>
                 <span
                   className={`text-[11px] block mt-0.5 truncate ${
-                    activeCategory === "portfolio" ? "text-slate-300" : "text-slate-400"
+                    activeCategory === "portfolio" ? "text-slate-300" : "text-slate-500"
                   }`}
                 >
                   Bidang keahlian & portofolio kegiatan
@@ -705,15 +711,17 @@ export function EditPartnerProfilePageView({
             <button
               type="button"
               onClick={() => setActiveCategory("legal")}
-              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer ${
+              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
                 activeCategory === "legal"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                  activeCategory === "legal" ? "bg-white/10 text-white" : "bg-slate-100 text-blue-700"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                  activeCategory === "legal"
+                    ? "bg-white/10 text-white"
+                    : "bg-slate-100 text-[#181343] group-hover:bg-slate-200/70"
                 }`}
               >
                 <ShieldCheck className="w-4 h-4" />
@@ -724,7 +732,7 @@ export function EditPartnerProfilePageView({
                 </span>
                 <span
                   className={`text-[11px] block mt-0.5 truncate ${
-                    activeCategory === "legal" ? "text-slate-300" : "text-slate-400"
+                    activeCategory === "legal" ? "text-slate-300" : "text-slate-500"
                   }`}
                 >
                   SK Kemenkumham, NPWP & profil PDF
@@ -736,15 +744,17 @@ export function EditPartnerProfilePageView({
             <button
               type="button"
               onClick={() => setActiveCategory("team")}
-              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer ${
+              className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
                 activeCategory === "team"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                  activeCategory === "team" ? "bg-white/10 text-white" : "bg-slate-100 text-purple-700"
+                className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                  activeCategory === "team"
+                    ? "bg-white/10 text-white"
+                    : "bg-slate-100 text-[#181343] group-hover:bg-slate-200/70"
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -755,7 +765,7 @@ export function EditPartnerProfilePageView({
                 </span>
                 <span
                   className={`text-[11px] block mt-0.5 truncate ${
-                    activeCategory === "team" ? "text-slate-300" : "text-slate-400"
+                    activeCategory === "team" ? "text-slate-300" : "text-slate-500"
                   }`}
                 >
                   Pengurus organisasi & koordinator

@@ -614,7 +614,7 @@ export function StagingOnboardingView({
               }
               className="text-xs font-semibold text-slate-800 border-slate-200 hover:bg-slate-50 rounded-xl cursor-pointer min-h-[40px] px-4"
             >
-              Periksa Undangan Masuk
+              Periksa Undangan Kolaborasi
             </Button>
           </div>
         </div>

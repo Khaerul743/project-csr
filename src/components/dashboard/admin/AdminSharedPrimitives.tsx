@@ -73,7 +73,7 @@ export function AdminModal({
             type="button"
             onClick={onClose}
             aria-label="Tutup dialog"
-            className="min-w-[44px] min-h-[44px] shrink-0 flex items-center justify-center rounded-xl text-slate-600 hover:text-[#181343] hover:bg-slate-200/70 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-[#181343] hover:bg-slate-100 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] cursor-pointer"
           >
             <X className="w-5 h-5" aria-hidden="true" />
           </button>
@@ -125,7 +125,7 @@ export function AdminErrorState({ message, onRetry }: AdminErrorStateProps) {
       <button
         type="button"
         onClick={onRetry}
-        className="min-h-[44px] px-4 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] shrink-0"
+        className="px-3.5 py-1.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] shrink-0 shadow-2xs cursor-pointer"
       >
         <RefreshCw className="w-4 h-4" aria-hidden="true" />
         <span>Muat Ulang</span>
@@ -156,7 +156,7 @@ export function AdminEmptyState({
           <button
             type="button"
             onClick={onAction}
-            className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+            className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] shadow-2xs cursor-pointer"
           >
             {actionLabel}
           </button>
@@ -194,7 +194,7 @@ export function AdminPaginationBar({
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
           aria-label="Halaman sebelumnya"
-          className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] shadow-2xs cursor-pointer"
         >
           <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           <span>Sebelumnya</span>
@@ -204,7 +204,7 @@ export function AdminPaginationBar({
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
           aria-label="Halaman berikutnya"
-          className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] shadow-2xs cursor-pointer"
         >
           <span>Berikutnya</span>
           <ChevronRight className="w-4 h-4" aria-hidden="true" />

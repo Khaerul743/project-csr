@@ -2,14 +2,24 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  AlertTriangle,
+  Building2,
   CheckCircle2,
   Clock,
   ExternalLink,
   Eye,
   FileCheck2,
+  FileText,
+  Globe,
   HeartHandshake,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
   Search,
+  ShieldAlert,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { CsrFocusArea, csrFocusAreaEnum } from "@/db/schema/csr-focus-areas";
@@ -17,6 +27,9 @@ import { AdminPartnerDetail, AdminPartnerListItem, PaginatedResult } from "../ty
 import {
   ENTITY_STATUS_CONFIG,
   FOCUS_AREA_LABELS,
+  PROGRAM_STATUS_LABELS,
+  PROPOSAL_STATUS_LABELS,
+  USER_ROLE_CONFIG,
   formatCompactRupiah,
   formatDate,
   getFocusAreaLabel,
@@ -201,7 +214,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                 setPage(1);
               }}
               placeholder="Cari nama yayasan, kota, tipe lembaga, atau email..."
-              className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
             />
           </div>
 
@@ -216,7 +229,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                 setFocusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Bidang Fokus</option>
               {csrFocusAreaEnum.map((fa: CsrFocusArea) => (
@@ -238,7 +251,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Status</option>
               <option value="ACTIVE">Aktif</option>
@@ -258,7 +271,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                 setVerifiedFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Verifikasi</option>
               <option value="true">Terverifikasi</option>
@@ -366,7 +379,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                           <button
                             type="button"
                             onClick={() => handleOpenDetail(partner.id)}
-                            className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                           >
                             <Eye className="w-3.5 h-3.5" aria-hidden="true" />
                             <span>Detail</span>
@@ -374,7 +387,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                           <button
                             type="button"
                             onClick={() => setModeratingPartner(partner)}
-                            className="min-h-[44px] px-3.5 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                            className="px-3.5 py-1.5 rounded-lg bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                           >
                             <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
                             <span>Kelola</span>
@@ -444,17 +457,17 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
                     <button
                       type="button"
                       onClick={() => handleOpenDetail(partner.id)}
-                      className="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                      className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                     >
-                      <Eye className="w-4 h-4" aria-hidden="true" />
+                      <Eye className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                       <span>Inspeksi</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setModeratingPartner(partner)}
-                      className="flex-1 min-h-[44px] px-3 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                      className="flex-1 px-3 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                     >
-                      <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                      <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
                       <span>Verifikasi</span>
                     </button>
                   </div>
@@ -482,7 +495,7 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
         title={selectedDetail ? selectedDetail.name : "Inspeksi Detail Mitra NGO"}
         subtitle={
           selectedDetail
-            ? `${selectedDetail.organizationType || "NGO/Yayasan"} | ${getFocusAreaLabel(
+            ? `${selectedDetail.organizationType || "NGO/Yayasan"} • ${selectedDetail.city || "Indonesia"} • ${getFocusAreaLabel(
                 selectedDetail.focusArea
               )}`
             : undefined
@@ -494,105 +507,281 @@ export function AdminPartnersView({ onMutated }: AdminPartnersViewProps) {
         ) : detailError ? (
           <AdminErrorState message={detailError} onRetry={() => setDetailError(null)} />
         ) : selectedDetail ? (
-          <div className="space-y-5 text-xs">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <span className="text-slate-600 block">Nomor Legalitas (SK Kemenkumham / Dinsos)</span>
-                <span className="font-bold text-[#181343]">
-                  {selectedDetail.legalNumber || "-"}
-                </span>
+          <div className="space-y-6 text-xs">
+            {/* Action Bar Inside Dossier (Anti-AI Slop, Seragam dengan Halaman Perusahaan Sponsor) */}
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant={selectedDetail.isVerified ? "emerald" : "amber"}
+                  size="sm"
+                  hasDot
+                >
+                  {selectedDetail.isVerified ? "Terverifikasi Resmi" : "Belum Verifikasi"}
+                </Badge>
+                <Badge
+                  variant={
+                    selectedDetail.status === "ACTIVE"
+                      ? "emerald"
+                      : selectedDetail.status === "SUSPENDED"
+                      ? "rose"
+                      : "slate"
+                  }
+                  size="sm"
+                  hasDot
+                >
+                  {selectedDetail.status === "ACTIVE"
+                    ? "Akun Aktif"
+                    : selectedDetail.status === "SUSPENDED"
+                    ? "Akun Ditangguhkan"
+                    : "Akun Nonaktif"}
+                </Badge>
+                <Badge variant="purple" size="sm">
+                  {getFocusAreaLabel(selectedDetail.focusArea)}
+                </Badge>
               </div>
-              <div>
-                <span className="text-slate-600 block">NPWP Lembaga</span>
-                <span className="font-bold text-[#181343]">{selectedDetail.npwpNumber || "-"}</span>
-              </div>
-              <div>
-                <span className="text-slate-600 block">Email &amp; Telepon</span>
-                <span className="font-semibold text-[#181343]">
-                  {selectedDetail.email || "-"} | {selectedDetail.phone || "-"}
-                </span>
-              </div>
-              <div>
-                <span className="text-slate-600 block">Dokumen Portofolio</span>
-                {selectedDetail.portfolioDocUrl ? (
-                  <a
-                    href={selectedDetail.portfolioDocUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 font-bold text-emerald-700 hover:underline"
-                  >
-                    <FileCheck2 className="w-3.5 h-3.5" aria-hidden="true" />
-                    <span>Buka Berkas Portofolio</span>
-                    <ExternalLink className="w-3 h-3" aria-hidden="true" />
-                  </a>
-                ) : (
-                  <span className="text-slate-600">Belum diunggah</span>
-                )}
-              </div>
-              {selectedDetail.verificationNotes && (
-                <div className="sm:col-span-2 pt-2 border-t border-slate-200">
-                  <span className="text-slate-600 block">Catatan Admin Platform</span>
-                  <span className="font-medium text-[#181343]">
-                    {selectedDetail.verificationNotes}
+
+              <button
+                type="button"
+                onClick={() => {
+                  const partnerToModerate = data?.data.find((p) => p.id === selectedDetail.id) || {
+                    id: selectedDetail.id,
+                    name: selectedDetail.name,
+                    organizationType: selectedDetail.organizationType,
+                    city: selectedDetail.city,
+                    focusArea: selectedDetail.focusArea,
+                    status: selectedDetail.status,
+                    isVerified: selectedDetail.isVerified,
+                    verificationNotes: selectedDetail.verificationNotes,
+                    membersCount: selectedDetail.members.length,
+                    proposalsCount: selectedDetail.proposals.length,
+                    programsCount: selectedDetail.programs.length,
+                  } as AdminPartnerListItem;
+                  setSelectedDetail(null);
+                  setModeratingPartner(partnerToModerate);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#181343] hover:bg-[#26224C] text-white font-semibold text-xs transition-colors self-start sm:self-auto cursor-pointer"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Ubah Status &amp; Verifikasi</span>
+              </button>
+            </div>
+
+            {/* Section 1: Kelengkapan Dokumen Legalitas & Kontak Resmi */}
+            <div className="space-y-2.5">
+              <h3 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
+                Kelengkapan Dokumen Legalitas &amp; Kontak Resmi
+              </h3>
+              <div className="p-4 rounded-xl bg-white border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <span className="text-slate-500 font-medium block">Nomor Legalitas (SK Kemenkumham / Dinsos)</span>
+                  <span className="font-mono font-bold text-[#181343] text-sm mt-0.5 block">
+                    {selectedDetail.legalNumber || "Belum diisi"}
                   </span>
                 </div>
-              )}
+                <div>
+                  <span className="text-slate-500 font-medium block">NPWP Lembaga</span>
+                  <span className="font-mono font-bold text-[#181343] text-sm mt-0.5 block">
+                    {selectedDetail.npwpNumber || "Belum diisi"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-medium block">Kontak Email Resmi</span>
+                  <span className="font-semibold text-[#181343] flex items-center gap-1.5 mt-0.5">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    {selectedDetail.email || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-medium block">Telepon Kantor / PIC</span>
+                  <span className="font-semibold text-[#181343] flex items-center gap-1.5 mt-0.5">
+                    <Phone className="w-3.5 h-3.5 text-slate-400" />
+                    {selectedDetail.phone || "-"}
+                  </span>
+                </div>
+                {selectedDetail.website && (
+                  <div className="sm:col-span-2">
+                    <span className="text-slate-500 font-medium block">Situs Web Resmi</span>
+                    <a
+                      href={selectedDetail.website.startsWith("http") ? selectedDetail.website : `https://${selectedDetail.website}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 font-semibold text-indigo-700 hover:underline mt-0.5"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>{selectedDetail.website}</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                )}
+                {selectedDetail.address && (
+                  <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+                    <span className="text-slate-500 font-medium block">Alamat Sekretariat / Domisili</span>
+                    <span className="text-slate-700 mt-0.5 flex items-start gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                      <span>
+                        {selectedDetail.address}
+                        {selectedDetail.city ? `, ${selectedDetail.city}` : ""}
+                        {selectedDetail.province ? `, ${selectedDetail.province}` : ""}
+                      </span>
+                    </span>
+                  </div>
+                )}
+                <div className="sm:col-span-2 pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-slate-500 font-medium block">Dokumen Portofolio Lembaga</span>
+                    <span className="text-slate-700 text-[11px]">
+                      {selectedDetail.portfolioDocUrl
+                        ? "Berkas portofolio dan rekam jejak resmi telah diunggah."
+                        : "Lembaga belum melampirkan berkas dokumen portofolio."}
+                    </span>
+                  </div>
+                  {selectedDetail.portfolioDocUrl && (
+                    <a
+                      href={selectedDetail.portfolioDocUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200 hover:bg-emerald-100 transition-colors shrink-0"
+                    >
+                      <FileCheck2 className="w-3.5 h-3.5" aria-hidden="true" />
+                      <span>Buka Dokumen Portofolio</span>
+                      <ExternalLink className="w-3 h-3" aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+                {selectedDetail.verificationNotes && (
+                  <div className="sm:col-span-2 pt-2 border-t border-slate-100 bg-amber-50/50 p-3 rounded-lg border border-amber-200/60">
+                    <span className="text-amber-900 font-bold block">Catatan Verifikasi Admin Platform</span>
+                    <p className="text-amber-800 mt-0.5">
+                      {selectedDetail.verificationNotes}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <h3 className="text-sm font-bold text-[#181343]">
-                Riwayat Proposal ({selectedDetail.proposals.length})
-              </h3>
-              {selectedDetail.proposals.length === 0 ? (
-                <p className="text-slate-600">Mitra ini belum mengajukan proposal.</p>
+            {/* Section 2: Pengurus & Pengguna Terdaftar Lembaga */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
+                  Pengurus &amp; Pengguna Terdaftar ({selectedDetail.members.length})
+                </h3>
+              </div>
+              {selectedDetail.members.length === 0 ? (
+                <p className="text-slate-500 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  Belum ada akun tim yang terdaftar di bawah entitas mitra ini.
+                </p>
               ) : (
-                <div className="border border-slate-200 rounded-xl divide-y divide-slate-200">
-                  {selectedDetail.proposals.map((prop) => (
-                    <div key={prop.id} className="p-3 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="font-bold text-[#181343] truncate">{prop.title}</div>
-                        <div className="text-[11px] text-slate-600 truncate">
-                          Untuk: {prop.companyName || "-"} ({prop.opportunityTitle || "-"}) |{" "}
-                          {formatDate(prop.createdAt)}
+                <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                  {selectedDetail.members.map((m) => {
+                    const roleCfg = USER_ROLE_CONFIG[m.role] || {
+                      label: m.role,
+                      variant: "slate" as const,
+                    };
+                    return (
+                      <div key={m.id} className="p-3 bg-white flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-bold text-[#181343] truncate">{m.name}</div>
+                          <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                            {m.email} {m.position ? `• ${m.position}` : ""}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Badge variant={roleCfg.variant} size="sm">
+                            {roleCfg.label}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <span className="font-bold text-[#181343] block">
-                          {formatCompactRupiah(prop.proposedBudget)}
-                        </span>
-                        {prop.aiScore !== null && prop.aiScore !== undefined && (
-                          <span className="text-[11px] text-emerald-700 font-semibold">
-                            Skor AI: {prop.aiScore}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
 
-            <div className="space-y-2">
-              <h3 className="text-sm font-bold text-[#181343]">
-                Program Dijalankan ({selectedDetail.programs.length})
-              </h3>
-              {selectedDetail.programs.length === 0 ? (
-                <p className="text-slate-600">Belum ada program pelaksanaan.</p>
+            {/* Section 3: Riwayat Pengajuan Proposal */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
+                  Riwayat Pengajuan Proposal ({selectedDetail.proposals.length})
+                </h3>
+              </div>
+              {selectedDetail.proposals.length === 0 ? (
+                <p className="text-slate-500 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  Mitra ini belum mengajukan proposal kemitraan CSR ke platform.
+                </p>
               ) : (
-                <div className="border border-slate-200 rounded-xl divide-y divide-slate-200">
-                  {selectedDetail.programs.map((p) => (
-                    <div key={p.id} className="p-3 flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="font-bold text-[#181343] truncate">{p.title}</div>
-                        <div className="text-[11px] text-slate-600">
-                          Sponsor: {p.companyName || "-"} | {formatDate(p.createdAt)}
+                <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                  {selectedDetail.proposals.map((prop) => {
+                    const st = PROPOSAL_STATUS_LABELS[prop.status] || {
+                      label: prop.status,
+                      variant: "slate" as const,
+                    };
+                    return (
+                      <div key={prop.id} className="p-3 bg-white flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-bold text-[#181343] truncate">{prop.title}</div>
+                          <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                            Tujuan: {prop.companyName || "Perusahaan"} • {prop.opportunityTitle || "Inisiatif CSR"} • {formatDate(prop.createdAt)}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 flex items-center gap-2">
+                          <div>
+                            <span className="font-bold text-[#181343] block">
+                              {formatCompactRupiah(prop.proposedBudget)}
+                            </span>
+                            {prop.aiScore !== null && prop.aiScore !== undefined && (
+                              <span className="text-[10px] text-emerald-700 font-semibold block">
+                                Skor AI: {prop.aiScore}/100
+                              </span>
+                            )}
+                          </div>
+                          <Badge variant={st.variant} size="sm">
+                            {st.label}
+                          </Badge>
                         </div>
                       </div>
-                      <span className="font-bold text-emerald-700 shrink-0">
-                        {formatCompactRupiah(p.budget)}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Section 4: Inisiatif Program CSR Dijalankan */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
+                  Inisiatif Program CSR Dijalankan ({selectedDetail.programs.length})
+                </h3>
+              </div>
+              {selectedDetail.programs.length === 0 ? (
+                <p className="text-slate-500 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  Belum ada program pelaksanaan yang sedang dijalankan oleh mitra ini.
+                </p>
+              ) : (
+                <div className="border border-slate-200 rounded-xl divide-y divide-slate-100 overflow-hidden">
+                  {selectedDetail.programs.map((prog) => {
+                    const progSt = PROGRAM_STATUS_LABELS[prog.status] || {
+                      label: prog.status,
+                      variant: "slate" as const,
+                    };
+                    return (
+                      <div key={prog.id} className="p-3 bg-white flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-bold text-[#181343] truncate">{prog.title}</div>
+                          <div className="text-[11px] text-slate-500 mt-0.5">
+                            Sponsor: {prog.companyName || "Perusahaan Sponsor"} • Terdaftar {formatDate(prog.createdAt)}
+                          </div>
+                        </div>
+                        <div className="text-right shrink-0 flex items-center gap-2">
+                          <span className="font-bold text-emerald-700 block">
+                            {formatCompactRupiah(prog.budget)}
+                          </span>
+                          <Badge variant={progSt.variant} size="sm">
+                            {progSt.label}
+                          </Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

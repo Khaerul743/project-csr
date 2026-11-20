@@ -6,7 +6,6 @@ import {
   Users2,
   HeartHandshake,
   FileCheck2,
-  DollarSign,
   QrCode,
   ShieldCheck,
   CheckCircle2,

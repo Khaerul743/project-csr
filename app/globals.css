@@ -105,6 +105,34 @@
   --spacing-section-2xl: 80px;
 }
 
+html {
+  font-size: 14.4px; /* Skala proporsional 90% berbasis root rem (90% dari 16px standar browser) */
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Sembunyikan Next.js dev overlay indicator (lingkaran hitam ikon N di pojok kiri bawah) */
+nextjs-portal,
+[data-nextjs-toast],
+[data-nextjs-dev-overlay] {
+  display: none !important;
+}
+
+/* Scrollbar halus, modern, dan ramping untuk seluruh tampilan */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -132,6 +160,22 @@ h1, h2, h3, h4, h5, h6 {
   :disabled,
   [aria-disabled="true"] {
     cursor: not-allowed;
+  }
+
+  /* Scrollbar halus & elegan */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.55);
   }
 }
 
@@ -222,6 +266,7 @@ h1, h2, h3, h4, h5, h6 {
 
   html,
   body {
+    font-size: 16px !important;
     background-color: #ffffff !important;
     color: #0f172a !important;
     margin: 0 !important;

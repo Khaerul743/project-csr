@@ -202,7 +202,7 @@ export function ConversationCenterView({
   };
 
   return (
-    <div className="h-[calc(100vh-8.5rem)] min-h-[550px] bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs flex flex-col md:flex-row overflow-hidden">
+    <div className="w-full h-full flex-1 bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs flex flex-col md:flex-row overflow-hidden">
       {/* Mobile Back Button (hanya tampil di layar kecil saat percakapan aktif) */}
       {selectedConversation && (
         <div className="md:hidden p-3 bg-[#181343] text-white flex items-center justify-between shrink-0">

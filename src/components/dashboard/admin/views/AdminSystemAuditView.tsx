@@ -96,7 +96,7 @@ export function AdminSystemAuditView() {
           type="button"
           onClick={fetchSystem}
           disabled={isLoading}
-          className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-2 self-start sm:self-auto"
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 shadow-2xs cursor-pointer self-start sm:self-auto"
         >
           <RefreshCw
             className={`w-4 h-4 ${isLoading ? "animate-spin text-emerald-700" : "text-slate-600"}`}
@@ -254,7 +254,7 @@ export function AdminSystemAuditView() {
                       setPage(1);
                     }}
                     placeholder="Cari nama sasaran, jenis aksi, eksekutor, atau alasan..."
-                    className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
                   />
                 </div>
 
@@ -269,7 +269,7 @@ export function AdminSystemAuditView() {
                       setTargetType(e.target.value);
                       setPage(1);
                     }}
-                    className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
                   >
                     <option value="ALL">Semua Kategori Sasaran</option>
                     <option value="COMPANY">Perusahaan Sponsor</option>

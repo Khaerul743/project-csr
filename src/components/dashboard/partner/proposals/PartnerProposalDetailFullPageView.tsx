@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Building2,
   Calendar,
-  DollarSign,
   Users,
   FileText,
   ExternalLink,

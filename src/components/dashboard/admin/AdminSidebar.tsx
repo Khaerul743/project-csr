@@ -72,7 +72,7 @@ export function AdminSidebar({
 
   const sections: AdminNavSection[] = [
     {
-      title: "Utama",
+      title: "UTAMA",
       items: [
         {
           id: "overview",
@@ -82,7 +82,7 @@ export function AdminSidebar({
       ],
     },
     {
-      title: "Ekosistem & Pengguna",
+      title: "EKOSISTEM & PENGGUNA",
       items: [
         {
           id: "companies",
@@ -102,7 +102,7 @@ export function AdminSidebar({
       ],
     },
     {
-      title: "Pengawasan & Moderasi",
+      title: "PENGAWASAN & MODERASI",
       items: [
         {
           id: "moderation",
@@ -123,7 +123,7 @@ export function AdminSidebar({
       ],
     },
     {
-      title: "Sistem & Tata Kelola",
+      title: "SISTEM & TATA KELOLA",
       items: [
         {
           id: "system",
@@ -140,28 +140,29 @@ export function AdminSidebar({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white text-[#181343] border-r border-slate-200">
+    <div className="flex flex-col h-full bg-white text-[#181343] border-r border-[#E5E7EB] select-none">
       {/* Header & Brand */}
-      <div className="h-[72px] px-5 border-b border-slate-200 flex items-center justify-between gap-2 shrink-0">
-        <AppLogo size="md" theme="light" subtitle="Platform Oversight" />
+      <div className="h-[72px] px-5 border-b border-[#E5E7EB] flex items-center justify-between shrink-0">
+        <AppLogo size="md" theme="light" subtitle="Platform Oversight" className="min-w-0 flex-1" />
         <button
           type="button"
           onClick={onCloseMobile}
-          aria-label="Tutup Menu Navigasi"
-          className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-slate-600 hover:text-[#181343] hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+          aria-label="Tutup Menu"
+          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-[#181343] hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
         >
           <X className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
       {/* Navigation Sections */}
-      <nav aria-label="Menu Super Admin" className="flex-1 overflow-y-auto px-3 py-5 space-y-6">
+      <div className="flex-1 overflow-y-auto px-3.5 py-4 pb-8 space-y-6">
         {sections.map((section) => (
-          <div key={section.title} className="space-y-1.5">
-            <h2 className="px-3 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+          <div key={section.title} className="space-y-1">
+            <span className="px-3 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
               {section.title}
-            </h2>
-            <div className="space-y-1">
+            </span>
+
+            <div className="space-y-1 pt-1.5">
               {section.items.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeMenu === item.id;
@@ -171,40 +172,42 @@ export function AdminSidebar({
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item.id)}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`w-full min-h-[44px] flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${isActive
-                      ? "bg-[#181343] text-white font-bold"
-                      : "text-[#181343] hover:bg-slate-100"
-                      }`}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group ${
+                      isActive
+                        ? "bg-[#181343] text-white shadow-xs font-bold"
+                        : "text-[#181343] hover:bg-[#F4F4F6] hover:text-[#181343]"
+                    }`}
                   >
-                    <span className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
-                        className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-600"
-                          }`}
+                        className={`w-4 h-4 shrink-0 transition-colors ${
+                          isActive ? "text-white" : "text-[#787680] group-hover:text-[#181343]"
+                        }`}
                         aria-hidden="true"
                       />
                       <span className="truncate">{item.label}</span>
-                    </span>
+                    </div>
 
-                    <span className="flex items-center gap-1.5 shrink-0 ml-2">
+                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {item.count !== undefined && item.count > 0 && (
                         <span
-                          className={`min-w-[20px] h-[20px] px-1.5 inline-flex items-center justify-center rounded-full text-[11px] font-bold leading-none ${isActive
-                            ? "bg-emerald-500 text-white"
-                            : "bg-amber-50 text-amber-800 border border-amber-200"
-                            }`}
+                          className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${
+                            isActive
+                              ? "bg-white/20 text-white"
+                              : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
+                          }`}
                         >
                           {item.count}
                         </span>
                       )}
-                    </span>
+                    </div>
                   </button>
                 );
               })}
             </div>
           </div>
         ))}
-      </nav>
+      </div>
 
       {/* Footer Logout di Sudut Kiri Bawah */}
       <div className="px-3.5 py-2.5 border-t border-[#E5E7EB] bg-white shrink-0">
@@ -241,18 +244,18 @@ export function AdminSidebar({
 
   return (
     <>
-      <aside className="hidden lg:block fixed inset-y-0 left-0 w-64 xl:w-72 z-30">
+      <aside className="hidden lg:block fixed inset-y-0 left-0 w-64 z-30">
         {sidebarContent}
       </aside>
 
       {isOpenMobile && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div
-            className="fixed inset-0 bg-slate-950/50 transition-opacity"
+            className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs transition-opacity"
             onClick={onCloseMobile}
             aria-hidden="true"
           />
-          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl z-10">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-2xl z-10 animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </div>
         </div>

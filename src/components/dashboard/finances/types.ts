@@ -49,7 +49,7 @@ export const EXPENSE_CATEGORY_CONFIG: Record<
   SEWA_ALAT_DAN_TEMPAT: { label: "Sewa Peralatan & Lokasi", icon: "Building", variant: "amber" },
   KONSUMSI_KEGIATAN: { label: "Konsumsi & Akomodasi", icon: "Coffee", variant: "rose" },
   DOKUMENTASI_DAN_PUBLIKASI: { label: "Dokumentasi & Publikasi", icon: "Camera", variant: "emerald" },
-  OPERASIONAL_LAINNYA: { label: "Operasional Lainnya", icon: "Receipt", variant: "slate" },
+  OPERASIONAL_LAINNYA: { label: "Operasional Lainnya", icon: "ReceiptText", variant: "slate" },
 };
 
 export const EXPENSE_VERIFICATION_CONFIG: Record<

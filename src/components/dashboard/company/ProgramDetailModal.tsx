@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import {
   X,
   Activity,
-  DollarSign,
   Calendar,
   Users,
   Building2,
@@ -17,10 +16,6 @@ import {
   Sparkles,
   Check,
   Percent,
-  Camera,
-  FileText,
-  Star,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +25,8 @@ import {
   FOCUS_AREA_CONFIG,
   formatRupiah,
   formatDate,
+  formatCurrencyInput,
+  parseCurrencyInput,
 } from "./helpers";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
@@ -83,7 +80,7 @@ export function ProgramDetailModal({
     : null;
 
   const totalBudgetNum = parseFloat(program.budget || "0") || 1;
-  const currentSpentNum = parseFloat(spentBudget || "0") || 0;
+  const currentSpentNum = parseCurrencyInput(spentBudget);
   const progressPercent = Math.min(100, Math.round((currentSpentNum / totalBudgetNum) * 100));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,7 +100,7 @@ export function ProgramDetailModal({
         },
         body: JSON.stringify({
           status,
-          spentBudget: spentBudget ? parseFloat(spentBudget) : 0,
+          spentBudget: parseCurrencyInput(spentBudget),
           actualBeneficiaries: actualBeneficiaries.trim() || null,
           description: description.trim() || null,
         }),
@@ -176,55 +173,51 @@ export function ProgramDetailModal({
           </button>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="px-6 border-b border-slate-100 flex items-center gap-6 bg-slate-50/30 overflow-x-auto">
+        {/* Tab Navigation (Seragam dengan role CSR Admin: tanpa ikon, active navy) */}
+        <div className="px-6 border-b border-[#E5E7EB] flex items-center gap-4 sm:gap-7 bg-[#F9F9FB] overflow-x-auto scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab("activities")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
+            className={`py-3.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "activities"
-                ? "border-teal-600 text-teal-700 font-extrabold"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Camera className="w-4 h-4" />
-            Log & Bukti Kegiatan Lapangan
+            Log &amp; Bukti Kegiatan Lapangan
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("finances")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
+            className={`py-3.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "finances"
                 ? "border-[#181343] text-[#181343] font-extrabold"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Wallet className="w-4 h-4 text-[#181343]" />
-            Realisasi Dana & Keuangan
+            Realisasi Dana &amp; Keuangan
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("overview")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
+            className={`py-3.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "overview"
                 ? "border-[#181343] text-[#181343] font-extrabold"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <FileText className="w-4 h-4" />
-            Ringkasan & Status Pelaksanaan
+            Ringkasan &amp; Status Pelaksanaan
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("reviews")}
-            className={`py-3.5 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
+            className={`py-3.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "reviews"
-                ? "border-teal-600 text-teal-700 font-extrabold"
-                : "border-transparent text-slate-500 hover:text-slate-800"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-            Suara & Ulasan Masyarakat
+            Suara &amp; Ulasan Masyarakat
           </button>
         </div>
 
@@ -235,6 +228,8 @@ export function ProgramDetailModal({
               programId={program.id}
               programTitle={program.title}
               role="COMPANY"
+              collaborationId={program.collaborationId}
+              onNavigateToFinances={() => setActiveTab("finances")}
               onActivityChanged={onSuccess}
             />
           </div>
@@ -395,12 +390,15 @@ export function ProgramDetailModal({
                     Rp
                   </span>
                   <input
-                    type="number"
-                    value={spentBudget}
-                    onChange={(e) => setSpentBudget(e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={formatCurrencyInput(spentBudget)}
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/[^\d]/g, "");
+                      setSpentBudget(clean);
+                    }}
                     placeholder="0"
-                    min="0"
-                    max={totalBudgetNum}
                     className="w-full pl-10 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
                   />
                 </div>

@@ -23,7 +23,7 @@ export interface SoftDataGridProps {
 }
 
 /**
- * SoftDataGrid — Eksperimen Visual Opsi 3: Subtle Data-Driven Background SIPENA
+ * SoftDataGrid - Eksperimen Visual Opsi 3: Subtle Data-Driven Background SIPENA
  *
  * Karakteristik Visual:
  * - Ukuran sel grid 40px (teratur & proporsional).
@@ -46,7 +46,7 @@ export function SoftDataGrid({
         className={`absolute inset-0 pointer-events-none select-none overflow-hidden z-0 ${className}`}
         aria-hidden="true"
       >
-        {/* Faint white-blue grid on dark navy/gradient hero — corner focused with radial fade */}
+        {/* Faint white-blue grid on dark navy/gradient hero - corner focused with radial fade */}
         <div
           className="absolute inset-0 opacity-70 sm:opacity-90"
           style={{
