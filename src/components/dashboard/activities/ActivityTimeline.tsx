@@ -671,24 +671,24 @@ export function ActivityTimeline({
               return (
                 <div
                   key={act.id}
-                  className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200/80 hover:border-slate-300 shadow-2xs transition-all space-y-4"
+                  className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all space-y-4"
                 >
                   {/* Baris Atas: Status Verifikasi, Metadata Tanggal & Aksi Cepat */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 text-xs">
                     <div className="flex flex-wrap items-center gap-2">
                       {/* Status Verifikasi */}
                       {act.status === "VERIFIED" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                           Terverifikasi
                         </span>
                       ) : act.status === "REVISION_REQUESTED" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200">
                           <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
                           Perlu Perbaikan
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
                           <Clock className="w-3.5 h-3.5 text-amber-600" />
                           Menunggu Verifikasi
                         </span>
@@ -696,42 +696,39 @@ export function ActivityTimeline({
 
                       {/* Tag Tahap Singkat (Tanpa Duplikasi Judul) */}
                       {act.stageOrderIndex ? (
-                        <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200/80">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-semibold border border-slate-200/80">
                           Tahap {act.stageOrderIndex}
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">
                           Laporan Umum
                         </span>
                       )}
 
-                      <span className="text-slate-500 flex items-center gap-1.5 text-xs">
+                      <span className="text-slate-500 flex items-center gap-1.5 text-xs font-medium bg-slate-50 border border-slate-200/60 px-2.5 py-1 rounded-lg">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
                         {formatDate(act.activityDate)}
                       </span>
 
-                      <span className="text-slate-300 hidden sm:inline">•</span>
+                      <span className="text-slate-300 hidden md:inline">•</span>
 
                       <span className="text-xs text-slate-500">
                         Oleh <strong className="text-slate-800 font-semibold">{act.submitterName || "Mitra Pelaksana"}</strong>
+                        <span className="text-slate-400 text-[11px] ml-1">(Diunggah {formatDate(act.createdAt)})</span>
                       </span>
                     </div>
 
                     {/* Aksi Kanan */}
-                    <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-                      <span className="text-[11px] text-slate-400 hidden md:inline">
-                        Diunggah {formatDate(act.createdAt)}
-                      </span>
-
+                    <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => setSelectedActivityForDetail(act)}
                         leftIcon={<Eye className="w-3.5 h-3.5 text-slate-500" />}
-                        className="text-xs font-semibold border-slate-200 text-slate-700 rounded-xl px-3 py-1.5 hover:bg-slate-50 cursor-pointer"
+                        className="text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border-slate-200 rounded-xl px-3.5 py-2 cursor-pointer shadow-2xs"
                       >
-                        Lihat Detail Laporan
+                        Lihat Detail
                       </Button>
 
                       {role === "COMPANY" && !isManagement && (
@@ -740,10 +737,10 @@ export function ActivityTimeline({
                           variant="primary"
                           size="sm"
                           onClick={() => setSelectedActivityForVerify(act)}
-                          leftIcon={<ShieldCheck className="w-3.5 h-3.5" />}
-                          className="text-xs font-semibold bg-[#181343] text-white rounded-xl px-3 py-1.5 cursor-pointer"
+                          leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />}
+                          className="text-xs font-bold bg-[#181343] hover:bg-indigo-950 text-white rounded-xl px-4 py-2 cursor-pointer shadow-2xs"
                         >
-                          {act.status === "VERIFIED" ? "Perbarui Verifikasi" : "Verifikasi &amp; Evaluasi"}
+                          {act.status === "VERIFIED" ? "Perbarui Verifikasi" : "Verifikasi & Evaluasi"}
                         </Button>
                       )}
 
@@ -751,7 +748,7 @@ export function ActivityTimeline({
                         <button
                           type="button"
                           onClick={() => handleDeleteActivity(act.id, act.title)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                          className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                           title="Hapus Laporan Ini"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -760,159 +757,176 @@ export function ActivityTimeline({
                     </div>
                   </div>
 
-                  {/* Isi Konten Laporan: Split 2 Kolom Bernafas (Teks & Foto Dokumentasi) */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-                    <div className={`${photos.length > 0 ? "md:col-span-8 lg:col-span-9" : "md:col-span-12"} space-y-3`}>
-                      {/* Judul Laporan Bersih */}
-                      <h4 className="text-base sm:text-lg font-bold text-[#181343] leading-snug">
-                        {cleanStageTitle(act.title) || act.title}
-                      </h4>
+                  {/* Isi Konten Laporan: Full-Width Narasi */}
+                  <div className="space-y-2">
+                    <h4 className="text-base sm:text-lg font-extrabold text-[#181343] leading-snug">
+                      {cleanStageTitle(act.title) || act.title}
+                    </h4>
 
-                      {/* Narasi Deskripsi Kegiatan */}
-                      {act.description && (
-                        <div className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                          <p className={isExpanded ? "whitespace-pre-line" : "line-clamp-2 sm:line-clamp-3"}>
-                            {act.description}
-                          </p>
-                          {act.description.length > 140 && (
-                            <button
-                              type="button"
-                              onClick={() => toggleExpand(act.id)}
-                              className="text-xs font-bold text-[#009E75] hover:underline mt-1 cursor-pointer inline-block"
-                            >
-                              {isExpanded ? "Ciutkan deskripsi" : "Lihat selengkapnya"}
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Pill Parameter Laporan (Penerima, Dana, Berkas) */}
-                      {(act.beneficiariesReached || numFunds > 0 || act.documentUrl) && (
-                        <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs">
-                          {act.beneficiariesReached && (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
-                              <Users className="w-3.5 h-3.5 text-slate-500" />
-                              <span>Penerima: <strong className="text-slate-900">{act.beneficiariesReached}</strong></span>
-                            </div>
-                          )}
-                          {numFunds > 0 && (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
-                              <Wallet className="w-3.5 h-3.5 text-slate-500" />
-                              <span>Dana: <strong className="text-slate-900">{formatRupiah(act.fundsSpent)}</strong></span>
-                            </div>
-                          )}
-                          {act.documentUrl && (
-                            <a
-                              href={act.documentUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-700 hover:text-[#181343] transition"
-                            >
-                              <FileCheck2 className="w-3.5 h-3.5 text-slate-500" />
-                              <span className="font-semibold">Berkas BAST</span>
-                              <ExternalLink className="w-3 h-3 text-slate-400" />
-                            </a>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Catatan Feedback CSR Admin jika ada */}
-                      {act.companyFeedback && (
-                        <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs space-y-1 mt-2">
-                          <div className="flex items-center gap-1.5 text-amber-950 font-bold">
-                            <MessageSquare className="w-3.5 h-3.5 text-amber-700" />
-                            <span>Catatan Evaluasi Verifikator:</span>
-                            {act.verifierName && (
-                              <span className="text-[11px] text-amber-800 font-normal">
-                                ({act.verifierName})
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-amber-900 leading-relaxed italic pl-5">
-                            "{act.companyFeedback}"
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Indikator Riwayat Versi / Audit Trail */}
-                      {history.length > 0 && (
-                        <div className="pt-2 border-t border-slate-100">
+                    {act.description && (
+                      <div className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        <p className={isExpanded ? "whitespace-pre-line" : "line-clamp-2 sm:line-clamp-3"}>
+                          {act.description}
+                        </p>
+                        {act.description.length > 140 && (
                           <button
                             type="button"
-                            onClick={() => toggleAuditTrail(act.id)}
-                            className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer"
+                            onClick={() => toggleExpand(act.id)}
+                            className="text-xs font-bold text-[#009E75] hover:underline mt-1 cursor-pointer inline-flex items-center gap-1"
                           >
-                            <History className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{history.length} Riwayat Pengajuan / Versi Terdahulu</span>
-                            {isAuditTrailExpanded ? (
-                              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+                            {isExpanded ? (
+                              <>
+                                <span>Ciutkan deskripsi</span>
+                                <ChevronUp className="w-3.5 h-3.5" />
+                              </>
                             ) : (
-                              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                              <>
+                                <span>Lihat selengkapnya</span>
+                                <ChevronDown className="w-3.5 h-3.5" />
+                              </>
                             )}
                           </button>
-
-                          {isAuditTrailExpanded && (
-                            <div className="mt-2.5 space-y-2 pl-4 border-l-2 border-slate-200">
-                              {history.map((hist) => (
-                                <div
-                                  key={hist.id}
-                                  className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1"
-                                >
-                                  <div className="flex items-center justify-between gap-2">
-                                    <span className="font-semibold text-slate-700">
-                                      Versi diajukan {formatDate(hist.createdAt)}
-                                    </span>
-                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white text-slate-600 border border-slate-200">
-                                      {hist.status}
-                                    </span>
-                                  </div>
-                                  <p className="text-[11px] text-slate-500 line-clamp-1">
-                                    {hist.description}
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Sisi Kanan: Thumbnail Dokumentasi Lapangan */}
-                    {photos.length > 0 && (
-                      <div className="md:col-span-4 lg:col-span-3 flex flex-col gap-2 pt-1 md:pt-0">
-                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
-                          Dokumentasi ({photos.length})
-                        </span>
-                        <div className="flex items-center gap-2">
-                          {photos.slice(0, 3).map((url, idx) => {
-                            const isLastSlot = idx === 2 && photos.length > 3;
-                            return (
-                              <div
-                                key={idx}
-                                onClick={() => handleOpenLightbox(photos, idx, act.title)}
-                                className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 cursor-pointer group shadow-2xs hover:shadow-xs transition-all shrink-0"
-                              >
-                                <img
-                                  src={url}
-                                  alt={`Dokumentasi ${idx + 1}`}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                />
-                                <div className="absolute inset-0 bg-[#181343]/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                                  <Maximize2 className="w-4 h-4 drop-shadow-xs" />
-                                </div>
-
-                                {isLastSlot && (
-                                  <div className="absolute inset-0 bg-[#181343]/85 text-white font-bold text-xs flex items-center justify-center">
-                                    +{photos.length - 2}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                        )}
                       </div>
                     )}
                   </div>
+
+                  {/* Galeri Dokumentasi Foto (Opsi A: Horizontal, Proporsional, Lebih Jelas) */}
+                  {photos.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <span className="font-bold text-slate-700 flex items-center gap-1.5">
+                          <Camera className="w-4 h-4 text-slate-400" />
+                          <span>Dokumentasi Kegiatan ({photos.length} Foto)</span>
+                        </span>
+                        <span className="text-[11px] text-slate-400">Klik foto untuk memperbesar</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {photos.slice(0, 4).map((url, idx) => {
+                          const isLastSlot = idx === 3 && photos.length > 4;
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => handleOpenLightbox(photos, idx, act.title)}
+                              className="group relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200/80 bg-slate-100 cursor-pointer shadow-2xs hover:shadow-md transition-all"
+                            >
+                              <img
+                                src={url}
+                                alt={`Dokumentasi ${idx + 1}`}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
+                                <span className="text-white text-[11px] font-medium flex items-center gap-1">
+                                  <Maximize2 className="w-3.5 h-3.5 drop-shadow-xs" />
+                                  <span>Perbesar</span>
+                                </span>
+                              </div>
+
+                              {isLastSlot && (
+                                <div className="absolute inset-0 bg-[#181343]/80 group-hover:bg-[#181343]/70 transition-colors flex flex-col items-center justify-center text-white">
+                                  <span className="text-base font-extrabold">+{photos.length - 3} Foto</span>
+                                  <span className="text-[10px] text-slate-300">Lihat Semua</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Catatan Feedback CSR Admin jika ada */}
+                  {act.companyFeedback && (
+                    <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs space-y-1">
+                      <div className="flex items-center gap-1.5 text-amber-950 font-bold">
+                        <MessageSquare className="w-3.5 h-3.5 text-amber-700" />
+                        <span>Catatan Evaluasi Verifikator:</span>
+                        {act.verifierName && (
+                          <span className="text-[11px] text-amber-800 font-normal">
+                            ({act.verifierName})
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-amber-900 leading-relaxed italic pl-5">
+                        "{act.companyFeedback}"
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Baris Parameter & Micro-Stats (Bottom Bar: Rapi, Terstruktur & Terpadu) */}
+                  {(act.beneficiariesReached || numFunds > 0 || act.documentUrl) && (
+                    <div className="pt-3 border-t border-slate-100">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+                        {act.beneficiariesReached && (
+                          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
+                            <Users className="w-4 h-4 text-indigo-600 shrink-0" />
+                            <span>Penerima: <strong className="text-[#181343] font-bold">{act.beneficiariesReached}</strong></span>
+                          </div>
+                        )}
+                        {numFunds > 0 && (
+                          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
+                            <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>Dana Termin: <strong className="text-[#181343] font-bold">{formatRupiah(act.fundsSpent)}</strong></span>
+                          </div>
+                        )}
+                        {act.documentUrl && (
+                          <a
+                            href={act.documentUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-700 hover:text-[#181343] transition-colors sm:ml-auto"
+                          >
+                            <FileCheck2 className="w-4 h-4 text-slate-500 shrink-0" />
+                            <span className="font-bold">Unduh Berkas BAST</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Indikator Riwayat Versi / Audit Trail */}
+                  {history.length > 0 && (
+                    <div className="pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => toggleAuditTrail(act.id)}
+                        className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer"
+                      >
+                        <History className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{history.length} Riwayat Pengajuan / Versi Terdahulu</span>
+                        {isAuditTrailExpanded ? (
+                          <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                        )}
+                      </button>
+
+                      {isAuditTrailExpanded && (
+                        <div className="mt-2.5 space-y-2 pl-4 border-l-2 border-slate-200">
+                          {history.map((hist) => (
+                            <div
+                              key={hist.id}
+                              className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold text-slate-700">
+                                  Versi diajukan {formatDate(hist.createdAt)}
+                                </span>
+                                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-white text-slate-600 border border-slate-200">
+                                  {hist.status}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 line-clamp-1">
+                                {hist.description}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })
