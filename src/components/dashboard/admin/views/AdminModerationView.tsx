@@ -242,7 +242,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
             role="tab"
             aria-selected={activeTab === "opportunities"}
             onClick={() => setActiveTab("opportunities")}
-            className={`min-h-[44px] px-4 py-2 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] cursor-pointer ${
               activeTab === "opportunities"
                 ? "bg-white text-[#181343] font-bold shadow-xs"
                 : "text-slate-600 hover:text-[#181343]"
@@ -255,7 +255,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
             role="tab"
             aria-selected={activeTab === "proposals"}
             onClick={() => setActiveTab("proposals")}
-            className={`min-h-[44px] px-4 py-2 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#181343] cursor-pointer ${
               activeTab === "proposals"
                 ? "bg-white text-[#181343] font-bold shadow-xs"
                 : "text-slate-600 hover:text-[#181343]"
@@ -346,7 +346,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
           <button
             type="button"
             onClick={() => setBannerSuccess(null)}
-            className="min-h-[44px] min-w-[44px] px-3 py-2 text-xs font-bold text-emerald-800 hover:underline rounded-lg"
+            className="px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer"
           >
             Tutup
           </button>
@@ -375,7 +375,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                     setOppPage(1);
                   }}
                   placeholder="Cari judul peluang, perusahaan, atau kota target..."
-                  className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
                 />
               </div>
 
@@ -390,7 +390,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                     setOppFocus(e.target.value);
                     setOppPage(1);
                   }}
-                  className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
                 >
                   <option value="ALL">Semua Bidang Fokus</option>
                   {csrFocusAreaEnum.map((fa: CsrFocusArea) => (
@@ -412,7 +412,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                     setOppStatus(e.target.value);
                     setOppPage(1);
                   }}
-                  className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
                 >
                   <option value="ALL">Semua Status</option>
                   <option value="OPEN">Terbuka (OPEN)</option>
@@ -511,17 +511,17 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                               <button
                                 type="button"
                                 onClick={() => setSelectedOpp(opp)}
-                                className="min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                               >
-                                <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                                <Eye className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                                 <span>Tinjau</span>
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleOpenModerateModal(opp)}
-                                className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 ${
+                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
                                   opp.status === "CLOSED"
-                                    ? "border border-slate-300 bg-white hover:bg-slate-50 text-[#181343]"
+                                    ? "border border-slate-200 bg-white hover:bg-slate-50 text-[#181343]"
                                     : "bg-rose-700 hover:bg-rose-800 text-white"
                                 }`}
                               >
@@ -585,17 +585,17 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                         <button
                           type="button"
                           onClick={() => setSelectedOpp(opp)}
-                          className="flex-1 min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5"
+                          className="flex-1 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                         >
-                          <Eye className="w-4 h-4" aria-hidden="true" />
+                          <Eye className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                           <span>Detail</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleOpenModerateModal(opp)}
-                          className={`flex-1 min-h-[44px] px-3 py-2 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1.5 ${
+                          className={`flex-1 px-3 py-2 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
                             opp.status === "CLOSED"
-                              ? "border border-slate-300 bg-white text-[#181343]"
+                              ? "border border-slate-200 bg-white text-[#181343]"
                               : "bg-rose-700 hover:bg-rose-800 text-white"
                           }`}
                         >
@@ -640,7 +640,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                     setPropPage(1);
                   }}
                   placeholder="Cari judul proposal, lembaga pengusul, perusahaan tujuan, atau peluang..."
-                  className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
                 />
               </div>
 
@@ -655,7 +655,7 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                     setPropStatus(e.target.value);
                     setPropPage(1);
                   }}
-                  className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
                 >
                   <option value="ALL">Semua Status Proposal</option>
                   <option value="SUBMITTED">Terkirim</option>
@@ -748,9 +748,9 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                             <button
                               type="button"
                               onClick={() => setSelectedProposal(prop)}
-                              className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5"
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                             >
-                              <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                              <Eye className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                               <span>Detail</span>
                             </button>
                           </td>
@@ -801,9 +801,9 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
                       <button
                         type="button"
                         onClick={() => setSelectedProposal(prop)}
-                        className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                       >
-                        <Eye className="w-4 h-4" aria-hidden="true" />
+                        <Eye className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />
                         <span>Inspeksi Proposal</span>
                       </button>
                     </div>
@@ -916,14 +916,14 @@ export function AdminModerationView({ onMutated }: AdminModerationViewProps) {
               type="button"
               onClick={() => setModeratingOpp(null)}
               disabled={isModerating}
-              className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
+              className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isModerating}
-              className={`min-h-[44px] px-5 py-2 rounded-xl text-white text-xs font-semibold inline-flex items-center gap-2 disabled:opacity-60 ${
+              className={`px-4 py-2 rounded-xl text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
                 moderateTargetStatus === "CLOSED"
                   ? "bg-rose-700 hover:bg-rose-800"
                   : "bg-[#181343] hover:bg-[#26224C]"

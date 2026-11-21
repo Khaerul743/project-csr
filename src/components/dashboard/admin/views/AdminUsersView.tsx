@@ -248,7 +248,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
         <button
           type="button"
           onClick={handleOpenCreateModal}
-          className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] self-start sm:self-auto shrink-0 shadow-xs cursor-pointer"
+          className="px-3.5 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] self-start sm:self-auto shrink-0"
         >
           <UserPlus className="w-4 h-4" aria-hidden="true" />
           <span>Tambah Super Admin</span>
@@ -299,7 +299,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
           <button
             type="button"
             onClick={() => setBannerSuccess(null)}
-            className="min-h-[44px] min-w-[44px] text-xs font-bold text-emerald-800 hover:underline px-3 py-2 rounded-lg"
+            className="px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 rounded-lg transition-colors cursor-pointer"
           >
             Tutup
           </button>
@@ -326,7 +326,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                 setPage(1);
               }}
               placeholder="Cari nama lengkap, email, atau jabatan..."
-              className="w-full min-h-[44px] pl-10 pr-4 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
             />
           </div>
 
@@ -341,7 +341,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                 setRoleFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Peran</option>
               <option value="SUPER_ADMIN">Super Admin</option>
@@ -363,7 +363,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ALL">Semua Status Akun</option>
               <option value="ACTIVE">Aktif</option>
@@ -489,7 +489,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                               ? "Akun yang sedang aktif digunakan tidak dapat diubah statusnya"
                               : `Kelola status akun ${u.name}`
                           }
-                          className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                         >
                           <UserCog className="w-3.5 h-3.5" aria-hidden="true" />
                           <span>Kelola Akses</span>
@@ -554,7 +554,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                     type="button"
                     onClick={() => handleOpenStatusModal(u)}
                     disabled={isSelf}
-                    className="w-full min-h-[44px] px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-45 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                   >
                     <UserCog className="w-4 h-4" aria-hidden="true" />
                     <span>{isSelf ? "Akun Anda Sedang Aktif" : "Kelola Status Akses"}</span>
@@ -603,7 +603,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="Nama lengkap pengelola"
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
             />
           </div>
 
@@ -618,7 +618,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
               placeholder="admin@sipena.id"
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
             />
           </div>
 
@@ -635,13 +635,13 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Minimal 8 karakter kombinasi huruf dan angka"
-                className="w-full min-h-[44px] pl-3.5 pr-12 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                className="w-full pl-3.5 pr-12 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword((prev) => !prev)}
                 aria-label={showNewPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center absolute right-0 top-0 text-slate-600 hover:text-[#181343]"
+                className="w-9 h-9 flex items-center justify-center absolute right-1 top-1/2 -translate-y-1/2 text-slate-500 hover:text-[#181343] rounded-lg transition-colors cursor-pointer"
               >
                 {showNewPassword ? (
                   <EyeOff className="w-4 h-4" aria-hidden="true" />
@@ -663,7 +663,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                 value={newPosition}
                 onChange={(e) => setNewPosition(e.target.value)}
                 placeholder="Platform Super Admin"
-                className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
               />
             </div>
 
@@ -677,7 +677,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
                 value={newPhone}
                 onChange={(e) => setNewPhone(e.target.value)}
                 placeholder="Nomor telepon aktif"
-                className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
+                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs text-[#181343] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#181343]"
               />
             </div>
           </div>
@@ -687,14 +687,14 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
               type="button"
               onClick={() => setIsCreateOpen(false)}
               disabled={isCreating}
-              className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
+              className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isCreating}
-              className="min-h-[44px] px-5 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-2 disabled:opacity-60"
+              className="px-4 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
             >
               {isCreating ? (
                 <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
@@ -736,7 +736,7 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
               onChange={(e) =>
                 setNextStatus(e.target.value as "ACTIVE" | "INACTIVE" | "SUSPENDED")
               }
-              className="w-full min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#181343]"
             >
               <option value="ACTIVE">Aktif (Login diizinkan)</option>
               <option value="INACTIVE">Nonaktif (Sementara tidak dapat login)</option>
@@ -763,14 +763,14 @@ export function AdminUsersView({ currentAdminId, onMutated }: AdminUsersViewProp
               type="button"
               onClick={() => setEditingUser(null)}
               disabled={isUpdatingStatus}
-              className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700"
+              className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isUpdatingStatus}
-              className="min-h-[44px] px-5 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-2 disabled:opacity-60"
+              className="px-4 py-2 rounded-xl bg-[#181343] hover:bg-[#26224C] text-white text-xs font-semibold inline-flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
             >
               {isUpdatingStatus ? (
                 <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />

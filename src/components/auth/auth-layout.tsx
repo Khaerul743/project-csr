@@ -22,7 +22,7 @@ export function AuthLayout({
 }: AuthLayoutProps) {
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-[#F4F4F6]">
-      {/* Layered background — soft radial gradient wash for depth */}
+      {/* Layered background - soft radial gradient wash for depth */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -33,7 +33,7 @@ export function AuthLayout({
 
       {/* Full-height flex wrapper */}
       <div className="relative z-10 flex flex-col items-center w-full px-5 py-10 sm:py-16">
-        {/* Back link — sits above the card, left-aligned to card width */}
+        {/* Back link - sits above the card, left-aligned to card width */}
         <div className="w-full max-w-[420px] mb-5">
           <Link
             href="/"
@@ -52,7 +52,7 @@ export function AuthLayout({
               "0 1px 2px rgba(24,19,67,0.04), 0 4px 12px rgba(24,19,67,0.04), 0 12px 32px rgba(24,19,67,0.03)",
           }}
         >
-          {/* Card Header — Logo & Title Zone */}
+          {/* Card Header - Logo & Title Zone */}
           <div className="pt-8 pb-1 px-8 sm:pt-10 sm:px-10">
             {/* Logo lockup */}
             <div className="flex flex-col items-center text-center mb-6">
@@ -105,7 +105,7 @@ export function AuthLayout({
           {/* Form Content */}
           <div className="px-8 sm:px-10 pb-6">{children}</div>
 
-          {/* Footer — Switch between Login/Register */}
+          {/* Footer - Switch between Login/Register */}
           <div className="border-t border-[#F4F4F6] bg-[#FAFAFE] px-8 sm:px-10 py-4">
             <p className="text-[13px] text-[#787680] text-center">
               {footerText}{" "}
@@ -122,7 +122,7 @@ export function AuthLayout({
         {/* Institutional footer */}
         <div className="mt-8 text-center space-y-0.5">
           <p className="text-[11px] text-[#C8C5D0]">
-            &copy; 2026 SIPENA — Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi
+            &copy; 2026 SIPENA - Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi
             CSR
           </p>
           <p className="text-[11px] text-[#C8C5D0]">

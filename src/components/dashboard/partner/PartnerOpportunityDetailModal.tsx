@@ -5,7 +5,6 @@ import {
   X,
   MapPin,
   Calendar,
-  DollarSign,
   Building2,
   Clock,
   Send,

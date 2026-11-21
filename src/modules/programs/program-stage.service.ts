@@ -16,13 +16,15 @@ import {
 import { milestoneExtractorService } from "@/modules/ai";
 import { MilestoneExtractionResponse } from "@/modules/ai/ai.interface";
 import { ProgramStage, NewProgramStage } from "@/db/schema/program-stages";
+import { FinanceRepository } from "../finances/finance.repository";
 
 export class ProgramStageService {
   private readonly logger = new AppLogger("ProgramStageService");
 
   constructor(
     private readonly programRepository: ProgramRepository,
-    private readonly stageRepository: ProgramStageRepository
+    private readonly stageRepository: ProgramStageRepository,
+    private readonly financeRepository?: FinanceRepository
   ) {}
 
   private async verifyProgramAccess(
@@ -156,6 +158,16 @@ export class ProgramStageService {
     }
 
     await this.verifyProgramAccess(stage.programId, user);
+
+    // STRICT GUARDRAIL: Tahapan tidak dapat dimulai/diselesaikan jika termin awal belum dicairkan
+    if (this.financeRepository && (dto.status === "IN_PROGRESS" || dto.status === "COMPLETED")) {
+      const summary = await this.financeRepository.getFinancialSummary(stage.programId);
+      if (summary.totalConfirmedReceived <= 0) {
+        throw new BadRequestError(
+          "Tahapan pelaksanaan belum dapat dimulai atau diselesaikan karena dana termin awal (Termin 1) belum dicairkan oleh perusahaan ke rekening kas mitra. Pastikan penyaluran dana termin awal telah dikonfirmasi terlebih dahulu."
+        );
+      }
+    }
 
     return this.stageRepository.update(stageId, {
       title: dto.title,

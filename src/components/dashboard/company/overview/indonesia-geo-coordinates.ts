@@ -1,3 +1,5 @@
+import { INDONESIAN_REGIONS } from "../opportunities/indonesian-regions";
+
 export interface ProvinceGeoCoordinate {
   name: string;
   lat: number;
@@ -59,18 +61,41 @@ export const INDONESIA_PROVINCE_GEO: Record<string, ProvinceGeoCoordinate> = {
   "Papua Selatan": { name: "Papua Selatan", lat: -7.3820, lng: 139.6970, island: "Papua" },
 };
 
-export function matchGeoProvinceName(provName?: string | null): string | null {
-  if (!provName) return null;
-  const clean = provName.trim().toLowerCase();
-  for (const p of Object.keys(INDONESIA_PROVINCE_GEO)) {
-    if (
-      p.toLowerCase() === clean ||
-      clean.includes(p.toLowerCase()) ||
-      p.toLowerCase().includes(clean)
-    ) {
-      return p;
+export function matchGeoProvinceName(
+  provName?: string | null,
+  cityName?: string | null
+): string | null {
+  if (provName) {
+    const clean = provName.trim().toLowerCase();
+    for (const p of Object.keys(INDONESIA_PROVINCE_GEO)) {
+      if (
+        p.toLowerCase() === clean ||
+        clean.includes(p.toLowerCase()) ||
+        p.toLowerCase().includes(clean)
+      ) {
+        return p;
+      }
     }
   }
+
+  // Deduce province from city/kabupaten if province is missing or unassigned
+  if (cityName) {
+    const cleanCity = cityName.trim().toLowerCase().replace(/^(kab\.|kabupaten|kota)\s+/i, "");
+    for (const region of INDONESIAN_REGIONS) {
+      const matchCity = region.cities.some((c) => {
+        const cClean = c.toLowerCase().replace(/^(kab\.|kabupaten|kota)\s+/i, "");
+        return (
+          cClean === cleanCity ||
+          cClean.includes(cleanCity) ||
+          cleanCity.includes(cClean)
+        );
+      });
+      if (matchCity) {
+        return matchGeoProvinceName(region.name);
+      }
+    }
+  }
+
   return null;
 }
 

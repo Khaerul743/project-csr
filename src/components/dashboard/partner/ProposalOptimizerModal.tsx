@@ -12,7 +12,7 @@ import {
   Copy,
   Check,
   RotateCcw,
-  DollarSign,
+  Coins,
   FileText,
   ShieldCheck,
   CheckSquare,
@@ -418,7 +418,7 @@ export function ProposalOptimizerModal({
               {result.suggestedBudgetAdvice && (
                 <div className="p-4 rounded-2xl bg-teal-50/70 border border-teal-200/80 space-y-1.5">
                   <div className="flex items-center gap-2 font-bold text-xs text-teal-900">
-                    <DollarSign className="w-4 h-4 text-teal-700 shrink-0" />
+                    <Coins className="w-4 h-4 text-teal-700 shrink-0" />
                     <span>Rekomendasi Alokasi & Efisiensi Anggaran (RAB)</span>
                   </div>
                   <p className="text-xs text-teal-950 leading-relaxed pl-6">

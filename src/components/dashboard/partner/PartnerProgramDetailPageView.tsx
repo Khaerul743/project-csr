@@ -15,14 +15,12 @@ import {
   Sparkles,
   Check,
   FileText,
-  Star,
   Wallet,
   MessageSquare,
   RefreshCw,
   Info,
   ChevronDown,
   ChevronUp,
-  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +30,8 @@ import {
   FOCUS_AREA_CONFIG,
   formatRupiah,
   formatDate,
+  formatCurrencyInput,
+  parseCurrencyInput,
 } from "./helpers";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
@@ -103,6 +103,17 @@ export function PartnerProgramDetailPageView({
     setSuccessMsg(null);
   }, [initialProgram]);
 
+  useEffect(() => {
+    const handleNavigateTabEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ tab?: string }>;
+      if (customEvent.detail?.tab === "finances") {
+        setActiveTab("finances");
+      }
+    };
+    window.addEventListener("sipena:navigate-program-tab", handleNavigateTabEvent);
+    return () => window.removeEventListener("sipena:navigate-program-tab", handleNavigateTabEvent);
+  }, []);
+
   const program = currentProgram;
 
   const statusConfig = PROGRAM_STATUS_CONFIG[program.status] || {
@@ -115,7 +126,7 @@ export function PartnerProgramDetailPageView({
     : null;
 
   const totalBudgetNum = parseFloat(program.budget || "0") || 1;
-  const currentSpentNum = parseFloat(spentBudget || "0") || 0;
+  const currentSpentNum = parseCurrencyInput(spentBudget);
   const progressPercent = Math.min(100, Math.round((currentSpentNum / totalBudgetNum) * 100));
 
   const handleUpdateStatus = async (e: React.FormEvent) => {
@@ -136,7 +147,7 @@ export function PartnerProgramDetailPageView({
         },
         body: JSON.stringify({
           status,
-          spentBudget: spentBudget ? parseFloat(spentBudget) : 0,
+          spentBudget: parseCurrencyInput(spentBudget),
           actualBeneficiaries: actualBeneficiaries.trim() || null,
           description: description.trim() || null,
         }),
@@ -445,71 +456,66 @@ export function PartnerProgramDetailPageView({
       {/* 4. FULL-WIDTH TABS NAVIGATION                                */}
       {/* ============================================================ */}
       <div className="bg-white rounded-3xl border border-[#E8E8EA] shadow-2xs overflow-hidden">
-        {/* Navigation Bar */}
-        <div className="px-6 border-b border-[#E8E8EA] flex items-center gap-2 sm:gap-6 bg-[#FBFBFC] overflow-x-auto scrollbar-none">
+        {/* Navigation Bar (Seragam dengan role CSR Admin: tanpa ikon, border active navy) */}
+        <div className="px-6 border-b border-[#E8E8EA] flex items-center gap-4 sm:gap-7 bg-[#F9F9FB] overflow-x-auto scrollbar-none select-none shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab("activities")}
-            className={`min-h-[44px] py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "activities"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Camera className="w-4 h-4" />
-            <span>Log &amp; Timeline Bukti Lapangan</span>
+            Log &amp; Timeline Bukti Lapangan
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("finances")}
-            className={`min-h-[44px] py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "finances"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Wallet className="w-4 h-4" />
-            <span>Realisasi Dana &amp; Audit Keuangan</span>
+            Realisasi Dana &amp; Audit Keuangan
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("reviews")}
-            className={`min-h-[44px] py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "reviews"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-            <span>Suara &amp; Ulasan Penerima Manfaat</span>
+            Suara &amp; Ulasan Penerima Manfaat
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("esg-report")}
-            className={`min-h-[44px] py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "esg-report"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <FileText className="w-4 h-4 text-emerald-600" />
-            <span>Laporan Keberlanjutan &amp; ESG</span>
+            Laporan Keberlanjutan &amp; ESG (AI)
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab("settings")}
-            className={`min-h-[44px] py-4 text-xs font-bold border-b-2 flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`py-4 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
               activeTab === "settings"
-                ? "border-[#009E75] text-[#009E75] font-extrabold"
-                : "border-transparent text-[#787680] hover:text-[#181343]"
+                ? "border-[#181343] text-[#181343] font-extrabold"
+                : "border-transparent text-slate-500 hover:text-[#181343]"
             }`}
           >
-            <FileText className="w-4 h-4" />
-            <span>Parameter &amp; Evaluasi Status</span>
+            Parameter &amp; Evaluasi Status
           </button>
         </div>
 
@@ -520,6 +526,9 @@ export function PartnerProgramDetailPageView({
               programId={program.id}
               programTitle={program.title}
               role="PARTNER"
+              collaborationId={program.collaborationId}
+              onOpenChat={onOpenChat}
+              onNavigateToFinances={() => setActiveTab("finances")}
               onActivityChanged={onProgramUpdated}
             />
           )}
@@ -588,11 +597,10 @@ export function PartnerProgramDetailPageView({
                           type="button"
                           key={st}
                           onClick={() => setStatus(st)}
-                          className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            isSelected
-                              ? "border-[#009E75] bg-emerald-50/80 text-emerald-950 shadow-xs ring-1 ring-[#009E75]"
-                              : "border-[#E8E8EA] bg-white text-[#47464F] hover:border-emerald-300"
-                          }`}
+                          className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${isSelected
+                            ? "border-[#009E75] bg-emerald-50/80 text-emerald-950 shadow-xs ring-1 ring-[#009E75]"
+                            : "border-[#E8E8EA] bg-white text-[#47464F] hover:border-emerald-300"
+                            }`}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-bold">{cfg.label}</span>
@@ -622,12 +630,15 @@ export function PartnerProgramDetailPageView({
                         Rp
                       </span>
                       <input
-                        type="number"
-                        value={spentBudget}
-                        onChange={(e) => setSpentBudget(e.target.value)}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        value={formatCurrencyInput(spentBudget)}
+                        onChange={(e) => {
+                          const clean = e.target.value.replace(/[^\d]/g, "");
+                          setSpentBudget(clean);
+                        }}
                         placeholder="0"
-                        min="0"
-                        max={totalBudgetNum}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E8E8EA] text-xs font-bold text-[#181343] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>

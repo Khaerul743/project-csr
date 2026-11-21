@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import {
-  DollarSign,
+  Coins,
   TrendingUp,
-  Receipt,
+  ReceiptText,
   Wallet,
   Building2,
   Calendar,
@@ -142,7 +142,7 @@ export function ProgramFinancesTab({
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-semibold">Pagu Disepakati</span>
-            <DollarSign className="w-4 h-4 text-slate-500" />
+            <Coins className="w-4 h-4 text-slate-500" />
           </div>
           <div className="text-lg font-black text-slate-900 truncate">
             {formatRupiah(summary.agreedBudget)}
@@ -175,7 +175,7 @@ export function ProgramFinancesTab({
         <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-emerald-700">
             <span className="text-xs font-semibold">Serapan Biaya</span>
-            <Receipt className="w-4 h-4 text-emerald-600" />
+            <ReceiptText className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-lg font-black text-emerald-900 truncate">
             {formatRupiah(summary.totalExpensesReported)}
@@ -252,7 +252,7 @@ export function ProgramFinancesTab({
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
             }`}
           >
-            <Receipt className="w-3.5 h-3.5" />
+            <ReceiptText className="w-3.5 h-3.5" />
             Pengeluaran & Nota ({expenses.length})
           </button>
         </div>
@@ -420,7 +420,7 @@ export function ProgramFinancesTab({
                           size="sm"
                           onClick={() => setConfirmDisbursementItem(d)}
                           leftIcon={<CheckCircle2 className="w-3.5 h-3.5 shrink-0" />}
-                          className="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 h-8"
+                          className="bg-[#181343] hover:bg-[#25205c] text-white text-xs py-1 h-8 rounded-xl font-bold cursor-pointer shadow-xs"
                         >
                           Konfirmasi Terima Dana
                         </Button>
@@ -444,7 +444,7 @@ export function ProgramFinancesTab({
         <div className="space-y-3">
           {expenses.length === 0 ? (
             <div className="py-12 px-4 text-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50">
-              <Receipt className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <ReceiptText className="w-10 h-10 text-slate-300 mx-auto mb-2" />
               <h4 className="text-sm font-bold text-slate-800">
                 Belum ada nota pengeluaran tercatat
               </h4>
@@ -548,7 +548,7 @@ export function ProgramFinancesTab({
                             }}
                             className="text-xs font-bold text-teal-700 hover:text-teal-900 inline-flex items-center gap-1.5 transition-colors"
                           >
-                            <Receipt className="w-3.5 h-3.5" /> Buka Foto Nota / Kwitansi
+                            <ReceiptText className="w-3.5 h-3.5" /> Buka Foto Nota / Kwitansi
                           </button>
                         ) : (
                           <span className="text-xs text-slate-400 italic">
@@ -565,7 +565,7 @@ export function ProgramFinancesTab({
                           size="sm"
                           onClick={() => setVerifyExpenseItem(exp)}
                           leftIcon={<ShieldCheck className="w-3.5 h-3.5 shrink-0" />}
-                          className="bg-teal-600 hover:bg-teal-700 text-white text-xs py-1 h-8"
+                          className="bg-[#181343] hover:bg-[#25205c] text-white text-xs py-1 h-8 rounded-xl font-bold cursor-pointer shadow-xs"
                         >
                           Verifikasi Nota
                         </Button>

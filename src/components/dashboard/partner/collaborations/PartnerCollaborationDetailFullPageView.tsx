@@ -6,7 +6,7 @@ import {
   ArrowRight,
   FileCheck2,
   Calendar,
-  DollarSign,
+  Coins,
   Users,
   ExternalLink,
   CheckCircle2,
@@ -563,7 +563,7 @@ export function PartnerCollaborationDetailFullPageView({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-1.5 shadow-2xs">
                 <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-                  <DollarSign className="w-4 h-4 text-emerald-600" />
+                  <Coins className="w-4 h-4 text-emerald-600" />
                   <span className="text-xs font-semibold text-slate-600">Anggaran Disepakati</span>
                 </div>
                 <div className="text-lg sm:text-xl font-extrabold text-[#009E75] tracking-tight">

@@ -105,6 +105,17 @@ export class CollaborationService {
 
     // Jika difinalisasi menjadi AGREED
     if (dto.status === "AGREED") {
+      const sDate = startDate || (existing.startDate ? new Date(existing.startDate) : undefined);
+      const eDate = endDate || (existing.endDate ? new Date(existing.endDate) : undefined);
+      if (!sDate) {
+        throw new BadRequestError("Tanggal mulai pelaksanaan wajib diisi sebelum mengesahkan MoU");
+      }
+      if (!eDate) {
+        throw new BadRequestError("Tanggal selesai pelaksanaan wajib diisi sebelum mengesahkan MoU");
+      }
+      if (eDate < sDate) {
+        throw new BadRequestError("Tanggal selesai pelaksanaan tidak boleh lebih awal dari tanggal mulai");
+      }
       return this.collaborationRepository.finalizeAgreement(id, updatePayload, existing);
     }
 

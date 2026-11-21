@@ -5,7 +5,6 @@ import {
   X,
   Sparkles,
   Layers,
-  Calendar,
   CheckCircle2,
   Trash2,
   Plus,
@@ -16,7 +15,6 @@ import {
   Cpu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cleanStageTitle } from "./types";
 
 export interface StageDraft {
@@ -48,7 +46,6 @@ export function AiMilestonesModal({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [stages, setStages] = useState<StageDraft[]>([]);
   const [rationale, setRationale] = useState<string | null>(null);
-  const [extractionSource, setExtractionSource] = useState<string | null>(null);
   const [hasGenerated, setHasGenerated] = useState(false);
 
   if (!isOpen) return null;
@@ -69,12 +66,11 @@ export function AiMilestonesModal({
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json.message || "Gagal mengekstrak tahapan dengan AI");
+        throw new Error(json.message || "Gagal mengekstrak tahapan dari proposal");
       }
 
       const data = json.data;
       setRationale(data.summaryRationale || null);
-      setExtractionSource(data.source || "AI_OPENAI");
       setStages(
         (data.stages || []).map((s: any, idx: number) => ({
           orderIndex: s.orderIndex || idx + 1,
@@ -87,7 +83,7 @@ export function AiMilestonesModal({
       );
       setHasGenerated(true);
     } catch (err: any) {
-      setErrorMessage(err.message || "Terjadi kesalahan saat memproses ekstraksi AI");
+      setErrorMessage(err.message || "Terjadi kesalahan saat memproses ekstraksi tahapan");
     } finally {
       setIsLoading(false);
     }
@@ -113,7 +109,7 @@ export function AiMilestonesModal({
         title: `Kegiatan Lanjutan ${prev.length + 1}`,
         description: "",
         targetTimeline: `Bulan ke-${prev.length + 1}`,
-        expectedEvidence: "Foto dokumentasi pelaksanaan kegiatan & berita acara",
+        expectedEvidence: "Foto dokumentasi pelaksanaan kegiatan dan berita acara",
         suggestedKpi: "",
       },
     ]);
@@ -182,55 +178,51 @@ export function AiMilestonesModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[92vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl space-y-6 my-8 max-h-[92vh] overflow-y-auto border border-slate-200/80">
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div className="flex items-start justify-between pb-4 border-b border-slate-100 shrink-0">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-full bg-linear-to-r from-teal-500/10 to-indigo-500/10 border border-teal-500/20 text-teal-700 text-[11px] font-bold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                LangChain & OpenAI GPT-4o-mini
+              <span className="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-[#181343] text-xs font-semibold flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#181343]" />
+                Ekstraksi Cerdas Proposal
               </span>
-              {extractionSource && (
-                <span className="text-[11px] font-medium text-slate-400">
-                  {extractionSource === "AI_OPENAI" ? "• Model Aktif: gpt-4o-mini" : "• Heuristic Fallback"}
-                </span>
-              )}
             </div>
-            <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">
-              Ekstraksi Tahapan & Milestone Kegiatan dari Proposal
+            <h3 className="text-lg sm:text-xl font-extrabold text-[#181343]">
+              Ekstraksi Tahapan &amp; Milestone Kegiatan
             </h3>
             <p className="text-xs text-slate-500 truncate max-w-xl">
               Program: <span className="font-semibold text-slate-700">{programTitle}</span>
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {errorMessage && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2 shadow-2xs">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Not yet generated state */}
+        {/* Belum Diekstrak (Tampilan Awal) */}
         {!hasGenerated && !isLoading && (
-          <div className="text-center py-12 px-6 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50/50 space-y-4">
-            <div className="w-16 h-16 rounded-3xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto shadow-inner">
-              <Sparkles className="w-8 h-8 text-teal-600 animate-pulse" />
+          <div className="text-center py-12 px-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50 space-y-5">
+            <div className="w-14 h-14 rounded-2xl bg-white text-[#181343] border border-slate-200 shadow-2xs flex items-center justify-center mx-auto">
+              <Layers className="w-7 h-7 text-[#181343]" />
             </div>
             <div className="space-y-2 max-w-lg mx-auto">
               <h4 className="text-base font-bold text-slate-900">
-                Otomatisasi Struktur Tahapan Pelaksanaan Lapangan
+                Penyusunan Struktur Tahapan Pelaksanaan Lapangan
               </h4>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Sistem AI akan membaca dokumen proposal yang diunggah mitra, menganalisis ruang lingkup kegiatan, metodologi, dan linimasa waktu, lalu menyusun tahapan terstruktur beserta panduan bukti foto yang relevan.
+                Sistem akan menganalisis isi dokumen proposal yang disepakati bersama mitra, mengidentifikasi ruang lingkup kegiatan, metodologi, dan linimasa waktu, lalu menyusun tahapan kerja terstruktur beserta indikator capaian dan panduan bukti foto yang relevan.
               </p>
             </div>
             <Button
@@ -238,53 +230,53 @@ export function AiMilestonesModal({
               size="md"
               onClick={handleGenerate}
               leftIcon={<Sparkles className="w-4 h-4" />}
-              className="bg-linear-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white font-bold shadow-md hover:shadow-lg transition-all"
+              className="font-semibold shadow-xs"
             >
-              Mulai Ekstraksi dengan AI (gpt-4o-mini)
+              Mulai Ekstraksi Tahapan Proposal
             </Button>
           </div>
         )}
 
-        {/* Loading state */}
+        {/* Status Loading Saat Analisis */}
         {isLoading && (
-          <div className="text-center py-16 px-6 border border-slate-200/80 rounded-3xl bg-slate-50/50 space-y-4">
-            <div className="relative w-16 h-16 mx-auto">
-              <div className="absolute inset-0 rounded-full border-4 border-teal-200 border-t-teal-600 animate-spin" />
-              <Cpu className="w-7 h-7 text-teal-600 absolute inset-0 m-auto" />
+          <div className="text-center py-16 px-6 border border-slate-200/80 rounded-2xl bg-slate-50/50 space-y-4">
+            <div className="relative w-14 h-14 mx-auto">
+              <div className="absolute inset-0 rounded-full border-3 border-slate-200 border-t-[#181343] animate-spin" />
+              <Cpu className="w-6 h-6 text-[#181343] absolute inset-0 m-auto" />
             </div>
             <div className="space-y-1">
               <h4 className="text-sm font-bold text-slate-900">
-                AI Sedang Menganalisis Proposal...
+                Sedang Menganalisis Dokumen Proposal...
               </h4>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
-                Membaca isi proposal & PDF, mengekstrak linimasa, serta merumuskan panduan bukti lapangan terstruktur menggunakan OpenAI gpt-4o-mini.
+              <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+                Membaca isi proposal, mengidentifikasi linimasa pelaksanaan, serta merumuskan indikator keberhasilan dan panduan bukti lapangan.
               </p>
             </div>
           </div>
         )}
 
-        {/* Generated & Edit List State */}
+        {/* Hasil Ekstraksi & Form Pengeditan Tahapan */}
         {hasGenerated && !isLoading && (
           <div className="space-y-6">
-            {/* AI Rationale banner */}
+            {/* Ringkasan Analisis Dokumen Proposal */}
             {rationale && (
-              <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100/90 text-xs text-indigo-900 space-y-1.5">
-                <div className="flex items-center gap-1.5 font-bold text-indigo-700">
-                  <Lightbulb className="w-4 h-4 text-indigo-600" />
-                  Rasionalisasi AI terhadap Dokumen Proposal:
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1.5 shadow-2xs">
+                <div className="flex items-center gap-1.5 font-bold text-[#181343]">
+                  <Lightbulb className="w-4 h-4 text-[#181343]" />
+                  Ringkasan Analisis Dokumen Proposal:
                 </div>
-                <p className="text-indigo-800/90 leading-relaxed">{rationale}</p>
+                <p className="text-slate-600 leading-relaxed">{rationale}</p>
               </div>
             )}
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
               <div>
                 <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-teal-600" />
+                  <Layers className="w-4 h-4 text-[#181343]" />
                   Daftar Tahapan Kegiatan ({stages.length} Tahap)
                 </h4>
-                <p className="text-xs text-slate-400">
-                  Anda dapat meninjau, mengubah teks, atau menambah tahapan sebelum diterapkan.
+                <p className="text-xs text-slate-500">
+                  Tinjau dan sesuaikan nama tahapan, linimasa, serta indikator sebelum diterapkan.
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -293,32 +285,32 @@ export function AiMilestonesModal({
                   size="sm"
                   onClick={handleGenerate}
                   leftIcon={<Sparkles className="w-3.5 h-3.5" />}
-                  className="text-xs border-slate-200 hover:bg-slate-50"
+                  className="text-xs"
                 >
-                  Ekstrak Ulang AI
+                  Ekstrak Ulang
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleAddStage}
                   leftIcon={<Plus className="w-3.5 h-3.5" />}
-                  className="text-xs border-teal-200 text-teal-700 hover:bg-teal-50"
+                  className="text-xs"
                 >
                   Tambah Tahap
                 </Button>
               </div>
             </div>
 
-            {/* Stages List */}
+            {/* Daftar Tahapan */}
             <div className="space-y-4">
               {stages.map((st, idx) => (
                 <div
                   key={idx}
-                  className="p-5 rounded-2xl border border-slate-200/90 bg-slate-50/40 hover:bg-white hover:border-teal-300 transition-all space-y-3.5 relative group"
+                  className="p-5 rounded-xl border border-slate-200 bg-white hover:border-[#181343]/40 transition-all space-y-3.5 relative shadow-xs"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-7 h-7 rounded-xl bg-teal-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="flex items-center gap-2.5 flex-1">
+                      <span className="w-7 h-7 rounded-lg bg-[#181343] text-white font-bold text-xs flex items-center justify-center shrink-0">
                         {idx + 1}
                       </span>
                       <input
@@ -327,13 +319,13 @@ export function AiMilestonesModal({
                         onChange={(e) =>
                           handleUpdateStage(idx, "title", e.target.value)
                         }
-                        className="text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-teal-500 focus:bg-white focus:outline-hidden px-1.5 py-0.5 rounded transition w-full sm:w-96"
+                        className="text-sm font-bold text-slate-800 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-[#181343] focus:bg-white focus:outline-none px-1.5 py-0.5 rounded transition w-full"
                         placeholder="Nama tahapan kegiatan"
                       />
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-600">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-600">
                         <Clock className="w-3.5 h-3.5 text-slate-400" />
                         <input
                           type="text"
@@ -341,13 +333,14 @@ export function AiMilestonesModal({
                           onChange={(e) =>
                             handleUpdateStage(idx, "targetTimeline", e.target.value)
                           }
-                          className="w-24 text-xs bg-transparent focus:outline-hidden"
+                          className="w-24 text-xs bg-transparent focus:outline-none font-medium text-slate-800"
                           placeholder="Linimasa"
                         />
                       </div>
                       <button
+                        type="button"
                         onClick={() => handleRemoveStage(idx)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                         title="Hapus tahapan ini"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -355,7 +348,7 @@ export function AiMilestonesModal({
                     </div>
                   </div>
 
-                  {/* Description */}
+                  {/* Deskripsi Kegiatan */}
                   <div>
                     <label className="text-[11px] font-semibold text-slate-500 block mb-1">
                       Deskripsi Kegiatan
@@ -366,17 +359,17 @@ export function AiMilestonesModal({
                       onChange={(e) =>
                         handleUpdateStage(idx, "description", e.target.value)
                       }
-                      className="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 focus:border-teal-500 focus:ring-1 focus:ring-teal-500 focus:outline-hidden transition"
+                      className="w-full text-xs p-2.5 rounded-lg border border-slate-200 bg-white text-slate-700 focus:border-[#181343] focus:ring-1 focus:ring-[#181343]/15 focus:outline-none transition leading-relaxed"
                       placeholder="Uraian langkah dan rencana aktivitas pada tahap ini..."
                     />
                   </div>
 
-                  {/* Expected Evidence & KPI */}
+                  {/* Panduan Bukti & KPI */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div className="p-2.5 rounded-xl bg-teal-50/60 border border-teal-100 text-xs space-y-1">
-                      <div className="flex items-center gap-1 font-semibold text-teal-800 text-[11px]">
-                        <FileCheck2 className="w-3.5 h-3.5 text-teal-600" />
-                        Panduan Bukti Lapangan Wajib:
+                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-semibold text-[#181343] text-xs">
+                        <FileCheck2 className="w-3.5 h-3.5 text-[#181343]" />
+                        Panduan Bukti Lapangan:
                       </div>
                       <input
                         type="text"
@@ -384,14 +377,14 @@ export function AiMilestonesModal({
                         onChange={(e) =>
                           handleUpdateStage(idx, "expectedEvidence", e.target.value)
                         }
-                        className="w-full text-xs bg-white/80 border border-teal-200/60 rounded-lg px-2 py-1 text-slate-700 focus:outline-hidden focus:border-teal-500"
+                        className="w-full text-xs bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-[#181343]"
                         placeholder="Contoh: Foto koordinasi, presensi warga..."
                       />
                     </div>
 
-                    <div className="p-2.5 rounded-xl bg-slate-100/70 border border-slate-200 text-xs space-y-1">
-                      <div className="flex items-center gap-1 font-semibold text-slate-700 text-[11px]">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-slate-500" />
+                    <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+                      <div className="flex items-center gap-1.5 font-semibold text-slate-700 text-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#181343]" />
                         Indikator Keberhasilan (KPI):
                       </div>
                       <input
@@ -400,7 +393,7 @@ export function AiMilestonesModal({
                         onChange={(e) =>
                           handleUpdateStage(idx, "suggestedKpi", e.target.value)
                         }
-                        className="w-full text-xs bg-white/80 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 focus:outline-hidden focus:border-slate-400"
+                        className="w-full text-xs bg-white border border-slate-200 rounded-md px-2.5 py-1.5 text-slate-700 focus:outline-none focus:border-[#181343]"
                         placeholder="Contoh: 100 bibit mangrove tertanam..."
                       />
                     </div>
@@ -412,6 +405,7 @@ export function AiMilestonesModal({
             {/* Footer Actions */}
             <div className="flex items-center justify-between pt-4 border-t border-slate-100">
               <Button
+                type="button"
                 variant="outline"
                 size="md"
                 onClick={onClose}
@@ -421,18 +415,17 @@ export function AiMilestonesModal({
                 Batal
               </Button>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={handleSave}
-                  isLoading={isSaving}
-                  leftIcon={<CheckCircle2 className="w-4 h-4" />}
-                  className="text-xs font-semibold"
-                >
-                  Terapkan & Simpan Tahapan ({stages.length})
-                </Button>
-              </div>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleSave}
+                isLoading={isSaving}
+                leftIcon={<CheckCircle2 className="w-4 h-4" />}
+                className="text-xs font-semibold"
+              >
+                Terapkan &amp; Simpan Tahapan ({stages.length})
+              </Button>
             </div>
           </div>
         )}

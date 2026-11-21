@@ -103,7 +103,7 @@ export function ChatbotView({
     const ext = file.name.split(".").pop()?.toLowerCase() || "";
     const allowed = ["pdf", "docx", "doc"];
     if (!allowed.includes(ext)) {
-      alert("Hanya berkas berformat PDF atau Word (.docx, .doc) yang didukung untuk dokumen survei wilayah.");
+      alert("Hanya berkas berformat PDF atau Word (.docx, .doc) yang didukung.");
       e.target.value = "";
       return;
     }
@@ -248,7 +248,7 @@ export function ChatbotView({
     const displayText =
       text ||
       (fileToUpload
-        ? `Tolong analisis hasil survei kondisi dan kebutuhan wilayah dari berkas "${fileToUpload.name}" ini, kemudian berikan rekomendasi inisiatif program CSR yang tepat sasaran.`
+        ? `Tolong telaah dan analisis isi berkas "${fileToUpload.name}" ini, lalu berikan wawasan, ringkasan, atau rekomendasi program CSR yang relevan.`
         : "");
 
     setLastUserPrompt(displayText);
@@ -430,7 +430,7 @@ export function ChatbotView({
   const displayName = organizationName || userName;
 
   return (
-    <div className="flex flex-col h-full w-full max-w-[1120px] mx-auto bg-white rounded-2xl border border-[#E5E7EB] overflow-hidden">
+    <div className="w-full h-full flex-1 flex flex-col max-w-[1120px] mx-auto bg-white rounded-2xl border border-[#E5E7EB] shadow-xs overflow-hidden">
       {/* ========================================================================= */}
       {/* 1. HEADER AI (Clean, Sederhana, Tanpa Jargon Teknis) */}
       {/* ========================================================================= */}
@@ -505,13 +505,13 @@ export function ChatbotView({
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#F9F9FB]"
+        className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#F9F9FB] flex flex-col"
       >
         {messages.length === 0 ? (
           /* ========================================================================= */
           /* EMPTY STATE: CLEAN WELCOME & 4 QUICK PROMPTS */
           /* ========================================================================= */
-          <div className="h-full min-h-[380px] flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-7 py-6">
+          <div className="flex-1 flex flex-col items-center justify-center max-w-2xl mx-auto w-full text-center space-y-7 py-6 my-auto">
             <div className="space-y-2 max-w-lg mx-auto">
               <h3 className="text-xl sm:text-2xl font-black text-[#181343] tracking-tight">
                 Halo, {displayName}!
@@ -609,7 +609,7 @@ export function ChatbotView({
                               {msg.attachedDocument.fileName}
                             </span>
                             <span className="text-[10px] text-emerald-200">
-                              {(msg.attachedDocument.fileSize / 1024).toFixed(1)} KB (Survei Wilayah)
+                              {(msg.attachedDocument.fileSize / 1024).toFixed(1)} KB (Dokumen Terlampir)
                             </span>
                           </div>
                         </div>
@@ -854,7 +854,7 @@ export function ChatbotView({
                                   <div>
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <h5 className="font-bold text-xs text-[#181343]">
-                                        Hasil Telaah Survei Wilayah
+                                        Hasil Telaah Dokumen &amp; Rekomendasi
                                       </h5>
                                       <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                         {card.detectedProvince || "Provinsi Teridentifikasi"}
@@ -933,7 +933,7 @@ export function ChatbotView({
                                           className="px-3 py-1.5 rounded-lg bg-[#059669] hover:bg-[#047857] text-white text-[11px] font-bold flex items-center gap-1.5 shadow-2xs transition cursor-pointer shrink-0"
                                         >
                                           <Plus className="w-3.5 h-3.5" />
-                                          <span>Buat Peluang CSR Berdasarkan Survei Ini</span>
+                                          <span>Buat Peluang CSR Berdasarkan Rekomendasi Ini</span>
                                         </button>
                                       )}
                                     </div>
@@ -1037,7 +1037,7 @@ export function ChatbotView({
                   ({(attachedFile.size / 1024).toFixed(1)} KB)
                 </span>
                 <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-extrabold shrink-0">
-                  Survei Wilayah
+                  Dokumen
                 </span>
               </div>
               <button
@@ -1068,7 +1068,7 @@ export function ChatbotView({
                 ? `Berkas "${attachedFile.name}" siap dianalisis. Tekan Kirim atau tambahkan instruksi khusus...`
                 : isPartner
                 ? "Tanyakan peluang CSR, bantuan draf proposal, atau status pengajuan..."
-                : "Tanyakan ide program baru, rekapitulasi data program, atau unggah survei wilayah..."
+                : "Tanyakan ide program baru, rekapitulasi data program, atau unggah dokumen..."
             }
             className="w-full bg-transparent resize-none border-none focus:outline-hidden text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 px-2 py-1 leading-relaxed max-h-32 disabled:opacity-60 disabled:cursor-not-allowed"
           />
@@ -1086,11 +1086,11 @@ export function ChatbotView({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading || !aiEnabled}
-                className="px-2.5 py-1.5 rounded-lg text-slate-600 hover:text-[#059669] hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 transition flex items-center gap-1.5 text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Unggah berkas survei wilayah (PDF / DOCX)"
+                className="px-3 py-1.5 rounded-xl bg-emerald-50/90 hover:bg-emerald-100 text-[#007A5A] hover:text-emerald-950 border border-emerald-300/80 hover:border-emerald-400 transition-all flex items-center gap-1.5 text-xs font-bold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+                title="Unggah berkas dokumen (PDF / Word)"
               >
-                <Paperclip className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden sm:inline">Unggah Survei Wilayah</span>
+                <Paperclip className="w-4 h-4 text-[#007A5A] shrink-0" />
+                <span>Unggah Dokumen</span>
               </button>
 
               <div className="hidden md:flex items-center gap-1 text-[11px] text-slate-400">

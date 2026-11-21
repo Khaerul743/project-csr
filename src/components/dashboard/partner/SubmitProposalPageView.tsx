@@ -19,7 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OpportunityItem } from "./types";
-import { FOCUS_AREA_CONFIG, formatRupiah, formatDate } from "./helpers";
+import { FOCUS_AREA_CONFIG, formatRupiah, formatDate, formatCurrencyInput } from "./helpers";
 import { ProposalOptimizerModal } from "./ProposalOptimizerModal";
 
 export interface SubmitProposalPageViewProps {
@@ -483,7 +483,9 @@ export function SubmitProposalPageView({
                   </span>
                   <input
                     type="text"
-                    value={proposedBudget}
+                    inputMode="numeric"
+                    autoComplete="off"
+                    value={formatCurrencyInput(proposedBudget)}
                     onChange={(e) => {
                       const clean = e.target.value.replace(/[^\d]/g, "");
                       setProposedBudget(clean);

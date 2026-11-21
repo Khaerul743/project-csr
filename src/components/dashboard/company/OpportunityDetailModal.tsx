@@ -118,7 +118,7 @@ export function OpportunityDetailModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Detail Peluang CSR"
-      description="Informasi lengkap inisiatif kerja sama, klasifikasi SDGs–ESG, dan status pengajuan mitra."
+      description="Informasi lengkap inisiatif kerja sama, klasifikasi SDGs-ESG, dan status pengajuan mitra."
       maxWidth="xl"
     >
       <div className="space-y-6">
@@ -251,7 +251,7 @@ export function OpportunityDetailModal({
                   🌿 Lingkungan (E)
                 </span>
                 <span className="text-xs font-bold text-slate-800">
-                  {mappedEsgPillars.E.length > 0 ? `${mappedEsgPillars.E.length} Sasaran` : "—"}
+                  {mappedEsgPillars.E.length > 0 ? `${mappedEsgPillars.E.length} Sasaran` : "-"}
                 </span>
               </div>
               <div className="space-y-0.5">
@@ -259,7 +259,7 @@ export function OpportunityDetailModal({
                   👥 Sosial (S)
                 </span>
                 <span className="text-xs font-bold text-slate-800">
-                  {mappedEsgPillars.S.length > 0 ? `${mappedEsgPillars.S.length} Sasaran` : "—"}
+                  {mappedEsgPillars.S.length > 0 ? `${mappedEsgPillars.S.length} Sasaran` : "-"}
                 </span>
               </div>
               <div className="space-y-0.5">
@@ -267,7 +267,7 @@ export function OpportunityDetailModal({
                   🏛️ Tata Kelola (G)
                 </span>
                 <span className="text-xs font-bold text-slate-800">
-                  {mappedEsgPillars.G.length > 0 ? `${mappedEsgPillars.G.length} Sasaran` : "—"}
+                  {mappedEsgPillars.G.length > 0 ? `${mappedEsgPillars.G.length} Sasaran` : "-"}
                 </span>
               </div>
             </div>

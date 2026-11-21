@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
   HeartHandshake,
+  ChevronLeft,
   ChevronRight,
   Sparkles,
   Search,
@@ -28,7 +29,6 @@ import {
   Inbox,
   Check,
   ExternalLink,
-  DollarSign,
   FileCheck2,
   Activity,
   TrendingUp,
@@ -43,6 +43,7 @@ import {
   PieChart,
   Target,
   Award,
+  Wallet,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -338,6 +339,20 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
     setCurrentUser(user);
   }, [user]);
 
+  useEffect(() => {
+    const handleOpenChatEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ collaborationId?: string }>;
+      setSelectedProgramForDetail(null);
+      if (customEvent.detail?.collaborationId) {
+        setActiveCollaborationChatId(customEvent.detail.collaborationId);
+      }
+      setActiveMenu("conversations");
+    };
+
+    window.addEventListener("sipena:open-chat", handleOpenChatEvent);
+    return () => window.removeEventListener("sipena:open-chat", handleOpenChatEvent);
+  }, []);
+
   // Data states
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
   const [opportunities, setOpportunities] = useState<OpportunityItem[]>([]);
@@ -345,6 +360,8 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
   const [invitations, setInvitations] = useState<PartnerOpportunityInvitationItem[]>([]);
   const [collaborations, setCollaborations] = useState<PartnerCollaborationItem[]>([]);
   const [programs, setPrograms] = useState<PartnerProgramItem[]>([]);
+  const [activityPage, setActivityPage] = useState(1);
+  const ACTIVITIES_PER_PAGE = 5;
 
   // Loading states
   const [isLoadingPartner, setIsLoadingPartner] = useState(true);
@@ -1009,14 +1026,14 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
           ? { label: "Undangan Diterima", variant: "emerald" as const }
           : inv.status === "DECLINED"
             ? { label: "Undangan Ditolak", variant: "slate" as const }
-            : { label: "Undangan Masuk", variant: "amber" as const };
+            : { label: "Undangan Kolaborasi", variant: "amber" as const };
 
       list.push({
         id: `inv-${inv.id}`,
         type: "INVITATION",
         title: inv.opportunityTitle || "Undangan Kolaborasi CSR",
         organizationOrProgram: inv.companyName || "Perusahaan Mitra",
-        date: inv.createdAt,
+        date: inv.updatedAt || inv.createdAt,
         statusBadge: badge,
         icon: <Inbox className="w-4 h-4 text-teal-600" />,
         targetMenu: "invitations",
@@ -1039,7 +1056,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
         type: "PROPOSAL",
         title: prop.title,
         organizationOrProgram: prop.companyName || "Perusahaan Sponsor",
-        date: prop.reviewedAt || prop.createdAt,
+        date: prop.reviewedAt || (prop as { updatedAt?: string }).updatedAt || prop.createdAt,
         statusBadge: badge,
         icon: <FileText className="w-4 h-4 text-blue-600" />,
         targetMenu: "proposals",
@@ -1078,22 +1095,33 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
         if (prog.lastReportStatus === "VERIFIED") badge = { label: "Laporan Diverifikasi", variant: "emerald" as const };
         else if (prog.lastReportStatus === "REVISION_REQUESTED") badge = { label: "Laporan Perlu Revisi", variant: "rose" as const };
 
+        // Pastikan tanggal aktivitas riwayat pelaporan tidak melompat ke masa depan jika diinput sebagai target jadwal
+        const isFutureReport = new Date(prog.lastReportDate!).getTime() > Date.now();
+        const effectiveDate = isFutureReport
+          ? prog.updatedAt || prog.createdAt || new Date().toISOString()
+          : prog.lastReportDate!;
+
         list.push({
           id: `prog-report-${prog.id}`,
           type: "REPORT",
           title: `Laporan Progres: ${prog.title}`,
           organizationOrProgram: `Program Lapangan (${prog.companyName || "Mitra"})`,
-          date: prog.lastReportDate!,
+          date: effectiveDate,
           statusBadge: badge,
           icon: <Activity className="w-4 h-4 text-purple-600" />,
           targetMenu: "programs",
         });
       });
 
-    return list
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5);
+    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [invitations, proposals, collaborations, programs]);
+
+  const totalActivityPages = Math.ceil(recentCollaborationActivities.length / ACTIVITIES_PER_PAGE) || 1;
+  const currentActivityPage = Math.min(activityPage, totalActivityPages);
+  const pagedActivities = useMemo(() => {
+    const start = (currentActivityPage - 1) * ACTIVITIES_PER_PAGE;
+    return recentCollaborationActivities.slice(start, start + ACTIVITIES_PER_PAGE);
+  }, [recentCollaborationActivities, currentActivityPage]);
 
   const partnerFocus = partner ? FOCUS_AREA_CONFIG[partner.focusArea] : null;
 
@@ -1165,7 +1193,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
     if (activeMenu === "invitations") {
       return [
         { label: "Dashboard", onClick: () => setActiveMenu("overview") },
-        { label: "Undangan Masuk" },
+        { label: "Undangan Kolaborasi" },
       ];
     }
     if (activeMenu === "proposals") {
@@ -1236,28 +1264,9 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
     selectedProgramForDetail,
   ]);
 
-  // Standardized SIPENA Right Action for Partner Dashboard Header
-  const headerRightAction = (
-    <div className="flex items-center gap-2">
-      {/* Subtle Aligned Refresh Button */}
-      <button
-        type="button"
-        onClick={handleRefreshAll}
-        className="p-2 rounded-xl border border-[#E8E8EA] bg-white hover:bg-[#F4F4F6] text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
-        title="Segarkan data workspace"
-      >
-        <RefreshCw
-          className={`w-4 h-4 ${isLoadingOpportunities || isLoadingProposals || isLoadingCollaborations || isLoadingPrograms
-            ? "animate-spin text-emerald-600"
-            : ""
-            }`}
-        />
-      </button>
-    </div>
-  );
 
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans ${activeMenu === "chat" ? "lg:h-screen lg:overflow-hidden" : ""}`}>
+    <div className={`min-h-screen bg-slate-50 text-slate-900 flex flex-col lg:flex-row font-sans ${activeMenu === "chat" || activeMenu === "conversations" ? "h-screen overflow-hidden" : ""}`}>
       {/* 1. Sidebar */}
       <PartnerSidebar
         user={currentUser}
@@ -1276,7 +1285,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
       />
 
       {/* 2. Main Content Area */}
-      <div className={`flex-1 flex flex-col min-w-0 lg:pl-64 ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
+      <div className={`flex-1 flex flex-col min-w-0 lg:pl-64 ${activeMenu === "chat" || activeMenu === "conversations" ? "h-screen overflow-hidden" : ""}`}>
         {/* Top Header - Standardized SIPENA DashboardHeader */}
         <DashboardHeader
           user={currentUser}
@@ -1297,7 +1306,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                       : activeMenu === "explore"
                         ? "Eksplorasi Peluang CSR"
                         : activeMenu === "invitations"
-                          ? "Undangan Masuk"
+                          ? "Undangan Kolaborasi"
                           : activeMenu === "proposals"
                             ? "Pengajuan Proposal"
                             : activeMenu === "collaborations"
@@ -1318,13 +1327,25 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
               : undefined
           }
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
-          rightAction={headerRightAction}
           onNavigateMenu={handleSelectMenu}
           organizationName={partner?.name}
         />
 
         {/* Dynamic Subviews Content */}
-        <main className={`w-full mx-auto ${activeMenu === "chat" ? "p-3 sm:p-4 lg:p-5 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden" : "p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl"}`}>
+        <main
+          style={
+            activeMenu === "chat" || activeMenu === "conversations"
+              ? { height: "calc(100vh - 72px)", maxHeight: "calc(100vh - 72px)" }
+              : undefined
+          }
+          className={`w-full mx-auto ${
+            activeMenu === "chat"
+              ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
+              : activeMenu === "conversations"
+              ? "p-4 sm:p-5 lg:p-6 max-w-7xl flex-1 flex flex-col min-h-0 overflow-hidden"
+              : "p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl"
+          }`}
+        >
           {selectedOppForProposal ? (
             <SubmitProposalPageView
               opportunity={selectedOppForProposal}
@@ -1544,25 +1565,25 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                       <div className="flex flex-col sm:flex-row items-center gap-6 my-auto py-2">
                         <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0 flex items-center justify-center">
                           <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
-                            <circle cx="60" cy="60" r="46" stroke="#F1F5F9" strokeWidth="12" fill="none" />
+                            <circle cx="60" cy="60" r="48" stroke="#F1F5F9" strokeWidth="8" fill="none" />
                             <circle
                               cx="60"
                               cy="60"
-                              r="46"
+                              r="48"
                               stroke="#009E75"
-                              strokeWidth="12"
+                              strokeWidth="8"
                               strokeLinecap="round"
-                              strokeDasharray={`${(budgetAbsorptionRate / 100) * 289.026} 289.026`}
+                              strokeDasharray={`${(budgetAbsorptionRate / 100) * 301.593} 301.593`}
                               strokeDashoffset="0"
                               fill="none"
                               className="transition-all duration-700 ease-out"
                             />
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tabular-nums tracking-tight">
+                            <span className="text-xl sm:text-2xl font-bold text-[#181343] tabular-nums tracking-tight">
                               {budgetAbsorptionRate}%
                             </span>
-                            <span className="text-[11px] text-slate-400 font-semibold mt-0.5">Terserap</span>
+                            <span className="text-[10px] sm:text-xs text-slate-400 font-medium mt-0.5">Terserap</span>
                           </div>
                         </div>
 
@@ -1636,25 +1657,25 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                       <div className="flex flex-col sm:flex-row items-center gap-6 my-auto py-2">
                         <div className="relative w-32 h-32 sm:w-36 sm:h-36 shrink-0 flex items-center justify-center">
                           <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
-                            <circle cx="60" cy="60" r="46" stroke="#F1F5F9" strokeWidth="12" fill="none" />
+                            <circle cx="60" cy="60" r="48" stroke="#F1F5F9" strokeWidth="8" fill="none" />
                             <circle
                               cx="60"
                               cy="60"
-                              r="46"
+                              r="48"
                               stroke="#181343"
-                              strokeWidth="12"
+                              strokeWidth="8"
                               strokeLinecap="round"
-                              strokeDasharray={`${(impactSummary.averageProgress / 100) * 289.026} 289.026`}
+                              strokeDasharray={`${(impactSummary.averageProgress / 100) * 301.593} 301.593`}
                               strokeDashoffset="0"
                               fill="none"
                               className="transition-all duration-700 ease-out"
                             />
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-[#181343] tabular-nums tracking-tight">
+                            <span className="text-xl sm:text-2xl font-bold text-[#181343] tabular-nums tracking-tight">
                               {impactSummary.averageProgress}%
                             </span>
-                            <span className="text-[11px] text-slate-400 font-semibold mt-0.5">Eksekusi</span>
+                            <span className="text-[10px] sm:text-xs text-slate-400 font-medium mt-0.5">Eksekusi</span>
                           </div>
                         </div>
 
@@ -1855,20 +1876,29 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                   {/* ========================================================================= */}
                   {recentCollaborationActivities.length > 0 && (
                     <div className="space-y-3.5">
-                      <div className="space-y-0.5">
-                        <h2
-                          className="text-base sm:text-lg font-bold text-[#181343]"
-                          style={{ fontFamily: "var(--font-display)" }}
-                        >
-                          Aktivitas Kolaborasi Terbaru
-                        </h2>
-                        <p className="text-xs text-slate-600">
-                          Riwayat perkembangan kesepakatan dan pelaksanaan program kerja sama lembaga Anda.
-                        </p>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <h2
+                            className="text-base sm:text-lg font-bold text-[#181343]"
+                            style={{ fontFamily: "var(--font-display)" }}
+                          >
+                            Aktivitas Kolaborasi Terbaru
+                          </h2>
+                          <p className="text-xs text-slate-600">
+                            Riwayat perkembangan kesepakatan dan pelaksanaan program kerja sama lembaga Anda.
+                          </p>
+                        </div>
+                        {recentCollaborationActivities.length > 5 && (
+                          <span className="text-xs text-slate-500 font-medium self-start sm:self-auto">
+                            Menampilkan {(currentActivityPage - 1) * ACTIVITIES_PER_PAGE + 1} -{" "}
+                            {Math.min(currentActivityPage * ACTIVITIES_PER_PAGE, recentCollaborationActivities.length)} dari{" "}
+                            {recentCollaborationActivities.length} aktivitas
+                          </span>
+                        )}
                       </div>
 
                       <div className="rounded-2xl bg-white border border-[#E5E7EB] shadow-xs divide-y divide-[#E5E7EB] overflow-hidden">
-                        {recentCollaborationActivities.map((act) => (
+                        {pagedActivities.map((act) => (
                           <div
                             key={act.id}
                             role="button"
@@ -1907,6 +1937,37 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                           </div>
                         ))}
                       </div>
+
+                      {/* Pagination Navigasi Halaman jika aktivitas lebih dari 5 */}
+                      {totalActivityPages > 1 && (
+                        <div className="p-3 bg-white rounded-xl border border-[#E5E7EB] flex items-center justify-between gap-3 shadow-2xs">
+                          <p className="text-xs text-slate-600 font-medium">
+                            Halaman <span className="font-bold text-[#181343]">{currentActivityPage}</span> dari{" "}
+                            <span className="font-bold text-[#181343]">{totalActivityPages}</span>
+                          </p>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setActivityPage((prev) => Math.max(1, prev - 1))}
+                              disabled={currentActivityPage === 1}
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] shadow-2xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1"
+                            >
+                              <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                              <span>Sebelumnya</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setActivityPage((prev) => Math.min(totalActivityPages, prev + 1))}
+                              disabled={currentActivityPage >= totalActivityPages}
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] shadow-2xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed inline-flex items-center gap-1"
+                            >
+                              <span>Berikutnya</span>
+                              <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -2097,7 +2158,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
               )}
 
               {/* ========================================================================= */}
-              {/* SUBVIEW 3: INVITATIONS (UNDANGAN MASUK) */}
+              {/* SUBVIEW 3: INVITATIONS (UNDANGAN KOLABORASI) */}
               {/* ========================================================================= */}
               {activeMenu === "invitations" && (
                 <div className="space-y-6">
@@ -2152,101 +2213,160 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                           variant: "slate" as const,
                         };
                         const isPending = inv.status === "INVITED";
+                        const isDeclined = inv.status === "DECLINED";
                         const oppMatch = opportunities.find((o) => o.id === inv.opportunityId);
+                        const focusArea = (inv.opportunityFocusArea || oppMatch?.focusArea) as CsrFocusArea | undefined;
+                        const focusConfig = focusArea ? FOCUS_AREA_CONFIG[focusArea] : null;
 
                         return (
                           <div
                             key={inv.id}
-                            className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                            className={`bg-white p-5 sm:p-6 rounded-2xl border transition-all space-y-4 shadow-xs ${
+                              isDeclined
+                                ? "border-slate-200/80 bg-slate-50/50"
+                                : "border-[#E5E7EB] hover:border-slate-300"
+                            }`}
                           >
-                            <div className="space-y-2 flex-1">
-                              <div className="flex flex-wrap items-center gap-2">
+                            {/* 1. Header: Profil Perusahaan Pengundang & Badge Status Tunggal */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="flex items-center gap-3 min-w-0">
+                                {inv.companyLogo ? (
+                                  <img
+                                    src={inv.companyLogo}
+                                    alt={inv.companyName || "Perusahaan"}
+                                    className="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-xl bg-[#181343] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+                                    {(inv.companyName || "P").trim().charAt(0).toUpperCase()}
+                                  </div>
+                                )}
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-bold text-sm text-[#181343] truncate">
+                                      {inv.companyName || "Perusahaan Sponsor"}
+                                    </span>
+                                    {inv.companyCity && (
+                                      <span className="text-xs text-slate-400">
+                                        • {inv.companyCity}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-[11px] text-slate-500 mt-0.5">
+                                    Mengundang organisasi Anda • Diterima pada {formatDate(inv.createdAt)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Status Badge Tunggal (Satu-satunya indikator status, tidak pernah dobel) */}
+                              <div className="shrink-0 self-start sm:self-auto">
                                 <Badge variant={statusCfg.variant} size="sm" hasDot>
                                   {statusCfg.label}
                                 </Badge>
-                                <span className="text-[11px] text-slate-400">
-                                  Diterima pada {formatDate(inv.createdAt)}
+                              </div>
+                            </div>
+
+                            {/* 2. Judul Inisiatif & Tag Kategori */}
+                            <div className="space-y-1.5 pt-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {focusConfig && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
+                                    {focusConfig.label}
+                                  </span>
+                                )}
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/70">
+                                  Peluang Kolaborasi
                                 </span>
                               </div>
+                              <h3 className="text-base sm:text-lg font-bold text-[#181343] tracking-tight leading-snug">
+                                {inv.opportunityTitle}
+                              </h3>
+                            </div>
 
-                              <div>
-                                <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                                  <Building2 className="w-3.5 h-3.5 text-teal-600" />
-                                  <span>{inv.companyName}</span>
-                                </div>
-                                <h3 className="text-base font-extrabold text-slate-900 mt-0.5">
-                                  {inv.opportunityTitle}
-                                </h3>
+                            {/* 3. Pesan Undangan (Gaya korespondensi formal beraksen, bukan teks slop miring generik) */}
+                            {inv.message && (
+                              <div className="relative pl-3.5 border-l-2 border-[#181343]/25 py-1 bg-slate-50/70 rounded-r-xl pr-3">
+                                <p className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-normal">
+                                  {inv.message}
+                                </p>
                               </div>
+                            )}
 
-                              {inv.message && (
-                                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 italic">
-                                  "{inv.message}"
-                                </div>
-                              )}
-
-                              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
-                                <div>
-                                  <span>Alokasi Anggaran: </span>
-                                  <span className="font-extrabold text-emerald-600">
+                            {/* 4. Bar Metrik Alokasi Pagu & Tombol Aksi */}
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-100">
+                              <div className="flex flex-wrap items-center gap-4 text-xs">
+                                <div className="flex items-center gap-1.5 text-slate-600">
+                                  <Wallet className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                  <span className="text-slate-500">Alokasi Pagu:</span>
+                                  <span className="font-bold text-[#181343]">
                                     {formatRupiah(inv.opportunityBudget)}
                                   </span>
                                 </div>
                                 {inv.opportunityDeadline && (
-                                  <div>
-                                    <span>Batas Waktu: </span>
-                                    <span className="font-semibold text-slate-700">
+                                  <div className="flex items-center gap-1.5 text-slate-600">
+                                    <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    <span className="text-slate-500">Batas Pengajuan:</span>
+                                    <span className="font-semibold text-slate-800">
                                       {formatDate(inv.opportunityDeadline)}
                                     </span>
                                   </div>
                                 )}
                               </div>
-                            </div>
 
-                            {/* Actions */}
-                            <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                              {isPending ? (
-                                <>
+                              {/* Aksi Respon: Tanpa badge ganda saat ditolak */}
+                              <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
+                                {isPending ? (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="text-xs font-semibold text-slate-600 hover:text-rose-700 hover:bg-rose-50 hover:border-rose-200 border-slate-200 transition-colors cursor-pointer"
+                                      onClick={() => handleRespondInvitation(inv.id, "DECLINED")}
+                                    >
+                                      Tolak
+                                    </Button>
+                                    <Button
+                                      variant="primary"
+                                      size="sm"
+                                      className="text-xs font-semibold bg-[#181343] hover:bg-[#26224C] text-white shadow-xs cursor-pointer flex items-center gap-1.5"
+                                      rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                                      onClick={() => {
+                                        if (oppMatch) {
+                                          setSelectedOppForProposal(oppMatch);
+                                        } else {
+                                          setSelectedOppForProposal({
+                                            id: inv.opportunityId,
+                                            companyId: inv.companyId,
+                                            title: inv.opportunityTitle || "Peluang CSR",
+                                            description: inv.opportunityDescription || "",
+                                            focusArea: (inv.opportunityFocusArea as any) || "LAINNYA",
+                                            estimatedBudget: inv.opportunityBudget,
+                                            status: "OPEN",
+                                            companyName: inv.companyName,
+                                            createdAt: inv.createdAt,
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      Terima &amp; Buat Proposal
+                                    </Button>
+                                  </>
+                                ) : isDeclined ? (
+                                  <span className="text-xs text-slate-400 font-medium">
+                                    Undangan ditolak pada {formatDate(inv.updatedAt || inv.createdAt)}
+                                  </span>
+                                ) : (
                                   <Button
                                     variant="outline"
                                     size="sm"
-                                    className="text-rose-600 border-rose-200 hover:bg-rose-50 text-xs"
-                                    onClick={() => handleRespondInvitation(inv.id, "DECLINED")}
+                                    className="text-xs font-semibold text-[#181343] hover:bg-slate-50 border-slate-200 cursor-pointer flex items-center gap-1.5"
+                                    onClick={() => setActiveMenu("proposals")}
+                                    rightIcon={<ArrowRight className="w-3.5 h-3.5 text-slate-500" />}
                                   >
-                                    Tolak
+                                    Lihat Pengajuan Proposal
                                   </Button>
-                                  <Button
-                                    variant="primary"
-                                    size="sm"
-                                    className="text-xs font-semibold"
-                                    leftIcon={<Send className="w-3.5 h-3.5" />}
-                                    onClick={() => {
-                                      if (oppMatch) {
-                                        setSelectedOppForProposal(oppMatch);
-                                      } else {
-                                        // Make synthetic opportunity item for proposal
-                                        setSelectedOppForProposal({
-                                          id: inv.opportunityId,
-                                          companyId: inv.companyId,
-                                          title: inv.opportunityTitle || "Peluang CSR",
-                                          description: inv.opportunityDescription || "",
-                                          focusArea: (inv.opportunityFocusArea as any) || "LAINNYA",
-                                          estimatedBudget: inv.opportunityBudget,
-                                          status: "OPEN",
-                                          companyName: inv.companyName,
-                                          createdAt: inv.createdAt,
-                                        });
-                                      }
-                                    }}
-                                  >
-                                    Terima & Buat Proposal
-                                  </Button>
-                                </>
-                              ) : (
-                                <Badge variant={statusCfg.variant} size="md">
-                                  {statusCfg.label}
-                                </Badge>
-                              )}
+                                )}
+                              </div>
                             </div>
                           </div>
                         );
@@ -2677,11 +2797,6 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                                   <div className="text-sm font-bold text-[#009E75] tabular-nums">
                                     {formatRupiah(collab.finalBudget || collab.proposedBudget)}
                                   </div>
-                                  {collab.finalBudget && collab.proposedBudget && collab.finalBudget !== collab.proposedBudget && (
-                                    <span className="text-[10px] text-slate-400 block line-through">
-                                      Usulan: {formatRupiah(collab.proposedBudget)}
-                                    </span>
-                                  )}
                                 </div>
 
                                 <div className="space-y-0.5">
@@ -2784,484 +2899,498 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                 )
               )}
 
-              {/* ========================================================================= */}
-              {/* SUBVIEW: PROGRAMS (PELAKSANAAN PROGRAM & IMPACT TRACKING) */}
-              {/* ========================================================================= */}
-              {activeMenu === "programs" && (
-                selectedProgramForDetail ? (
-                  <PartnerProgramDetailPageView
-                    program={selectedProgramForDetail}
-                    onBack={() => setSelectedProgramForDetail(null)}
-                    onProgramUpdated={() => {
-                      fetchPrograms();
-                    }}
-                    onOpenChat={(collabId) => {
-                      setSelectedProgramForDetail(null);
-                      if (collabId) {
-                        setActiveCollaborationChatId(collabId);
-                      }
-                      setActiveMenu("conversations");
-                    }}
-                  />
-                ) : (
-                  <div className="space-y-5">
-                    {/* Page Header: Pelaksanaan Program & Monitoring */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
-                      <div className="space-y-1">
-                        <h1
-                          className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
-                          style={{ fontFamily: "var(--font-display)" }}
-                        >
-                          Pelaksanaan Program &amp; Monitoring
-                        </h1>
-                        <p className="text-xs sm:text-sm text-slate-600">
-                          Pantau realisasi milestone lapangan, serapan dana, serta pelaporan akuntabilitas kegiatan.
-                        </p>
-                      </div>
+      {/* ========================================================================= */}
+      {/* SUBVIEW: PROGRAMS (PELAKSANAAN PROGRAM & IMPACT TRACKING) */}
+      {/* ========================================================================= */}
+      {activeMenu === "programs" && (
+        selectedProgramForDetail ? (
+          <PartnerProgramDetailPageView
+            program={selectedProgramForDetail}
+            onBack={() => setSelectedProgramForDetail(null)}
+            onProgramUpdated={() => {
+              fetchPrograms();
+            }}
+            onOpenChat={(collabId) => {
+              setSelectedProgramForDetail(null);
+              if (collabId) {
+                setActiveCollaborationChatId(collabId);
+              }
+              setActiveMenu("conversations");
+            }}
+          />
+        ) : (
+          <div className="space-y-5">
+            {/* Page Header: Pelaksanaan Program & Monitoring */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
+              <div className="space-y-1">
+                <h1
+                  className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  Pelaksanaan Program &amp; Monitoring
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600">
+                  Pantau realisasi milestone lapangan, serapan dana, serta pelaporan akuntabilitas kegiatan.
+                </p>
+              </div>
 
-                      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                        <button
-                          type="button"
-                          onClick={handleRefreshAll}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-xs"
-                          title="Segarkan program"
-                        >
-                          <RefreshCw className={`w-3.5 h-3.5 ${isLoadingPrograms ? "animate-spin text-[#009E75]" : "text-slate-500"}`} />
-                          <span>Segarkan</span>
-                        </button>
-                      </div>
+              <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                <button
+                  type="button"
+                  onClick={handleRefreshAll}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-xs"
+                  title="Segarkan program"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoadingPrograms ? "animate-spin text-[#009E75]" : "text-slate-500"}`} />
+                  <span>Segarkan</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten Persis Kolaborasi Aktif) */}
+            {(() => {
+              const opStats = {
+                inProgress: programs.filter((p) => p.status === "IN_PROGRESS").length,
+                pendingActivities: programs.reduce(
+                  (acc, p) => acc + (p.pendingActivitiesCount ?? (p.status === "IN_PROGRESS" ? 1 : 0)),
+                  0
+                ),
+                pendingVerification: programs.reduce(
+                  (acc, p) => acc + (p.pendingVerificationCount || 0),
+                  0
+                ),
+                completed: programs.filter((p) => p.status === "COMPLETED").length,
+              };
+
+              return (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  {/* Kartu 1: Program Berjalan */}
+                  <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-600 block">
+                      Program Berjalan
+                    </span>
+                    <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      {opStats.inProgress}
                     </div>
-
-                    {/* 1. 4 KPI Card Pelaksanaan Program (Desain Clean, Modern & Konsisten Persis Kolaborasi Aktif) */}
-                    {(() => {
-                      const opStats = {
-                        inProgress: programs.filter((p) => p.status === "IN_PROGRESS").length,
-                        pendingActivities: programs.reduce(
-                          (acc, p) => acc + (p.pendingActivitiesCount ?? (p.status === "IN_PROGRESS" ? 1 : 0)),
-                          0
-                        ),
-                        pendingVerification: programs.reduce(
-                          (acc, p) => acc + (p.pendingVerificationCount || 0),
-                          0
-                        ),
-                        completed: programs.filter((p) => p.status === "COMPLETED").length,
-                      };
-
-                      return (
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                          {/* Kartu 1: Program Berjalan */}
-                          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                            <span className="text-xs font-semibold text-slate-600 block">
-                              Program Berjalan
-                            </span>
-                            <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
-                              {opStats.inProgress}
-                            </div>
-                            <span className="text-[11px] text-slate-500 block">
-                              Program dalam pelaksanaan
-                            </span>
-                          </div>
-
-                          {/* Kartu 2: Aktivitas Tersisa */}
-                          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                            <span className="text-xs font-semibold text-slate-600 block">
-                              Aktivitas Tersisa
-                            </span>
-                            <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
-                              {opStats.pendingActivities}
-                            </div>
-                            <span className="text-[11px] text-slate-500 block">
-                              Kegiatan yang belum selesai
-                            </span>
-                          </div>
-
-                          {/* Kartu 3: Menunggu Verifikasi */}
-                          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                            <span className="text-xs font-semibold text-slate-600 block">
-                              Menunggu Verifikasi
-                            </span>
-                            <div className="text-xl sm:text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
-                              {opStats.pendingVerification}
-                            </div>
-                            <span className="text-[11px] text-slate-500 block">
-                              Laporan perlu ditinjau
-                            </span>
-                          </div>
-
-                          {/* Kartu 4: Program Selesai */}
-                          <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                            <span className="text-xs font-semibold text-slate-600 block">
-                              Program Selesai
-                            </span>
-                            <div className="text-xl sm:text-2xl font-extrabold text-[#009E75] tracking-tight tabular-nums">
-                              {opStats.completed}
-                            </div>
-                            <span className="text-[11px] text-slate-500 block">
-                              Program yang telah rampung
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* 2. Filter & Pencarian yang Rapi dalam Bahasa Indonesia */}
-                    <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
-                      <div className="flex flex-col sm:flex-row items-center gap-3">
-                        <div className="relative flex-1 w-full">
-                          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                          <input
-                            type="text"
-                            placeholder="Cari program, perusahaan mitra, inisiatif, atau lokasi..."
-                            value={programSearch}
-                            onChange={(e) => setProgramSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-                          />
-                        </div>
-
-                        <div className="w-full sm:w-auto">
-                          <select
-                            value={programFocusFilter}
-                            onChange={(e) => setProgramFocusFilter(e.target.value)}
-                            className="w-full sm:w-auto text-xs py-2.5 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
-                          >
-                            <option value="ALL">Semua Bidang CSR</option>
-                            {csrFocusAreaEnum.map((fa: CsrFocusArea) => (
-                              <option key={fa} value={fa}>
-                                {FOCUS_AREA_CONFIG[fa]?.label || fa}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Status Filter Chips - Bahasa Indonesia, tanpa kode teknis internal */}
-                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-                        <span className="text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1">
-                          <Filter className="w-3.5 h-3.5" /> Status Program:
-                        </span>
-                        {[
-                          { id: "ALL", label: "Semua Status" },
-                          { id: "PLANNED", label: "Persiapan" },
-                          { id: "IN_PROGRESS", label: "Sedang Berjalan" },
-                          { id: "COMPLETED", label: "Selesai" },
-                          { id: "ON_HOLD", label: "Ditunda" },
-                          { id: "CANCELLED", label: "Dibatalkan" },
-                        ].map((chip) => {
-                          const isSelected = programStatusFilter === chip.id;
-                          return (
-                            <button
-                              key={chip.id}
-                              type="button"
-                              onClick={() => setProgramStatusFilter(chip.id)}
-                              className={`text-xs px-3.5 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${isSelected
-                                ? "bg-[#181343] text-white shadow-2xs font-semibold"
-                                : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
-                                }`}
-                            >
-                              {chip.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* 3. Sederhanakan Kartu Program: Fokus pada Monitoring Aktivitas & Bukti Lapangan */}
-                    {isLoadingPrograms ? (
-                      <div className="p-12 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-100">
-                        <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-teal-600" />
-                        Memuat data program pelaksanaan...
-                      </div>
-                    ) : filteredPrograms.length === 0 ? (
-                      <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-3">
-                        <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
-                          <Activity className="w-6 h-6" />
-                        </div>
-                        <h4 className="text-base font-bold text-slate-900">
-                          Tidak Ada Program Ditemukan
-                        </h4>
-                        <p className="text-xs text-slate-500 max-w-md mx-auto">
-                          {programSearch || programStatusFilter !== "ALL" || programFocusFilter !== "ALL"
-                            ? "Tidak ada program yang sesuai dengan kata kunci pencarian Anda."
-                            : "Program lapangan dibuat secara otomatis setelah perjanjian MoU disahkan (status AGREED) bersama perusahaan donor."}
-                        </p>
-                        {collaborations.some((c) => c.status === "NEGOTIATION") && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setActiveMenu("collaborations")}
-                            leftIcon={<FileCheck2 className="w-4 h-4" />}
-                            className="mt-2"
-                          >
-                            Buka Tab Kolaborasi & Selesaikan MoU
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 gap-4">
-                        {filteredPrograms.map((prog) => {
-                          const statusConfig = PROGRAM_STATUS_CONFIG[prog.status] || {
-                            label: prog.status,
-                            variant: "slate" as const,
-                          };
-                          const focusConfig = FOCUS_AREA_CONFIG[prog.focusArea as CsrFocusArea] || {
-                            label: prog.focusArea || "Umum",
-                          };
-                          const activityProgress = prog.activityProgressPercent ?? 0;
-                          const totalActs = prog.totalActivitiesCount ?? 0;
-                          const completedActs = prog.completedActivitiesCount ?? 0;
-                          const pendingVerif = prog.pendingVerificationCount ?? 0;
-
-                          return (
-                            <div
-                              key={prog.id}
-                              className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-5"
-                            >
-                              {/* Header Row: Focus area, status, location, period */}
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200/80">
-                                    {focusConfig.label}
-                                  </span>
-                                  <Badge variant={statusConfig.variant} size="md" hasDot>
-                                    {statusConfig.label}
-                                  </Badge>
-                                  {prog.targetCity && (
-                                    <span className="text-xs text-slate-500 flex items-center gap-1 font-medium">
-                                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                                      {prog.targetCity}{prog.targetProvince ? `, ${prog.targetProvince}` : ""}
-                                    </span>
-                                  )}
-                                </div>
-
-                                <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                                  <Calendar className="w-3.5 h-3.5" />
-                                  {prog.startDate && prog.endDate
-                                    ? `${formatDate(prog.startDate)} s/d ${formatDate(prog.endDate)}`
-                                    : "Jadwal Belum Ditetapkan"}
-                                </div>
-                              </div>
-
-                              {/* Title & Company Information */}
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-xs">
-                                  <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
-                                    Perusahaan Sponsor:
-                                  </span>
-                                  <span className="font-bold text-slate-800 flex items-center gap-1">
-                                    <Building2 className="w-3.5 h-3.5 text-teal-600" />
-                                    {prog.companyName || "Perusahaan Mitra"}
-                                  </span>
-                                  {prog.opportunityTitle && (
-                                    <>
-                                      <span className="text-slate-300">•</span>
-                                      <span className="text-slate-500 truncate text-[11px]">
-                                        Inisiatif: {prog.opportunityTitle}
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-
-                                <h3 className="text-base font-extrabold text-[#181343] leading-snug">
-                                  {prog.title}
-                                </h3>
-                              </div>
-
-                              {/* 3-Column Operational Monitoring Grid */}
-                              <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                                {/* Column 1: Progres Aktivitas Proposal */}
-                                <div className="space-y-1.5 md:border-r border-slate-200/60 md:pr-4">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
-                                      <Layers className="w-3.5 h-3.5 text-emerald-600" />
-                                      Progres Aktivitas Proposal
-                                    </span>
-                                    <span className="font-extrabold text-emerald-700 text-xs">
-                                      {activityProgress}%
-                                    </span>
-                                  </div>
-                                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                                    <div
-                                      className="bg-emerald-600 h-full rounded-full transition-all duration-500"
-                                      style={{ width: `${Math.min(activityProgress, 100)}%` }}
-                                    />
-                                  </div>
-                                  <span className="text-[10px] text-slate-500 block">
-                                    {totalActs > 0
-                                      ? `${completedActs} dari ${totalActs} tahapan terselesaikan`
-                                      : "Tahapan disinkronkan dari proposal"}
-                                  </span>
-                                </div>
-
-                                {/* Column 2: Aktivitas Berikutnya & Jadwal */}
-                                <div className="space-y-1 md:border-r border-slate-200/60 md:pr-4">
-                                  <span className="text-[11px] text-slate-500 font-semibold block">
-                                    Aktivitas Berikutnya
-                                  </span>
-                                  <div className="text-xs font-bold text-slate-800 line-clamp-1">
-                                    {prog.nextActivityTitle || "Semua tahapan terselesaikan"}
-                                  </div>
-                                  <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                                    <Clock className="w-3 h-3 text-slate-400" />
-                                    {prog.nextActivityDate
-                                      ? `Target: ${formatDate(prog.nextActivityDate)}`
-                                      : "Jadwal Belum Ditetapkan"}
-                                  </span>
-                                </div>
-
-                                {/* Column 3: Status Laporan / Verifikasi Terakhir */}
-                                <div className="space-y-1.5">
-                                  <span className="text-[11px] text-slate-500 font-semibold block">
-                                    Status Laporan Terakhir
-                                  </span>
-                                  <div>
-                                    {pendingVerif > 0 ? (
-                                      <Badge variant="amber" size="sm" hasDot>
-                                        {pendingVerif} Menunggu Verifikasi
-                                      </Badge>
-                                    ) : prog.lastReportStatus === "VERIFIED" ? (
-                                      <Badge variant="emerald" size="sm" hasDot>
-                                        Laporan Terverifikasi
-                                      </Badge>
-                                    ) : prog.lastReportStatus === "REVISION_REQUESTED" ? (
-                                      <Badge variant="rose" size="sm" hasDot>
-                                        Perlu Revisi
-                                      </Badge>
-                                    ) : prog.lastReportStatus === "SUBMITTED" ? (
-                                      <Badge variant="amber" size="sm" hasDot>
-                                        Menunggu Verifikasi
-                                      </Badge>
-                                    ) : (
-                                      <span className="text-xs text-slate-400 italic">
-                                        Belum Ada Laporan Kegiatan
-                                      </span>
-                                    )}
-                                  </div>
-                                  <span className="text-[10px] text-slate-400 block">
-                                    {prog.lastReportDate
-                                      ? `Pembaruan: ${formatDate(prog.lastReportDate)}`
-                                      : "Sesuai timeline proposal"}
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Card Footer: Ringkasan Anggaran & Target + Tombol Lihat Detail Monitoring */}
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
-                                <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
-                                  <span>
-                                    Anggaran MoU: <strong className="text-slate-700">{formatRupiah(prog.budget)}</strong>
-                                  </span>
-                                  <span className="text-slate-300">•</span>
-                                  <span>
-                                    Serapan: <strong className="text-slate-700">{formatRupiah(prog.spentBudget || "0")}</strong>
-                                  </span>
-                                  <span className="text-slate-300">•</span>
-                                  <span>
-                                    Target: <strong className="text-slate-700">{prog.targetBeneficiaries || "-"}</strong>
-                                  </span>
-                                </div>
-
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs cursor-pointer self-end sm:self-auto"
-                                  onClick={() => setSelectedProgramForDetail(prog)}
-                                  leftIcon={<Activity className="w-3.5 h-3.5" />}
-                                >
-                                  Lihat Detail Monitoring
-                                </Button>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                    <span className="text-[11px] text-slate-500 block">
+                      Program dalam pelaksanaan
+                    </span>
                   </div>
-                )
-              )}
 
-              {/* ========================================================================= */}
-              {/* SUBVIEW: ANALYTICS (LAPORAN & DAMPAK ESG) */}
-              {/* ========================================================================= */}
-              {activeMenu === "analytics" && (
-                <EsgAnalyticsView
-                  role="PARTNER"
-                  organizationName={partner?.name}
-                  programs={programs}
-                  onOpenProgramDetail={(p) => {
-                    const found = programs.find((item) => item.id === p.id);
-                    if (found) {
-                      setSelectedProgramForDetail(found);
-                      setActiveMenu("programs");
-                    }
-                  }}
-                />
-              )}
+                  {/* Kartu 2: Aktivitas Tersisa */}
+                  <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-600 block">
+                      Aktivitas Tersisa
+                    </span>
+                    <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      {opStats.pendingActivities}
+                    </div>
+                    <span className="text-[11px] text-slate-500 block">
+                      Kegiatan yang belum selesai
+                    </span>
+                  </div>
 
-              {/* ========================================================================= */}
-              {/* SUBVIEW 6: PROFILE (PROFIL LEMBAGA) */}
-              {/* ========================================================================= */}
-              {activeMenu === "profile" && partner && (
-                <PartnerFullProfileView
-                  partner={partner}
-                  programs={programs}
-                  collaborations={collaborations}
-                  isOwner={true}
-                  onProfileUpdated={(updated) => {
-                    setPartner(updated);
-                  }}
-                />
-              )}
+                  {/* Kartu 3: Menunggu Verifikasi */}
+                  <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-600 block">
+                      Menunggu Verifikasi
+                    </span>
+                    <div className="text-xl sm:text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                      {opStats.pendingVerification}
+                    </div>
+                    <span className="text-[11px] text-slate-500 block">
+                      Laporan perlu ditinjau
+                    </span>
+                  </div>
 
-              {/* ========================================================================= */}
-              {/* SUBVIEW: CONVERSATIONS (PESAN & NEGOSIASI) */}
-              {/* ========================================================================= */}
-              {activeMenu === "conversations" && (
-                <div className="space-y-4">
-                  <ConversationCenterView
-                    userRole="PARTNER_ADMIN"
-                    initialCollaborationId={activeCollaborationChatId}
-                    onViewCollaborationDetails={(collabId) => {
-                      const found = collaborations.find((c) => c.id === collabId);
-                      if (found) {
-                        setSelectedCollabForDetail(found);
-                        setActiveMenu("collaborations");
-                      }
-                    }}
+                  {/* Kartu 4: Program Selesai */}
+                  <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
+                    <span className="text-xs font-semibold text-slate-600 block">
+                      Program Selesai
+                    </span>
+                    <div className="text-xl sm:text-2xl font-extrabold text-[#009E75] tracking-tight tabular-nums">
+                      {opStats.completed}
+                    </div>
+                    <span className="text-[11px] text-slate-500 block">
+                      Program yang telah rampung
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 2. Filter & Pencarian yang Rapi dalam Bahasa Indonesia */}
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="relative flex-1 w-full">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Cari program, perusahaan mitra, inisiatif, atau lokasi..."
+                    value={programSearch}
+                    onChange={(e) => setProgramSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                   />
                 </div>
-              )}
 
-              {/* ========================================================================= */}
-              {/* SUBVIEW: AI CHATBOT (FULL-SCREEN AI ADVISOR) */}
-              {/* ========================================================================= */}
-              {activeMenu === "chat" && (
-                <ChatbotView
-                  role={user.role}
-                  userName={user.name}
-                  organizationName={partner?.name}
-                  onNavigate={(menu) => setActiveMenu(menu as PartnerNavMenu)}
-                />
-              )}
+                <div className="w-full sm:w-auto">
+                  <select
+                    value={programFocusFilter}
+                    onChange={(e) => setProgramFocusFilter(e.target.value)}
+                    className="w-full sm:w-auto text-xs py-2.5 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
+                  >
+                    <option value="ALL">Semua Bidang CSR</option>
+                    {csrFocusAreaEnum.map((fa: CsrFocusArea) => (
+                      <option key={fa} value={fa}>
+                        {FOCUS_AREA_CONFIG[fa]?.label || fa}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Status Filter Chips - Bahasa Indonesia, tanpa kode teknis internal */}
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                <span className="text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1">
+                  <Filter className="w-3.5 h-3.5" /> Status Program:
+                </span>
+                {[
+                  { id: "ALL", label: "Semua Status" },
+                  { id: "PLANNED", label: "Persiapan" },
+                  { id: "IN_PROGRESS", label: "Sedang Berjalan" },
+                  { id: "COMPLETED", label: "Selesai" },
+                  { id: "ON_HOLD", label: "Ditunda" },
+                  { id: "CANCELLED", label: "Dibatalkan" },
+                ].map((chip) => {
+                  const isSelected = programStatusFilter === chip.id;
+                  return (
+                    <button
+                      key={chip.id}
+                      type="button"
+                      onClick={() => setProgramStatusFilter(chip.id)}
+                      className={`text-xs px-3.5 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${isSelected
+                        ? "bg-[#181343] text-white shadow-2xs font-semibold"
+                        : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                        }`}
+                    >
+                      {chip.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. Sederhanakan Kartu Program: Fokus pada Monitoring Aktivitas & Bukti Lapangan */}
+            {isLoadingPrograms ? (
+              <div className="p-12 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-100">
+                <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-teal-600" />
+                Memuat data program pelaksanaan...
+              </div>
+            ) : filteredPrograms.length === 0 ? (
+              <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">
+                  <Activity className="w-6 h-6" />
+                </div>
+                <h4 className="text-base font-bold text-slate-900">
+                  Tidak Ada Program Ditemukan
+                </h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  {programSearch || programStatusFilter !== "ALL" || programFocusFilter !== "ALL"
+                    ? "Tidak ada program yang sesuai dengan kata kunci pencarian Anda."
+                    : "Program lapangan dibuat secara otomatis setelah perjanjian MoU disahkan (status AGREED) bersama perusahaan donor."}
+                </p>
+                {collaborations.some((c) => c.status === "NEGOTIATION") && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveMenu("collaborations")}
+                    leftIcon={<FileCheck2 className="w-4 h-4" />}
+                    className="mt-2"
+                  >
+                    Buka Tab Kolaborasi & Selesaikan MoU
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {filteredPrograms.map((prog) => {
+                  const statusConfig = PROGRAM_STATUS_CONFIG[prog.status] || {
+                    label: prog.status,
+                    variant: "slate" as const,
+                  };
+                  const focusConfig = FOCUS_AREA_CONFIG[prog.focusArea as CsrFocusArea] || {
+                    label: prog.focusArea || "Umum",
+                  };
+                  const activityProgress = prog.activityProgressPercent ?? 0;
+                  const totalActs = prog.totalActivitiesCount ?? 0;
+                  const completedActs = prog.completedActivitiesCount ?? 0;
+                  const pendingVerif = prog.pendingVerificationCount ?? 0;
+
+                  return (
+                    <div
+                      key={prog.id}
+                      className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-5"
+                    >
+                      {/* Header Row: Focus area, status, location, period */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-teal-50 text-teal-700 border border-teal-200/80">
+                            {focusConfig.label}
+                          </span>
+                          <Badge variant={statusConfig.variant} size="md" hasDot>
+                            {statusConfig.label}
+                          </Badge>
+                          {prog.targetCity && (
+                            <span className="text-xs text-slate-500 flex items-center gap-1 font-medium">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              {prog.targetCity}{prog.targetProvince ? `, ${prog.targetProvince}` : ""}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {prog.startDate && prog.endDate
+                            ? `${formatDate(prog.startDate)} s/d ${formatDate(prog.endDate)}`
+                            : "Jadwal Belum Ditetapkan"}
+                        </div>
+                      </div>
+
+                      {/* Title & Company Information */}
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
+                            Perusahaan Sponsor:
+                          </span>
+                          <span className="font-bold text-slate-800 flex items-center gap-1">
+                            <Building2 className="w-3.5 h-3.5 text-teal-600" />
+                            {prog.companyName || "Perusahaan Mitra"}
+                          </span>
+                          {prog.opportunityTitle && (
+                            <>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-500 truncate text-[11px]">
+                                Inisiatif: {prog.opportunityTitle}
+                              </span>
+                            </>
+                          )}
+                        </div>
+
+                        <h3 className="text-base font-extrabold text-[#181343] leading-snug">
+                          {prog.title}
+                        </h3>
+                      </div>
+
+                      {/* 3-Column Operational Monitoring Grid */}
+                      <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        {/* Column 1: Progres Aktivitas Proposal */}
+                        <div className="space-y-1.5 md:border-r border-slate-200/60 md:pr-4">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                              <Layers className="w-3.5 h-3.5 text-emerald-600" />
+                              Progres Aktivitas Proposal
+                            </span>
+                            <span className="font-extrabold text-emerald-700 text-xs">
+                              {activityProgress}%
+                            </span>
+                          </div>
+                          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                              style={{ width: `${Math.min(activityProgress, 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-slate-500 block">
+                            {totalActs > 0
+                              ? `${completedActs} dari ${totalActs} tahapan terselesaikan`
+                              : "Tahapan disinkronkan dari proposal"}
+                          </span>
+                        </div>
+
+                        {/* Column 2: Aktivitas Berikutnya & Jadwal */}
+                        <div className="space-y-1 md:border-r border-slate-200/60 md:pr-4">
+                          <span className="text-[11px] text-slate-500 font-semibold block">
+                            Aktivitas Berikutnya
+                          </span>
+                          <div className="text-xs font-bold text-slate-800 line-clamp-1">
+                            {prog.nextActivityTitle || "Semua tahapan terselesaikan"}
+                          </div>
+                          <span className="text-[10px] text-slate-500 flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            {prog.nextActivityDate
+                              ? `Target: ${formatDate(prog.nextActivityDate)}`
+                              : "Jadwal Belum Ditetapkan"}
+                          </span>
+                        </div>
+
+                        {/* Column 3: Status Laporan / Verifikasi Terakhir */}
+                        <div className="space-y-1.5">
+                          <span className="text-[11px] text-slate-500 font-semibold block">
+                            Status Laporan Terakhir
+                          </span>
+                          <div>
+                            {pendingVerif > 0 ? (
+                              <Badge variant="amber" size="sm" hasDot>
+                                {pendingVerif} Menunggu Verifikasi
+                              </Badge>
+                            ) : prog.lastReportStatus === "VERIFIED" ? (
+                              <Badge variant="emerald" size="sm" hasDot>
+                                Laporan Terverifikasi
+                              </Badge>
+                            ) : prog.lastReportStatus === "REVISION_REQUESTED" ? (
+                              <Badge variant="rose" size="sm" hasDot>
+                                Perlu Revisi
+                              </Badge>
+                            ) : prog.lastReportStatus === "SUBMITTED" ? (
+                              <Badge variant="amber" size="sm" hasDot>
+                                Menunggu Verifikasi
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-slate-400 italic">
+                                Belum Ada Laporan Kegiatan
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-slate-400 block">
+                            {prog.lastReportDate
+                              ? `Pembaruan: ${formatDate(prog.lastReportDate)}`
+                              : "Sesuai timeline proposal"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Footer: Ringkasan Anggaran & Target + Tombol Lihat Detail Monitoring */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
+                        <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+                          <span>
+                            Anggaran MoU: <strong className="text-slate-700">{formatRupiah(prog.budget)}</strong>
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span>
+                            Serapan: <strong className="text-slate-700">{formatRupiah(prog.spentBudget || "0")}</strong>
+                          </span>
+                          <span className="text-slate-300">•</span>
+                          <span>
+                            Target: <strong className="text-slate-700">{prog.targetBeneficiaries || "-"}</strong>
+                          </span>
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs cursor-pointer self-end sm:self-auto"
+                          onClick={() => setSelectedProgramForDetail(prog)}
+                          leftIcon={<Activity className="w-3.5 h-3.5" />}
+                        >
+                          Lihat Detail Monitoring
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUBVIEW: ANALYTICS (LAPORAN & DAMPAK ESG) */}
+      {/* ========================================================================= */}
+      {activeMenu === "analytics" && (
+        <EsgAnalyticsView
+          role="PARTNER"
+          organizationName={partner?.name}
+          programs={programs}
+          onOpenProgramDetail={(p) => {
+            const found = programs.find((item) => item.id === p.id);
+            if (found) {
+              setSelectedProgramForDetail(found);
+              setActiveMenu("programs");
+            }
+          }}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUBVIEW 6: PROFILE (PROFIL LEMBAGA) */}
+      {/* ========================================================================= */}
+      {activeMenu === "profile" && partner && (
+        <PartnerFullProfileView
+          partner={partner}
+          programs={programs}
+          collaborations={collaborations}
+          isOwner={true}
+          onProfileUpdated={(updated) => {
+            setPartner(updated);
+          }}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUBVIEW: CONVERSATIONS (PESAN & NEGOSIASI) */}
+      {/* ========================================================================= */}
+      {activeMenu === "conversations" && (
+        <div className="w-full h-full min-h-0 flex-1 flex flex-col">
+          <ConversationCenterView
+            userRole="PARTNER_ADMIN"
+            initialCollaborationId={activeCollaborationChatId}
+            onViewCollaborationDetails={async (collabId) => {
+              let found = collaborations.find((c) => c.id === collabId);
+              if (!found) {
+                try {
+                  const token = localStorage.getItem("accessToken");
+                  if (token) {
+                    const res = await fetch(`/api/collaborations/${collabId}`, {
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (res.ok) {
+                      const json = await res.json();
+                      found = json.data?.data || json.data;
+                    }
+                  }
+                } catch (err) {
+                  console.error("Gagal memuat detail kolaborasi:", err);
+                }
+              }
+              if (found) {
+                setSelectedCollabForDetail(found);
+              }
+              setActiveMenu("collaborations");
+            }}
+          />
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* SUBVIEW: AI CHATBOT (FULL-SCREEN AI ADVISOR) */}
+      {/* ========================================================================= */}
+      {activeMenu === "chat" && (
+        <div className="w-full h-full min-h-0 flex-1 flex flex-col">
+          <ChatbotView
+            role={user.role}
+            userName={user.name}
+            organizationName={partner?.name}
+            onNavigate={(menu) => setActiveMenu(menu as PartnerNavMenu)}
+          />
+        </div>
+      )}
             </>
-          )
-          }
+          )}
         </main>
       </div>
 
-          {/* --- MODALS --- */}
-
-
-
-          {/* User Profile Modal */}
-          <UserProfileModal
-            isOpen={isUserProfileModalOpen}
-            onClose={() => setIsUserProfileModalOpen(false)}
-            user={currentUser}
-            onProfileUpdated={(updated) => {
-              setCurrentUser(updated);
-              onProfileUpdated?.(updated);
-            }}
-          />
-      </div>
-      );
+      {/* --- MODALS --- */}
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={isUserProfileModalOpen}
+        onClose={() => setIsUserProfileModalOpen(false)}
+        user={currentUser}
+        onProfileUpdated={(updated) => {
+          setCurrentUser(updated);
+          onProfileUpdated?.(updated);
+        }}
+      />
+    </div>
+  );
 }

@@ -199,6 +199,20 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
     }
   }, [isManagement, activeMenu]);
 
+  useEffect(() => {
+    const handleOpenChatEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ collaborationId?: string }>;
+      setSelectedProgramForDetail(null);
+      if (customEvent.detail?.collaborationId) {
+        setActiveCollaborationChatId(customEvent.detail.collaborationId);
+      }
+      setActiveMenu("conversations");
+    };
+
+    window.addEventListener("sipena:open-chat", handleOpenChatEvent);
+    return () => window.removeEventListener("sipena:open-chat", handleOpenChatEvent);
+  }, []);
+
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
@@ -971,7 +985,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   };
 
   return (
-    <div className={`min-h-screen bg-[#F9F9FB] flex ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
+    <div className={`min-h-screen bg-[#F9F9FB] flex ${activeMenu === "chat" || activeMenu === "conversations" ? "h-screen overflow-hidden" : ""}`}>
       {/* 1. Sidebar Navigation */}
       <Sidebar
         user={currentUser}
@@ -1002,7 +1016,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       />
 
       {/* 2. Main Workspace Layout */}
-      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" ? "h-screen overflow-hidden" : ""}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${activeMenu === "chat" || activeMenu === "conversations" ? "h-screen overflow-hidden" : ""}`}>
         {/* Sticky Dashboard Header */}
         <DashboardHeader
           user={currentUser}
@@ -1126,7 +1140,12 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                             { label: "Konsultasi Strategis" },
                                             { label: "AI CSR Advisor" },
                                           ]
-                                          : undefined
+                                          : activeMenu === "conversations"
+                                            ? [
+                                              { label: "Kolaborasi & Mitra" },
+                                              { label: "Pesan & Negosiasi" },
+                                            ]
+                                            : undefined
           }
           title={
             activeMenu === "opportunities" && isCreatingOpportunity
@@ -1151,7 +1170,20 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
         />
 
         {/* Content Body Container */}
-        <main className={`w-full mx-auto ${activeMenu === "chat" ? "p-3 sm:p-4 lg:p-5 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden" : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"}`}>
+        <main
+          style={
+            activeMenu === "chat" || activeMenu === "conversations"
+              ? { height: "calc(100vh - 72px)", maxHeight: "calc(100vh - 72px)" }
+              : undefined
+          }
+          className={`w-full mx-auto ${
+            activeMenu === "chat"
+              ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
+              : activeMenu === "conversations"
+              ? "p-4 sm:p-5 lg:p-6 max-w-7xl flex-1 flex flex-col min-h-0 overflow-hidden"
+              : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"
+          }`}
+        >
           {/* ============================================================ */}
           {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF & BI ANALYTICS) */}
           {/* ============================================================ */}
@@ -1308,21 +1340,21 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                   </div>
                 </div>
 
-                {/* 3 KPI Cards Horizontal (Statistik Read-Only) */}
+                {/* 3 KPI Cards Horizontal (Statistik Read-Only - Seragam & Anti-Slop) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
                   {/* KPI 1: Menunggu Tinjauan */}
                   <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex items-center gap-4 cursor-default">
-                    <div className="p-3.5 rounded-2xl bg-blue-50 text-blue-600 shrink-0">
-                      <FileSearch className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                      <FileSearch className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-slate-600 block">
                         Menunggu Tinjauan
                       </span>
-                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5 tabular-nums">
                         {proposalKpis.waitingReview}
                       </div>
-                      <span className="text-xs text-[#787680] block">
+                      <span className="text-xs text-slate-400 block">
                         Proposal baru masuk
                       </span>
                     </div>
@@ -1330,17 +1362,17 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                   {/* KPI 2: Dalam Tinjauan */}
                   <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex items-center gap-4 cursor-default">
-                    <div className="p-3.5 rounded-2xl bg-purple-50 text-purple-600 shrink-0">
-                      <ClipboardList className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                      <ClipboardList className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-slate-600 block">
                         Dalam Tinjauan
                       </span>
-                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5 tabular-nums">
                         {proposalKpis.underReview}
                       </div>
-                      <span className="text-xs text-[#787680] block">
+                      <span className="text-xs text-slate-400 block">
                         Sedang dievaluasi tim CSR
                       </span>
                     </div>
@@ -1348,17 +1380,17 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                   {/* KPI 3: Perlu Revisi */}
                   <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs w-full flex items-center gap-4 cursor-default">
-                    <div className="p-3.5 rounded-2xl bg-amber-50 text-amber-600 shrink-0">
-                      <FileEdit className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0">
+                      <FileEdit className="w-5 h-5 text-slate-700" />
                     </div>
                     <div>
                       <span className="text-xs font-semibold text-slate-600 block">
                         Perlu Revisi
                       </span>
-                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5">
+                      <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-0.5 tabular-nums">
                         {proposalKpis.needsRevision}
                       </div>
-                      <span className="text-xs text-[#787680] block">
+                      <span className="text-xs text-slate-400 block">
                         Menunggu pembaruan mitra
                       </span>
                     </div>
@@ -2409,13 +2441,32 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {/* VIEW: CONVERSATIONS (PESAN & NEGOSIASI - KHUSUS CSR_ADMIN) */}
           {/* ============================================================ */}
           {!isManagement && activeMenu === "conversations" && (
-            <div className="space-y-4">
+            <div className="w-full h-full min-h-0 flex-1 flex flex-col">
               <ConversationCenterView
                 userRole="CSR_ADMIN"
                 initialCollaborationId={activeCollaborationChatId}
-                onViewCollaborationDetails={(collabId) => {
-                  const found = collaborations.find((c) => c.id === collabId);
-                  if (found) setSelectedCollabForDetail(found);
+                onViewCollaborationDetails={async (collabId) => {
+                  let found = collaborations.find((c) => c.id === collabId);
+                  if (!found) {
+                    try {
+                      const token = localStorage.getItem("accessToken");
+                      if (token) {
+                        const res = await fetch(`/api/collaborations/${collabId}`, {
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        if (res.ok) {
+                          const json = await res.json();
+                          found = json.data?.data || json.data;
+                        }
+                      }
+                    } catch (err) {
+                      console.error("Gagal memuat detail kolaborasi:", err);
+                    }
+                  }
+                  if (found) {
+                    setSelectedCollabForDetail(found);
+                  }
+                  setActiveMenu("collaborations");
                 }}
               />
             </div>
@@ -2438,22 +2489,24 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           {/* VIEW: AI CHATBOT (FULL-SCREEN AI ADVISOR) */}
           {/* ============================================================ */}
           {activeMenu === "chat" && (
-            <ChatbotView
-              role={user.role}
-              userName={user.name}
-              organizationName={company?.name}
-              onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
-              onOpenCreateOpportunity={
-                !isManagement
-                  ? (initialProvince, draftData) => {
-                      setActiveMenu("opportunities");
-                      setIsCreatingOpportunity(true);
-                      setOpportunityPrefillProvince(initialProvince || null);
-                      setOpportunityPrefillDraft(draftData || null);
-                    }
-                  : undefined
-              }
-            />
+            <div className="w-full h-full min-h-0 flex-1 flex flex-col">
+              <ChatbotView
+                role={user.role}
+                userName={user.name}
+                organizationName={company?.name}
+                onNavigate={(menu) => setActiveMenu(menu as CompanyNavMenu)}
+                onOpenCreateOpportunity={
+                  !isManagement
+                    ? (initialProvince, draftData) => {
+                        setActiveMenu("opportunities");
+                        setIsCreatingOpportunity(true);
+                        setOpportunityPrefillProvince(initialProvince || null);
+                        setOpportunityPrefillDraft(draftData || null);
+                      }
+                    : undefined
+                }
+              />
+            </div>
           )}
         </main>
       </div>

@@ -212,14 +212,14 @@ export function Sidebar({
             count: counts?.proposals,
           },
           {
-            id: "collaborations" as CompanyNavMenu,
-            label: "Kolaborasi & MoU",
-            icon: FileCheck2,
-          },
-          {
             id: "conversations" as CompanyNavMenu,
             label: "Pesan & Negosiasi",
             icon: MessageSquare,
+          },
+          {
+            id: "collaborations" as CompanyNavMenu,
+            label: "Kolaborasi & MoU",
+            icon: FileCheck2,
           },
         ],
       },
@@ -384,8 +384,8 @@ export function Sidebar({
 
   return (
     <>
-      {/* Desktop Sidebar (Sticky fixed on left) */}
-      <aside className="hidden lg:block w-64 xl:w-72 h-screen sticky top-0 shrink-0 z-30">
+      {/* Desktop Sidebar (Sticky fixed on left, width 64 = 256px seragam dengan Mitra & Admin) */}
+      <aside className="hidden lg:block w-64 h-screen sticky top-0 shrink-0 z-30">
         {sidebarContent}
       </aside>
 
@@ -399,7 +399,7 @@ export function Sidebar({
           />
 
           {/* Drawer content */}
-          <div className="relative w-72 max-w-[85vw] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200 bg-white">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-2xl z-10 animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </div>
         </div>

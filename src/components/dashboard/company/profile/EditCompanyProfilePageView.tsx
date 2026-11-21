@@ -27,6 +27,7 @@ import {
   Lock,
   CheckCircle2,
   Info,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,11 +77,38 @@ const CSR_FOCUS_PILLARS = [
   { id: "TANGGAP_BENCANA", label: "Tanggap Bencana", desc: "Bantuan darurat kemanusiaan & rehabilitasi bencana" },
 ];
 
-const CATEGORY_TABS: { id: ProfileCategoryTab; label: string; icon: React.ElementType }[] = [
-  { id: "info", label: "Informasi & Kontak", icon: Building2 },
-  { id: "branding", label: "Branding & Visual", icon: Palette },
-  { id: "csr", label: "Komitmen CSR", icon: Award },
-  { id: "legal", label: "Legalitas & Berkas", icon: ShieldCheck },
+interface CategoryTabConfig {
+  id: ProfileCategoryTab;
+  label: string;
+  subtitle: string;
+  icon: React.ElementType;
+}
+
+const CATEGORY_TABS: CategoryTabConfig[] = [
+  {
+    id: "info",
+    label: "Informasi Perusahaan",
+    subtitle: "Nama resmi, sektor & kontak",
+    icon: Building2,
+  },
+  {
+    id: "branding",
+    label: "Branding & Tampilan",
+    subtitle: "Logo resmi, foto sampul & tagline",
+    icon: Palette,
+  },
+  {
+    id: "csr",
+    label: "Fokus & Komitmen CSR",
+    subtitle: "Pilar prioritas & tujuan dampak",
+    icon: Award,
+  },
+  {
+    id: "legal",
+    label: "Legalitas & Dokumen",
+    subtitle: "NIB, NPWP & berkas resmi",
+    icon: ShieldCheck,
+  },
 ];
 
 const INPUT_BASE_CLASS =
@@ -421,7 +449,7 @@ export function EditCompanyProfilePageView({
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-28 space-y-6 animate-in fade-in duration-200">
+    <div className="max-w-6xl mx-auto pb-28 space-y-6 animate-in fade-in duration-200">
       {/* Top Header Card */}
       <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -489,28 +517,66 @@ export function EditCompanyProfilePageView({
         </div>
       )}
 
-      {/* Top Pill Tabs Navigation (Standardized with Profile Views) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {CATEGORY_TABS.map((cat) => {
-          const Icon = cat.icon;
-          const isActive = activeCategory === cat.id;
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              onClick={() => setActiveCategory(cat.id)}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shrink-0 ${
-                isActive
-                  ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-[#47464F] border border-[#E5E7EB] hover:text-[#181343] hover:border-slate-300"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{cat.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      {/* Main Two-Column Layout (Seragam dengan Edit Profil Mitra) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: Category Navigation (Sticky) */}
+        <div className="lg:col-span-4 space-y-4 lg:sticky lg:top-24">
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden p-2 space-y-1">
+            {CATEGORY_TABS.map((cat) => {
+              const Icon = cat.icon;
+              const isActive = activeCategory === cat.id;
+
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`w-full text-left p-3.5 rounded-xl transition-all flex items-start gap-3 cursor-pointer group ${
+                    isActive
+                      ? "bg-[#181343] text-white shadow-xs"
+                      : "text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                      isActive
+                        ? "bg-white/10 text-white"
+                        : "bg-slate-100 text-[#181343] group-hover:bg-slate-200/70"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs sm:text-sm font-bold block leading-tight">
+                      {cat.label}
+                    </span>
+                    <span
+                      className={`text-[11px] block mt-0.5 truncate ${
+                        isActive ? "text-slate-300" : "text-slate-500"
+                      }`}
+                    >
+                      {cat.subtitle}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Card Bantuan / Petunjuk Pengisian */}
+          <div className="bg-slate-50/70 rounded-2xl border border-slate-200/80 p-4 space-y-2 text-xs text-slate-600">
+            <div className="flex items-center gap-2 font-bold text-slate-800">
+              <Sparkles className="w-4 h-4 text-emerald-600" />
+              <span>Verifikasi Berkas SIPENA</span>
+            </div>
+            <p className="text-[11px] leading-relaxed text-slate-500">
+              Kelengkapan profil dan dokumen administratif mempercepat proses validasi program kemitraan CSR bersama mitra pelaksana terverifikasi.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Column: Form Sections */}
+        <div className="lg:col-span-8 space-y-6">
 
       {/* ========================================================================= */}
       {/* TAB 1: INFORMASI PERUSAHAAN & KONTAK */}
@@ -1284,12 +1350,14 @@ export function EditCompanyProfilePageView({
           </div>
         </div>
       )}
+        </div>
+      </div>
 
       {/* ========================================================================= */}
       {/* STICKY BOTTOM ACTION BAR */}
       {/* ========================================================================= */}
       <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-slate-200 py-3.5 px-4 sm:px-8 shadow-lg">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           {/* Left: Change status */}
           <div className="flex items-center gap-2">
             {isDirty ? (

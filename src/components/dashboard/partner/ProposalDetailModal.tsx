@@ -6,7 +6,6 @@ import {
   Building2,
   Calendar,
   Clock,
-  DollarSign,
   Users,
   FileText,
   ExternalLink,

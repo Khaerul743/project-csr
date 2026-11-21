@@ -92,3 +92,21 @@ export function formatDate(val: string | null | undefined): string {
     return "-";
   }
 }
+
+export function formatCurrencyInput(val: string | number | null | undefined): string {
+  if (val === null || val === undefined || val === "") return "";
+  const clean = String(val).replace(/[^\d]/g, "");
+  if (!clean) return "";
+  const num = parseInt(clean, 10);
+  if (isNaN(num)) return "";
+  return new Intl.NumberFormat("id-ID").format(num);
+}
+
+export function parseCurrencyInput(val: string | number | null | undefined): number {
+  if (val === null || val === undefined || val === "") return 0;
+  if (typeof val === "number") return isNaN(val) ? 0 : val;
+  const clean = String(val).replace(/[^\d]/g, "");
+  if (!clean) return 0;
+  const num = parseInt(clean, 10);
+  return isNaN(num) ? 0 : num;
+}

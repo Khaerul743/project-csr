@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import dynamic from "next/dynamic";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Activity,
   AlertTriangle,
   BarChart3,
   Building2,
   CheckCircle2,
-  ChevronRight,
   Compass,
   Globe2,
   HeartHandshake,
@@ -34,23 +32,11 @@ import {
 } from "../helpers";
 import { AdminErrorState, AdminKpiCard, AdminLoadingState } from "../AdminSharedPrimitives";
 import {
+  IndonesiaBeneficiaryMap,
   PROVINCE_COORDINATES,
   matchProvinceName,
 } from "../../company/overview/IndonesiaBeneficiaryMap";
 import { CompanyProgramItem, OpportunityItem, PartnerItem } from "../../company/types";
-
-const IndonesiaRealLeafletMap = dynamic(
-  () => import("../../company/overview/IndonesiaRealLeafletMap"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="w-full h-[450px] sm:h-[500px] rounded-2xl bg-slate-50 flex flex-col items-center justify-center text-slate-400 gap-2.5 border border-slate-200">
-        <div className="w-8 h-8 border-3 border-[#181343] border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-semibold text-slate-600">Memuat Peta Geografis Indonesia...</span>
-      </div>
-    ),
-  }
-);
 
 const CITY_TO_PROVINCE_MAP: Record<string, string> = {
   // DKI Jakarta
@@ -242,7 +228,71 @@ export function AdminOverviewView({
   const [queueCategory, setQueueCategory] = useState<"companies" | "partners" | "issues">("companies");
   const [growthCategory, setGrowthCategory] = useState<"programs" | "partners" | "companies" | "users" | "all">("programs");
   const [selectedMonthKey, setSelectedMonthKey] = useState<string | null>(null);
-  const [selectedMapProvince, setSelectedMapProvince] = useState<string | null>("DKI Jakarta");
+  const [mapSdgFilter, setMapSdgFilter] = useState<string>("ALL");
+  const [mapSelectedProvince, setMapSelectedProvince] = useState<string | null>(null);
+  const [fetchedPrograms, setFetchedPrograms] = useState<CompanyProgramItem[]>([]);
+  const [fetchedOpportunities, setFetchedOpportunities] = useState<OpportunityItem[]>([]);
+  const [fetchedPartners, setFetchedPartners] = useState<PartnerItem[]>([]);
+
+  useEffect(() => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken") || localStorage.getItem("auth_token")
+        : null;
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
+    let isMounted = true;
+    const fetchMapData = async () => {
+      try {
+        const [programsRes, oppsRes, partnersRes] = await Promise.all([
+          fetch("/api/admin/programs?limit=50", { headers }).catch(() => null),
+          fetch("/api/admin/opportunities?limit=50", { headers }).catch(() => null),
+          fetch("/api/admin/partners?limit=50", { headers }).catch(() => null),
+        ]);
+
+        if (programsRes && programsRes.ok) {
+          const json = await programsRes.json();
+          const list = Array.isArray(json.data?.data)
+            ? json.data.data
+            : Array.isArray(json.data)
+            ? json.data
+            : [];
+          if (isMounted && list.length > 0) {
+            setFetchedPrograms(list);
+          }
+        }
+        if (oppsRes && oppsRes.ok) {
+          const json = await oppsRes.json();
+          const list = Array.isArray(json.data?.data)
+            ? json.data.data
+            : Array.isArray(json.data)
+            ? json.data
+            : [];
+          if (isMounted && list.length > 0) {
+            setFetchedOpportunities(list);
+          }
+        }
+        if (partnersRes && partnersRes.ok) {
+          const json = await partnersRes.json();
+          const list = Array.isArray(json.data?.data)
+            ? json.data.data
+            : Array.isArray(json.data)
+            ? json.data
+            : [];
+          if (isMounted && list.length > 0) {
+            setFetchedPartners(list);
+          }
+        }
+      } catch {
+        // Fallback silently if any request fails
+      }
+    };
+
+    fetchMapData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const geoDist = useMemo(() => {
     return {
@@ -344,133 +394,6 @@ export function AdminOverviewView({
     return result;
   }, [geoDist]);
 
-  const activeProvincePins = useMemo(() => {
-    return Object.values(mapProvinceAggregates).filter((p) => p.totalEntities > 0);
-  }, [mapProvinceAggregates]);
-
-  const selectedProvinceData = useMemo(() => {
-    if (!selectedMapProvince) return null;
-    return mapProvinceAggregates[selectedMapProvince] || null;
-  }, [selectedMapProvince, mapProvinceAggregates]);
-
-  const mapPrograms = useMemo<CompanyProgramItem[]>(() => {
-    const list: CompanyProgramItem[] = [];
-
-    (geoDist.topProgramRegions || []).forEach((reg, rIdx) => {
-      const prov = mapCityOrProvince(reg.region) || "DKI Jakarta";
-      const totalBudget = reg.committedBudget || 150000000;
-      const count = Math.max(1, reg.count);
-      const budgetPerProg = Math.round(totalBudget / count);
-
-      for (let i = 0; i < count; i++) {
-        list.push({
-          id: `admin-prog-${rIdx}-${i}`,
-          collaborationId: `collab-${rIdx}-${i}`,
-          opportunityId: `opp-${rIdx}-${i}`,
-          companyId: `comp-${rIdx}`,
-          partnerId: `part-${rIdx}`,
-          title: count === 1 ? `Program CSR ${reg.region}` : `Inisiatif CSR ${reg.region} #${i + 1}`,
-          description: `Program keberlanjutan dan pemberdayaan masyarakat di wilayah ${reg.region}`,
-          focusArea: "LINGKUNGAN",
-          budget: String(budgetPerProg),
-          spentBudget: String(Math.round(budgetPerProg * 0.7)),
-          targetBeneficiaries: "500",
-          actualBeneficiaries: "450",
-          targetCity: reg.region,
-          targetProvince: prov,
-          status: "IN_PROGRESS",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
-      }
-    });
-
-    (overview?.escalationQueue?.flaggedPrograms || []).forEach((fp, idx) => {
-      list.push({
-        id: fp.id || `fp-${idx}`,
-        collaborationId: `collab-fp-${idx}`,
-        opportunityId: `opp-fp-${idx}`,
-        companyId: `comp-fp-${idx}`,
-        partnerId: `part-fp-${idx}`,
-        title: fp.title,
-        description: `Program eskalasi dalam pengawasan Super Admin (${fp.companyName || "Perusahaan Sponsor"})`,
-        focusArea: "TANGGAP_BENCANA",
-        budget: "250000000",
-        spentBudget: "180000000",
-        targetBeneficiaries: "800",
-        actualBeneficiaries: "600",
-        targetCity: "DKI Jakarta",
-        targetProvince: "DKI Jakarta",
-        status: fp.status as any,
-        companyName: fp.companyName,
-        partnerName: fp.partnerName,
-        createdAt: new Date(fp.updatedAt).toISOString(),
-        updatedAt: new Date(fp.updatedAt).toISOString(),
-      });
-    });
-
-    return list;
-  }, [geoDist.topProgramRegions, overview?.escalationQueue?.flaggedPrograms]);
-
-  const mapOpportunities = useMemo<OpportunityItem[]>(() => {
-    const list: OpportunityItem[] = [];
-    const openCount = overview?.kpis?.openOpportunities || 0;
-    if (openCount > 0) {
-      const regions = geoDist.topProgramRegions || [];
-      const primaryRegion = regions[0]?.region || "DKI Jakarta";
-      const prov = mapCityOrProvince(primaryRegion) || "DKI Jakarta";
-
-      list.push({
-        id: "opp-open-1",
-        companyId: "comp-1",
-        createdBy: "admin",
-        title: `Peluang Kolaborasi CSR ${primaryRegion}`,
-        description: `Peluang pendanaan program terbuka untuk mitra NGO pelaksana di wilayah ${primaryRegion}.`,
-        focusArea: "PENDIDIKAN" as any,
-        targetCity: primaryRegion,
-        targetProvince: prov,
-        estimatedBudget: "200000000",
-        status: "OPEN" as any,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-    }
-    return list;
-  }, [overview?.kpis?.openOpportunities, geoDist.topProgramRegions]);
-
-  const mapPartners = useMemo<PartnerItem[]>(() => {
-    const list: PartnerItem[] = [];
-    (geoDist.partnerCities || []).forEach((pc, idx) => {
-      const prov = mapCityOrProvince(pc.region) || "Jawa Barat";
-      for (let i = 0; i < Math.max(1, Math.min(pc.count, 5)); i++) {
-        list.push({
-          id: `admin-partner-${idx}-${i}`,
-          name: `Mitra NGO ${pc.region}${i > 0 ? ` #${i + 1}` : ""}`,
-          focusArea: "LINGKUNGAN" as any,
-          status: "ACTIVE",
-          city: pc.region,
-          province: prov,
-          createdAt: new Date().toISOString(),
-        });
-      }
-    });
-
-    (overview?.escalationQueue?.unverifiedPartners || []).forEach((up) => {
-      const prov = up.city ? (mapCityOrProvince(up.city) || "DKI Jakarta") : "DKI Jakarta";
-      list.push({
-        id: up.id,
-        name: up.name,
-        focusArea: up.focusArea as any,
-        status: up.status,
-        city: up.city,
-        province: prov,
-        createdAt: new Date(up.createdAt).toISOString(),
-      });
-    });
-
-    return list;
-  }, [geoDist.partnerCities, overview?.escalationQueue?.unverifiedPartners]);
-
   const strategicInsights = useMemo(() => {
     const topRegions = geoDist.topProgramRegions || [];
     const topRegionItem = topRegions[0] || null;
@@ -521,6 +444,52 @@ export function AdminOverviewView({
       },
     };
   }, [geoDist, overview?.focusAreaDistribution, overview?.kpis?.totalPartners, mapProvinceAggregates]);
+
+  const activeMapPrograms = useMemo<CompanyProgramItem[]>(() => {
+    if (fetchedPrograms.length > 0) return fetchedPrograms;
+    return (geoDist.topProgramRegions || []).map((r, i) => ({
+      id: `syn-prog-${i}`,
+      collaborationId: `collab-${i}`,
+      opportunityId: `opp-${i}`,
+      companyId: `comp-${i}`,
+      partnerId: `part-${i}`,
+      title: `Program Kemitraan CSR ${r.region}`,
+      description: `Inisiatif dampak sosial aktif di wilayah ${r.region}`,
+      focusArea: ((overview?.focusAreaDistribution?.[i % (overview?.focusAreaDistribution?.length || 1)]?.focusArea as any) || "LINGKUNGAN"),
+      budget: String(r.committedBudget || 50000000),
+      spentBudget: String(Math.round((r.committedBudget || 50000000) * 0.4)),
+      targetCity: r.region,
+      status: "IN_PROGRESS",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      stages: [],
+      activities: [],
+    }));
+  }, [fetchedPrograms, geoDist.topProgramRegions, overview?.focusAreaDistribution]);
+
+  const activeMapPartners = useMemo<PartnerItem[]>(() => {
+    if (fetchedPartners.length > 0) return fetchedPartners;
+    const queuePartners = (overview?.escalationQueue?.unverifiedPartners || []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      city: p.city || "Cirebon",
+      province: "Jawa Barat",
+      focusArea: (p.focusArea as any) || "LINGKUNGAN",
+      status: "ACTIVE",
+      isVerified: false,
+      createdAt: p.createdAt ? new Date(p.createdAt).toISOString() : new Date().toISOString(),
+    }));
+    if (queuePartners.length > 0) return queuePartners;
+    return (geoDist.partnerCities || []).map((pc, i) => ({
+      id: `syn-partner-${i}`,
+      name: `Mitra NGO ${pc.region}`,
+      city: pc.region,
+      focusArea: ((overview?.focusAreaDistribution?.[i % (overview?.focusAreaDistribution?.length || 1)]?.focusArea as any) || "LINGKUNGAN"),
+      status: "ACTIVE",
+      isVerified: true,
+      createdAt: new Date().toISOString(),
+    }));
+  }, [fetchedPartners, overview?.escalationQueue?.unverifiedPartners, geoDist.partnerCities, overview?.focusAreaDistribution]);
 
   if (isLoading && !overview) {
     return <AdminLoadingState message="Memuat ringkasan ekosistem dan metrik platform..." />;
@@ -579,7 +548,7 @@ export function AdminOverviewView({
           type="button"
           onClick={onRefresh}
           disabled={isLoading}
-          className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-2 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] self-start sm:self-auto"
+          className="px-3.5 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] self-start sm:self-auto"
         >
           <RefreshCw
             className={`w-4 h-4 ${isLoading ? "animate-spin text-emerald-700" : "text-slate-600"}`}
@@ -617,11 +586,11 @@ export function AdminOverviewView({
         />
       </div>
 
-      {/* Segmented Tab Navigation: Pilihan Modul Terpisah (Style Kapsul Rapi) */}
+      {/* Segmented Tab Navigation: Pilihan Modul Terpisah (Style Kapsul Rapi & Proporsional) */}
       <div
         role="tablist"
         aria-label="Pilihan modul ringkasan"
-        className="flex items-center gap-2.5 whitespace-nowrap overflow-x-auto max-w-full pb-1"
+        className="flex items-center gap-2 whitespace-nowrap overflow-x-auto max-w-full pb-1"
       >
         {[
           {
@@ -648,7 +617,7 @@ export function AdminOverviewView({
               role="tab"
               aria-selected={isSelected}
               onClick={() => setActiveSection(tab.id)}
-              className={`inline-flex items-center gap-2.5 shrink-0 whitespace-nowrap px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
+              className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
                 isSelected
                   ? "bg-[#181343] text-white border-[#181343] shadow-xs font-bold"
                   : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
@@ -657,10 +626,10 @@ export function AdminOverviewView({
               <span>{tab.label}</span>
               {tab.count !== undefined && (
                 <span
-                  className={`min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold tabular-nums flex items-center justify-center ${
+                  className={`min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold tabular-nums flex items-center justify-center ${
                     isSelected
                       ? "bg-white/20 text-white"
-                      : "bg-slate-100 text-slate-600"
+                      : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
                   }`}
                 >
                   {tab.count}
@@ -698,7 +667,7 @@ export function AdminOverviewView({
                 )}
               </div>
 
-              {/* Row 2: Sub-navigasi Tab Garis Bawah (Underline Tabs Bersih & Anti-Menumpuk) */}
+              {/* Row 2: Sub-navigasi Tab Garis Bawah (Underline Tabs Bersih, Tanpa Ikon & Tanpa Badge Duplikat) */}
               <div
                 role="tablist"
                 aria-label="Kategori antrean tinjauan"
@@ -708,24 +677,17 @@ export function AdminOverviewView({
                   {
                     id: "companies" as const,
                     label: "Perusahaan Sponsor",
-                    count: escalationQueue.unverifiedCompanies.length,
-                    icon: Building2,
                   },
                   {
                     id: "partners" as const,
                     label: "Mitra Pelaksana NGO",
-                    count: escalationQueue.unverifiedPartners.length,
-                    icon: HeartHandshake,
                   },
                   {
                     id: "issues" as const,
                     label: "Program Bermasalah",
-                    count: totalProgramIssues,
-                    icon: ShieldAlert,
                   },
                 ].map((item) => {
                   const isSelected = queueCategory === item.id;
-                  const Icon = item.icon;
                   return (
                     <button
                       key={item.id}
@@ -733,23 +695,13 @@ export function AdminOverviewView({
                       role="tab"
                       aria-selected={isSelected}
                       onClick={() => setQueueCategory(item.id)}
-                      className={`flex items-center gap-2 py-3 border-b-2 font-semibold transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none ${
+                      className={`py-2.5 border-b-2 font-semibold transition-all cursor-pointer whitespace-nowrap focus-visible:outline-none ${
                         isSelected
                           ? "border-[#181343] text-[#181343] font-bold"
                           : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
                       }`}
                     >
-                      <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-                      <span>{item.label}</span>
-                      <span
-                        className={`min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-bold tabular-nums flex items-center justify-center ${
-                          isSelected
-                            ? "bg-[#181343] text-white"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        {item.count}
-                      </span>
+                      {item.label}
                     </button>
                   );
                 })}
@@ -796,7 +748,7 @@ export function AdminOverviewView({
                         <button
                           type="button"
                           onClick={() => onNavigateMenu("companies")}
-                          className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] shrink-0 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                         >
                           Tinjau Perusahaan
                         </button>
@@ -845,7 +797,7 @@ export function AdminOverviewView({
                         <button
                           type="button"
                           onClick={() => onNavigateMenu("partners")}
-                          className="min-h-[44px] px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                          className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] shrink-0 transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                         >
                           Tinjau Mitra
                         </button>
@@ -902,7 +854,7 @@ export function AdminOverviewView({
                             <button
                               type="button"
                               onClick={() => onOpenProgramAudit(fp.id)}
-                              className="min-h-[44px] px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                             >
                               Audit Program
                             </button>
@@ -938,7 +890,7 @@ export function AdminOverviewView({
                           <button
                             type="button"
                             onClick={() => onOpenProgramAudit(lr.id)}
-                            className="min-h-[44px] px-3 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors shrink-0 self-end sm:self-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] transition-colors shrink-0 self-end sm:self-center shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                           >
                             Audit Program
                           </button>
@@ -970,7 +922,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigateMenu("companies")}
-                  className="w-full min-h-[44px] p-3.5 rounded-xl border border-slate-200 hover:border-[#181343]/40 hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                  className="w-full p-3.5 rounded-xl border border-slate-200 hover:border-[#181343]/40 hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                 >
                   <span className="flex items-center gap-3 min-w-0">
                     <Building2 className="w-5 h-5 text-[#181343] shrink-0" aria-hidden="true" />
@@ -991,7 +943,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigateMenu("partners")}
-                  className="w-full min-h-[44px] p-3.5 rounded-xl border border-slate-200 hover:border-[#181343]/40 hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                  className="w-full p-3.5 rounded-xl border border-slate-200 hover:border-[#181343]/40 hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                 >
                   <span className="flex items-center gap-3 min-w-0">
                     <HeartHandshake className="w-5 h-5 text-[#181343] shrink-0" aria-hidden="true" />
@@ -1012,7 +964,7 @@ export function AdminOverviewView({
                 <button
                   type="button"
                   onClick={() => onNavigateMenu("users")}
-                  className="w-full min-h-[44px] p-3.5 rounded-xl border border-slate-200 hover:border-[#181343]/40 hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+                  className="w-full p-3.5 rounded-xl border border-slate-200 hover:border-[#181343]/40 hover:bg-slate-50 flex items-center justify-between gap-3 text-left transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
                 >
                   <span className="flex items-center gap-3 min-w-0">
                     <Users className="w-5 h-5 text-[#181343] shrink-0" aria-hidden="true" />
@@ -1093,7 +1045,7 @@ export function AdminOverviewView({
                     role="tab"
                     aria-selected={isSelected}
                     onClick={() => setGrowthCategory(cat.id as typeof growthCategory)}
-                    className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
+                    className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343] ${
                       isSelected
                         ? "bg-[#181343] text-white border-[#181343] shadow-2xs font-bold"
                         : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300"
@@ -1477,188 +1429,24 @@ export function AdminOverviewView({
             </div>
           </div>
 
-          {/* Interactive Indonesia Map Section */}
-          <section
-            aria-label="Peta Interaktif Sebaran Wilayah Indonesia"
-            className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-4"
-          >
-            {/* Map Header & Layer Selector */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0">
-                  <Compass className="w-5 h-5" aria-hidden="true" />
-                </div>
-                <div>
-                  <h3 className="text-sm sm:text-base font-bold text-[#181343]">
-                    Peta Interaktif Sebaran Ekosistem CSR Indonesia
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Klik pin pada peta untuk meninjau rincian program, mitra, dan komitmen pagu di masing-masing provinsi.
-                  </p>
-                </div>
-              </div>
-
-              {/* Status Badge */}
-              <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200/80 px-3.5 py-1.5 rounded-xl">
-                <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                <span>{activeProvincePins.length} Provinsi Aktif ({strategicInsights.coverage.coveragePct}% Nasional)</span>
-              </div>
-            </div>
-
-            {/* Map Canvas and Selected Province Drawer */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-              {/* Real Interactive Leaflet Map Container */}
-              <div
-                className={`w-full transition-all ${
-                  selectedProvinceData ? "lg:col-span-8" : "lg:col-span-12"
-                }`}
-              >
-                <IndonesiaRealLeafletMap
-                  programs={mapPrograms}
-                  opportunities={mapOpportunities}
-                  partners={mapPartners}
-                  selectedProvince={selectedMapProvince}
-                  onSelectProvince={(prov) => setSelectedMapProvince(prov)}
-                  onNavigateToProgramDetail={(prog) => {
-                    if (onOpenProgramAudit) {
-                      onOpenProgramAudit(prog.id);
-                    } else {
-                      onNavigateMenu("programs");
-                    }
-                  }}
-                  onNavigateToOpportunityDetail={() => onNavigateMenu("moderation")}
-                  onOpenCreateOpportunity={() => onNavigateMenu("moderation")}
-                />
-              </div>
-
-              {/* Selected Province Detail Drawer */}
-              {selectedProvinceData && (
-                <div className="lg:col-span-4 bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 space-y-4 transition-all shadow-xs">
-                  <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">
-                        {selectedProvinceData.island}
-                      </span>
-                      <h4 className="text-base font-extrabold text-[#181343] mt-1">
-                        {selectedProvinceData.province}
-                      </h4>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMapProvince(null)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors"
-                      title="Tutup rincian wilayah"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {/* Metrics Grid */}
-                  <div className="grid grid-cols-2 gap-2.5 text-xs">
-                    <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-1">
-                      <span className="text-slate-500 text-[11px] font-medium block">
-                        Program CSR
-                      </span>
-                      <span className="text-sm font-extrabold text-[#181343] block">
-                        {selectedProvinceData.programsCount} Inisiatif
-                      </span>
-                      {selectedProvinceData.committedBudget > 0 && (
-                        <span className="text-[10px] text-emerald-700 font-semibold block">
-                          Pagu: {formatCompactRupiah(selectedProvinceData.committedBudget)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-1">
-                      <span className="text-slate-500 text-[11px] font-medium block">
-                        Mitra Pelaksana
-                      </span>
-                      <span className="text-sm font-extrabold text-emerald-800 block">
-                        {selectedProvinceData.partnersCount} Mitra NGO
-                      </span>
-                      <span className="text-[10px] text-slate-500 block">
-                        Siap mobilisasi
-                      </span>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-1">
-                      <span className="text-slate-500 text-[11px] font-medium block">
-                        Perusahaan
-                      </span>
-                      <span className="text-sm font-extrabold text-[#181343] block">
-                        {selectedProvinceData.companiesCount} Sponsor
-                      </span>
-                      <span className="text-[10px] text-slate-500 block">
-                        Pemberi dana
-                      </span>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-white border border-slate-200/80 space-y-1">
-                      <span className="text-slate-500 text-[11px] font-medium block">
-                        Total Ekosistem
-                      </span>
-                      <span className="text-sm font-extrabold text-indigo-900 block">
-                        {selectedProvinceData.totalEntities} Entitas
-                      </span>
-                      <span className="text-[10px] text-slate-500 block">
-                        Tercatat di sistem
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Registered Cities in this Province */}
-                  <div className="space-y-1.5 pt-1">
-                    <span className="text-xs font-bold text-[#181343] block">
-                      Kota &amp; Kabupaten Terdata:
-                    </span>
-                    {(!selectedProvinceData.citiesList || selectedProvinceData.citiesList.length === 0) ? (
-                      <p className="text-xs text-slate-500">
-                        Tidak ada spesifikasi kota bawahan.
-                      </p>
-                    ) : (
-                      <div className="flex flex-wrap gap-1.5">
-                        {(selectedProvinceData.citiesList || []).map((city) => (
-                          <span
-                            key={city}
-                            className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700"
-                          >
-                            {city}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick Action Navigation */}
-                  <div className="pt-2 flex flex-col gap-2">
-                    {selectedProvinceData.programsCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => onNavigateMenu("programs")}
-                        className="w-full py-2 px-3 rounded-xl bg-[#181343] hover:bg-[#181343]/90 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-xs"
-                      >
-                        <span>Tinjau Pengawasan Program</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    {selectedProvinceData.partnersCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => onNavigateMenu("partners")}
-                        className="w-full py-2 px-3 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-xs"
-                      >
-                        <span>Kelola Mitra di Wilayah Ini</span>
-                      </button>
-                    )}
-                  </div>
-
-                  <p className="text-[11px] text-slate-500 pt-2 border-t border-slate-200">
-                    Wilayah ini aktif berpartisipasi dalam program dampak sosial platform Sipena.
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
+          {/* Peta Interaktif Geografis Riil (Seragam dengan Halaman MANAGEMENT) */}
+          <IndonesiaBeneficiaryMap
+            programs={activeMapPrograms}
+            opportunities={fetchedOpportunities}
+            partners={activeMapPartners}
+            selectedSdgFilter={mapSdgFilter}
+            onSelectSdgFilter={(sdg) => setMapSdgFilter(sdg)}
+            selectedProvince={mapSelectedProvince}
+            onSelectProvince={(prov) => setMapSelectedProvince(prov)}
+            onNavigateToProgramDetail={(prog) => {
+              if (onOpenProgramAudit && prog?.id && !prog.id.startsWith("syn-")) {
+                onOpenProgramAudit(prog.id);
+              } else {
+                onNavigateMenu("programs");
+              }
+            }}
+            onNavigateToOpportunityDetail={() => onNavigateMenu("moderation")}
+          />
 
           {/* Ringkasan Indikator Kunci Sebaran (Faktual, Padat Informasi, Bebas AI-Slop) */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

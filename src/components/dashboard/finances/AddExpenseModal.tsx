@@ -3,13 +3,12 @@
 import React, { useState } from "react";
 import {
   X,
-  Receipt,
+  ReceiptText,
   Upload,
   Calendar,
   AlertCircle,
   Trash2,
   Image as ImageIcon,
-  DollarSign,
   Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import {
   ProgramDisbursementItem,
   ProgramExpenseItem,
 } from "./types";
-import { formatRupiah } from "../company/helpers";
+import { formatRupiah, formatCurrencyInput, parseCurrencyInput } from "../company/helpers";
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -72,7 +71,7 @@ export function AddExpenseModal({
 
   const selectedTranche = trancheAllocations.find((t) => t.id === disbursementId);
 
-  const currentAmtNum = parseFloat(amount) || 0;
+  const currentAmtNum = parseCurrencyInput(amount);
   const isOverGeneralBalance = currentAmtNum > partnerBalance;
   const isOverTranche = selectedTranche ? currentAmtNum > selectedTranche.remaining : false;
 
@@ -118,7 +117,7 @@ export function AddExpenseModal({
     e.preventDefault();
     setErrorMessage(null);
 
-    const amt = parseFloat(amount);
+    const amt = parseCurrencyInput(amount);
     if (isNaN(amt) || amt <= 0) {
       setErrorMessage("Nominal pengeluaran harus lebih besar dari 0");
       return;
@@ -196,7 +195,7 @@ export function AddExpenseModal({
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-teal-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-500/20">
-              <Receipt className="w-5 h-5" />
+              <ReceiptText className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-extrabold text-slate-900">
@@ -289,11 +288,15 @@ export function AddExpenseModal({
                   Rp
                 </span>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="off"
                   required
-                  min="1"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  value={formatCurrencyInput(amount)}
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/[^\d]/g, "");
+                    setAmount(clean);
+                  }}
                   placeholder="0"
                   className={`w-full pl-9 pr-3 py-2.5 rounded-xl border text-xs font-bold transition-all focus:outline-none focus:ring-2 ${
                     isOverGeneralBalance || isOverTranche
@@ -349,7 +352,7 @@ export function AddExpenseModal({
                 <option value="">-- Umum / Gabungan Termin --</option>
                 {trancheAllocations.map((t) => (
                   <option key={t.id} value={t.id}>
-                    {t.trancheName} — Sisa: {formatRupiah(t.remaining)} (Pagu: {formatRupiah(t.amount)})
+                    {t.trancheName} - Sisa: {formatRupiah(t.remaining)} (Pagu: {formatRupiah(t.amount)})
                   </option>
                 ))}
               </select>
@@ -417,42 +420,20 @@ export function AddExpenseModal({
                 </button>
               </div>
             ) : (
-              <div className="space-y-2">
-                <label className="border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-1.5 hover:border-teal-500 hover:bg-teal-50/20 cursor-pointer transition-all">
-                  <Upload className="w-5 h-5 text-teal-600" />
-                  <span className="text-xs font-bold text-slate-700">
-                    {isUploading ? "Mengunggah..." : "Unggah Foto Nota / Kwitansi"}
-                  </span>
-                  <span className="text-[11px] text-slate-400">PNG, JPG, JPEG (Maks. 5MB)</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                    className="hidden"
-                  />
-                </label>
-
-                {/* Option to paste direct image URL */}
-                <div className="flex items-center gap-2">
-                  <input
-                    type="url"
-                    placeholder="Atau tempel URL gambar nota/kwitansi..."
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        const val = (e.target as HTMLInputElement).value.trim();
-                        if (val) setReceiptUrl(val);
-                      }
-                    }}
-                    onBlur={(e) => {
-                      const val = e.target.value.trim();
-                      if (val) setReceiptUrl(val);
-                    }}
-                    className="flex-1 px-3 py-1.5 text-xs rounded-xl border border-slate-200 font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
-                  />
-                </div>
-              </div>
+              <label className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 hover:border-teal-500 hover:bg-teal-50/20 cursor-pointer transition-all">
+                <Upload className="w-5 h-5 text-teal-600" />
+                <span className="text-xs font-bold text-slate-700">
+                  {isUploading ? "Mengunggah..." : "Unggah Foto Nota / Kwitansi"}
+                </span>
+                <span className="text-[11px] text-slate-400">PNG, JPG, JPEG (Maks. 5MB)</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  disabled={isUploading}
+                  className="hidden"
+                />
+              </label>
             )}
           </div>
 

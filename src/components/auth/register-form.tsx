@@ -92,7 +92,7 @@ export function RegisterForm() {
         </div>
       )}
 
-      {/* Info notice — default role */}
+      {/* Info notice - default role */}
       <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F0FAF0] border border-[#C8E6C9]/60 text-[#2E7D32] text-[12px] leading-relaxed">
         <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#43A047]" />
         <span>

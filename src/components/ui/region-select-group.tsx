@@ -26,7 +26,7 @@ export interface RegionSelectGroupProps {
 }
 
 /**
- * RegionSelectGroup — Komponen Reusable Pemilihan Wilayah Administratif Indonesia (Provinsi & Kota/Kabupaten)
+ * RegionSelectGroup - Komponen Reusable Pemilihan Wilayah Administratif Indonesia (Provinsi & Kota/Kabupaten)
  * 
  * Karakteristik:
  * 1. Urutan resmi: Provinsi terlebih dahulu, kemudian Kota/Kabupaten.

@@ -462,7 +462,7 @@ export function ChatWindow({
 
       <form
         onSubmit={handleSend}
-        className="p-3 bg-white border-t border-[#E8E8EA] flex items-end gap-2 shrink-0"
+        className="p-3 bg-white border-t border-[#E8E8EA] flex items-center gap-2.5 shrink-0"
       >
         <input
           type="file"
@@ -478,7 +478,7 @@ export function ChatWindow({
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading || isSending}
           title="Lampirkan Dokumen atau Gambar"
-          className="p-2.5 rounded-xl border border-[#E8E8EA] text-slate-500 hover:text-[#181343] hover:bg-slate-50 hover:border-slate-300 transition-colors disabled:opacity-50 shrink-0 cursor-pointer"
+          className="w-10 h-10 rounded-full border border-[#E8E8EA] text-slate-500 hover:text-[#181343] hover:bg-slate-50 hover:border-slate-300 transition-colors disabled:opacity-50 shrink-0 cursor-pointer flex items-center justify-center"
         >
           {isUploading ? (
             <Loader2 className="w-4 h-4 animate-spin text-[#009E75]" />
@@ -488,7 +488,7 @@ export function ChatWindow({
         </button>
 
         {/* Input Textarea Nyaman */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex items-center">
           <textarea
             ref={textareaRef}
             value={inputText}
@@ -496,24 +496,23 @@ export function ChatWindow({
             onKeyDown={handleKeyDown}
             rows={1}
             placeholder="Tulis pesan (Enter untuk kirim, Shift+Enter untuk baris baru)..."
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E8EA] text-xs text-[#181343] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#009E75]/20 focus:border-[#009E75] transition-all resize-none max-h-32 leading-relaxed bg-[#F9F9FB]"
+            className="w-full h-10 min-h-[40px] max-h-32 px-4 py-2.5 rounded-full border border-[#E8E8EA] text-xs text-[#181343] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#009E75]/20 focus:border-[#009E75] transition-all resize-none leading-normal bg-[#F9F9FB] flex items-center"
           />
         </div>
 
         {/* Tombol Kirim Pesan */}
-        <Button
+        <button
           type="submit"
-          variant="primary"
-          size="sm"
           disabled={(!inputText.trim() && !attachment) || isSending || isUploading}
-          className="bg-[#009E75] hover:bg-[#008764] text-white rounded-xl h-10 px-4 shrink-0 shadow-2xs disabled:opacity-40 cursor-pointer"
+          title="Kirim Pesan"
+          className="w-10 h-10 rounded-full bg-[#181343] hover:bg-[#25205c] text-white disabled:opacity-40 disabled:hover:bg-[#181343] disabled:cursor-not-allowed transition-all shrink-0 shadow-2xs cursor-pointer flex items-center justify-center"
         >
           {isSending ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin text-white" />
           ) : (
             <Send className="w-4 h-4" />
           )}
-        </Button>
+        </button>
       </form>
     </div>
   );

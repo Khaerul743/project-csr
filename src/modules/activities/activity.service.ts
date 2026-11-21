@@ -1,5 +1,6 @@
 import { ActivityRepository } from "./activity.repository";
 import { ProgramRepository } from "../programs/program.repository";
+import { FinanceRepository } from "../finances/finance.repository";
 import {
   CreateActivityDTO,
   ReviewActivityDTO,
@@ -17,7 +18,8 @@ import { JwtUserPayload } from "@/common/jwt/jwt.interface";
 export class ActivityService {
   constructor(
     private readonly activityRepository: ActivityRepository,
-    private readonly programRepository: ProgramRepository
+    private readonly programRepository: ProgramRepository,
+    private readonly financeRepository?: FinanceRepository
   ) {}
 
   async getActivitiesByProgramId(
@@ -78,6 +80,25 @@ export class ActivityService {
 
     if (isNaN(activityDate.getTime())) {
       throw new BadRequestError("Format tanggal kegiatan tidak valid");
+    }
+
+    // STRICT GUARDRAIL: Kewajiban Pencairan Dana Termin Awal Sebelum Pelaksanaan Tahapan
+    if (this.financeRepository) {
+      const summary = await this.financeRepository.getFinancialSummary(programId);
+      if (summary.totalConfirmedReceived <= 0) {
+        throw new BadRequestError(
+          "Pelaksanaan tahapan dan pelaporan kegiatan lapangan belum dapat dimulai karena perusahaan belum mencairkan dana termin awal (Termin 1) atau dana belum dikonfirmasi masuk ke rekening kas mitra. Pastikan pencairan dana termin telah diproses terlebih dahulu."
+        );
+      }
+
+      // Validasi: Dana terpakai per sesi kegiatan tidak boleh melampaui sisa saldo kas aktif yang dikelola mitra
+      if (fundsSpentNum > 0 && fundsSpentNum > summary.remainingPartnerBalance) {
+        const formattedSpent = "Rp " + Math.round(fundsSpentNum).toLocaleString("id-ID");
+        const formattedBalance = "Rp " + Math.round(summary.remainingPartnerBalance).toLocaleString("id-ID");
+        throw new BadRequestError(
+          `Nominal dana terpakai pada sesi ini (${formattedSpent}) melebihi sisa saldo kas yang dikelola mitra (${formattedBalance}). Silakan sesuaikan nominal penggunaan dana atau tunggu pencairan termin berikutnya.`
+        );
+      }
     }
 
     const created = await this.activityRepository.create({

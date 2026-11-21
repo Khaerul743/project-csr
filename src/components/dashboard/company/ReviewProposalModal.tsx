@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   X,
   FileText,
-  DollarSign,
   Calendar,
   Users,
   Building2,

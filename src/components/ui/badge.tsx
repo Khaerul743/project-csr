@@ -43,7 +43,7 @@ export function Badge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-semibold rounded-full border ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`inline-flex items-center gap-1.5 font-semibold rounded-full border whitespace-nowrap ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       {...props}
     >
       {hasDot && (
