@@ -9,3 +9,4 @@ export * from "./app-logo";
 export * from "./searchable-select";
 export * from "./soft-data-grid";
 export * from "./region-select-group";
+export * from "./skeleton";

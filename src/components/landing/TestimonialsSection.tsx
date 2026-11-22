@@ -83,7 +83,7 @@ export function TestimonialsSection() {
   return (
     <section
       id="testimoni"
-      className="py-20 lg:py-28 bg-[#FFFFFF] border-t border-[#E5E7EB] relative overflow-hidden"
+      className="pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#FFFFFF] border-t border-[#E5E7EB] relative overflow-hidden scroll-mt-[76px]"
     >
       {/* Background architectural pattern */}
       <div

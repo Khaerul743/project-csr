@@ -48,6 +48,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardGridSkeleton, TableSkeleton } from "@/components/ui/skeleton";
 import { DashboardHeader, BreadcrumbItem } from "../DashboardHeader";
 import { PartnerSidebar } from "./PartnerSidebar";
 import { SubmitProposalPageView } from "./SubmitProposalPageView";
@@ -2107,10 +2108,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
 
                   {/* Opportunities Grid: Responsive, Proporsional & Hierarki Rapi */}
                   {isLoadingOpportunities ? (
-                    <div className="py-20 text-center text-slate-400 space-y-2">
-                      <RefreshCw className="w-8 h-8 mx-auto animate-spin text-teal-600" />
-                      <p className="text-xs font-semibold">Memuat katalog peluang CSR...</p>
-                    </div>
+                    <CardGridSkeleton count={3} />
                   ) : filteredOpportunities.length === 0 ? (
                     <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-[#E8E8EA] p-8 space-y-3">
                       <div className="w-12 h-12 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] flex items-center justify-center text-[#787680] mx-auto">
@@ -2193,10 +2191,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                   </div>
 
                   {isLoadingInvitations ? (
-                    <div className="py-20 text-center text-slate-400 space-y-2">
-                      <RefreshCw className="w-8 h-8 mx-auto animate-spin text-teal-600" />
-                      <p className="text-xs">Memuat daftar undangan...</p>
-                    </div>
+                    <CardGridSkeleton count={2} />
                   ) : invitations.length === 0 ? (
                     <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-3">
                       <Inbox className="w-12 h-12 text-slate-300 mx-auto" />
@@ -2455,10 +2450,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
 
                     {/* Proposals List */}
                     {isLoadingProposals ? (
-                      <div className="py-20 text-center text-slate-400 space-y-2">
-                        <RefreshCw className="w-8 h-8 mx-auto animate-spin text-teal-600" />
-                        <p className="text-xs">Memuat proposal Anda...</p>
-                      </div>
+                      <CardGridSkeleton count={3} />
                     ) : filteredProposals.length === 0 ? (
                       <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-slate-200 p-8 space-y-3">
                         <FileText className="w-12 h-12 text-slate-300 mx-auto" />
@@ -2682,10 +2674,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
 
                     {/* Daftar Kontrak Kolaborasi */}
                     {isLoadingCollaborations ? (
-                      <div className="py-20 text-center bg-white rounded-2xl border border-[#E5E7EB] p-8 space-y-3 shadow-xs">
-                        <RefreshCw className="w-5 h-5 text-[#009E75] animate-spin mx-auto" />
-                        <p className="text-xs text-slate-500">Memuat data kontrak kolaborasi...</p>
-                      </div>
+                      <CardGridSkeleton count={3} />
                     ) : filteredCollaborations.length === 0 ? (
                       <div className="py-16 text-center bg-white rounded-2xl border border-[#E5E7EB] p-8 space-y-4 shadow-xs">
                         <div className="w-12 h-12 rounded-xl bg-slate-50 text-[#181343] border border-slate-200/80 flex items-center justify-center mx-auto">
@@ -3082,10 +3071,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
 
             {/* 3. Sederhanakan Kartu Program: Fokus pada Monitoring Aktivitas & Bukti Lapangan */}
             {isLoadingPrograms ? (
-              <div className="p-12 text-center text-xs text-slate-400 bg-white rounded-3xl border border-slate-100">
-                <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-teal-600" />
-                Memuat data program pelaksanaan...
-              </div>
+              <CardGridSkeleton count={3} />
             ) : filteredPrograms.length === 0 ? (
               <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-2xs space-y-3">
                 <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto">

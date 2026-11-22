@@ -45,6 +45,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardGridSkeleton, TableSkeleton } from "@/components/ui/skeleton";
 import { csrFocusAreaEnum, CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { opportunityStatusEnum, OpportunityStatus } from "@/db/schema/opportunities";
 import { InviteMemberModal } from "../InviteMemberModal";
@@ -1459,10 +1460,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* Proposals Cards List (Responsive Grid) */}
                 {isLoadingProposals ? (
-                  <div className="py-20 text-center text-slate-400 space-y-2 bg-white rounded-3xl border border-[#E8E8EA] w-full">
-                    <RefreshCw className="w-8 h-8 mx-auto animate-spin text-emerald-600" />
-                    <p className="text-xs font-medium text-slate-600">Memuat daftar proposal...</p>
-                  </div>
+                  <CardGridSkeleton count={3} />
                 ) : filteredProposals.length === 0 ? (
                   <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-[#C8C5D0] p-8 space-y-3 w-full">
                     <div className="w-12 h-12 rounded-2xl bg-[#181343]/5 text-[#181343] flex items-center justify-center mx-auto">
@@ -1746,10 +1744,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* List Content */}
                 {isLoadingCollaborations ? (
-                  <div className="py-20 text-center bg-white rounded-2xl border border-[#E8E8EA] p-8 space-y-3">
-                    <RefreshCw className="w-6 h-6 text-[#181343] animate-spin mx-auto" />
-                    <p className="text-xs text-[#787680]">Memuat data kerja sama &amp; MoU...</p>
-                  </div>
+                  <CardGridSkeleton count={3} />
                 ) : filteredCollaborations.length === 0 ? (
                   <div className="py-16 text-center bg-white rounded-2xl border border-dashed border-[#E8E8EA] p-8 space-y-4">
                     <div className="w-14 h-14 rounded-2xl bg-[#F9F9FB] text-[#181343] flex items-center justify-center mx-auto border border-[#E8E8EA]">
@@ -2131,10 +2126,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* 3. Sederhanakan Kartu Program: Fokus pada Monitoring Aktivitas & Bukti */}
                 {isLoadingPrograms ? (
-                  <div className="p-12 text-center text-xs text-slate-600 bg-white rounded-3xl border border-[#E5E7EB]">
-                    <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600" />
-                    Memuat data pelaksanaan program...
-                  </div>
+                  <CardGridSkeleton count={3} />
                 ) : filteredPrograms.length === 0 ? (
                   <div className="p-12 text-center bg-white rounded-3xl border border-[#E5E7EB] shadow-2xs space-y-3">
                     <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">

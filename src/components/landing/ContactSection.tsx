@@ -53,25 +53,24 @@ export function ContactSection() {
   return (
     <section
       id="kontak"
-      className="py-20 lg:py-28 bg-[#F9F9FB] border-t border-[#E5E7EB] relative overflow-hidden"
+      className="pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#F9F9FB] border-t border-[#E5E7EB] relative overflow-hidden scroll-mt-[76px]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative w-full">
         {/* Header */}
         <ScrollReveal animation="fade-up" delay={50}>
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#181343]/5 border border-[#181343]/10 text-[#181343] text-xs font-semibold mb-3">
-              <Mail className="w-3.5 h-3.5 text-emerald-600" />
+          <div className="text-center max-w-3xl mx-auto mb-6 sm:mb-8">
+            <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 border border-[#181343]/10 text-[#181343] text-xs font-semibold mb-3.5 sm:mb-4">
               <span>Kemitraan &amp; Konsultasi Tata Kelola</span>
             </div>
             <h2
-              className="text-2xl sm:text-4xl font-extrabold text-[#181343] tracking-tight leading-tight"
+              className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-[#181343] tracking-tight leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Mulai Transformasi Dampak CSR{" "}
-              <span className="text-emerald-600">Institusi Anda</span>
+              Mulai Transformasi Dampak CSR <br className="hidden sm:block" />
+              <span className="text-emerald-600 whitespace-nowrap">Organisasi Anda</span>
             </h2>
-            <p className="mt-3 text-base text-slate-600 leading-relaxed">
-              Apakah Anda mewakili korporasi, yayasan pelaksana program, atau lembaga publik? Diskusikan kebutuhan kolaborasi, integrasi sistem, atau konsultasi akuntabilitas program Anda bersama tim SIPENA.
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">
+              Diskusikan kebutuhan kolaborasi, integrasi sistem, atau konsultasi akuntabilitas program CSR organisasi Anda bersama tim sekretariat SIPENA.
             </p>
           </div>
         </ScrollReveal>
@@ -134,7 +133,7 @@ export function ContactSection() {
                       Jam Layanan Operasional
                     </h4>
                     <p className="text-slate-200 text-xs sm:text-sm">
-                      Senin &ndash; Jumat, 08.30 &ndash; 17.30 WIB
+                      Senin - Jumat, 08.30 - 17.30 WIB
                     </p>
                   </div>
                 </div>
@@ -187,7 +186,7 @@ export function ContactSection() {
                     Pesan Kemitraan Berhasil Dikirim
                   </h3>
                   <p className="text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
-                    Terima kasih atas inisiatif kolaborasi Anda. Tim Sekretariat Kemitraan SIPENA akan meninjau kebutuhan institusi Anda dan menghubungi melalui kontak yang dicantumkan dalam 1x24 jam kerja.
+                    Terima kasih atas inisiatif kolaborasi Anda. Tim Sekretariat Kemitraan SIPENA akan meninjau kebutuhan organisasi Anda dan menghubungi melalui kontak yang dicantumkan dalam 1x24 jam kerja.
                   </p>
                   <div className="pt-4">
                     <Button
@@ -210,7 +209,7 @@ export function ContactSection() {
                       Formulir Kemitraan &amp; Penjajakan CSR
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">
-                      Lengkapi rincian profil institusi Anda di bawah ini untuk memulai dialog resmi.
+                      Lengkapi rincian profil organisasi Anda di bawah ini untuk memulai dialog resmi.
                     </p>
                   </div>
 
@@ -233,7 +232,7 @@ export function ContactSection() {
 
                     <div>
                       <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                        Email Institusi Resmi <span className="text-rose-500">*</span>
+                        Email Organisasi Resmi <span className="text-rose-500">*</span>
                       </label>
                       <input
                         type="email"
@@ -266,7 +265,7 @@ export function ContactSection() {
 
                     <div>
                       <label className="block text-xs font-bold text-[#181343] uppercase tracking-wider mb-1.5">
-                        Tipe Institusi <span className="text-rose-500">*</span>
+                        Tipe Organisasi <span className="text-rose-500">*</span>
                       </label>
                       <select
                         value={formData.institutionType}

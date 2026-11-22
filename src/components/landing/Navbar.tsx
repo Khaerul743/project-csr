@@ -59,10 +59,14 @@ export function LandingNavbar() {
     const id = href.replace("#", "");
     const element = document.getElementById(id);
     if (element) {
-      const yOffset = -76;
+      const headerEl = document.querySelector("header");
+      const navHeight = headerEl ? headerEl.offsetHeight : 80;
+      // Subtract (navHeight - 4) to ensure a 4px overlap into the target section
+      // This completely guarantees that NO sliver of white background from the previous section shows!
+      const yOffset = -(navHeight - 4);
       const y =
         element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
+      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
     }
     setActiveSection(id);
     setIsMobileMenuOpen(false);
@@ -70,18 +74,17 @@ export function LandingNavbar() {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
-          ? "bg-[#FFFFFF]/95 backdrop-blur-md shadow-xs border-b border-[#E5E7EB]"
-          : "bg-[#FFFFFF] border-b border-[#E5E7EB]"
-      }`}
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled
+        ? "bg-[#FFFFFF]/95 backdrop-blur-md shadow-xs border-b border-[#E5E7EB]"
+        : "bg-[#FFFFFF] border-b border-[#E5E7EB]"
+        }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 h-20 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <Link
           href="#beranda"
           onClick={(e) => handleNavClick(e, "#beranda")}
-          className="flex items-center gap-3 select-none group focus:outline-hidden"
+          className="flex items-center gap-3 select-none group focus:outline-hidden shrink-0"
         >
           <div className="relative w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105">
             <Image
@@ -105,14 +108,14 @@ export function LandingNavbar() {
                 Tata Kelola CSR
               </span>
             </div>
-            <span className="text-[11px] font-medium text-slate-600 block tracking-tight">
+            <span className="text-[11px] sm:text-xs font-medium text-slate-600 block tracking-tight whitespace-nowrap">
               Sistem Informasi Pengelolaan dan Evaluasi Nilai Aksi CSR
             </span>
           </div>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+        <nav className="hidden lg:flex items-center gap-1 xl:gap-2.5 shrink-0">
           {NAV_ITEMS.map((item) => {
             const id = item.href.replace("#", "");
             const isActive = activeSection === id;
@@ -122,11 +125,10 @@ export function LandingNavbar() {
                 key={item.href}
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`relative px-3.5 py-2 rounded-lg text-[13px] transition-all duration-200 ${
-                  isActive
-                    ? "text-emerald-700 font-bold"
-                    : "text-slate-600 hover:text-[#181343] font-medium hover:bg-[#F4F4F6]"
-                }`}
+                className={`relative px-3.5 py-2 rounded-lg text-sm whitespace-nowrap shrink-0 transition-all duration-200 ${isActive
+                  ? "text-emerald-700 font-bold"
+                  : "text-slate-600 hover:text-[#181343] font-medium hover:bg-[#F4F4F6]"
+                  }`}
               >
                 {item.label}
                 {isActive && (
@@ -138,12 +140,12 @@ export function LandingNavbar() {
         </nav>
 
         {/* Desktop CTA Action Buttons */}
-        <div className="hidden sm:flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-3 shrink-0 whitespace-nowrap">
           <Link href="/login">
             <Button
               variant="ghost"
-              size="sm"
-              className="text-xs font-bold text-[#181343] hover:bg-[#F4F4F6] px-3.5"
+              size="md"
+              className="text-sm font-semibold text-[#181343] hover:bg-[#F4F4F6] px-4 whitespace-nowrap"
             >
               Masuk
             </Button>
@@ -151,9 +153,9 @@ export function LandingNavbar() {
           <Link href="/register">
             <Button
               variant="accent"
-              size="sm"
-              rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-              className="text-xs font-bold rounded-xl shadow-xs px-4"
+              size="md"
+              rightIcon={<ArrowRight className="w-4 h-4" />}
+              className="text-sm font-semibold rounded-xl shadow-xs px-5 whitespace-nowrap"
             >
               Mulai Kolaborasi
             </Button>
@@ -195,11 +197,10 @@ export function LandingNavbar() {
                   key={item.href}
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.href)}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-between ${
-                    isActive
-                      ? "text-[#181343] font-bold bg-[#181343]/8"
-                      : "text-slate-600 hover:bg-[#F4F4F6] hover:text-[#181343]"
-                  }`}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-between ${isActive
+                    ? "text-[#181343] font-bold bg-[#181343]/8"
+                    : "text-slate-600 hover:bg-[#F4F4F6] hover:text-[#181343]"
+                    }`}
                 >
                   <span>{item.label}</span>
                   {isActive && (
@@ -221,7 +222,7 @@ export function LandingNavbar() {
                 size="md"
                 className="w-full justify-center text-xs font-bold"
               >
-                Masuk ke Akun Institusi
+                Masuk ke Akun Organisasi
               </Button>
             </Link>
             <Link
@@ -235,7 +236,7 @@ export function LandingNavbar() {
                 rightIcon={<ArrowRight className="w-4 h-4" />}
                 className="w-full justify-center text-xs font-bold"
               >
-                Daftar Institusi Baru
+                Daftar Organisasi Baru
               </Button>
             </Link>
           </div>

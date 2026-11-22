@@ -28,7 +28,7 @@ export function HeroSection() {
   return (
     <section
       id="beranda"
-      className="relative overflow-hidden pt-8 pb-12 lg:pt-12 lg:pb-16 bg-[#FFFFFF]"
+      className="relative overflow-hidden min-h-[calc(100vh-5rem)] lg:min-h-[calc(100dvh-5rem)] flex flex-col justify-center py-10 lg:py-16 bg-[#FFFFFF]"
     >
       {/* Subtle Background Pattern */}
       <div
@@ -41,7 +41,7 @@ export function HeroSection() {
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* ========================================================================= */}
         {/* SIDE-BY-SIDE TWO COLUMN LAYOUT: Text Column (Left) + Video Column (Right) */}
         {/* ========================================================================= */}

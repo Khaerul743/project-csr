@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardGridSkeleton } from "@/components/ui/skeleton";
 import { csrFocusAreaEnum } from "@/db/schema/csr-focus-areas";
 import { PartnerItem } from "../types";
 import { FOCUS_AREA_CONFIG } from "../helpers";
@@ -343,10 +344,7 @@ export function PartnerCurationView({
 
       {/* 3. Partner Grid */}
       {isLoading ? (
-        <div className="py-20 text-center text-xs text-[#787680] space-y-3 bg-white rounded-3xl border border-[#E8E8EA]">
-          <div className="w-8 h-8 border-2 border-[#181343] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="font-medium text-slate-600">Memuat direktori mitra pelaksana...</p>
-        </div>
+        <CardGridSkeleton count={3} />
       ) : filteredPartners.length === 0 ? (
         /* Empty State */
         <div className="py-16 px-6 rounded-3xl bg-white border border-dashed border-[#C8C5D0] text-center space-y-3">
@@ -388,7 +386,7 @@ export function PartnerCurationView({
             return (
               <div
                 key={partner.id}
-                className="rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/25 shadow-2xs hover:shadow-md transition-all duration-200 p-5 sm:p-6 flex flex-col justify-between gap-4 group"
+                className="rounded-2xl bg-white border border-[#E8E8EA] hover:border-[#181343]/25 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 ease-out p-5 sm:p-6 flex flex-col justify-between gap-4 group"
               >
                 <div className="space-y-3.5">
                   {/* Top Bar: Logo + Focus Area Badge + Administrative Status Indicator */}

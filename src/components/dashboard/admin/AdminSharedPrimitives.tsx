@@ -2,6 +2,7 @@
 
 import React, { useEffect, useId, useRef } from "react";
 import { AlertCircle, ChevronLeft, ChevronRight, RefreshCw, X } from "lucide-react";
+import { TableSkeleton, CardGridSkeleton } from "@/components/ui/skeleton";
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -86,18 +87,20 @@ export function AdminModal({
 }
 
 interface AdminLoadingStateProps {
-  message: string;
+  message?: string;
+  variant?: "table" | "cards";
 }
 
-export function AdminLoadingState({ message }: AdminLoadingStateProps) {
+export function AdminLoadingState({ message, variant = "table" }: AdminLoadingStateProps) {
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="bg-white rounded-2xl border border-slate-200 p-10 flex flex-col items-center justify-center text-center gap-3"
-    >
-      <RefreshCw className="w-6 h-6 text-[#181343] animate-spin" aria-hidden="true" />
-      <p className="text-sm font-medium text-slate-700">{message}</p>
+    <div role="status" aria-live="polite" className="space-y-4 animate-in fade-in duration-200">
+      {message && (
+        <div className="flex items-center gap-2 px-1 text-xs text-slate-500 font-medium">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>{message}</span>
+        </div>
+      )}
+      {variant === "cards" ? <CardGridSkeleton count={3} /> : <TableSkeleton rows={5} />}
     </div>
   );
 }

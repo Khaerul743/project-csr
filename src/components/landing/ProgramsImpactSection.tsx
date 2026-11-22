@@ -3,20 +3,13 @@
 import React, { useState } from "react";
 import {
   MapPin,
-  Calendar,
   Users,
-  CheckCircle2,
-  ExternalLink,
-  Layers,
-  ArrowRight,
-  TrendingUp,
   TreePine,
   GraduationCap,
   Droplets,
   Coins,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { ScrollReveal, StaggerContainer } from "@/components/ui/scroll-reveal";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
 interface ProgramItem {
   id: string;
@@ -106,17 +99,22 @@ export function ProgramsImpactSection() {
       : SAMPLE_PROGRAMS.filter((p) => p.category === selectedCategory);
 
   return (
-    <section id="program-dampak" className="py-20 lg:py-28 bg-[#F4F4F6] relative overflow-hidden border-t border-[#E5E7EB]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="program-dampak"
+      className="pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#F4F4F6] relative overflow-hidden border-t border-[#E5E7EB] scroll-mt-[76px]"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header */}
         <ScrollReveal animation="fade-up" delay={50}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-10 border-b border-[#E5E7EB]">
-            <div className="max-w-2xl space-y-3">
-              <span className="px-3 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-                Program & Dampak Lapangan
-              </span>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E5E7EB]">
+            <div className="max-w-2xl space-y-3.5 sm:space-y-4">
+              <div>
+                <span className="inline-flex px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
+                  Program &amp; Dampak Lapangan
+                </span>
+              </div>
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
+                className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#181343] leading-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 Bukti Nyata Kolaborasi Sosial yang Tercatat &amp; Tervalidasi
@@ -129,25 +127,27 @@ export function ProgramsImpactSection() {
         </ScrollReveal>
 
         {/* Category Filters */}
-        <ScrollReveal animation="fade-up" delay={120}>
-          <div className="mt-8 flex items-center gap-2 overflow-x-auto pb-2">
+        <ScrollReveal animation="fade-up" delay={100}>
+          <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2">
             <button
               type="button"
               onClick={() => setSelectedCategory("ALL")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${selectedCategory === "ALL"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                selectedCategory === "ALL"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-                }`}
+              }`}
             >
               Semua Program ({SAMPLE_PROGRAMS.length})
             </button>
             <button
               type="button"
               onClick={() => setSelectedCategory("LINGKUNGAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "LINGKUNGAN"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                selectedCategory === "LINGKUNGAN"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-                }`}
+              }`}
             >
               <TreePine className="w-3.5 h-3.5 text-emerald-600" />
               <span>Lingkungan Hidup</span>
@@ -155,41 +155,44 @@ export function ProgramsImpactSection() {
             <button
               type="button"
               onClick={() => setSelectedCategory("PENDIDIKAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "PENDIDIKAN"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                selectedCategory === "PENDIDIKAN"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-                }`}
+              }`}
             >
-              <GraduationCap className="w-3.5 h-3.5 text-blue-600" />
-              <span>Pendidikan & Literasi</span>
+              <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Pendidikan &amp; Literasi</span>
             </button>
             <button
               type="button"
               onClick={() => setSelectedCategory("KESEHATAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "KESEHATAN"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                selectedCategory === "KESEHATAN"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-                }`}
+              }`}
             >
-              <Droplets className="w-3.5 h-3.5 text-cyan-600" />
-              <span>Kesehatan & Sanitasi</span>
+              <Droplets className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Kesehatan &amp; Sanitasi</span>
             </button>
             <button
               type="button"
               onClick={() => setSelectedCategory("EKONOMI")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${selectedCategory === "EKONOMI"
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                selectedCategory === "EKONOMI"
                   ? "bg-[#181343] text-white shadow-xs"
                   : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-                }`}
+              }`}
             >
-              <Coins className="w-3.5 h-3.5 text-amber-600" />
+              <Coins className="w-3.5 h-3.5 text-emerald-600" />
               <span>Pemberdayaan UMKM</span>
             </button>
           </div>
         </ScrollReveal>
 
         {/* Program Cards Grid */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredPrograms.map((prog, pIdx) => (
             <ScrollReveal
               key={prog.id}
@@ -197,10 +200,8 @@ export function ProgramsImpactSection() {
               delay={100 + (pIdx % 2) * 120}
               className="h-full"
             >
-              <div
-                className="p-7 sm:p-8 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-5 flex flex-col justify-between h-full"
-              >
-                <div className="space-y-3.5">
+              <div className="card-hover p-6 sm:p-7 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between h-full">
+                <div className="space-y-3">
                   {/* Meta Row: Status & SDG Tag */}
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span
@@ -209,10 +210,11 @@ export function ProgramsImpactSection() {
                       {prog.sdgTag}
                     </span>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${prog.statusVariant === "emerald"
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                        prog.statusVariant === "emerald"
                           ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
                           : "bg-[#181343]/10 text-[#181343] border border-[#181343]/20"
-                        }`}
+                      }`}
                     >
                       {prog.status}
                     </span>

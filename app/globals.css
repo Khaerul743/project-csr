@@ -106,7 +106,8 @@
 }
 
 html {
-  font-size: 14.4px; /* Skala proporsional 90% berbasis root rem (90% dari 16px standar browser) */
+  font-size: 14.4px;
+  /* Skala proporsional 90% berbasis root rem (90% dari 16px standar browser) */
   -webkit-text-size-adjust: 100%;
 }
 
@@ -122,13 +123,16 @@ nextjs-portal,
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #D1D5DB;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #9CA3AF;
 }
@@ -139,11 +143,17 @@ body {
   font-family: var(--font-body);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
 }
 
 @layer base {
+
   a[href],
   button,
   summary,
@@ -167,15 +177,71 @@ h1, h2, h3, h4, h5, h6 {
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     background: rgba(148, 163, 184, 0.35);
     border-radius: 9999px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(100, 116, 139, 0.55);
+  }
+
+  /* Button Micro-Interactions: mengecil sedikit saat ditekan (tactile press) + glow halus */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  .btn-interactive {
+    transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.18s ease,
+                background-color 0.15s ease,
+                border-color 0.15s ease;
+  }
+
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  .btn-interactive:active {
+    transform: scale(0.975);
+  }
+
+  /* Card Hover Micro-Interactions: Kartu terangkat halus saat disentuh kursor */
+  .card-hover,
+  .hover-lift {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease;
+  }
+
+  .card-hover:hover,
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px -6px rgba(24, 19, 67, 0.09), 0 8px 12px -6px rgba(24, 19, 67, 0.04);
+  }
+
+  /* Skeleton Shimmer Animation */
+  @keyframes shimmerWave {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #F1F5F9 0%,
+      #F8FAFC 35%,
+      #E2E8F0 50%,
+      #F8FAFC 65%,
+      #F1F5F9 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmerWave 1.8s infinite ease-in-out;
   }
 }
 
@@ -310,7 +376,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   /* Hindari pemotongan kartu di tengah halaman */
-  #printable-esg-report > div,
+  #printable-esg-report>div,
   .break-inside-avoid,
   .page-break-avoid {
     break-inside: avoid !important;
