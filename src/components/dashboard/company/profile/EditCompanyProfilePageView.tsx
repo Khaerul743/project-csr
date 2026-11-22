@@ -1407,28 +1407,28 @@ export function EditCompanyProfilePageView({
       {/* CONFIRMATION MODAL (LEAVING WITH UNSAVED CHANGES) */}
       {/* ========================================================================= */}
       {isDiscardModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-2xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
-              <AlertTriangle className="w-6 h-6" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+              <AlertCircle className="w-6 h-6" />
             </div>
 
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-bold text-[#181343]">
-                Batalkan Perubahan Profil?
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-black text-slate-900">
+                Buang Perubahan Profil?
               </h3>
-              <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed">
-                Ada perubahan informasi yang belum Anda simpan. Jika Anda keluar sekarang, seluruh perubahan tersebut tidak akan tersimpan.
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Anda memiliki beberapa perubahan informasi yang belum disimpan. Jika keluar sekarang, seluruh perubahan tersebut akan hilang.
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setIsDiscardModalOpen(false)}
-                className="h-9 px-4 rounded-xl bg-white border border-[#E5E7EB] text-[#47464F] hover:bg-slate-50 text-xs font-semibold cursor-pointer"
+                className="flex-1 h-11 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
               >
-                Lanjutkan Mengedit
+                Tetap di Halaman Ini
               </button>
 
               <button
@@ -1437,9 +1437,9 @@ export function EditCompanyProfilePageView({
                   setIsDiscardModalOpen(false);
                   onBack();
                 }}
-                className="h-9 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold cursor-pointer transition-colors"
+                className="flex-1 h-11 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer"
               >
-                Buang Perubahan
+                Ya, Buang Perubahan
               </button>
             </div>
           </div>

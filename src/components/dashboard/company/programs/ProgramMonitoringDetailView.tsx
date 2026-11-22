@@ -13,12 +13,10 @@ import {
   AlertCircle,
   FileCheck2,
   Clock,
-  Sparkles,
   Check,
   Percent,
   FileText,
   Wallet,
-  MessageSquare,
   TrendingUp,
   RefreshCw,
   Info,
@@ -55,57 +53,57 @@ function getProgramCategoryVisual(focusArea: string | undefined | null) {
       return {
         label: "Lingkungan & Alam",
         icon: Sprout,
-        thumbnailBg: "bg-emerald-50 border border-emerald-100/90",
-        iconColor: "text-emerald-600",
-        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/80",
+        thumbnailBg: "bg-emerald-50/70 border border-emerald-100",
+        iconColor: "text-emerald-700",
+        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/70",
       };
     case "PENDIDIKAN":
       return {
         label: "Pendidikan",
         icon: GraduationCap,
-        thumbnailBg: "bg-indigo-50 border border-indigo-100/90",
-        iconColor: "text-indigo-600",
-        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/80",
+        thumbnailBg: "bg-indigo-50/70 border border-indigo-100",
+        iconColor: "text-indigo-700",
+        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/70",
       };
     case "KESEHATAN":
       return {
         label: "Kesehatan",
         icon: HeartPulse,
-        thumbnailBg: "bg-rose-50 border border-rose-100/90",
-        iconColor: "text-rose-600",
-        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/80",
+        thumbnailBg: "bg-rose-50/70 border border-rose-100",
+        iconColor: "text-rose-700",
+        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/70",
       };
     case "PEMBERDAYAAN_EKONOMI":
       return {
         label: "Pemberdayaan Ekonomi",
         icon: TrendingUp,
-        thumbnailBg: "bg-amber-50 border border-amber-100/90",
-        iconColor: "text-amber-600",
-        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/80",
+        thumbnailBg: "bg-amber-50/70 border border-amber-100",
+        iconColor: "text-amber-700",
+        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/70",
       };
     case "INFRASTRUKTUR_SOSIAL":
       return {
         label: "Infrastruktur Sosial",
         icon: Building2,
-        thumbnailBg: "bg-sky-50 border border-sky-100/90",
-        iconColor: "text-sky-600",
-        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/80",
+        thumbnailBg: "bg-sky-50/70 border border-sky-100",
+        iconColor: "text-sky-700",
+        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/70",
       };
     case "TANGGAP_BENCANA":
       return {
         label: "Tanggap Bencana",
         icon: ShieldAlert,
-        thumbnailBg: "bg-orange-50 border border-orange-100/90",
-        iconColor: "text-orange-600",
-        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/80",
+        thumbnailBg: "bg-orange-50/70 border border-orange-100",
+        iconColor: "text-orange-700",
+        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/70",
       };
     default:
       return {
         label: "Inisiatif Umum",
         icon: Layers,
-        thumbnailBg: "bg-slate-100 border border-slate-200/90",
-        iconColor: "text-slate-600",
-        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/80",
+        thumbnailBg: "bg-slate-50 border border-slate-200/80",
+        iconColor: "text-slate-700",
+        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/70",
       };
   }
 }
@@ -285,10 +283,8 @@ export function ProgramMonitoringDetailView({
             <div className="space-y-2 flex-1 min-w-0">
               {/* Badges & Meta Pill Row */}
               <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full ${categoryConfig.badgeClass}`}
-                >
-                  <CategoryIcon className="w-3.5 h-3.5" />
+                <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <CategoryIcon className="w-3.5 h-3.5 text-slate-500" />
                   <span>{categoryConfig.label}</span>
                 </span>
 
@@ -311,7 +307,7 @@ export function ProgramMonitoringDetailView({
 
               {/* Main Heading: Nama Program */}
               <h1
-                className="text-lg sm:text-xl md:text-2xl font-extrabold text-[#181343] tracking-tight leading-snug"
+                className="text-lg sm:text-xl md:text-2xl font-bold text-[#181343] tracking-tight leading-snug max-w-2xl sm:max-w-3xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {program.title}
@@ -340,32 +336,9 @@ export function ProgramMonitoringDetailView({
             </div>
           </div>
 
-          {/* Sisi Kanan: Aksi Cepat (Quick Actions) */}
-          <div className="flex flex-row md:flex-col items-center sm:items-stretch gap-2.5 shrink-0 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
-            {!isManagement && onOpenChat && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => onOpenChat(program.collaborationId)}
-                leftIcon={<MessageSquare className="w-3.5 h-3.5 text-[#181343]" />}
-                className="flex-1 md:flex-initial text-xs font-bold text-[#181343] bg-slate-50 hover:bg-slate-100 border-slate-200 rounded-xl cursor-pointer shadow-2xs"
-              >
-                Pesan Mitra
-              </Button>
-            )}
-
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => setActiveTab("esg-report")}
-              leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-400" />}
-              className="flex-1 md:flex-initial text-xs font-extrabold text-white bg-[#181343] hover:bg-indigo-950 rounded-xl cursor-pointer shadow-2xs"
-            >
-              Laporan ESG (AI)
-            </Button>
-
-            {program.collaborationMouUrl && (
+          {/* Sisi Kanan: Berkas MoU jika tersedia */}
+          {program.collaborationMouUrl && (
+            <div className="flex flex-row md:flex-col items-center sm:items-stretch gap-2.5 shrink-0 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
               <a
                 href={program.collaborationMouUrl}
                 target="_blank"
@@ -376,8 +349,8 @@ export function ProgramMonitoringDetailView({
                 <span>Berkas MoU</span>
                 <ExternalLink className="w-3 h-3 text-slate-400" />
               </a>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Ringkasan Deskripsi Program (Maksimal 2-3 baris dengan Opsi Lihat Selengkapnya) */}

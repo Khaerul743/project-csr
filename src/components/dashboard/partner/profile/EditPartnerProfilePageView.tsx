@@ -69,6 +69,62 @@ const NGO_FOCUS_AREAS = [
   { id: "LAINNYA", label: "Inisiatif Khusus Lainnya", desc: "Program inklusi disabilitas, perlindungan anak & seni budaya" },
 ];
 
+function parseJsonArray<T>(val: any): T[] {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function buildPartnerSnapshot(data: any): string {
+  if (!data) return "";
+  const pastActivities = parseJsonArray<PastActivityItem>(data.pastActivities);
+  const teamMembers = parseJsonArray<TeamMemberItem>(data.teamMembers);
+
+  return JSON.stringify({
+    name: String(data.name ?? "").trim(),
+    tagline: String(data.tagline ?? "").trim(),
+    description: String(data.description ?? "").trim(),
+    organizationType: String(data.organizationType ?? ORGANIZATION_TYPES[0]).trim(),
+    foundedYear: String(data.foundedYear ?? "").trim(),
+    focusArea: String(data.focusArea ?? "LAINNYA").trim(),
+    email: String(data.email ?? "").trim(),
+    phone: String(data.phone ?? "").trim(),
+    address: String(data.address ?? "").trim(),
+    city: String(data.city ?? "").trim(),
+    province: String(data.province ?? "").trim(),
+    website: String(data.website ?? "").trim(),
+    instagramUrl: String(data.instagramUrl ?? "").trim(),
+    linkedinUrl: String(data.linkedinUrl ?? "").trim(),
+    youtubeUrl: String(data.youtubeUrl ?? "").trim(),
+    logoUrl: String(data.logoUrl ?? "").trim(),
+    coverUrl: String(data.coverUrl ?? "").trim(),
+    legalNumber: String(data.legalNumber ?? "").trim(),
+    npwpNumber: String(data.npwpNumber ?? "").trim(),
+    portfolioDocUrl: String(data.portfolioDocUrl ?? "").trim(),
+    pastActivities: pastActivities.map((act) => ({
+      title: String(act.title ?? "").trim(),
+      year: act.year ? Number(act.year) : "",
+      clientSponsor: String(act.clientSponsor ?? "").trim(),
+      beneficiaries: String(act.beneficiaries ?? "").trim(),
+      photoUrl: String(act.photoUrl ?? "").trim(),
+      description: String(act.description ?? "").trim(),
+    })),
+    teamMembers: teamMembers.map((m) => ({
+      name: String(m.name ?? "").trim(),
+      role: String(m.role ?? "").trim(),
+      photoUrl: String(m.photoUrl ?? "").trim(),
+    })),
+  });
+}
+
 export function EditPartnerProfilePageView({
   partner,
   initialCategory = "info",
@@ -120,24 +176,12 @@ export function EditPartnerProfilePageView({
 
   // Past Activities State
   const [pastActivities, setPastActivities] = useState<PastActivityItem[]>(() => {
-    if (!partner?.pastActivities) return [];
-    if (Array.isArray(partner.pastActivities)) return partner.pastActivities;
-    try {
-      return JSON.parse(partner.pastActivities);
-    } catch {
-      return [];
-    }
+    return parseJsonArray<PastActivityItem>(partner?.pastActivities);
   });
 
   // Team Members State
   const [teamMembers, setTeamMembers] = useState<TeamMemberItem[]>(() => {
-    if (!partner?.teamMembers) return [];
-    if (Array.isArray(partner.teamMembers)) return partner.teamMembers;
-    try {
-      return JSON.parse(partner.teamMembers);
-    } catch {
-      return [];
-    }
+    return parseJsonArray<TeamMemberItem>(partner?.teamMembers);
   });
 
   // Available provinces list
@@ -162,36 +206,40 @@ export function EditPartnerProfilePageView({
   const [activeTeamUploadIdx, setActiveTeamUploadIdx] = useState<number | null>(null);
 
   // Initial Snapshot for detecting dirty changes
-  const [initialSnapshot, setInitialSnapshot] = useState("");
+  const [initialSnapshot, setInitialSnapshot] = useState(() => buildPartnerSnapshot(partner || {}));
+
   useEffect(() => {
-    const snap = JSON.stringify({
-      name: partner?.name || "",
-      tagline: partner?.tagline || "",
-      description: partner?.description || "",
-      organizationType: partner?.organizationType || ORGANIZATION_TYPES[0],
-      foundedYear: partner?.foundedYear || "",
-      focusArea: partner?.focusArea || "LAINNYA",
-      email: partner?.email || "",
-      phone: partner?.phone || "",
-      address: partner?.address || "",
-      city: partner?.city || "",
-      province: partner?.province || "",
-      website: partner?.website || "",
-      instagramUrl: partner?.instagramUrl || "",
-      linkedinUrl: partner?.linkedinUrl || "",
-      youtubeUrl: partner?.youtubeUrl || "",
-      logoUrl: partner?.logoUrl || "",
-      coverUrl: partner?.coverUrl || "",
-      legalNumber: partner?.legalNumber || "",
-      npwpNumber: partner?.npwpNumber || "",
-      portfolioDocUrl: partner?.portfolioDocUrl || "",
-      pastActivities: partner?.pastActivities || [],
-      teamMembers: partner?.teamMembers || [],
-    });
-    setInitialSnapshot(snap);
+    if (partner) {
+      setInitialSnapshot(buildPartnerSnapshot(partner));
+    }
   }, [partner]);
 
-  const currentSnapshot = JSON.stringify({
+  const currentSnapshot = useMemo(() => {
+    return buildPartnerSnapshot({
+      name,
+      tagline,
+      description,
+      organizationType,
+      foundedYear,
+      focusArea,
+      email,
+      phone,
+      address,
+      city,
+      province,
+      website,
+      instagramUrl,
+      linkedinUrl,
+      youtubeUrl,
+      logoUrl,
+      coverUrl,
+      legalNumber,
+      npwpNumber,
+      portfolioDocUrl,
+      pastActivities,
+      teamMembers,
+    });
+  }, [
     name,
     tagline,
     description,
@@ -214,7 +262,7 @@ export function EditPartnerProfilePageView({
     portfolioDocUrl,
     pastActivities,
     teamMembers,
-  });
+  ]);
 
   const isDirty = initialSnapshot !== "" && initialSnapshot !== currentSnapshot;
 
@@ -485,6 +533,7 @@ export function EditPartnerProfilePageView({
       }
 
       setSuccessMessage("Profil lembaga berhasil diperbarui secara menyeluruh!");
+      setInitialSnapshot(buildPartnerSnapshot(json.data));
       onProfileUpdated(json.data);
 
       setTimeout(() => {
@@ -1694,7 +1743,7 @@ export function EditPartnerProfilePageView({
               <button
                 type="button"
                 onClick={() => setIsDiscardModalOpen(false)}
-                className="flex-1 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+                className="flex-1 h-11 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
               >
                 Tetap di Halaman Ini
               </button>
@@ -1704,7 +1753,7 @@ export function EditPartnerProfilePageView({
                   setIsDiscardModalOpen(false);
                   onBack();
                 }}
-                className="flex-1 h-10 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors cursor-pointer"
+                className="flex-1 h-11 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer"
               >
                 Ya, Buang Perubahan
               </button>

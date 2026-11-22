@@ -110,3 +110,11 @@ export function parseCurrencyInput(val: string | number | null | undefined): num
   const num = parseInt(clean, 10);
   return isNaN(num) ? 0 : num;
 }
+
+export function cleanProposalText(text?: string | null): string {
+  if (!text) return "";
+  return text
+    .replace(/(?:\.\s*|\s+)?Proposal_CSR_[A-Za-z0-9_.]+(?:\.\.\.)?/gi, "")
+    .trim();
+}
+

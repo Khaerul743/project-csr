@@ -101,6 +101,7 @@ export function SubmitProposalPageView({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showOptimizerModal, setShowOptimizerModal] = useState(false);
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
 
   // Parse Anggaran
   const numericBudget = useMemo(() => {
@@ -308,12 +309,10 @@ export function SubmitProposalPageView({
 
   const handleCancel = () => {
     if (isDirty) {
-      const confirmLeave = window.confirm(
-        "Formulir proposal telah diisi sebagian. Apakah Anda yakin ingin membatalkan pengajuan? Perubahan yang belum dikirim akan hilang."
-      );
-      if (!confirmLeave) return;
+      setIsDiscardModalOpen(true);
+    } else {
+      onBack();
     }
-    onBack();
   };
 
   return (
@@ -915,6 +914,47 @@ export function SubmitProposalPageView({
           setSummary(newSummary);
         }}
       />
+
+      {/* Discard Confirmation Modal */}
+      {isDiscardModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+
+            <div className="text-center space-y-1">
+              <h3 className="text-base font-black text-slate-900">
+                Buang Pengajuan Proposal?
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Formulir proposal telah diisi sebagian. Jika keluar sekarang, seluruh perubahan yang belum dikirim akan hilang.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsDiscardModalOpen(false)}
+                className="flex-1 h-11 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+              >
+                Tetap di Halaman Ini
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsDiscardModalOpen(false);
+                  onBack();
+                }}
+                className="flex-1 h-11 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+              >
+                Ya, Buang Perubahan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

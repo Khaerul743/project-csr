@@ -21,6 +21,13 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Sprout,
+  GraduationCap,
+  ShieldAlert,
+  Layers,
+  TrendingUp,
+  HeartPulse,
+  Landmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +39,7 @@ import {
   formatDate,
   formatCurrencyInput,
   parseCurrencyInput,
+  cleanProposalText,
 } from "./helpers";
 import { CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { ProgramStatus } from "@/db/schema/programs";
@@ -40,6 +48,68 @@ import { BeneficiaryReviewsTab } from "../reviews/BeneficiaryReviewsTab";
 import { ProgramFinancesTab } from "../finances/ProgramFinancesTab";
 import { EsgSustainabilityReportTab } from "../company/programs/EsgSustainabilityReportTab";
 import { CompanyProgramItem } from "../company/types";
+
+function getProgramCategoryVisual(focusArea: string | undefined | null) {
+  switch (focusArea) {
+    case "LINGKUNGAN":
+    case "LINGKUNGAN_HIDUP":
+      return {
+        label: "Lingkungan & Alam",
+        icon: Sprout,
+        thumbnailBg: "bg-emerald-50/70 border border-emerald-100",
+        iconColor: "text-emerald-700",
+        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/70",
+      };
+    case "PENDIDIKAN":
+      return {
+        label: "Pendidikan",
+        icon: GraduationCap,
+        thumbnailBg: "bg-indigo-50/70 border border-indigo-100",
+        iconColor: "text-indigo-700",
+        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/70",
+      };
+    case "KESEHATAN":
+      return {
+        label: "Kesehatan",
+        icon: HeartPulse,
+        thumbnailBg: "bg-rose-50/70 border border-rose-100",
+        iconColor: "text-rose-700",
+        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/70",
+      };
+    case "PEMBERDAYAAN_EKONOMI":
+      return {
+        label: "Pemberdayaan Ekonomi",
+        icon: TrendingUp,
+        thumbnailBg: "bg-amber-50/70 border border-amber-100",
+        iconColor: "text-amber-700",
+        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/70",
+      };
+    case "INFRASTRUKTUR_SOSIAL":
+      return {
+        label: "Infrastruktur Sosial",
+        icon: Building2,
+        thumbnailBg: "bg-sky-50/70 border border-sky-100",
+        iconColor: "text-sky-700",
+        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/70",
+      };
+    case "TANGGAP_BENCANA":
+      return {
+        label: "Tanggap Bencana",
+        icon: ShieldAlert,
+        thumbnailBg: "bg-orange-50/70 border border-orange-100",
+        iconColor: "text-orange-700",
+        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/70",
+      };
+    default:
+      return {
+        label: "Inisiatif Umum",
+        icon: Layers,
+        thumbnailBg: "bg-slate-50 border border-slate-200/80",
+        iconColor: "text-slate-700",
+        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/70",
+      };
+  }
+}
 
 function cleanProgramDescription(desc?: string | null, title?: string): string {
   if (!desc) return "";
@@ -125,6 +195,9 @@ export function PartnerProgramDetailPageView({
     ? FOCUS_AREA_CONFIG[program.focusArea as CsrFocusArea]
     : null;
 
+  const categoryConfig = getProgramCategoryVisual(program.focusArea);
+  const CategoryIcon = categoryConfig.icon;
+
   const totalBudgetNum = parseFloat(program.budget || "0") || 1;
   const currentSpentNum = parseCurrencyInput(spentBudget);
   const progressPercent = Math.min(100, Math.round((currentSpentNum / totalBudgetNum) * 100));
@@ -183,9 +256,9 @@ export function PartnerProgramDetailPageView({
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* ============================================================ */}
-      {/* 1. TOP NAVIGATION ROW                                        */}
+      {/* 1. TOP NAVIGATION ROW (Kembali & Status Pelaksanaan)         */}
       {/* ============================================================ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E8E8EA]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-3">
           <Button
             type="button"
@@ -193,50 +266,13 @@ export function PartnerProgramDetailPageView({
             size="sm"
             onClick={onBack}
             leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="min-h-[44px] text-xs font-bold text-[#181343] hover:text-[#009E75] border-[#E8E8EA] hover:border-emerald-300 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer"
+            className="text-xs font-bold text-[#181343] hover:text-[#047857] border-[#E5E7EB] hover:border-emerald-300 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer shadow-2xs"
           >
             Kembali ke Daftar Program
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          {program.collaborationMouUrl && (
-            <a
-              href={program.collaborationMouUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-bold text-[#181343] hover:text-[#009E75] bg-white hover:bg-emerald-50 border border-[#E8E8EA] hover:border-emerald-300 px-3.5 py-2 rounded-xl shadow-2xs transition-all"
-            >
-              <FileCheck2 className="w-4 h-4 text-emerald-600" />
-              <span>Dokumen MoU</span>
-              <ExternalLink className="w-3 h-3 text-[#787680]" />
-            </a>
-          )}
-
-          {onOpenChat && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChat(program.collaborationId)}
-              leftIcon={<MessageSquare className="w-3.5 h-3.5 text-teal-600" />}
-              className="min-h-[44px] text-xs font-bold text-teal-800 bg-teal-50/70 hover:bg-teal-100 border-teal-200/80 rounded-xl cursor-pointer"
-            >
-              Pesan Perusahaan
-            </Button>
-          )}
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setActiveTab("esg-report")}
-            leftIcon={<FileText className="w-3.5 h-3.5 text-emerald-600" />}
-            className="min-h-[44px] text-xs font-bold text-emerald-800 bg-emerald-50/80 hover:bg-emerald-100 border-emerald-300 rounded-xl cursor-pointer shadow-2xs"
-          >
-            Laporan ESG
-          </Button>
-
+        <div className="flex items-center gap-2.5">
           <Badge variant={statusConfig.variant} size="md" hasDot className="shadow-2xs">
             {statusConfig.label}
           </Badge>
@@ -244,80 +280,124 @@ export function PartnerProgramDetailPageView({
       </div>
 
       {/* ============================================================ */}
-      {/* 2. PROGRAM IDENTITY BANNER                                   */}
+      {/* 2. PROGRAM IDENTITY BANNER (Sesuai Referensi Visual)        */}
       {/* ============================================================ */}
-      <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#E8E8EA] shadow-2xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
-          <div className="flex items-start gap-4 min-w-0">
-            {/* Logo Perusahaan Sponsor dengan graceful fallback initial */}
-            <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-100/80 flex items-center justify-center font-black text-teal-800 text-lg overflow-hidden shrink-0 shadow-2xs">
+      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-5">
+          {/* Sisi Kiri: Foto/Logo Perusahaan Sponsor & Info Program */}
+          <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
+            {/* Foto/Logo Profil Perusahaan Sponsor */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200/90 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden transition-transform hover:scale-105">
               {program.companyLogo && !companyLogoError ? (
                 <img
                   src={program.companyLogo}
-                  alt={program.companyName || "Perusahaan"}
+                  alt={program.companyName || "Perusahaan Donor"}
                   onError={() => setCompanyLogoError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                (program.companyName || "CP").substring(0, 2).toUpperCase()
+                <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center p-2 text-center select-none">
+                  <Building2 className="w-8 h-8 sm:w-9 sm:h-9 text-[#181343]/60 mb-0.5" />
+                  <span className="text-[11px] font-black text-[#181343] tracking-wider uppercase truncate max-w-full px-1">
+                    {(program.companyName || "CP").substring(0, 3)}
+                  </span>
+                </div>
               )}
             </div>
 
-            <div className="space-y-1.5 min-w-0">
+            {/* Info Block */}
+            <div className="space-y-2 flex-1 min-w-0">
+              {/* Badges & Meta Pill Row */}
               <div className="flex flex-wrap items-center gap-2">
-                {focusConfig && (
-                  <Badge variant={focusConfig.variant} size="sm">
-                    {focusConfig.label}
-                  </Badge>
-                )}
-                <span className="text-xs text-[#787680] flex items-center gap-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <CategoryIcon className="w-3.5 h-3.5 text-slate-500" />
+                  <span>{categoryConfig.label}</span>
+                </span>
+
+                <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <MapPin className="w-3.5 h-3.5 text-slate-500" />
                   {program.targetCity
                     ? `${program.targetCity}${program.targetProvince ? `, ${program.targetProvince}` : ""}`
                     : "Wilayah Sasaran"}
                 </span>
-                <span className="text-xs text-[#787680] flex items-center gap-1 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-[#181343]" />
+
+                <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
                   {program.startDate && program.endDate
                     ? `${formatDate(program.startDate)} s/d ${formatDate(program.endDate)}`
+                    : program.startDate
+                    ? `Mulai ${formatDate(program.startDate)}`
                     : "Periode Pelaksanaan"}
                 </span>
               </div>
 
               {/* Main Heading: Nama Program */}
               <h1
-                className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight leading-snug"
+                className="text-lg sm:text-xl md:text-2xl font-bold text-[#181343] tracking-tight leading-snug max-w-2xl sm:max-w-3xl"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                {program.title}
+                {cleanProposalText(program.title)}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#787680]">
-                <span className="font-semibold text-[#181343] flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 text-teal-600" />
-                  Sponsor: {program.companyName || "Perusahaan Donor"}
-                </span>
-                <span>•</span>
-                <span className="flex items-center gap-1 font-medium text-emerald-700">
-                  <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
-                  {program.collaborationMouUrl ? "MoU Telah Disepakati" : "MoU Dalam Pengesahan"}
+              {/* Meta: Perusahaan Sponsor & MoU Status */}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 pt-0.5">
+                <div className="flex items-center gap-1.5 font-bold text-[#181343]">
+                  <Building2 className="w-3.5 h-3.5 text-slate-500" />
+                  <span>{program.companyName || "Perusahaan Sponsor"}</span>
+                </div>
+
+                <span className="text-slate-300">•</span>
+
+                <span
+                  className={`inline-flex items-center gap-1 font-semibold px-2.5 py-0.5 rounded-md ${
+                    program.collaborationMouUrl
+                      ? "text-emerald-700 bg-emerald-50 border border-emerald-200/80"
+                      : "text-amber-700 bg-amber-50 border border-amber-200/80"
+                  }`}
+                >
+                  <FileCheck2 className="w-3.5 h-3.5" />
+                  <span>{program.collaborationMouUrl ? "MoU Telah Disepakati" : "MoU Dalam Pengesahan"}</span>
                 </span>
               </div>
             </div>
           </div>
+
+          {/* Sisi Kanan: Berkas MoU jika tersedia */}
+          {program.collaborationMouUrl && (
+            <div className="flex flex-row md:flex-col items-center sm:items-stretch gap-2.5 shrink-0 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+              <a
+                href={program.collaborationMouUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#181343] hover:bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/80 transition-colors"
+              >
+                <FileCheck2 className="w-3.5 h-3.5 text-slate-500" />
+                <span>Berkas MoU</span>
+                <ExternalLink className="w-3 h-3 text-slate-400" />
+              </a>
+            </div>
+          )}
         </div>
 
         {/* Ringkasan Deskripsi Program (Maksimal 2-3 baris dengan Opsi Lihat Selengkapnya) */}
         {program.description && (
-          <div className="pt-3 border-t border-[#F4F4F6] text-xs sm:text-sm text-[#47464F] leading-relaxed">
-            <p className={isDescriptionExpanded ? "whitespace-pre-line" : "line-clamp-2 sm:line-clamp-3"}>
+          <div className="pt-3.5 border-t border-slate-100 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-2">
+            <p className={isDescriptionExpanded ? "whitespace-pre-line" : "line-clamp-2"}>
               {cleanProgramDescription(program.description, program.title)}
             </p>
-            {program.description.length > 140 && (
+
+            {program.opportunityTitle && isDescriptionExpanded && (
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="text-slate-400 font-medium">Inisiatif Asal Proposal:</span>
+                <strong className="text-slate-700">{program.opportunityTitle}</strong>
+              </div>
+            )}
+
+            {program.description.length > 120 && (
               <button
                 type="button"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="text-xs font-bold text-[#009E75] hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-[#181343] hover:text-emerald-700 hover:underline inline-flex items-center gap-1 cursor-pointer transition-colors"
               >
                 {isDescriptionExpanded ? (
                   <>
@@ -326,7 +406,7 @@ export function PartnerProgramDetailPageView({
                   </>
                 ) : (
                   <>
-                    <span>Lihat Selengkapnya</span>
+                    <span>Lihat Metodologi & Deskripsi Lengkap</span>
                     <ChevronDown className="w-3.5 h-3.5" />
                   </>
                 )}
@@ -337,27 +417,27 @@ export function PartnerProgramDetailPageView({
       </div>
 
       {/* ============================================================ */}
-      {/* 3. EMPAT KPI MONITORING HORIZONTAL (SERAGAM & TENANG)       */}
+      {/* 3. EMPAT KPI MONITORING HORIZONTAL (Ukuran Sama, 1 Baris)     */}
       {/* ============================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Progres Aktivitas */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
+        {/* KPI 1: Progres Aktivitas Proposal */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
-                Progres Aktivitas
+              <span className="text-xs font-semibold text-slate-600">
+                Progres Aktivitas Proposal
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Activity className="w-4 h-4 text-slate-700" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Activity className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight tabular-nums">
               {program.activityProgressPercent ?? 0}%
             </div>
           </div>
-          <div className="pt-3 border-t border-slate-100 space-y-1.5">
+          <div className="pt-3 border-t border-slate-100 mt-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Tahapan Selesai</span>
+              <span className="text-slate-500">Tahapan Proposal Selesai</span>
               <span className="font-bold text-[#181343] tabular-nums">
                 {program.completedActivitiesCount ?? 0} / {program.totalActivitiesCount ?? 0}
               </span>
@@ -372,21 +452,21 @@ export function PartnerProgramDetailPageView({
         </div>
 
         {/* KPI 2: Realisasi Dana */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
+              <span className="text-xs font-semibold text-slate-600">
                 Realisasi Dana
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Wallet className="w-4 h-4 text-slate-700" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Wallet className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
             <div className="text-2xl font-black text-[#181343] tracking-tight truncate tabular-nums">
               {formatRupiah(currentSpentNum)}
             </div>
           </div>
-          <div className="pt-3 border-t border-slate-100 space-y-1.5">
+          <div className="pt-3 border-t border-slate-100 mt-3 space-y-1.5">
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500 truncate">Pagu: {formatRupiah(program.budget)}</span>
               <span className="font-bold text-[#181343] shrink-0 tabular-nums">{progressPercent}%</span>
@@ -400,52 +480,56 @@ export function PartnerProgramDetailPageView({
           </div>
         </div>
 
-        {/* KPI 3: Status Laporan Lapangan */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
+        {/* KPI 3: Laporan Menunggu Verifikasi */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
-                Status Laporan Lapangan
+              <span className="text-xs font-semibold text-slate-600">
+                Laporan Menunggu Verifikasi
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-slate-700" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <FileText className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
-            <div className="text-2xl font-black text-[#181343] tracking-tight flex items-baseline gap-1.5 tabular-nums">
-              <span>{program.pendingVerificationCount ?? 0}</span>
-              <span className="text-sm font-semibold text-slate-500">Laporan</span>
+            <div className="text-2xl font-black text-[#181343] tracking-tight tabular-nums">
+              {program.pendingVerificationCount ?? 0}
             </div>
           </div>
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs">
             <span className="text-slate-500">Status Verifikasi:</span>
-            <span className="font-bold text-[#181343]">
+            <span
+              className={`font-bold ${(program.pendingVerificationCount ?? 0) > 0
+                ? "text-amber-700"
+                : "text-[#181343]"
+                }`}
+            >
               {(program.pendingVerificationCount ?? 0) > 0
-                ? "Menunggu Verifikasi"
+                ? `${program.pendingVerificationCount} Perlu Pemeriksaan`
                 : "Semua Tertib"}
             </span>
           </div>
         </div>
 
         {/* KPI 4: Penerima Manfaat Aktual */}
-        <div className="p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3 flex flex-col justify-between">
+        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 hover:border-[#181343]/30 shadow-2xs transition-all flex flex-col justify-between group">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500">
+              <span className="text-xs font-semibold text-slate-600">
                 Penerima Manfaat Aktual
               </span>
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Users className="w-4 h-4 text-slate-700" />
+              <div className="w-8 h-8 rounded-xl bg-slate-50 border border-slate-200/80 text-[#181343] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Users className="w-4 h-4 text-[#181343]" />
               </div>
             </div>
-            <div className="text-base font-bold text-[#181343] line-clamp-2 min-h-[32px]">
+            <div className="text-base font-black text-[#181343] line-clamp-2 min-h-[32px] flex items-center">
               {program.actualBeneficiaries || (
-                <span className="text-xs font-normal text-slate-400">Belum dilaporkan</span>
+                <span className="text-xs font-normal text-slate-400 italic">Belum dilaporkan</span>
               )}
             </div>
           </div>
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+          <div className="pt-3 border-t border-slate-100 mt-3 flex items-center justify-between text-xs">
             <span className="text-slate-500">Target Kesepakatan:</span>
-            <span className="font-bold text-[#181343] truncate max-w-[130px]">
+            <span className="font-bold text-[#181343] truncate max-w-[140px]">
               {program.targetBeneficiaries || "-"}
             </span>
           </div>

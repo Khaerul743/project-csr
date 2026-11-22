@@ -66,7 +66,7 @@ export function ContactSection() {
               className="text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-[#181343] tracking-tight leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Mulai Transformasi Dampak CSR <br className="hidden sm:block" />
+              Mulai Transformasi Dampak CSR <br />
               <span className="text-emerald-600 whitespace-nowrap">Organisasi Anda</span>
             </h2>
             <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">

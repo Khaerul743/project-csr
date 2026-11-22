@@ -305,14 +305,12 @@ export function StagingOnboardingView({
               </div>
 
               {/* Title & Deskripsi */}
-              <div className="space-y-2">
+              <div className="space-y-2 lg:min-h-[82px] flex flex-col justify-start">
                 <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                   Perusahaan Sponsor CSR
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Dirancang untuk korporasi, BUMN, atau perusahaan swasta yang
-                  mengalokasikan anggaran sosial, mempublikasikan inisiatif, dan
-                  memantau kepatuhan indikator keberlanjutan (ESG).
+                  Dirancang bagi korporasi dan BUMN untuk mengalokasikan anggaran sosial, merilis program CSR, dan memantau kepatuhan ESG.
                 </p>
               </div>
 
@@ -326,8 +324,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Publikasi Peluang Inisiatif
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Buka program pendanaan dengan pagu anggaran dan kriteria sasaran.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Buka peluang pendanaan CSR dengan pagu anggaran serta kriteria sasaran penerima manfaat.
                     </p>
                   </div>
                 </div>
@@ -340,8 +338,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Seleksi &amp; Skrining Proposal
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Tinjau proposal mitra, audit kewajaran RAB, dan tetapkan keputusan.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Tinjau usulan mitra pelaksana, verifikasi kewajaran RAB, dan tetapkan mitra terpilih.
                     </p>
                   </div>
                 </div>
@@ -354,8 +352,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Kontrak MoU &amp; Kesepakatan
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Finalisasi jadwal tahapan kegiatan dan pengesahan berkas resmi.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Finalisasi jadwal tahapan pelaksanaan program serta pengesahan dokumen kerja sama.
                     </p>
                   </div>
                 </div>
@@ -368,8 +366,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Monitoring &amp; Pelaporan ESG
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Pantau serapan dana riil dan hasilkan laporan akuntabilitas serta dampak ESG.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Pantau realisasi serapan anggaran program serta unduh laporan akuntabilitas dampak ESG.
                     </p>
                   </div>
                 </div>
@@ -411,14 +409,12 @@ export function StagingOnboardingView({
               </div>
 
               {/* Title & Deskripsi */}
-              <div className="space-y-2">
+              <div className="space-y-2 lg:min-h-[82px] flex flex-col justify-start">
                 <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                   Lembaga Mitra Pelaksana
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Dirancang untuk yayasan, Lembaga Swadaya Masyarakat (LSM/NGO), atau
-                  organisasi kemasyarakatan yang memiliki keahlian eksekusi kegiatan di
-                  lapangan.
+                  Dirancang bagi yayasan dan lembaga nirlaba untuk mengajukan proposal inisiatif, mengeksekusi program, dan menyalurkan bantuan.
                 </p>
               </div>
 
@@ -432,8 +428,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Eksplorasi Inisiatif Terbuka
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Cari peluang pendanaan CSR yang relevan dengan fokus keahlian Anda.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Eksplorasi program pendanaan CSR yang relevan dengan fokus bidang dan keahlian lembaga.
                     </p>
                   </div>
                 </div>
@@ -446,8 +442,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Pengajuan Proposal &amp; RAB
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Kembangkan usulan program digital lengkap dengan rencana anggaran.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Susun rancangan proposal kegiatan digital lengkap dengan rincian kebutuhan pagu RAB.
                     </p>
                   </div>
                 </div>
@@ -460,8 +456,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Laporan Kemajuan Lapangan
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Dokumentasikan aktivitas fisik, bukti foto kegiatan, dan kwitansi dana.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Dokumentasikan kemajuan aktivitas fisik di lapangan bersama bukti foto dan kwitansi.
                     </p>
                   </div>
                 </div>
@@ -474,8 +470,8 @@ export function StagingOnboardingView({
                     <h4 className="text-xs sm:text-sm font-semibold text-slate-900">
                       Survei Penerima Manfaat
                     </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Kumpulkan ulasan langsung dari masyarakat lapangan melalui kode QR.
+                    <p className="text-xs text-slate-500 leading-relaxed min-h-[34px] sm:min-h-[36px]">
+                      Himpun umpan balik dan kepuasan masyarakat penerima manfaat langsung melalui survei QR.
                     </p>
                   </div>
                 </div>
