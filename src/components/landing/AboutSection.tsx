@@ -16,33 +16,38 @@ import { ScrollReveal, StaggerContainer } from "@/components/ui/scroll-reveal";
 
 export function AboutSection() {
   return (
-    <section id="tentang-kami" className="pt-14 pb-16 lg:pt-20 lg:pb-24 bg-[#FFFFFF] relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="tentang-kami"
+      className="pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#FFFFFF] relative overflow-hidden scroll-mt-[76px]"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header */}
         <ScrollReveal animation="fade-up" delay={50}>
-          <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-              <span>Tentang SIPENA</span>
+          <div className="max-w-4xl space-y-3.5 sm:space-y-4">
+            <div>
+              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
+                Tentang SIPENA
+              </span>
             </div>
 
             <h2
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
+              className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#181343] leading-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Menjembatani Niat Baik Perusahaan dengan Realitas Kebutuhan Masyarakat
             </h2>
 
-            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl">
               Menentukan kebutuhan masyarakat, membangun kemitraan yang tepat, dan mengevaluasi dampak program CSR bukanlah proses yang sederhana. SIPENA hadir untuk membantu menghubungkan seluruh tahapan tersebut dalam satu platform terintegrasi.
             </p>
           </div>
         </ScrollReveal>
 
         {/* Problem vs Solution Narrative Comparison */}
-        <div className="mt-10 sm:mt-14 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+        <div className="mt-8 sm:mt-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           {/* Card Tantangan Pengelolaan CSR */}
           <ScrollReveal animation="fade-right" delay={150} className="h-full">
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] flex flex-col justify-between h-full shadow-2xs">
+            <div className="card-hover p-6 sm:p-8 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] flex flex-col justify-between h-full shadow-2xs">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-[#FDE8E8] flex items-center justify-center text-[#E02424] mb-4 sm:mb-5">
                   <AlertCircle className="w-5 h-5" />
@@ -93,7 +98,7 @@ export function AboutSection() {
 
           {/* Card Pendekatan SIPENA */}
           <ScrollReveal animation="fade-left" delay={250} className="h-full">
-            <div className="p-6 sm:p-8 rounded-2xl bg-[#181343] text-white border border-[#26224C] flex flex-col justify-between h-full shadow-lg">
+            <div className="card-hover p-6 sm:p-8 rounded-2xl bg-[#181343] text-white border border-[#26224C] flex flex-col justify-between h-full shadow-lg">
               <div>
                 <div className="w-10 h-10 rounded-xl bg-[#0F382C] flex items-center justify-center text-[#34D399] mb-4 sm:mb-5">
                   <CheckCircle2 className="w-5 h-5" />
@@ -144,11 +149,13 @@ export function AboutSection() {
         </div>
 
         {/* ASA: Fondasi di Balik Setiap Aksi */}
-        <div className="mt-16 sm:mt-20 max-w-6xl mx-auto">
+        <div className="mt-14 sm:mt-16 max-w-6xl mx-auto">
           <ScrollReveal animation="fade-up" delay={50}>
-            <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12 space-y-3">
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold tracking-wide uppercase border border-emerald-200/80">
-                <span>Nilai Utama SIPENA</span>
+            <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10 space-y-3">
+              <div>
+                <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
+                  Nilai Utama SIPENA
+                </span>
               </div>
               <h3
                 className="text-2xl sm:text-3xl font-extrabold text-[#181343]"
@@ -164,7 +171,7 @@ export function AboutSection() {
 
           <StaggerContainer staggerDelay={140} baseDelay={100} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
             {/* Card 1: Arah */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
+            <div className="card-hover p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
               <div
                 className="w-12 h-12 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-emerald-600 transition-colors duration-200"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -185,7 +192,7 @@ export function AboutSection() {
             </div>
 
             {/* Card 2: Sinergi */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
+            <div className="card-hover p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
               <div
                 className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-[#181343] transition-colors duration-200"
                 style={{ fontFamily: "var(--font-display)" }}
@@ -206,7 +213,7 @@ export function AboutSection() {
             </div>
 
             {/* Card 3: Akuntabilitas */}
-            <div className="p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
+            <div className="card-hover p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
               <div
                 className="w-12 h-12 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-emerald-600 transition-colors duration-200"
                 style={{ fontFamily: "var(--font-display)" }}

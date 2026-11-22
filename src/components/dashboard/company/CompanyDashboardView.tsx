@@ -54,6 +54,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardGridSkeleton, TableSkeleton } from "@/components/ui/skeleton";
 import { csrFocusAreaEnum, CsrFocusArea } from "@/db/schema/csr-focus-areas";
 import { opportunityStatusEnum, OpportunityStatus } from "@/db/schema/opportunities";
 import { InviteMemberModal } from "../InviteMemberModal";
@@ -105,57 +106,57 @@ function getProgramCategoryVisual(focusArea: string | undefined | null) {
       return {
         label: "Lingkungan & Alam",
         icon: Sprout,
-        thumbnailBg: "bg-emerald-50 border border-emerald-100/90",
-        iconColor: "text-emerald-600",
-        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/80",
+        thumbnailBg: "bg-emerald-50/70 border border-emerald-100",
+        iconColor: "text-emerald-700",
+        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/70",
       };
     case "PENDIDIKAN":
       return {
         label: "Pendidikan",
         icon: GraduationCap,
-        thumbnailBg: "bg-indigo-50 border border-indigo-100/90",
-        iconColor: "text-indigo-600",
-        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/80",
+        thumbnailBg: "bg-indigo-50/70 border border-indigo-100",
+        iconColor: "text-indigo-700",
+        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/70",
       };
     case "KESEHATAN":
       return {
         label: "Kesehatan",
         icon: HeartPulse,
-        thumbnailBg: "bg-rose-50 border border-rose-100/90",
-        iconColor: "text-rose-600",
-        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/80",
+        thumbnailBg: "bg-rose-50/70 border border-rose-100",
+        iconColor: "text-rose-700",
+        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/70",
       };
     case "PEMBERDAYAAN_EKONOMI":
       return {
         label: "Pemberdayaan Ekonomi",
         icon: TrendingUp,
-        thumbnailBg: "bg-amber-50 border border-amber-100/90",
-        iconColor: "text-amber-600",
-        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/80",
+        thumbnailBg: "bg-amber-50/70 border border-amber-100",
+        iconColor: "text-amber-700",
+        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/70",
       };
     case "INFRASTRUKTUR_SOSIAL":
       return {
         label: "Infrastruktur Sosial",
         icon: Building2,
-        thumbnailBg: "bg-sky-50 border border-sky-100/90",
-        iconColor: "text-sky-600",
-        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/80",
+        thumbnailBg: "bg-sky-50/70 border border-sky-100",
+        iconColor: "text-sky-700",
+        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/70",
       };
     case "TANGGAP_BENCANA":
       return {
         label: "Tanggap Bencana",
         icon: ShieldAlert,
-        thumbnailBg: "bg-orange-50 border border-orange-100/90",
-        iconColor: "text-orange-600",
-        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/80",
+        thumbnailBg: "bg-orange-50/70 border border-orange-100",
+        iconColor: "text-orange-700",
+        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/70",
       };
     default:
       return {
         label: "Inisiatif Umum",
         icon: Layers,
-        thumbnailBg: "bg-slate-100 border border-slate-200/90",
-        iconColor: "text-slate-600",
-        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/80",
+        thumbnailBg: "bg-slate-50 border border-slate-200/80",
+        iconColor: "text-slate-700",
+        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/70",
       };
   }
 }
@@ -163,7 +164,7 @@ function getProgramCategoryVisual(focusArea: string | undefined | null) {
 function renderProgramStatusPill(status: string, pendingVerification: number = 0) {
   if (pendingVerification > 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/90 shadow-2xs">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-800 border border-amber-200/80">
         <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
         <span>Menunggu Verifikasi</span>
       </span>
@@ -173,40 +174,42 @@ function renderProgramStatusPill(status: string, pendingVerification: number = 0
   switch (status) {
     case "COMPLETED":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/90 shadow-2xs">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200/80">
           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
           <span>Selesai</span>
         </span>
       );
     case "IN_PROGRESS":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200/90 shadow-2xs">
-          <Play className="w-3 h-3 text-indigo-600 fill-indigo-600 shrink-0" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-800 border border-indigo-200/80">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0" />
           <span>Sedang Berjalan</span>
         </span>
       );
     case "PLANNED":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200/90 shadow-2xs">
-          <Play className="w-3 h-3 text-blue-600 fill-blue-600 shrink-0" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200/80">
+          <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
           <span>Persiapan</span>
         </span>
       );
     case "ON_HOLD":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
+          <span className="w-1.5 h-1.5 rounded-full bg-slate-500 shrink-0" />
           <span>Ditunda</span>
         </span>
       );
     case "CANCELLED":
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200/90 shadow-2xs">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-800 border border-rose-200/80">
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
           <span>Dibatalkan</span>
         </span>
       );
     default:
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/80">
           <span>{status}</span>
         </span>
       );
@@ -1593,10 +1596,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* Proposals Cards List (Responsive Grid) */}
                 {isLoadingProposals ? (
-                  <div className="py-20 text-center text-slate-400 space-y-2 bg-white rounded-3xl border border-[#E8E8EA] w-full">
-                    <RefreshCw className="w-8 h-8 mx-auto animate-spin text-emerald-600" />
-                    <p className="text-xs font-medium text-slate-600">Memuat daftar proposal...</p>
-                  </div>
+                  <CardGridSkeleton count={3} />
                 ) : filteredProposals.length === 0 ? (
                   <div className="py-16 text-center bg-white rounded-3xl border border-dashed border-[#C8C5D0] p-8 space-y-3 w-full">
                     <div className="w-12 h-12 rounded-2xl bg-[#181343]/5 text-[#181343] flex items-center justify-center mx-auto">
@@ -1880,10 +1880,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* List Content */}
                 {isLoadingCollaborations ? (
-                  <div className="py-20 text-center bg-white rounded-2xl border border-[#E8E8EA] p-8 space-y-3">
-                    <RefreshCw className="w-6 h-6 text-[#181343] animate-spin mx-auto" />
-                    <p className="text-xs text-[#787680]">Memuat data kerja sama &amp; MoU...</p>
-                  </div>
+                  <CardGridSkeleton count={3} />
                 ) : filteredCollaborations.length === 0 ? (
                   <div className="py-16 text-center bg-white rounded-2xl border border-dashed border-[#E8E8EA] p-8 space-y-4">
                     <div className="w-14 h-14 rounded-2xl bg-[#F9F9FB] text-[#181343] flex items-center justify-center mx-auto border border-[#E8E8EA]">
@@ -2274,10 +2271,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                 {/* 3. Kartu Program Ramping & Berbasis Thumbnail Kategori (Sesuai Referensi UI) */}
                 {isLoadingPrograms ? (
-                  <div className="p-12 text-center text-xs text-slate-600 bg-white rounded-3xl border border-[#E5E7EB]">
-                    <Activity className="w-6 h-6 animate-spin mx-auto mb-2 text-emerald-600" />
-                    Memuat data pelaksanaan program...
-                  </div>
+                  <CardGridSkeleton count={3} />
                 ) : filteredPrograms.length === 0 ? (
                   <div className="p-12 text-center bg-white rounded-3xl border border-[#E5E7EB] shadow-2xs space-y-3">
                     <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
@@ -2319,60 +2313,60 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                           <div
                             key={prog.id}
                             onClick={() => setSelectedProgramForDetail(prog)}
-                            className="group relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer"
+                            className="group relative bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer"
                           >
                             {/* Sisi Kiri: Thumbnail Kategori & Info Utama */}
-                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                            <div className="flex items-center gap-4 min-w-0 flex-1 lg:pr-8 xl:pr-10">
                               {/* Thumbnail Box */}
                               <div
-                                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-2xs ${categoryConfig.thumbnailBg}`}
+                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center shrink-0 transition-colors ${categoryConfig.thumbnailBg}`}
                               >
-                                <CategoryIcon className={`w-8 h-8 sm:w-9 sm:h-9 ${categoryConfig.iconColor}`} />
+                                <CategoryIcon className={`w-6 h-6 sm:w-7 sm:h-7 ${categoryConfig.iconColor}`} />
                               </div>
 
                               {/* Text Block */}
-                              <div className="space-y-1 min-w-0 flex-1">
+                              <div className="space-y-1.5 min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span
-                                    className={`inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full ${categoryConfig.badgeClass}`}
+                                    className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-md ${categoryConfig.badgeClass}`}
                                   >
                                     {categoryConfig.label}
                                   </span>
                                   {prog.sustainabilityReport && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF8F4] text-[#047857] border border-emerald-200/80">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                                       <Sparkles className="w-3 h-3 text-emerald-600" />
                                       <span>Laporan ESG Siap</span>
                                     </span>
                                   )}
                                 </div>
 
-                                <h3 className="text-sm sm:text-base font-extrabold text-[#181343] leading-snug group-hover:text-indigo-950 transition-colors line-clamp-2">
+                                <h3 className="text-sm sm:text-base font-semibold text-slate-900 leading-snug group-hover:text-[#181343] transition-colors line-clamp-2 max-w-full lg:max-w-[360px] xl:max-w-[430px]">
                                   {prog.title}
                                 </h3>
 
-                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
-                                  <Landmark className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-normal">
+                                  <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                   <span className="truncate">{prog.partnerName || "Mitra Pelaksana"}</span>
                                 </div>
                               </div>
                             </div>
 
                             {/* Kolom Tengah 1: Progress Program */}
-                            <div className="flex lg:flex-col items-center lg:items-start justify-between lg:justify-center min-w-[120px] lg:min-w-[140px] px-2 sm:px-4 lg:border-l border-slate-100 py-1 space-y-0 lg:space-y-1.5">
-                              <span className="text-[11px] font-semibold text-slate-500">
+                            <div className="flex lg:flex-col items-center lg:items-start justify-between lg:justify-center min-w-[120px] lg:min-w-[135px] px-2 sm:px-4 lg:pl-6 lg:pr-4 lg:border-l lg:border-slate-100 py-0.5 space-y-0 lg:space-y-1.5">
+                              <span className="text-[11px] font-medium text-slate-500">
                                 Progress Program
                               </span>
                               <div className="space-y-1.5">
-                                <div className="text-base sm:text-lg font-black text-[#181343] tabular-nums">
+                                <div className="text-base sm:text-lg font-bold text-slate-900 tabular-nums">
                                   {activityProgress}%
                                 </div>
                                 <div className="w-24 sm:w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                   <div
                                     className={`h-full rounded-full transition-all duration-500 ${
                                       activityProgress >= 100
-                                        ? "bg-emerald-500"
+                                        ? "bg-emerald-600"
                                         : activityProgress > 0
-                                        ? "bg-blue-600"
+                                        ? "bg-[#181343]"
                                         : "bg-slate-200"
                                     }`}
                                     style={{ width: `${Math.min(activityProgress, 100)}%` }}
@@ -2382,10 +2376,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                             </div>
 
                             {/* Kolom Tengah 2: Lokasi */}
-                            <div className="flex items-center gap-2 min-w-[130px] lg:min-w-[160px] px-2 sm:px-4 lg:border-l border-slate-100 py-1">
+                            <div className="flex items-center gap-2 min-w-[125px] lg:min-w-[145px] px-2 sm:px-4 lg:pl-6 lg:pr-4 lg:border-l lg:border-slate-100 py-0.5">
                               <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
                               <div className="min-w-0 text-xs">
-                                <span className="font-bold text-[#181343] block truncate">
+                                <span className="font-semibold text-slate-900 block truncate">
                                   {prog.targetCity || "Indonesia"}
                                 </span>
                                 <span className="text-[11px] text-slate-500 block truncate">
@@ -2395,17 +2389,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                             </div>
 
                             {/* Kolom Kanan: Status & Anggaran */}
-                            <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-center min-w-[160px] lg:min-w-[190px] px-2 sm:px-4 lg:border-l border-slate-100 py-1 space-y-1.5">
+                            <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-center min-w-[160px] lg:min-w-[185px] px-2 sm:px-4 lg:pl-6 lg:pr-4 lg:border-l lg:border-slate-100 py-0.5 space-y-2">
                               {/* Status Badge Pill */}
                               <div>{renderProgramStatusPill(prog.status, pendingVerif)}</div>
 
                               {/* Anggaran & Serapan */}
                               <div className="text-left sm:text-right space-y-0.5">
-                                <div className="flex items-center sm:justify-end gap-1.5 text-xs sm:text-sm font-extrabold text-[#181343] tabular-nums">
-                                  <Coins className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                <div className="text-xs sm:text-sm font-bold text-slate-900 tabular-nums">
                                   <span>{formatRupiah(prog.budget)}</span>
                                 </div>
-                                <span className="text-[11px] text-slate-500 font-medium block">
+                                <span className="text-[11px] text-slate-500 font-normal block">
                                   Serapan: {formatRupiah(prog.spentBudget || "0")}
                                   {budgetNum > 0 ? ` (${spentPercent}%)` : ""}
                                 </span>
@@ -2413,9 +2406,9 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                             </div>
 
                             {/* Ujung Kanan: Tombol Navigasi Panah */}
-                            <div className="hidden lg:flex items-center justify-center pl-2">
-                              <div className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 group-hover:bg-[#181343] group-hover:text-white group-hover:border-[#181343] group-hover:translate-x-0.5 transition-all shrink-0 shadow-2xs">
-                                <ArrowRight className="w-4 h-4" />
+                            <div className="hidden lg:flex items-center justify-center pl-1">
+                              <div className="w-9 h-9 rounded-xl border border-slate-200/90 bg-slate-50 text-slate-400 group-hover:bg-[#181343] group-hover:text-white group-hover:border-[#181343] group-hover:translate-x-0.5 transition-all flex items-center justify-center shrink-0">
+                                <ChevronRight className="w-4 h-4" />
                               </div>
                             </div>
                           </div>

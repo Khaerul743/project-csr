@@ -39,12 +39,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    // Standard SIPENA Button Base: 500-600 font weight, 10-12px (rounded-xl) radius, smooth transitions
+    // Standard SIPENA Button Base: 500-600 font weight, 10-12px (rounded-xl) radius, smooth transitions, tactile press
     const baseStyles =
-      "inline-flex flex-row items-center justify-center font-medium transition-all duration-150 outline-hidden focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer whitespace-nowrap";
+      "inline-flex flex-row items-center justify-center font-medium transition-all duration-150 outline-hidden focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer whitespace-nowrap active:scale-[0.97]";
 
     // Standardized SIPENA Button System:
-    // 1. Primary: Solid Navy (#181343, hover: #26224C, text white)
+    // 1. Primary: Solid Navy (#181343, hover: #26224C, text white) with subtle ambient glow
     // 2. Secondary/Outline: White background, Navy text (#181343), Border #CBC8DB, hover: #F4F3FA
     // 3. Filter: White background, Border #E1E4EB, text #181343. Active: #F0EFF8 with #CBC8DB border
     // 4. Destructive: White/transparent, Red text (#D9385F), Border #FECDD3, hover: #FFF1F2
@@ -52,28 +52,28 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // 6. Ghost: Transparent background, Navy text (#181343), hover: #F4F3FA
     const variantStyles: Record<string, string> = {
       primary:
-        "bg-[#181343] text-white hover:bg-[#26224C] active:bg-[#110D30] border border-transparent shadow-2xs hover:shadow-xs focus:ring-[#181343]/30 font-semibold",
+        "bg-[#181343] text-white hover:bg-[#26224C] active:bg-[#110D30] border border-transparent shadow-2xs hover:shadow-[0_0_20px_rgba(24,19,67,0.25)] focus:ring-[#181343]/30 font-semibold",
       accent:
-        "bg-[#181343] text-white hover:bg-[#26224C] active:bg-[#110D30] border border-transparent shadow-2xs hover:shadow-xs focus:ring-[#181343]/30 font-semibold",
+        "bg-[#181343] text-white hover:bg-[#26224C] active:bg-[#110D30] border border-transparent shadow-2xs hover:shadow-[0_0_20px_rgba(24,19,67,0.25)] focus:ring-[#181343]/30 font-semibold",
       secondary:
-        "bg-white text-[#181343] border border-[#CBC8DB] hover:bg-[#F4F3FA] active:bg-[#ECEAF5] shadow-2xs focus:ring-[#181343]/20 font-medium",
+        "bg-white text-[#181343] border border-[#CBC8DB] hover:bg-[#F4F3FA] hover:border-[#181343]/30 hover:shadow-[0_4px_16px_rgba(24,19,67,0.08)] active:bg-[#ECEAF5] shadow-2xs focus:ring-[#181343]/20 font-medium",
       outline:
-        "bg-white text-[#181343] border border-[#CBC8DB] hover:bg-[#F4F3FA] active:bg-[#ECEAF5] shadow-2xs focus:ring-[#181343]/20 font-medium",
+        "bg-white text-[#181343] border border-[#CBC8DB] hover:bg-[#F4F3FA] hover:border-[#181343]/30 hover:shadow-[0_4px_16px_rgba(24,19,67,0.08)] active:bg-[#ECEAF5] shadow-2xs focus:ring-[#181343]/20 font-medium",
       filter: isActive
-        ? "bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] shadow-2xs font-semibold focus:ring-[#181343]/20"
-        : "bg-white text-[#181343] border border-[#E1E4EB] hover:bg-[#F8F8FB] active:bg-[#F0EFF8] shadow-2xs focus:ring-[#181343]/20 font-medium",
+        ? "bg-[#F0EFF8] text-[#181343] border border-[#CBC8DB] shadow-2xs font-semibold focus:ring-[#181343]/20 hover:shadow-[0_2px_12px_rgba(24,19,67,0.06)]"
+        : "bg-white text-[#181343] border border-[#E1E4EB] hover:bg-[#F8F8FB] hover:border-slate-300 hover:shadow-[0_2px_12px_rgba(24,19,67,0.06)] active:bg-[#F0EFF8] shadow-2xs focus:ring-[#181343]/20 font-medium",
       ghost:
         "bg-transparent text-[#181343] hover:bg-[#F4F3FA] active:bg-[#ECEAF5] border border-transparent focus:ring-[#181343]/20 font-medium",
       destructive:
-        "bg-white text-[#D9385F] border border-[#FECDD3] hover:bg-[#FFF1F2] active:bg-[#FFE4E6] shadow-2xs focus:ring-[#D9385F]/20 font-medium",
+        "bg-white text-[#D9385F] border border-[#FECDD3] hover:bg-[#FFF1F2] hover:border-rose-300 hover:shadow-[0_0_16px_rgba(217,56,95,0.20)] active:bg-[#FFE4E6] shadow-2xs focus:ring-[#D9385F]/20 font-medium",
       danger:
-        "bg-white text-[#D9385F] border border-[#FECDD3] hover:bg-[#FFF1F2] active:bg-[#FFE4E6] shadow-2xs focus:ring-[#D9385F]/20 font-medium",
+        "bg-white text-[#D9385F] border border-[#FECDD3] hover:bg-[#FFF1F2] hover:border-rose-300 hover:shadow-[0_0_16px_rgba(217,56,95,0.20)] active:bg-[#FFE4E6] shadow-2xs focus:ring-[#D9385F]/20 font-medium",
       "destructive-solid":
-        "bg-[#D9385F] text-white hover:bg-[#BE224A] active:bg-[#9F173C] border border-transparent shadow-2xs hover:shadow-xs focus:ring-[#D9385F]/30 font-semibold",
+        "bg-[#D9385F] text-white hover:bg-[#BE224A] hover:shadow-[0_0_20px_rgba(217,56,95,0.30)] active:bg-[#9F173C] border border-transparent shadow-2xs focus:ring-[#D9385F]/30 font-semibold",
       "translucent-white":
-        "bg-[rgba(255,255,255,0.12)] text-white border border-[rgba(255,255,255,0.40)] hover:bg-[rgba(255,255,255,0.20)] active:bg-[rgba(255,255,255,0.26)] hover:border-[rgba(255,255,255,0.55)] shadow-2xs backdrop-blur-md focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent outline-none font-semibold",
+        "bg-[rgba(255,255,255,0.12)] text-white border border-[rgba(255,255,255,0.40)] hover:bg-[rgba(255,255,255,0.20)] hover:shadow-[0_0_16px_rgba(255,255,255,0.35)] active:bg-[rgba(255,255,255,0.26)] hover:border-[rgba(255,255,255,0.55)] shadow-2xs backdrop-blur-md focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent outline-none font-semibold",
       glass:
-        "bg-[rgba(255,255,255,0.12)] text-white border border-[rgba(255,255,255,0.40)] hover:bg-[rgba(255,255,255,0.20)] active:bg-[rgba(255,255,255,0.26)] hover:border-[rgba(255,255,255,0.55)] shadow-2xs backdrop-blur-md focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent outline-none font-semibold",
+        "bg-[rgba(255,255,255,0.12)] text-white border border-[rgba(255,255,255,0.40)] hover:bg-[rgba(255,255,255,0.20)] hover:shadow-[0_0_16px_rgba(255,255,255,0.35)] active:bg-[rgba(255,255,255,0.26)] hover:border-[rgba(255,255,255,0.55)] shadow-2xs backdrop-blur-md focus:ring-2 focus:ring-white/70 focus:ring-offset-2 focus:ring-offset-transparent outline-none font-semibold",
     };
 
     // Standardized Consistent Sizes: 10-12px radius (rounded-xl)

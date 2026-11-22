@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardGridSkeleton } from "@/components/ui/skeleton";
 import { opportunityStatusEnum } from "@/db/schema/opportunities";
 import { csrFocusAreaEnum } from "@/db/schema/csr-focus-areas";
 import { OpportunityItem } from "../types";
@@ -349,10 +350,7 @@ export function OpportunitiesManagementView({
 
       {/* 4. Grid Card Peluang CSR */}
       {isLoading ? (
-        <div className="py-20 text-center text-xs text-[#787680] space-y-3 bg-white rounded-2xl border border-[#E8E8EA]">
-          <div className="w-7 h-7 border-2 border-[#181343] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p>Memuat daftar peluang CSR...</p>
-        </div>
+        <CardGridSkeleton count={3} />
       ) : filteredAndSortedOpportunities.length === 0 ? (
         <div className="py-16 px-6 rounded-2xl bg-white border border-dashed border-[#E8E8EA] text-center space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] text-[#181343] flex items-center justify-center mx-auto">
@@ -400,7 +398,7 @@ export function OpportunitiesManagementView({
             return (
               <div
                 key={opp.id}
-                className="rounded-2xl bg-white border border-[#E8E8EA] hover:border-slate-300 shadow-2xs hover:shadow-xs transition-all duration-200 flex flex-col justify-between overflow-hidden group"
+                className="rounded-2xl bg-white border border-[#E8E8EA] hover:border-slate-300 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 ease-out flex flex-col justify-between overflow-hidden group"
               >
                 <div>
                   {/* Cover Header */}

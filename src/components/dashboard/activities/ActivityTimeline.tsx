@@ -737,7 +737,7 @@ export function ActivityTimeline({
                           variant="primary"
                           size="sm"
                           onClick={() => setSelectedActivityForVerify(act)}
-                          leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />}
+                          leftIcon={<ShieldCheck className="w-3.5 h-3.5 text-white" />}
                           className="text-xs font-bold bg-[#181343] hover:bg-indigo-950 text-white rounded-xl px-4 py-2 cursor-pointer shadow-2xs"
                         >
                           {act.status === "VERIFIED" ? "Perbarui Verifikasi" : "Verifikasi & Evaluasi"}
@@ -854,54 +854,54 @@ export function ActivityTimeline({
                     </div>
                   )}
 
-                  {/* Baris Parameter & Micro-Stats (Bottom Bar: Rapi, Terstruktur & Terpadu) */}
-                  {(act.beneficiariesReached || numFunds > 0 || act.documentUrl) && (
-                    <div className="pt-3 border-t border-slate-100">
-                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
-                        {act.beneficiariesReached && (
-                          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
-                            <Users className="w-4 h-4 text-indigo-600 shrink-0" />
-                            <span>Penerima: <strong className="text-[#181343] font-bold">{act.beneficiariesReached}</strong></span>
-                          </div>
-                        )}
-                        {numFunds > 0 && (
-                          <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
-                            <Wallet className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span>Dana Termin: <strong className="text-[#181343] font-bold">{formatRupiah(act.fundsSpent)}</strong></span>
-                          </div>
-                        )}
-                        {act.documentUrl && (
-                          <a
-                            href={act.documentUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-700 hover:text-[#181343] transition-colors sm:ml-auto"
-                          >
-                            <FileCheck2 className="w-4 h-4 text-slate-500 shrink-0" />
-                            <span className="font-bold">Unduh Berkas BAST</span>
-                            <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                                {/* Baris Parameter & Micro-Stats (Bottom Bar: Rapi, Terstruktur & Terpadu) */}
+                                {(act.beneficiariesReached || numFunds > 0 || act.documentUrl) && (
+                                  <div className="pt-3 border-t border-slate-100">
+                                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+                                      {act.beneficiariesReached && (
+                                        <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
+                                          <Users className="w-4 h-4 text-slate-500 shrink-0" />
+                                          <span>Penerima: <strong className="text-[#181343] font-bold">{act.beneficiariesReached}</strong></span>
+                                        </div>
+                                      )}
+                                      {numFunds > 0 && (
+                                        <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200/70 text-slate-700">
+                                          <Wallet className="w-4 h-4 text-slate-500 shrink-0" />
+                                          <span>Dana Termin: <strong className="text-[#181343] font-bold">{formatRupiah(act.fundsSpent)}</strong></span>
+                                        </div>
+                                      )}
+                                      {act.documentUrl && (
+                                        <a
+                                          href={act.documentUrl}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/70 text-slate-700 hover:text-[#181343] transition-colors sm:ml-auto"
+                                        >
+                                          <FileCheck2 className="w-4 h-4 text-slate-500 shrink-0" />
+                                          <span className="font-bold">Unduh Berkas BAST</span>
+                                          <ExternalLink className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
 
-                  {/* Indikator Riwayat Versi / Audit Trail */}
-                  {history.length > 0 && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <button
-                        type="button"
-                        onClick={() => toggleAuditTrail(act.id)}
-                        className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer"
-                      >
-                        <History className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{history.length} Riwayat Pengajuan / Versi Terdahulu</span>
-                        {isAuditTrailExpanded ? (
-                          <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
-                        ) : (
-                          <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
-                        )}
-                      </button>
+                                {/* Indikator Riwayat Versi / Audit Trail */}
+                                {history.length > 0 && (
+                                  <div className="pt-2 border-t border-slate-100">
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleAuditTrail(act.id)}
+                                      className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition cursor-pointer"
+                                    >
+                                      <History className="w-3.5 h-3.5 text-slate-400" />
+                                      <span>{history.length} Riwayat Pengajuan / Versi Terdahulu</span>
+                                      {isAuditTrailExpanded ? (
+                                        <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+                                      ) : (
+                                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                                      )}
+                                    </button>
 
                       {isAuditTrailExpanded && (
                         <div className="mt-2.5 space-y-2 pl-4 border-l-2 border-slate-200">
@@ -923,242 +923,242 @@ export function ActivityTimeline({
                               </p>
                             </div>
                           ))}
-                        </div>
+                                          </div>
                       )}
                     </div>
                   )}
                 </div>
-              );
-            })
+                            );
+                          })
           )}
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* MODAL: DETAIL LENGKAP LAPORAN (Requirement 5)                             */}
-      {/* ========================================================================= */}
-      {selectedActivityForDetail && (
-        <Modal
-          isOpen={Boolean(selectedActivityForDetail)}
-          onClose={() => setSelectedActivityForDetail(null)}
-          title="Detail Laporan Kegiatan Lapangan"
-          description={`Dokumentasi pelaksanaan untuk: ${selectedActivityForDetail.title}`}
-          maxWidth="lg"
-        >
-          <div className="space-y-5 py-2">
-            {/* Header info */}
-            <div className="p-4 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-bold text-[#181343]">
-                  {selectedActivityForDetail.title}
-                </span>
-
-                {selectedActivityForDetail.status === "VERIFIED" ? (
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#EDF9F3] text-[#009E75] border border-[#35B98E]">
-                    Terverifikasi
-                  </span>
-                ) : selectedActivityForDetail.status === "REVISION_REQUESTED" ? (
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
-                    Perlu Perbaikan
-                  </span>
-                ) : (
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
-                    Menunggu Verifikasi
-                  </span>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#787680]">
-                <span>Tanggal: {formatDate(selectedActivityForDetail.activityDate)}</span>
-                {selectedActivityForDetail.location && (
-                  <span>Lokasi: {selectedActivityForDetail.location}</span>
-                )}
-                <span>Pelapor: {selectedActivityForDetail.submitterName || "Mitra"}</span>
-                {selectedActivityForDetail.stageTitle && (
-                  <span>
-                    Tahapan: Tahap {selectedActivityForDetail.stageOrderIndex} ({cleanStageTitle(selectedActivityForDetail.stageTitle)})
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Narasi Penuh */}
-            <div className="space-y-1">
-              <span className="text-xs font-bold text-[#181343] block">
-                Deskripsi Lengkap Kegiatan:
-              </span>
-              <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed whitespace-pre-line p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80">
-                {selectedActivityForDetail.description}
-              </p>
-            </div>
-
-            {/* Capaian & Anggaran */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs">
-                <span className="text-[11px] font-semibold text-[#787680] block">
-                  Penerima Manfaat:
-                </span>
-                <span className="font-bold text-[#181343] text-sm mt-0.5 block">
-                  {selectedActivityForDetail.beneficiariesReached || "-"}
-                </span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs">
-                <span className="text-[11px] font-semibold text-[#787680] block">
-                  Realisasi Dana:
-                </span>
-                <span className="font-bold text-[#009E75] text-sm mt-0.5 block">
-                  {formatRupiah(selectedActivityForDetail.fundsSpent)}
-                </span>
-              </div>
-            </div>
-
-            {/* Galeri Lengkap */}
-            {parsePhotos(selectedActivityForDetail.mediaUrls).length > 0 && (
-              <div className="space-y-2">
-                <span className="text-xs font-bold text-[#181343] block">
-                  Dokumentasi Foto ({parsePhotos(selectedActivityForDetail.mediaUrls).length} Foto):
-                </span>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                  {parsePhotos(selectedActivityForDetail.mediaUrls).map((url, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() =>
-                        handleOpenLightbox(
-                          parsePhotos(selectedActivityForDetail.mediaUrls),
-                          idx,
-                          selectedActivityForDetail.title
-                        )
-                      }
-                      className="relative h-24 rounded-xl overflow-hidden border border-[#E8E8EA] cursor-pointer group shadow-2xs hover:shadow-xs transition"
-                    >
-                      <img
-                        src={url}
-                        alt={`Dokumentasi ${idx + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
-                      />
-                      <div className="absolute inset-0 bg-[#181343]/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
-                        <Maximize2 className="w-4 h-4" />
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Berkas BAST */}
-            {selectedActivityForDetail.documentUrl && (
-              <div className="p-3 rounded-xl bg-[#EDF9F3] border border-[#35B98E]/40 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-emerald-800 font-bold">
-                  <FileCheck2 className="w-4 h-4 text-emerald-600" />
-                  <span>Lampiran Dokumen BAST / Legalitas Terlampir</span>
-                </div>
-                <a
-                  href={selectedActivityForDetail.documentUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1 rounded-lg bg-white border border-[#35B98E] text-emerald-700 font-bold hover:bg-emerald-50 transition flex items-center gap-1.5"
-                >
-                  <span>Buka Berkas</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            )}
+      {/* ========================================================================= */}
+                    {/* MODAL: DETAIL LENGKAP LAPORAN (Requirement 5)                             */}
+                    {/* ========================================================================= */}
+                    {selectedActivityForDetail && (
+                      <Modal
+                        isOpen={Boolean(selectedActivityForDetail)}
+                        onClose={() => setSelectedActivityForDetail(null)}
+                        title="Detail Laporan Kegiatan Lapangan"
+                        description={`Dokumentasi pelaksanaan untuk: ${selectedActivityForDetail.title}`}
+                        maxWidth="lg"
+                      >
+                        <div className="space-y-5 py-2">
+                          {/* Header info */}
+                          <div className="p-4 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] space-y-2">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <span className="text-xs font-bold text-[#181343]">
+                                {selectedActivityForDetail.title}
+                              </span>
 
-            {/* Catatan Feedback */}
-            {selectedActivityForDetail.companyFeedback && (
-              <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1">
-                <span className="font-bold text-amber-900 block">
-                  Catatan Evaluasi Verifikator ({selectedActivityForDetail.verifierName || "CSR Admin"}):
-                </span>
-                <p className="text-slate-700 italic">
-                  "{selectedActivityForDetail.companyFeedback}"
-                </p>
-              </div>
-            )}
+                              {selectedActivityForDetail.status === "VERIFIED" ? (
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#EDF9F3] text-[#009E75] border border-[#35B98E]">
+                                  Terverifikasi
+                                </span>
+                              ) : selectedActivityForDetail.status === "REVISION_REQUESTED" ? (
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">
+                                  Perlu Perbaikan
+                                </span>
+                              ) : (
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                                  Menunggu Verifikasi
+                                </span>
+                              )}
+                            </div>
 
-            {/* Close Button */}
-            <div className="pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={() => setSelectedActivityForDetail(null)}
-                className="w-full font-bold"
-              >
-                Tutup Detail
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#787680]">
+                              <span>Tanggal: {formatDate(selectedActivityForDetail.activityDate)}</span>
+                              {selectedActivityForDetail.location && (
+                                <span>Lokasi: {selectedActivityForDetail.location}</span>
+                              )}
+                              <span>Pelapor: {selectedActivityForDetail.submitterName || "Mitra"}</span>
+                              {selectedActivityForDetail.stageTitle && (
+                                <span>
+                                  Tahapan: Tahap {selectedActivityForDetail.stageOrderIndex} ({cleanStageTitle(selectedActivityForDetail.stageTitle)})
+                                </span>
+                              )}
+                            </div>
+                          </div>
 
-      {/* --- Modals Tambah, Verifikasi, Lightbox, AI, Penyaluran --- */}
-      <AddActivityModal
-        isOpen={isAddModalOpen}
-        onClose={() => {
-          setIsAddModalOpen(false);
-          setActiveStageForAdd(undefined);
-        }}
-        programId={programId}
-        programTitle={programTitle}
-        stages={stages}
-        defaultStageId={activeStageForAdd}
-        hasConfirmedDisbursement={hasConfirmedDisbursement}
-        remainingPartnerBalance={remainingPartnerBalance}
-        onSuccess={() => {
-          fetchActivities();
-          fetchStages();
-          fetchFinances();
-          if (onActivityChanged) onActivityChanged();
-        }}
-      />
+                          {/* Narasi Penuh */}
+                          <div className="space-y-1">
+                            <span className="text-xs font-bold text-[#181343] block">
+                              Deskripsi Lengkap Kegiatan:
+                            </span>
+                            <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed whitespace-pre-line p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80">
+                              {selectedActivityForDetail.description}
+                            </p>
+                          </div>
 
-      {role === "COMPANY" && (
-        <DisburseFundModal
-          isOpen={isDisburseModalOpen}
-          onClose={() => setIsDisburseModalOpen(false)}
-          programId={programId}
-          nextTrancheNumber={nextTrancheNumber}
-          remainingBudget={remainingBudgetToDisburse}
-          onSuccess={() => {
-            fetchFinances();
-            fetchActivities();
-            fetchStages();
-            if (onActivityChanged) onActivityChanged();
-          }}
-        />
-      )}
+                          {/* Capaian & Anggaran */}
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs">
+                              <span className="text-[11px] font-semibold text-[#787680] block">
+                                Penerima Manfaat:
+                              </span>
+                              <span className="font-bold text-[#181343] text-sm mt-0.5 block">
+                                {selectedActivityForDetail.beneficiariesReached || "-"}
+                              </span>
+                            </div>
 
-      <VerifyActivityModal
-        isOpen={Boolean(selectedActivityForVerify)}
-        activity={selectedActivityForVerify}
-        onClose={() => setSelectedActivityForVerify(null)}
-        onSuccess={() => {
-          fetchActivities();
-          fetchStages();
-          if (onActivityChanged) onActivityChanged();
-        }}
-      />
+                            <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs">
+                              <span className="text-[11px] font-semibold text-[#787680] block">
+                                Realisasi Dana:
+                              </span>
+                              <span className="font-bold text-[#009E75] text-sm mt-0.5 block">
+                                {formatRupiah(selectedActivityForDetail.fundsSpent)}
+                              </span>
+                            </div>
+                          </div>
 
-      <PhotoLightboxModal
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
-        photos={lightboxPhotos}
-        initialIndex={lightboxIndex}
-        title={lightboxTitle}
-      />
+                          {/* Galeri Lengkap */}
+                          {parsePhotos(selectedActivityForDetail.mediaUrls).length > 0 && (
+                            <div className="space-y-2">
+                              <span className="text-xs font-bold text-[#181343] block">
+                                Dokumentasi Foto ({parsePhotos(selectedActivityForDetail.mediaUrls).length} Foto):
+                              </span>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                                {parsePhotos(selectedActivityForDetail.mediaUrls).map((url, idx) => (
+                                  <div
+                                    key={idx}
+                                    onClick={() =>
+                                      handleOpenLightbox(
+                                        parsePhotos(selectedActivityForDetail.mediaUrls),
+                                        idx,
+                                        selectedActivityForDetail.title
+                                      )
+                                    }
+                                    className="relative h-24 rounded-xl overflow-hidden border border-[#E8E8EA] cursor-pointer group shadow-2xs hover:shadow-xs transition"
+                                  >
+                                    <img
+                                      src={url}
+                                      alt={`Dokumentasi ${idx + 1}`}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                                    />
+                                    <div className="absolute inset-0 bg-[#181343]/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white">
+                                      <Maximize2 className="w-4 h-4" />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
-      <AiMilestonesModal
-        isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
-        programId={programId}
-        programTitle={programTitle}
-        onSuccess={() => {
-          fetchStages();
-          if (onActivityChanged) onActivityChanged();
-        }}
-      />
-    </div>
-  );
+                          {/* Berkas BAST */}
+                          {selectedActivityForDetail.documentUrl && (
+                            <div className="p-3 rounded-xl bg-[#EDF9F3] border border-[#35B98E]/40 flex items-center justify-between text-xs">
+                              <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                                <FileCheck2 className="w-4 h-4 text-emerald-600" />
+                                <span>Lampiran Dokumen BAST / Legalitas Terlampir</span>
+                              </div>
+                              <a
+                                href={selectedActivityForDetail.documentUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-3 py-1 rounded-lg bg-white border border-[#35B98E] text-emerald-700 font-bold hover:bg-emerald-50 transition flex items-center gap-1.5"
+                              >
+                                <span>Buka Berkas</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                            </div>
+                          )}
+
+                          {/* Catatan Feedback */}
+                          {selectedActivityForDetail.companyFeedback && (
+                            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1">
+                              <span className="font-bold text-amber-900 block">
+                                Catatan Evaluasi Verifikator ({selectedActivityForDetail.verifierName || "CSR Admin"}):
+                              </span>
+                              <p className="text-slate-700 italic">
+                                "{selectedActivityForDetail.companyFeedback}"
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Close Button */}
+                          <div className="pt-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="md"
+                              onClick={() => setSelectedActivityForDetail(null)}
+                              className="w-full font-bold"
+                            >
+                              Tutup Detail
+                            </Button>
+                          </div>
+                        </div>
+                      </Modal>
+                    )}
+
+                    {/* --- Modals Tambah, Verifikasi, Lightbox, AI, Penyaluran --- */}
+                    <AddActivityModal
+                      isOpen={isAddModalOpen}
+                      onClose={() => {
+                        setIsAddModalOpen(false);
+                        setActiveStageForAdd(undefined);
+                      }}
+                      programId={programId}
+                      programTitle={programTitle}
+                      stages={stages}
+                      defaultStageId={activeStageForAdd}
+                      hasConfirmedDisbursement={hasConfirmedDisbursement}
+                      remainingPartnerBalance={remainingPartnerBalance}
+                      onSuccess={() => {
+                        fetchActivities();
+                        fetchStages();
+                        fetchFinances();
+                        if (onActivityChanged) onActivityChanged();
+                      }}
+                    />
+
+                    {role === "COMPANY" && (
+                      <DisburseFundModal
+                        isOpen={isDisburseModalOpen}
+                        onClose={() => setIsDisburseModalOpen(false)}
+                        programId={programId}
+                        nextTrancheNumber={nextTrancheNumber}
+                        remainingBudget={remainingBudgetToDisburse}
+                        onSuccess={() => {
+                          fetchFinances();
+                          fetchActivities();
+                          fetchStages();
+                          if (onActivityChanged) onActivityChanged();
+                        }}
+                      />
+                    )}
+
+                    <VerifyActivityModal
+                      isOpen={Boolean(selectedActivityForVerify)}
+                      activity={selectedActivityForVerify}
+                      onClose={() => setSelectedActivityForVerify(null)}
+                      onSuccess={() => {
+                        fetchActivities();
+                        fetchStages();
+                        if (onActivityChanged) onActivityChanged();
+                      }}
+                    />
+
+                    <PhotoLightboxModal
+                      isOpen={isLightboxOpen}
+                      onClose={() => setIsLightboxOpen(false)}
+                      photos={lightboxPhotos}
+                      initialIndex={lightboxIndex}
+                      title={lightboxTitle}
+                    />
+
+                    <AiMilestonesModal
+                      isOpen={isAiModalOpen}
+                      onClose={() => setIsAiModalOpen(false)}
+                      programId={programId}
+                      programTitle={programTitle}
+                      onSuccess={() => {
+                        fetchStages();
+                        if (onActivityChanged) onActivityChanged();
+                      }}
+                    />
+                  </div>
+                  );
 }

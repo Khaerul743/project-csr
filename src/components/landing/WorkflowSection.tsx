@@ -5,13 +5,8 @@ import {
   Building2,
   Users2,
   HeartHandshake,
-  FileCheck2,
-  QrCode,
-  ShieldCheck,
   CheckCircle2,
   ArrowRight,
-  TrendingUp,
-  Clock,
 } from "lucide-react";
 import { ScrollReveal, StaggerContainer } from "@/components/ui/scroll-reveal";
 
@@ -68,39 +63,46 @@ export function WorkflowSection() {
   ];
 
   return (
-    <section id="cara-kerja" className="py-20 lg:py-28 bg-[#FFFFFF] relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="cara-kerja"
+      className="min-h-[calc(100vh-5rem)] lg:min-h-[calc(100dvh-5rem)] flex flex-col justify-start pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#FFFFFF] relative overflow-hidden scroll-mt-[76px]"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Section Header */}
         <ScrollReveal animation="fade-up" delay={50}>
           <div className="max-w-3xl mx-auto text-center space-y-4">
-            <span className="px-3 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-              Alur Interaksi & Siklus Program
-            </span>
+            <div>
+              <span className="inline-flex px-3.5 py-1.5 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
+                Alur Interaksi &amp; Siklus Program
+              </span>
+            </div>
 
             <h2
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#181343] leading-tight"
+              className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#181343] leading-snug pt-1"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Empat Langkah Menuju Program CSR yang Akuntabel
+              Empat Langkah Menuju <br className="hidden sm:block" />
+              <span className="whitespace-nowrap">Program CSR yang Akuntabel</span>
             </h2>
 
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto text-justify [text-align-last:center]">
               Dari pembukaan inisiatif hingga verifikasi dampak akhir, setiap pihak memiliki peran transparan yang saling terhubung dalam satu ekosistem.
             </p>
           </div>
         </ScrollReveal>
 
         {/* Interactive Role Perspective Switcher */}
-        <ScrollReveal animation="fade-up" delay={150}>
-          <div className="mt-10 flex items-center justify-center">
+        <ScrollReveal animation="fade-up" delay={100}>
+          <div className="mt-6 sm:mt-8 flex items-center justify-center">
             <div className="inline-flex p-1.5 rounded-2xl bg-[#F4F4F6] border border-[#E5E7EB] max-w-full overflow-x-auto">
               <button
                 type="button"
                 onClick={() => setRole("company")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "company"
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  role === "company"
                     ? "bg-[#181343] text-white shadow-xs"
                     : "text-slate-600 hover:text-[#181343]"
-                  }`}
+                }`}
               >
                 <Building2 className="w-4 h-4" />
                 <span>Sudut Pandang Perusahaan</span>
@@ -109,10 +111,11 @@ export function WorkflowSection() {
               <button
                 type="button"
                 onClick={() => setRole("partner")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "partner"
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  role === "partner"
                     ? "bg-[#181343] text-white shadow-xs"
                     : "text-slate-600 hover:text-[#181343]"
-                  }`}
+                }`}
               >
                 <Users2 className="w-4 h-4" />
                 <span>Sudut Pandang Yayasan / NGO</span>
@@ -121,10 +124,11 @@ export function WorkflowSection() {
               <button
                 type="button"
                 onClick={() => setRole("community")}
-                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${role === "community"
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                  role === "community"
                     ? "bg-[#181343] text-white shadow-xs"
                     : "text-slate-600 hover:text-[#181343]"
-                  }`}
+                }`}
               >
                 <HeartHandshake className="w-4 h-4" />
                 <span>Masyarakat Penerima Manfaat</span>
@@ -137,40 +141,40 @@ export function WorkflowSection() {
         <StaggerContainer
           staggerDelay={120}
           baseDelay={100}
-          className="mt-14 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative"
+          className="mt-8 sm:mt-10 lg:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 relative"
         >
           {steps.map((st, idx) => (
             <div
               key={st.num}
-              className="p-6 sm:p-7 rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group h-full min-h-[270px] sm:min-h-[285px] lg:min-h-[305px]"
+              className="card-hover p-6 sm:p-7 rounded-2xl border border-[#E5E7EB] bg-[#FFFFFF] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group h-full min-h-[250px] sm:min-h-[270px] lg:min-h-[290px]"
             >
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="w-9 h-9 rounded-xl bg-[#181343] text-white font-extrabold text-sm flex items-center justify-center">
+                  <span className="w-10 h-10 rounded-xl bg-[#181343] text-white font-extrabold text-sm flex items-center justify-center shadow-xs">
                     {st.num}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-[10px] font-bold">
+                  <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60 text-xs font-bold">
                     {st.tag}
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-[#181343] leading-snug">
+                <h3 className="text-base sm:text-lg font-bold text-[#181343] leading-snug">
                   {st.title}
                 </h3>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed min-h-[4.5rem] sm:min-h-[5rem] lg:min-h-[5.75rem]">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed min-h-[4.25rem]">
                   {role === "company" && st.companyText}
                   {role === "partner" && st.partnerText}
                   {role === "community" && st.communityText}
                 </p>
               </div>
 
-              <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[11px] text-slate-500">
+              <div className="pt-3.5 border-t border-[#E5E7EB] flex items-center justify-between text-xs text-slate-500">
                 <span className="font-medium">Tahap {idx + 1} dari 4</span>
                 {idx < 3 ? (
-                  <ArrowRight className="w-3.5 h-3.5 text-[#181343]/40 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 text-[#181343]/40 group-hover:translate-x-1 transition-transform" />
                 ) : (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 )}
               </div>
             </div>
