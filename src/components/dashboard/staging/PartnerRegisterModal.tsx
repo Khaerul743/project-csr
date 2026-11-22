@@ -5,12 +5,9 @@ import {
   HeartHandshake,
   Globe,
   Mail,
-  MapPin,
   Phone,
   AlertCircle,
   CheckCircle2,
-  Users2,
-  Compass,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
@@ -116,15 +113,15 @@ export function PartnerRegisterModal({
         )}
 
         {/* Informasi Jalur Role */}
-        <div className="p-3.5 rounded-xl bg-slate-100 border border-slate-200 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#181343] text-white flex items-center justify-center shrink-0">
-            <HeartHandshake className="w-5 h-5 text-teal-300" />
+        <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+            <HeartHandshake className="w-5 h-5 text-white" />
           </div>
           <div className="text-xs">
-            <span className="font-bold text-[#181343] block">
+            <span className="font-bold text-emerald-950 block">
               Jalur Organisasi: Mitra Pelaksana CSR / NGO
             </span>
-            <span className="text-slate-600">
+            <span className="text-emerald-800">
               Akun Anda akan otomatis ditetapkan sebagai peran <strong>PARTNER_ADMIN</strong>.
             </span>
           </div>
@@ -132,9 +129,8 @@ export function PartnerRegisterModal({
 
         {/* Section 1: Profil Utama Lembaga */}
         <div className="space-y-3 pt-1">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
-            <Users2 className="w-3.5 h-3.5 text-[#181343]" />
-            <span>1. Profil Utama Lembaga</span>
+          <div className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            1. Profil Utama Lembaga
           </div>
 
           <Input
@@ -162,9 +158,8 @@ export function PartnerRegisterModal({
 
         {/* Section 2: Kontak Resmi */}
         <div className="space-y-3 pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
-            <Mail className="w-3.5 h-3.5 text-[#181343]" />
-            <span>2. Kontak & Komunikasi Resmi</span>
+          <div className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            2. Kontak & Komunikasi Resmi
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -199,9 +194,8 @@ export function PartnerRegisterModal({
 
         {/* Section 3: Domisili Sekretariat */}
         <div className="space-y-3 pt-2 border-t border-slate-100">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 uppercase tracking-wider">
-            <Compass className="w-3.5 h-3.5 text-[#181343]" />
-            <span>3. Domisili & Sekretariat</span>
+          <div className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            3. Domisili & Sekretariat
           </div>
 
           {/* Pemilihan Wilayah Terintegrasi (Provinsi -> Kota/Kabupaten) */}
@@ -248,8 +242,8 @@ export function PartnerRegisterModal({
             variant="primary"
             size="md"
             isLoading={isLoading}
-            className="text-xs font-bold px-5 bg-[#181343] hover:bg-[#231b5e] text-white border-[#181343] cursor-pointer"
-            leftIcon={<CheckCircle2 className="w-4 h-4 text-teal-300" />}
+            className="text-xs font-bold px-5 bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600 cursor-pointer"
+            leftIcon={<CheckCircle2 className="w-4 h-4 text-white" />}
           >
             Konfirmasi &amp; Daftarkan Mitra
           </Button>

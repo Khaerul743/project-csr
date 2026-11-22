@@ -84,7 +84,7 @@ export function LoginView() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F9F9FB] text-[#181343] relative overflow-hidden flex items-center justify-center font-sans select-none">
+    <div className="min-h-screen lg:h-screen w-full bg-[#F9F9FB] text-[#181343] relative overflow-y-auto lg:overflow-hidden flex items-center justify-center font-sans select-none">
       {/* Pola titik latar khas landing page SIPENA */}
       <div
         aria-hidden="true"
@@ -179,7 +179,7 @@ export function LoginView() {
         </svg>
       </div>
 
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 relative z-10 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 xl:gap-16">
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-6 relative z-10 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 xl:gap-16">
         {/* Kolom Kiri: Identitas Brand & Headline SIPENA */}
         <div className="w-full lg:w-[420px] shrink-0 flex flex-col items-start lg:-mt-6">
           <Link
@@ -367,53 +367,8 @@ export function LoginView() {
                 </button>
               </div>
 
-              {/* Pembatas */}
-              <div className="relative flex items-center py-0.5">
-                <div className="flex-grow border-t border-[#E2E8F0]" />
-                <span className="shrink-0 mx-3.5 text-xs text-[#64748B] font-medium">
-                  atau
-                </span>
-                <div className="flex-grow border-t border-[#E2E8F0]" />
-              </div>
-
-              {/* Tombol Masuk dengan Google */}
-              <button
-                type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  alert(
-                    "Autentikasi Single Sign-On (SSO) Google khusus untuk domain institusi terdaftar."
-                  );
-                }}
-                className="w-full h-11 rounded-full bg-white border border-[#CBC8DB] hover:border-[#181343]/50 hover:bg-[#F4F3FA] text-[#181343] font-medium text-[14px] transition-colors cursor-pointer flex items-center justify-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] focus-visible:ring-offset-2"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="w-[18px] h-[18px] shrink-0"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"
-                  />
-                </svg>
-                <span>Masuk dengan Google</span>
-              </button>
-
               {/* Tautan Belum Memiliki Akun? Daftar Sekarang */}
-              <div className="pt-1 text-center">
+              <div className="pt-2 text-center">
                 <p className="text-[13px] text-[#47464F]">
                   Belum memiliki akun?{" "}
                   <Link

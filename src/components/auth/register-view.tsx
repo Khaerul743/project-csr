@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ import {
   Info,
   Loader2,
 } from "lucide-react";
+import { VerifyEmailCard } from "./verify-email-view";
 
 const INPUT_BASE_CLASS =
   "w-full h-11 pl-10 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#C8C5D0] rounded-xl text-[14px] text-[#181343] placeholder:text-[#64748B] focus-visible:outline-none focus-visible:bg-white focus-visible:border-[#181343] focus-visible:ring-2 focus-visible:ring-[#181343]/15 transition-all";
@@ -36,6 +37,20 @@ export function RegisterView() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
+
+  // Status perpindahan halus ke verifikasi email OTP
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (window.location.pathname.includes("/register")) {
+        setIsRegistered(false);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,8 +102,16 @@ export function RegisterView() {
         return;
       }
 
-      // Arahkan ke halaman verifikasi email OTP
-      router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+      // Transisi halus ke verifikasi email di tengah layar tanpa reload
+      setRegisteredEmail(email.trim().toLowerCase());
+      setIsRegistered(true);
+      if (typeof window !== "undefined") {
+        window.history.pushState(
+          null,
+          "",
+          `/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`
+        );
+      }
     } catch {
       setErrorMessage("Terjadi kesalahan jaringan atau server tidak merespon.");
     } finally {
@@ -97,7 +120,7 @@ export function RegisterView() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F9F9FB] text-[#181343] relative overflow-hidden flex items-center justify-center font-sans">
+    <div className="min-h-screen lg:h-screen w-full bg-[#F9F9FB] text-[#181343] relative overflow-y-auto lg:overflow-hidden flex items-center justify-center font-sans select-none">
       {/* Pola titik latar khas landing page SIPENA */}
       <div
         aria-hidden="true"
@@ -192,335 +215,348 @@ export function RegisterView() {
         </svg>
       </div>
 
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10 relative z-10 flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-12 xl:gap-16">
-        {/* Kolom Kiri: Identitas Brand & Headline SIPENA */}
-        <div className="w-full lg:w-[420px] shrink-0 flex flex-col items-start lg:-mt-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#47464F] hover:text-[#181343] transition-colors mb-6 rounded-lg py-1 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
+      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-4 relative z-10 flex flex-col lg:flex-row items-center justify-center">
+        {/* Kolom Kiri: Identitas Brand & Headline SIPENA (Fade Out & Collapse Terkoordinasi) */}
+        <div
+          className={`shrink-0 transition-all duration-[530ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isRegistered
+            ? "max-h-0 lg:max-h-none lg:w-0 overflow-hidden pointer-events-none mr-0 mb-0"
+            : "max-h-[800px] lg:max-h-none w-full lg:w-[420px] mr-0 lg:mr-10 xl:mr-14 mb-6 lg:mb-0"
+            }`}
+          style={{
+            transitionDelay: isRegistered ? "120ms" : "0ms",
+            willChange: isRegistered ? "width, margin-right, max-height" : "auto",
+          }}
+          aria-hidden={isRegistered}
+        >
+          {/* Inner wrapper: persis posisinya dengan login (lg:-mt-6), transisi hanya aktif saat isRegistered */}
+          <div
+            className={`w-full lg:w-[420px] shrink-0 flex flex-col items-start lg:-mt-4 ${isRegistered
+              ? "transition-[opacity,transform] duration-[240ms] ease-out opacity-0 -translate-x-3 pointer-events-none"
+              : "opacity-100 translate-x-0"
+              }`}
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Kembali ke Beranda</span>
-          </Link>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#47464F] hover:text-[#181343] transition-colors mb-4 rounded-lg py-1 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Kembali ke Beranda</span>
+            </Link>
 
-          <div className="flex items-center gap-3">
-            <Image
-              src="/LOGO SIPENA.png"
-              alt="Logo SIPENA"
-              width={44}
-              height={44}
-              className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0"
-              priority
-            />
-            <div className="leading-tight">
-              <span
-                className="text-2xl font-extrabold tracking-tight text-[#181343] block leading-none"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                SIPENA
-              </span>
-              <span className="text-[11px] font-semibold text-[#181343]/60 tracking-wide block mt-1">
-                Petakan Kebutuhan, Pantau Perubahan
-              </span>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/LOGO SIPENA.png"
+                alt="Logo SIPENA"
+                width={44}
+                height={44}
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0"
+                priority
+              />
+              <div className="leading-tight">
+                <span
+                  className="text-2xl font-extrabold tracking-tight text-[#181343] block leading-none"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  SIPENA
+                </span>
+                <span className="text-[11px] font-semibold text-[#181343]/60 tracking-wide block mt-1">
+                  Petakan Kebutuhan, Pantau Perubahan
+                </span>
+              </div>
             </div>
+
+            <h1
+              className="mt-4 text-3xl sm:text-4xl lg:text-[38px] xl:text-[42px] font-extrabold tracking-tight leading-[1.18] text-[#181343]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Kolaborasi CSR
+              <br />
+              Lebih Terarah
+              <br />
+              Bersama <span className="text-emerald-600">SIPENA</span>
+            </h1>
+
+            <p className="mt-3 max-w-[430px] text-[15px] leading-[1.6] text-[#47464F]">
+              Platform kolaborasi CSR yang menghubungkan perusahaan, yayasan/NGO,
+              dan masyarakat untuk menciptakan dampak sosial nyata.
+            </p>
           </div>
-
-          <h1
-            className="mt-6 text-3xl sm:text-4xl lg:text-[40px] xl:text-[44px] font-extrabold tracking-tight leading-[1.18] text-[#181343]"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Kolaborasi CSR
-            <br />
-            Lebih Terarah
-            <br />
-            Bersama <span className="text-emerald-600">SIPENA</span>
-          </h1>
-
-          <p className="mt-4 max-w-[430px] text-[15px] leading-[1.6] text-[#47464F]">
-            Platform kolaborasi CSR yang menghubungkan perusahaan, yayasan/NGO,
-            dan masyarakat untuk menciptakan dampak sosial nyata.
-          </p>
         </div>
 
-        {/* Kolom Kanan: Kartu Form Pendaftaran */}
-        <div className="w-full max-w-[520px] shrink-0 flex justify-center">
-          <div className="w-full bg-white rounded-3xl border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(24,19,67,0.08)] p-6 sm:p-8 lg:p-9">
-            <div>
-              <h2
-                className="text-[24px] sm:text-[28px] font-extrabold tracking-tight text-[#181343] leading-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Daftar Akun SIPENA
-              </h2>
-              <p className="mt-1 text-sm text-[#47464F]">
-                Buat akun untuk mulai berkolaborasi di SIPENA.
-              </p>
-            </div>
-
-            {errorMessage && (
-              <div
-                role="alert"
-                className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-[13px] font-medium"
-              >
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            {infoMessage && (
-              <div
-                role="status"
-                className="mt-4 p-3 rounded-xl bg-[#EAF8F4] border border-emerald-200 flex items-start gap-2.5 text-[#181343] text-[13px] font-medium"
-              >
-                <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#047857]" />
-                <span>{infoMessage}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="mt-5 space-y-3.5">
-              {/* Nama Lengkap */}
+        {/* Kolom Kanan: Panel Tunggal (Single Panel Shell) Bergeser Mulus ke Tengah Layar */}
+        <div
+          className={`w-full shrink-0 flex justify-center transition-all duration-[530ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isRegistered ? "max-w-[480px]" : "max-w-[500px]"
+            }`}
+          style={{
+            transitionDelay: isRegistered ? "120ms" : "0ms",
+          }}
+        >
+          <div
+            className="w-full bg-white rounded-3xl border border-[#E5E7EB] shadow-[0_20px_50px_-15px_rgba(24,19,67,0.08)] p-5 sm:p-7 lg:py-6 lg:px-8 relative overflow-hidden transition-[min-height] duration-[530ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+            style={{
+              minHeight: isRegistered ? "470px" : "auto",
+            }}
+          >
+            {/* View 1: Formulir Registrasi Akun (Crossfade Out: Opacity 1 -> 0, Vertikal 0 -> -8px, Durasi 180ms, Delay 80ms) */}
+            <div
+              className={`transition-all duration-[180ms] ease-out motion-reduce:transition-none ${isRegistered
+                ? "opacity-0 -translate-y-2 pointer-events-none absolute inset-0 p-5 sm:p-7 lg:py-6 lg:px-8 invisible"
+                : "opacity-100 translate-y-0 relative"
+                }`}
+              style={{
+                transitionDelay: isRegistered ? "80ms" : "0ms",
+              }}
+              aria-hidden={isRegistered}
+            >
               <div>
-                <label
-                  htmlFor="register-fullname"
-                  className="block text-[13px] font-semibold text-[#181343] mb-1.5"
+                <h2
+                  className="text-[24px] sm:text-[28px] font-extrabold tracking-tight text-[#181343] leading-tight"
+                  style={{ fontFamily: "var(--font-display)" }}
                 >
-                  Nama Lengkap <span className="text-rose-600">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <User
-                    aria-hidden="true"
-                    className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
-                  />
-                  <input
-                    id="register-fullname"
-                    type="text"
-                    autoComplete="name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Masukkan nama lengkap"
-                    required
-                    className={INPUT_BASE_CLASS}
-                  />
-                </div>
-              </div>
-
-              {/* Nama Pengguna */}
-              <div>
-                <label
-                  htmlFor="register-username"
-                  className="block text-[13px] font-semibold text-[#181343] mb-1.5"
-                >
-                  Nama Pengguna <span className="text-rose-600">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <AtSign
-                    aria-hidden="true"
-                    className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
-                  />
-                  <input
-                    id="register-username"
-                    type="text"
-                    autoComplete="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Masukkan nama pengguna"
-                    required
-                    className={INPUT_BASE_CLASS}
-                  />
-                </div>
-              </div>
-
-              {/* Email Pribadi */}
-              <div>
-                <label
-                  htmlFor="register-email"
-                  className="block text-[13px] font-semibold text-[#181343] mb-1.5"
-                >
-                  Email Pribadi <span className="text-rose-600">*</span>
-                </label>
-                <div className="relative flex items-center">
-                  <Mail
-                    aria-hidden="true"
-                    className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
-                  />
-                  <input
-                    id="register-email"
-                    type="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Masukkan email pribadi"
-                    required
-                    className={INPUT_BASE_CLASS}
-                  />
-                </div>
-              </div>
-
-              {/* Kata Sandi & Konfirmasi Kata Sandi */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div>
-                  <label
-                    htmlFor="register-password"
-                    className="block text-[13px] font-semibold text-[#181343] mb-1.5"
-                  >
-                    Kata Sandi <span className="text-rose-600">*</span>
-                  </label>
-                  <div className="relative flex items-center">
-                    <Lock
-                      aria-hidden="true"
-                      className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
-                    />
-                    <input
-                      id="register-password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Buat kata sandi"
-                      minLength={6}
-                      required
-                      className={PASSWORD_INPUT_CLASS}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={
-                        showPassword
-                          ? "Sembunyikan kata sandi"
-                          : "Tampilkan kata sandi"
-                      }
-                      className="absolute right-1.5 inline-flex items-center justify-center min-w-[36px] min-h-[36px] text-[#64748B] hover:text-[#181343] rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="register-confirm-password"
-                    className="block text-[13px] font-semibold text-[#181343] mb-1.5"
-                  >
-                    Konfirmasi Kata Sandi <span className="text-rose-600">*</span>
-                  </label>
-                  <div className="relative flex items-center">
-                    <Lock
-                      aria-hidden="true"
-                      className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
-                    />
-                    <input
-                      id="register-confirm-password"
-                      type={showConfirmPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="Ulangi kata sandi"
-                      minLength={6}
-                      required
-                      className={PASSWORD_INPUT_CLASS}
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      aria-label={
-                        showConfirmPassword
-                          ? "Sembunyikan konfirmasi kata sandi"
-                          : "Tampilkan konfirmasi kata sandi"
-                      }
-                      className="absolute right-1.5 inline-flex items-center justify-center min-w-[36px] min-h-[36px] text-[#64748B] hover:text-[#181343] rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Tombol Utama Daftar Akun */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full h-11 rounded-full bg-[#181343] hover:bg-[#26224C] active:bg-[#110D30] text-white font-semibold text-[14.5px] shadow-[0_10px_24px_-8px_rgba(24,19,67,0.4)] transition-colors cursor-pointer disabled:opacity-65 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] focus-visible:ring-offset-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Memproses Pendaftaran...</span>
-                    </>
-                  ) : (
-                    <span>Daftar Akun</span>
-                  )}
-                </button>
-              </div>
-
-              {/* Pembatas */}
-              <div className="relative flex items-center py-0.5">
-                <div className="flex-grow border-t border-[#E2E8F0]" />
-                <span className="shrink-0 mx-3.5 text-xs text-[#64748B] font-medium">
-                  atau
-                </span>
-                <div className="flex-grow border-t border-[#E2E8F0]" />
-              </div>
-
-              {/* Tombol Google SSO */}
-              <button
-                type="button"
-                onClick={() => {
-                  setErrorMessage(null);
-                  setInfoMessage(
-                    "Pendaftaran melalui Google akan segera tersedia. Silakan lengkapi formulir di atas untuk mendaftar."
-                  );
-                }}
-                className="w-full h-11 rounded-full bg-white border border-[#CBC8DB] hover:border-[#181343]/50 hover:bg-[#F4F3FA] text-[#181343] font-medium text-[14px] transition-colors cursor-pointer flex items-center justify-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] focus-visible:ring-offset-2"
-              >
-                <svg
-                  aria-hidden="true"
-                  className="w-[18px] h-[18px] shrink-0"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    fill="#4285F4"
-                    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"
-                  />
-                  <path
-                    fill="#34A853"
-                    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"
-                  />
-                  <path
-                    fill="#FBBC05"
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"
-                  />
-                  <path
-                    fill="#EA4335"
-                    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"
-                  />
-                </svg>
-                <span>Daftar dengan Google</span>
-              </button>
-
-              {/* Tautan Login */}
-              <div className="pt-1 text-center">
-                <p className="text-[13px] text-[#47464F]">
-                  Sudah memiliki akun?{" "}
-                  <Link
-                    href="/login"
-                    className="font-semibold text-[#047857] hover:text-emerald-800 hover:underline rounded px-0.5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
-                  >
-                    Masuk ke Akun
-                  </Link>
+                  Daftar Akun SIPENA
+                </h2>
+                <p className="mt-1 text-sm text-[#47464F]">
+                  Buat akun untuk mulai berkolaborasi di SIPENA.
                 </p>
               </div>
-            </form>
+
+              {errorMessage && (
+                <div
+                  role="alert"
+                  className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-[13px] font-medium"
+                >
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {infoMessage && (
+                <div
+                  role="status"
+                  className="mt-4 p-3 rounded-xl bg-[#EAF8F4] border border-emerald-200 flex items-start gap-2.5 text-[#181343] text-[13px] font-medium"
+                >
+                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#047857]" />
+                  <span>{infoMessage}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="mt-4 space-y-2.5">
+                {/* Nama Lengkap */}
+                <div>
+                  <label
+                    htmlFor="register-fullname"
+                    className="block text-[13px] font-semibold text-[#181343] mb-1"
+                  >
+                    Nama Lengkap <span className="text-rose-600">*</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <User
+                      aria-hidden="true"
+                      className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
+                    />
+                    <input
+                      id="register-fullname"
+                      type="text"
+                      autoComplete="name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Masukkan nama lengkap"
+                      required
+                      className={INPUT_BASE_CLASS}
+                    />
+                  </div>
+                </div>
+
+                {/* Nama Pengguna */}
+                <div>
+                  <label
+                    htmlFor="register-username"
+                    className="block text-[13px] font-semibold text-[#181343] mb-1"
+                  >
+                    Nama Pengguna <span className="text-rose-600">*</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <AtSign
+                      aria-hidden="true"
+                      className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
+                    />
+                    <input
+                      id="register-username"
+                      type="text"
+                      autoComplete="username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      placeholder="Masukkan nama pengguna"
+                      required
+                      className={INPUT_BASE_CLASS}
+                    />
+                  </div>
+                </div>
+
+                {/* Email Pribadi */}
+                <div>
+                  <label
+                    htmlFor="register-email"
+                    className="block text-[13px] font-semibold text-[#181343] mb-1"
+                  >
+                    Email Pribadi <span className="text-rose-600">*</span>
+                  </label>
+                  <div className="relative flex items-center">
+                    <Mail
+                      aria-hidden="true"
+                      className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
+                    />
+                    <input
+                      id="register-email"
+                      type="email"
+                      autoComplete="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Masukkan email pribadi"
+                      required
+                      className={INPUT_BASE_CLASS}
+                    />
+                  </div>
+                </div>
+
+                {/* Kata Sandi & Konfirmasi Kata Sandi */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label
+                      htmlFor="register-password"
+                      className="block text-[13px] font-semibold text-[#181343] mb-1"
+                    >
+                      Kata Sandi <span className="text-rose-600">*</span>
+                    </label>
+                    <div className="relative flex items-center">
+                      <Lock
+                        aria-hidden="true"
+                        className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
+                      />
+                      <input
+                        id="register-password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Buat kata sandi"
+                        minLength={6}
+                        required
+                        className={PASSWORD_INPUT_CLASS}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={
+                          showPassword
+                            ? "Sembunyikan kata sandi"
+                            : "Tampilkan kata sandi"
+                        }
+                        className="absolute right-1.5 inline-flex items-center justify-center min-w-[36px] min-h-[36px] text-[#64748B] hover:text-[#181343] rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="register-confirm-password"
+                      className="block text-[13px] font-semibold text-[#181343] mb-1"
+                    >
+                      Konfirmasi Kata Sandi <span className="text-rose-600">*</span>
+                    </label>
+                    <div className="relative flex items-center">
+                      <Lock
+                        aria-hidden="true"
+                        className="w-4 h-4 text-[#64748B] absolute left-3.5 pointer-events-none"
+                      />
+                      <input
+                        id="register-confirm-password"
+                        type={showConfirmPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Ulangi kata sandi"
+                        minLength={6}
+                        required
+                        className={PASSWORD_INPUT_CLASS}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        aria-label={
+                          showConfirmPassword
+                            ? "Sembunyikan konfirmasi kata sandi"
+                            : "Tampilkan konfirmasi kata sandi"
+                        }
+                        className="absolute right-1.5 inline-flex items-center justify-center min-w-[36px] min-h-[36px] text-[#64748B] hover:text-[#181343] rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tombol Utama Daftar Akun */}
+                <div className="pt-1.5">
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full h-11 rounded-full bg-[#181343] hover:bg-[#26224C] active:bg-[#110D30] text-white font-semibold text-[14.5px] shadow-[0_10px_24px_-8px_rgba(24,19,67,0.4)] transition-colors cursor-pointer disabled:opacity-65 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] focus-visible:ring-offset-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Memproses Pendaftaran...</span>
+                      </>
+                    ) : (
+                      <span>Daftar Akun</span>
+                    )}
+                  </button>
+                </div>
+
+                {/* Tautan Login */}
+                <div className="pt-1.5 text-center">
+                  <p className="text-[13px] text-[#47464F]">
+                    Sudah memiliki akun?{" "}
+                    <Link
+                      href="/login"
+                      className="font-semibold text-[#047857] hover:text-emerald-800 hover:underline rounded px-0.5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
+                    >
+                      Masuk ke Akun
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </div>
+
+            {/* View 2: Verifikasi Email OTP (Staggered Reveal 6 Elemen) */}
+            {isRegistered && (
+              <div className="relative">
+                <VerifyEmailCard
+                  bare
+                  animateIn
+                  initialEmail={registeredEmail}
+                  onBackToRegister={() => {
+                    setIsRegistered(false);
+                    if (typeof window !== "undefined") {
+                      window.history.pushState(null, "", "/register");
+                    }
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
