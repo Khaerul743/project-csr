@@ -23,7 +23,7 @@ export class AuthService {
   constructor(private readonly authRepository: AuthRepository) {}
 
   async register(dto: RegisterDTO): Promise<AuthResponseData> {
-    const normalizedEmail = dto.email.trim();
+    const normalizedEmail = dto.email.trim().toLowerCase();
     const normalizedUsername = dto.username?.trim();
     this.logger.info(`Attempting to register user: ${normalizedEmail}`);
 
@@ -75,9 +75,10 @@ export class AuthService {
   }
 
   async login(dto: LoginDTO): Promise<AuthResponseData> {
-    this.logger.info(`Attempting login for: ${dto.email}`);
+    const normalizedEmail = dto.email.trim().toLowerCase();
+    this.logger.info(`Attempting login for: ${normalizedEmail}`);
 
-    const user = await this.authRepository.findByEmail(dto.email);
+    const user = await this.authRepository.findByEmail(normalizedEmail);
     if (!user) {
       throw new UnauthorizedError("Invalid email or password");
     }

@@ -44,7 +44,7 @@ export function RegisterForm() {
         body: JSON.stringify({
           name: fullName.trim(),
           username: username.trim(),
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           password,
         }),
       });

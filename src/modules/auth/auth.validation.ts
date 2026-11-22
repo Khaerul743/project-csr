@@ -12,12 +12,12 @@ export const registerSchema = z.object({
     .min(2, "Nama pengguna minimal 2 karakter")
     .max(100, "Nama pengguna maksimal 100 karakter")
     .optional(),
-  email: z.string().trim().email("Format email tidak valid").max(255),
+  email: z.string().trim().toLowerCase().email("Format email tidak valid").max(255),
   password: z.string().min(6, "Kata sandi minimal 6 karakter").max(100),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email format"),
+  email: z.string().trim().toLowerCase().email("Invalid email format"),
   password: z.string().min(1, "Password is required"),
 });
 

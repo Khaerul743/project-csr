@@ -1,10 +1,15 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { users, User, NewUser } from "@/db/schema/users";
 
 export class AuthRepository {
   async findByEmail(email: string): Promise<User | null> {
-    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    const cleanEmail = email.trim().toLowerCase();
+    const result = await db
+      .select()
+      .from(users)
+      .where(sql`LOWER(${users.email}) = ${cleanEmail}`)
+      .limit(1);
     return result[0] ?? null;
   }
 
