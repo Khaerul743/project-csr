@@ -7,7 +7,9 @@ import {
   changePasswordSchema,
   loginSchema,
   registerSchema,
+  resendOtpSchema,
   updateProfileSchema,
+  verifyOtpSchema,
 } from "./auth.validation";
 
 export class AuthController {
@@ -19,7 +21,31 @@ export class AuthController {
       const validatedInput = registerSchema.parse(body);
 
       const result = await this.authService.register(validatedInput);
-      return ApiResponse.created(result, "Registration successful");
+      return ApiResponse.created(result, "Registrasi berhasil. Silakan cek email Anda untuk kode verifikasi OTP.");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async verifyEmail(request: Request): Promise<NextResponse> {
+    try {
+      const body = await request.json();
+      const validatedInput = verifyOtpSchema.parse(body);
+
+      const result = await this.authService.verifyOtp(validatedInput);
+      return ApiResponse.success(result, "Email berhasil diverifikasi");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
+  async resendOtp(request: Request): Promise<NextResponse> {
+    try {
+      const body = await request.json();
+      const validatedInput = resendOtpSchema.parse(body);
+
+      const result = await this.authService.resendOtp(validatedInput);
+      return ApiResponse.success(result, result.message);
     } catch (error) {
       return ErrorHandler.handle(error);
     }

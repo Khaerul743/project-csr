@@ -29,6 +29,7 @@ export const users = mysqlTable(
     password: varchar("password", { length: 255 }).notNull(),
     role: mysqlEnum("role", userRoleEnum).notNull().default("STAGING"),
     status: mysqlEnum("status", userStatusEnum).notNull().default("ACTIVE"),
+    emailVerifiedAt: timestamp("email_verified_at"),
     avatarUrl: text("avatar_url"),
     phone: varchar("phone", { length: 30 }),
     position: varchar("position", { length: 100 }),

@@ -28,10 +28,12 @@ export function LoginView() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setUnverifiedEmail(null);
 
     if (!email.trim() || !password.trim()) {
       setErrorMessage("Silakan lengkapi email dan kata sandi Anda.");
@@ -50,6 +52,14 @@ export function LoginView() {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
+        const msg = result.message || "";
+        if (msg.includes("EMAIL_NOT_VERIFIED") || msg.includes("belum diverifikasi")) {
+          setUnverifiedEmail(email.trim().toLowerCase());
+          setErrorMessage(
+            "Akun Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirimkan ke email Anda."
+          );
+          return;
+        }
         setErrorMessage(
           result.message || "Gagal masuk ke akun. Silakan coba lagi."
         );
@@ -237,10 +247,23 @@ export function LoginView() {
             {errorMessage && (
               <div
                 role="alert"
-                className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-800 text-[13px] font-medium"
+                className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex flex-col gap-2 text-rose-800 text-[13px] font-medium"
               >
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
-                <span>{errorMessage}</span>
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                  <span>{errorMessage}</span>
+                </div>
+                {unverifiedEmail && (
+                  <div className="pt-2 border-t border-rose-200/60 flex items-center justify-between">
+                    <span className="text-xs text-rose-700">Perlu verifikasi email?</span>
+                    <Link
+                      href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
+                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline cursor-pointer"
+                    >
+                      Verifikasi Sekarang &rarr;
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 

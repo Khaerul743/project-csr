@@ -29,6 +29,7 @@ function getSanitizedDatabaseUrl(): string {
 
 function createMySqlPool(): mysql.Pool {
   const dbUrl = getSanitizedDatabaseUrl();
+  const isTiDB = dbUrl.includes("tidbcloud.com");
 
   return mysql.createPool({
     uri: dbUrl,
@@ -39,6 +40,14 @@ function createMySqlPool(): mysql.Pool {
     enableKeepAlive: true, // TCP keep-alive aktif untuk mencegah zombie connection di cloud database
     keepAliveInitialDelay: 10000, // Deteksi keep-alive setiap 10 detik
     connectTimeout: 20000,
+    ...(isTiDB
+      ? {
+          ssl: {
+            minVersion: "TLSv1.2",
+            rejectUnauthorized: true,
+          },
+        }
+      : {}),
   });
 }
 

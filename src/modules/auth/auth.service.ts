@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import {
   BadRequestError,
   ConflictError,
@@ -7,14 +8,18 @@ import {
 import { AppLogger } from "@/common/logger/app-logger";
 import { PasswordUtil } from "@/common/utils/password";
 import { JwtService } from "@/common/jwt/jwt.service";
+import { emailService } from "@/common/email/email.service";
 import { AuthRepository } from "./auth.repository";
 import {
   AuthResponseData,
   ChangePasswordDTO,
   LoginDTO,
   RegisterDTO,
+  RegisterResponseData,
+  ResendOtpDTO,
   SafeUser,
   UpdateProfileDTO,
+  VerifyOtpDTO,
 } from "./auth.interface";
 
 export class AuthService {
@@ -22,7 +27,7 @@ export class AuthService {
 
   constructor(private readonly authRepository: AuthRepository) {}
 
-  async register(dto: RegisterDTO): Promise<AuthResponseData> {
+  async register(dto: RegisterDTO): Promise<RegisterResponseData> {
     const normalizedEmail = dto.email.trim().toLowerCase();
     const normalizedUsername = dto.username?.trim();
     this.logger.info(`Attempting to register user: ${normalizedEmail}`);
@@ -30,7 +35,39 @@ export class AuthService {
     // Check if email already registered
     const existing = await this.authRepository.findByEmail(normalizedEmail);
     if (existing) {
-      throw new ConflictError("Email sudah terdaftar");
+      if (existing.emailVerifiedAt) {
+        throw new ConflictError("Email sudah terdaftar");
+      }
+
+      // Jika user sudah terdaftar tapi belum verifikasi email, perbarui password dan buat OTP baru
+      const hashedPassword = await PasswordUtil.hash(dto.password);
+      await this.authRepository.updateUser(existing.id, {
+        name: dto.name.trim(),
+        username: normalizedUsername || existing.username,
+        password: hashedPassword,
+      });
+
+      const otp = randomInt(100000, 1000000).toString();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+      await this.authRepository.createOrUpdateOtp(normalizedEmail, otp, expiresAt);
+
+      try {
+        await emailService.sendOtpEmail({
+          to: normalizedEmail,
+          otp,
+          recipientName: dto.name.trim(),
+        });
+      } catch (mailError) {
+        this.logger.error(`Failed to send OTP email: ${mailError}`);
+      }
+
+      this.logger.info(`Unverified user re-registered, new OTP sent: ${existing.id} (${normalizedEmail})`);
+
+      return {
+        email: normalizedEmail,
+        isVerified: false,
+        message: "Kode OTP verifikasi baru telah dikirim ke email Anda",
+      };
     }
 
     // Check if username already taken
@@ -44,7 +81,7 @@ export class AuthService {
     // Hash the password
     const hashedPassword = await PasswordUtil.hash(dto.password);
 
-    // Create user in database
+    // Create user in database with INACTIVE status until email verified
     const createdUser = await this.authRepository.createUser({
       name: dto.name.trim(),
       username: normalizedUsername || null,
@@ -53,24 +90,128 @@ export class AuthService {
       role: "STAGING",
       companyId: null,
       partnerId: null,
-      status: "ACTIVE",
+      status: "INACTIVE",
     });
+
+    // Generate 6-digit OTP
+    const otp = randomInt(100000, 1000000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+    await this.authRepository.createOrUpdateOtp(normalizedEmail, otp, expiresAt);
+
+    // Send OTP email (or fallback to console)
+    try {
+      await emailService.sendOtpEmail({
+        to: normalizedEmail,
+        otp,
+        recipientName: createdUser.name,
+      });
+    } catch (mailError) {
+      this.logger.error(`Failed to send OTP email: ${mailError}`);
+    }
+
+    this.logger.info(`User registered successfully, OTP sent: ${createdUser.id} (${createdUser.email})`);
+
+    return {
+      email: normalizedEmail,
+      isVerified: false,
+      message: "Kode OTP verifikasi telah dikirim ke email Anda",
+    };
+  }
+
+  async verifyOtp(dto: VerifyOtpDTO): Promise<AuthResponseData> {
+    const normalizedEmail = dto.email.trim().toLowerCase();
+    const cleanOtp = dto.otp.trim();
+    this.logger.info(`Verifying OTP for: ${normalizedEmail}`);
+
+    const user = await this.authRepository.findByEmail(normalizedEmail);
+    if (!user) {
+      throw new NotFoundError("Akun pengguna tidak ditemukan");
+    }
+
+    if (user.emailVerifiedAt) {
+      throw new BadRequestError("Email ini sudah diverifikasi sebelumnya. Silakan langsung masuk.");
+    }
+
+    const verification = await this.authRepository.findLatestOtp(normalizedEmail);
+    if (!verification) {
+      throw new BadRequestError("Kode OTP tidak ditemukan atau telah kedaluwarsa. Silakan minta kode baru.");
+    }
+
+    // Check expiration
+    if (new Date() > new Date(verification.expiresAt)) {
+      await this.authRepository.deleteOtp(normalizedEmail);
+      throw new BadRequestError("Kode OTP telah kedaluwarsa. Silakan minta kode baru.");
+    }
+
+    // Check attempts limit (max 5)
+    if (verification.attempts >= 5) {
+      await this.authRepository.deleteOtp(normalizedEmail);
+      throw new BadRequestError("Terlalu banyak percobaan yang salah. Kode OTP telah dibatalkan. Silakan minta kode baru.");
+    }
+
+    // Check OTP match
+    if (verification.otp !== cleanOtp) {
+      await this.authRepository.incrementOtpAttempts(verification.id);
+      const remainingAttempts = 5 - (verification.attempts + 1);
+      if (remainingAttempts > 0) {
+        throw new BadRequestError(`Kode OTP tidak sesuai. Sisa percobaan: ${remainingAttempts} kali.`);
+      } else {
+        await this.authRepository.deleteOtp(normalizedEmail);
+        throw new BadRequestError("Kode OTP salah dan telah dibatalkan karena melebihi batas percobaan. Silakan minta kode baru.");
+      }
+    }
+
+    // Mark email verified & activate user
+    const verifiedUser = await this.authRepository.markEmailVerified(user.id);
+    await this.authRepository.deleteOtp(normalizedEmail);
 
     // Generate JWT access token
     const accessToken = JwtService.sign({
-      sub: createdUser.id,
-      email: createdUser.email,
-      role: createdUser.role,
-      companyId: createdUser.companyId,
-      partnerId: createdUser.partnerId,
+      sub: verifiedUser.id,
+      email: verifiedUser.email,
+      role: verifiedUser.role,
+      companyId: verifiedUser.companyId,
+      partnerId: verifiedUser.partnerId,
     });
 
-    this.logger.info(`User registered successfully: ${createdUser.id} (${createdUser.email})`);
+    this.logger.info(`User email verified successfully: ${verifiedUser.id} (${verifiedUser.email})`);
 
-    const { password: _, ...safeUser } = createdUser;
+    const { password: _, ...safeUser } = verifiedUser;
     return {
       user: safeUser,
       accessToken,
+    };
+  }
+
+  async resendOtp(dto: ResendOtpDTO): Promise<{ message: string }> {
+    const normalizedEmail = dto.email.trim().toLowerCase();
+    this.logger.info(`Resending OTP for: ${normalizedEmail}`);
+
+    const user = await this.authRepository.findByEmail(normalizedEmail);
+    if (!user) {
+      throw new NotFoundError("Akun dengan email ini tidak ditemukan");
+    }
+
+    if (user.emailVerifiedAt) {
+      throw new BadRequestError("Email ini sudah diverifikasi sebelumnya. Silakan langsung masuk.");
+    }
+
+    // Generate fresh OTP
+    const otp = randomInt(100000, 1000000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+    await this.authRepository.createOrUpdateOtp(normalizedEmail, otp, expiresAt);
+
+    // Send email
+    await emailService.sendOtpEmail({
+      to: normalizedEmail,
+      otp,
+      recipientName: user.name,
+    });
+
+    this.logger.info(`New OTP sent to: ${normalizedEmail}`);
+
+    return {
+      message: "Kode OTP baru telah berhasil dikirim ke email Anda.",
     };
   }
 
@@ -80,16 +221,21 @@ export class AuthService {
 
     const user = await this.authRepository.findByEmail(normalizedEmail);
     if (!user) {
-      throw new UnauthorizedError("Invalid email or password");
-    }
-
-    if (user.status !== "ACTIVE") {
-      throw new UnauthorizedError(`Account is ${user.status.toLowerCase()}. Please contact administrator.`);
+      throw new UnauthorizedError("Email atau kata sandi tidak valid");
     }
 
     const isPasswordValid = await PasswordUtil.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedError("Invalid email or password");
+      throw new UnauthorizedError("Email atau kata sandi tidak valid");
+    }
+
+    // Check if email has been verified
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedError("EMAIL_NOT_VERIFIED: Akun Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirim ke email Anda.");
+    }
+
+    if (user.status !== "ACTIVE") {
+      throw new UnauthorizedError(`Account is ${user.status.toLowerCase()}. Please contact administrator.`);
     }
 
     const accessToken = JwtService.sign({

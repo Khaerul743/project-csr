@@ -30,3 +30,18 @@ export interface AuthResponseData {
   user: SafeUser;
   accessToken: string;
 }
+
+export interface VerifyOtpDTO {
+  email: string;
+  otp: string;
+}
+
+export interface ResendOtpDTO {
+  email: string;
+}
+
+export interface RegisterResponseData {
+  email: string;
+  isVerified: boolean;
+  message: string;
+}

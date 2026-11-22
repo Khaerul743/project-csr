@@ -87,14 +87,8 @@ export function RegisterView() {
         return;
       }
 
-      if (result.data?.accessToken) {
-        localStorage.setItem("accessToken", result.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(result.data.user));
-        document.cookie = `token=${result.data.accessToken}; path=/; max-age=86400; SameSite=Lax`;
-      }
-
-      router.push("/dashboard");
-      router.refresh();
+      // Arahkan ke halaman verifikasi email OTP
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
     } catch {
       setErrorMessage("Terjadi kesalahan jaringan atau server tidak merespon.");
     } finally {

@@ -1,6 +1,7 @@
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { users, User, NewUser } from "@/db/schema/users";
+import { emailVerifications, EmailVerification } from "@/db/schema/email-verifications";
 
 export class AuthRepository {
   async findByEmail(email: string): Promise<User | null> {
@@ -55,5 +56,61 @@ export class AuthRepository {
     }
 
     return updated;
+  }
+
+  async markEmailVerified(userId: string): Promise<User> {
+    return this.updateUser(userId, {
+      emailVerifiedAt: new Date(),
+      status: "ACTIVE",
+    });
+  }
+
+  async createOrUpdateOtp(email: string, otp: string, expiresAt: Date): Promise<EmailVerification> {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Hapus OTP lama untuk email ini agar selalu fresh
+    await db.delete(emailVerifications).where(sql`LOWER(${emailVerifications.email}) = ${cleanEmail}`);
+
+    const id = crypto.randomUUID();
+    await db.insert(emailVerifications).values({
+      id,
+      email: cleanEmail,
+      otp,
+      attempts: 0,
+      expiresAt,
+    });
+
+    const rows = await db.select().from(emailVerifications).where(eq(emailVerifications.id, id)).limit(1);
+    if (!rows[0]) {
+      throw new Error("Gagal menyimpan kode OTP verifikasi");
+    }
+
+    return rows[0];
+  }
+
+  async findLatestOtp(email: string): Promise<EmailVerification | null> {
+    const cleanEmail = email.trim().toLowerCase();
+    const rows = await db
+      .select()
+      .from(emailVerifications)
+      .where(sql`LOWER(${emailVerifications.email}) = ${cleanEmail}`)
+      .orderBy(desc(emailVerifications.createdAt))
+      .limit(1);
+
+    return rows[0] ?? null;
+  }
+
+  async incrementOtpAttempts(id: string): Promise<void> {
+    await db
+      .update(emailVerifications)
+      .set({
+        attempts: sql`${emailVerifications.attempts} + 1`,
+      })
+      .where(eq(emailVerifications.id, id));
+  }
+
+  async deleteOtp(email: string): Promise<void> {
+    const cleanEmail = email.trim().toLowerCase();
+    await db.delete(emailVerifications).where(sql`LOWER(${emailVerifications.email}) = ${cleanEmail}`);
   }
 }

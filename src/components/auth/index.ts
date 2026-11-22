@@ -3,3 +3,4 @@ export * from "./login-form";
 export * from "./register-form";
 export * from "./login-view";
 export * from "./register-view";
+export * from "./verify-email-view";

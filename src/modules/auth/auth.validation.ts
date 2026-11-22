@@ -43,3 +43,15 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+export const verifyOtpSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Format email tidak valid"),
+  otp: z.string().trim().length(6, "Kode OTP harus terdiri dari 6 digit angka"),
+});
+
+export const resendOtpSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Format email tidak valid"),
+});
+
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;
+export type ResendOtpInput = z.infer<typeof resendOtpSchema>;

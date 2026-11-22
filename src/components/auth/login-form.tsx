@@ -14,10 +14,12 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setUnverifiedEmail(null);
 
     if (!email.trim() || !password.trim()) {
       setErrorMessage("Silakan lengkapi email dan kata sandi Anda.");
@@ -36,6 +38,12 @@ export function LoginForm() {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
+        const msg = result.message || "";
+        if (msg.includes("EMAIL_NOT_VERIFIED") || msg.includes("belum diverifikasi")) {
+          setUnverifiedEmail(email.trim().toLowerCase());
+          setErrorMessage("Akun Anda belum diverifikasi. Silakan masukkan kode OTP yang telah dikirimkan ke email Anda.");
+          return;
+        }
         setErrorMessage(result.message || "Gagal masuk ke akun. Silakan coba lagi.");
         return;
       }
@@ -61,9 +69,22 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Error alert */}
       {errorMessage && (
-        <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-[#FFDAD6]/40 border border-[#BA1A1A]/10 text-[#93000A] text-[13px] leading-relaxed">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#BA1A1A]" />
-          <span>{errorMessage}</span>
+        <div className="p-3.5 rounded-xl bg-[#FFDAD6]/40 border border-[#BA1A1A]/10 text-[#93000A] text-[13px] leading-relaxed space-y-2">
+          <div className="flex items-start gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-[#BA1A1A]" />
+            <span>{errorMessage}</span>
+          </div>
+          {unverifiedEmail && (
+            <div className="pt-2 border-t border-[#BA1A1A]/10 flex items-center justify-between">
+              <span className="text-xs text-[#93000A]">Perlu verifikasi OTP?</span>
+              <a
+                href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
+                className="text-xs font-bold text-emerald-700 hover:text-emerald-900 underline"
+              >
+                Verifikasi Sekarang &rarr;
+              </a>
+            </div>
+          )}
         </div>
       )}
 

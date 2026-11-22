@@ -61,16 +61,8 @@ export function RegisterForm() {
         return;
       }
 
-      // Simpan token ke localStorage & cookie browser
-      if (result.data?.accessToken) {
-        localStorage.setItem("accessToken", result.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(result.data.user));
-        document.cookie = `token=${result.data.accessToken}; path=/; max-age=86400; SameSite=Lax`;
-      }
-
-      // Navigasi ke halaman dashboard
-      router.push("/dashboard");
-      router.refresh();
+      // Arahkan ke halaman verifikasi email OTP
+      router.push(`/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
     } catch (err: unknown) {
       setErrorMessage("Terjadi kesalahan jaringan atau server tidak merespon.");
     } finally {
