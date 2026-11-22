@@ -29,18 +29,27 @@ import {
   XCircle,
   Copy,
   Check,
+  ChevronLeft,
+  ChevronRight,
+  Coins,
+  GraduationCap,
+  HeartPulse,
   Inbox,
+  Landmark,
   FileCheck2,
   ArrowRight,
   ExternalLink,
   Globe,
   Mail,
   Phone,
+  Play,
   Activity,
   MessageSquare,
   Layers,
   MessageSquareQuote,
   RotateCcw,
+  ShieldAlert,
+  Sprout,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -90,6 +99,120 @@ import { PartnerPerformanceEvaluationView } from "./partners/PartnerPerformanceE
 import { BeneficiarySentimentDashboardView } from "./sentiment/BeneficiarySentimentDashboardView";
 import { UserProfileModal, UserProfileData } from "../UserProfileModal";
 
+
+function getProgramCategoryVisual(focusArea: string | undefined | null) {
+  switch (focusArea) {
+    case "LINGKUNGAN":
+      return {
+        label: "Lingkungan & Alam",
+        icon: Sprout,
+        thumbnailBg: "bg-emerald-50 border border-emerald-100/90",
+        iconColor: "text-emerald-600",
+        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/80",
+      };
+    case "PENDIDIKAN":
+      return {
+        label: "Pendidikan",
+        icon: GraduationCap,
+        thumbnailBg: "bg-indigo-50 border border-indigo-100/90",
+        iconColor: "text-indigo-600",
+        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/80",
+      };
+    case "KESEHATAN":
+      return {
+        label: "Kesehatan",
+        icon: HeartPulse,
+        thumbnailBg: "bg-rose-50 border border-rose-100/90",
+        iconColor: "text-rose-600",
+        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/80",
+      };
+    case "PEMBERDAYAAN_EKONOMI":
+      return {
+        label: "Pemberdayaan Ekonomi",
+        icon: TrendingUp,
+        thumbnailBg: "bg-amber-50 border border-amber-100/90",
+        iconColor: "text-amber-600",
+        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/80",
+      };
+    case "INFRASTRUKTUR_SOSIAL":
+      return {
+        label: "Infrastruktur Sosial",
+        icon: Building2,
+        thumbnailBg: "bg-sky-50 border border-sky-100/90",
+        iconColor: "text-sky-600",
+        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/80",
+      };
+    case "TANGGAP_BENCANA":
+      return {
+        label: "Tanggap Bencana",
+        icon: ShieldAlert,
+        thumbnailBg: "bg-orange-50 border border-orange-100/90",
+        iconColor: "text-orange-600",
+        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/80",
+      };
+    default:
+      return {
+        label: "Inisiatif Umum",
+        icon: Layers,
+        thumbnailBg: "bg-slate-100 border border-slate-200/90",
+        iconColor: "text-slate-600",
+        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/80",
+      };
+  }
+}
+
+function renderProgramStatusPill(status: string, pendingVerification: number = 0) {
+  if (pendingVerification > 0) {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200/90 shadow-2xs">
+        <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+        <span>Menunggu Verifikasi</span>
+      </span>
+    );
+  }
+
+  switch (status) {
+    case "COMPLETED":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/90 shadow-2xs">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>Selesai</span>
+        </span>
+      );
+    case "IN_PROGRESS":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200/90 shadow-2xs">
+          <Play className="w-3 h-3 text-indigo-600 fill-indigo-600 shrink-0" />
+          <span>Sedang Berjalan</span>
+        </span>
+      );
+    case "PLANNED":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200/90 shadow-2xs">
+          <Play className="w-3 h-3 text-blue-600 fill-blue-600 shrink-0" />
+          <span>Persiapan</span>
+        </span>
+      );
+    case "ON_HOLD":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 shadow-2xs">
+          <span>Ditunda</span>
+        </span>
+      );
+    case "CANCELLED":
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200/90 shadow-2xs">
+          <span>Dibatalkan</span>
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+          <span>{status}</span>
+        </span>
+      );
+  }
+}
 
 function ProposalPartnerLogo({ logoUrl, name }: { logoUrl?: string | null; name: string }) {
   const [hasError, setHasError] = useState(false);
@@ -167,6 +290,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   const [programSearch, setProgramSearch] = useState("");
   const [programStatusFilter, setProgramStatusFilter] = useState<string>("ALL");
   const [programFocusFilter, setProgramFocusFilter] = useState<string>("ALL");
+  const [programPage, setProgramPage] = useState(1);
 
   // Modal and sub-view states
   const [isCreatingOpportunity, setIsCreatingOpportunity] = useState(false);
@@ -674,6 +798,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       return matchSearch && matchStatus && matchFocus;
     });
   }, [programs, programSearch, programStatusFilter, programFocusFilter]);
+
+  const PROGRAM_ITEMS_PER_PAGE = 5;
+  const totalProgramPages = useMemo(() => {
+    return Math.max(1, Math.ceil(filteredPrograms.length / PROGRAM_ITEMS_PER_PAGE));
+  }, [filteredPrograms.length]);
+
+  const paginatedPrograms = useMemo(() => {
+    const start = (programPage - 1) * PROGRAM_ITEMS_PER_PAGE;
+    return filteredPrograms.slice(start, start + PROGRAM_ITEMS_PER_PAGE);
+  }, [filteredPrograms, programPage]);
 
 
   // Proposals action count & KPIs
@@ -2072,7 +2206,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                         type="text"
                         placeholder="Cari judul program, mitra pelaksana, inisiatif, atau lokasi..."
                         value={programSearch}
-                        onChange={(e) => setProgramSearch(e.target.value)}
+                        onChange={(e) => {
+                          setProgramSearch(e.target.value);
+                          setProgramPage(1);
+                        }}
                         className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
                       />
                     </div>
@@ -2080,7 +2217,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                     <div className="w-full sm:w-auto">
                       <select
                         value={programFocusFilter}
-                        onChange={(e) => setProgramFocusFilter(e.target.value)}
+                        onChange={(e) => {
+                          setProgramFocusFilter(e.target.value);
+                          setProgramPage(1);
+                        }}
                         className="w-full sm:w-auto text-xs py-2.5 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
                       >
                         <option value="ALL">Semua Bidang CSR</option>
@@ -2111,7 +2251,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                         <button
                           key={chip.id}
                           type="button"
-                          onClick={() => setProgramStatusFilter(chip.id)}
+                          onClick={() => {
+                            setProgramStatusFilter(chip.id);
+                            setProgramPage(1);
+                          }}
                           className={`text-xs px-3.5 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${isSelected
                             ? "bg-[#181343] text-white shadow-2xs font-semibold"
                             : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
@@ -2124,7 +2267,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                   </div>
                 </div>
 
-                {/* 3. Sederhanakan Kartu Program: Fokus pada Monitoring Aktivitas & Bukti */}
+                {/* 3. Kartu Program Ramping & Berbasis Thumbnail Kategori (Sesuai Referensi UI) */}
                 {isLoadingPrograms ? (
                   <CardGridSkeleton count={3} />
                 ) : filteredPrograms.length === 0 ? (
@@ -2148,193 +2291,189 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                         leftIcon={<FileCheck2 className="w-4 h-4" />}
                         className="mt-2"
                       >
-                        Buka Tab Kolaborasi & Sahkan MoU
+                        Buka Tab Kolaborasi &amp; Sahkan MoU
                       </Button>
                     )}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 gap-4">
-                    {filteredPrograms.map((prog) => {
-                      const statusConfig = PROGRAM_STATUS_CONFIG[prog.status] || {
-                        label: prog.status,
-                        variant: "slate" as const,
-                      };
-                      const focusConfig = FOCUS_AREA_CONFIG[prog.focusArea as CsrFocusArea] || {
-                        label: prog.focusArea || "Umum",
-                      };
-                      const activityProgress = prog.activityProgressPercent ?? 0;
-                      const totalActs = prog.totalActivitiesCount ?? 0;
-                      const completedActs = prog.completedActivitiesCount ?? 0;
-                      const pendingVerif = prog.pendingVerificationCount ?? 0;
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-3.5">
+                      {paginatedPrograms.map((prog) => {
+                        const categoryConfig = getProgramCategoryVisual(prog.focusArea);
+                        const CategoryIcon = categoryConfig.icon;
+                        const activityProgress = Math.min(100, Math.max(0, prog.activityProgressPercent ?? 0));
+                        const pendingVerif = prog.pendingVerificationCount ?? 0;
+                        const budgetNum = parseFloat(prog.budget || "0");
+                        const spentNum = parseFloat(prog.spentBudget || "0");
+                        const spentPercent = budgetNum > 0 ? Math.min(100, Math.round((spentNum / budgetNum) * 100)) : 0;
 
-                      return (
-                        <div
-                          key={prog.id}
-                          className="p-6 rounded-3xl bg-white border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-5"
-                        >
-                          {/* Header Row: Focus area, status, location, period */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                                {focusConfig.label}
-                              </span>
-                              <Badge variant={statusConfig.variant} size="md" hasDot>
-                                {statusConfig.label}
-                              </Badge>
-                              {prog.sustainabilityReport && (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#EAF8F4] text-[#047857] border border-emerald-200/80 shadow-xs">
-                                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>Laporan ESG Siap</span>
-                                </span>
-                              )}
-                              {prog.targetCity && (
-                                <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
-                                  <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                                  {prog.targetCity}{prog.targetProvince ? `, ${prog.targetProvince}` : ""}
-                                </span>
-                              )}
-                            </div>
+                        return (
+                          <div
+                            key={prog.id}
+                            onClick={() => setSelectedProgramForDetail(prog)}
+                            className="group relative bg-white rounded-2xl sm:rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-2xs hover:shadow-md hover:border-slate-300 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer"
+                          >
+                            {/* Sisi Kiri: Thumbnail Kategori & Info Utama */}
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                              {/* Thumbnail Box */}
+                              <div
+                                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105 shadow-2xs ${categoryConfig.thumbnailBg}`}
+                              >
+                                <CategoryIcon className={`w-8 h-8 sm:w-9 sm:h-9 ${categoryConfig.iconColor}`} />
+                              </div>
 
-                            <div className="text-xs text-slate-600 flex items-center gap-1.5 font-medium">
-                              <Calendar className="w-3.5 h-3.5" />
-                              {prog.startDate && prog.endDate
-                                ? `${formatDate(prog.startDate)} s/d ${formatDate(prog.endDate)}`
-                                : "Jadwal Belum Ditetapkan"}
-                            </div>
-                          </div>
-
-                          {/* Title & Partner Information */}
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-xs">
-                              <span className="font-semibold text-slate-600 uppercase tracking-wider text-[10px]">
-                                Mitra Pelaksana:
-                              </span>
-                              <span className="font-bold text-[#181343] flex items-center gap-1">
-                                <Building2 className="w-3.5 h-3.5 text-emerald-600" />
-                                {prog.partnerName || "Mitra Pelaksana"}
-                              </span>
-                              {prog.opportunityTitle && (
-                                <>
-                                  <span className="text-slate-300">•</span>
-                                  <span className="text-slate-500 truncate text-[11px]">
-                                    Inisiatif: {prog.opportunityTitle}
+                              {/* Text Block */}
+                              <div className="space-y-1 min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`inline-flex items-center text-[11px] font-bold px-2.5 py-0.5 rounded-full ${categoryConfig.badgeClass}`}
+                                  >
+                                    {categoryConfig.label}
                                   </span>
-                                </>
-                              )}
+                                  {prog.sustainabilityReport && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EAF8F4] text-[#047857] border border-emerald-200/80">
+                                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                                      <span>Laporan ESG Siap</span>
+                                    </span>
+                                  )}
+                                </div>
+
+                                <h3 className="text-sm sm:text-base font-extrabold text-[#181343] leading-snug group-hover:text-indigo-950 transition-colors line-clamp-2">
+                                  {prog.title}
+                                </h3>
+
+                                <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium pt-0.5">
+                                  <Landmark className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span className="truncate">{prog.partnerName || "Mitra Pelaksana"}</span>
+                                </div>
+                              </div>
                             </div>
 
-                            <h3 className="text-base font-extrabold text-[#181343] leading-snug">
-                              {prog.title}
-                            </h3>
-                          </div>
-
-                          {/* 3-Column Operational Monitoring Grid */}
-                          <div className="p-4 rounded-2xl bg-slate-50/70 border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                            {/* Column 1: Progres Aktivitas Proposal */}
-                            <div className="space-y-1.5 md:border-r border-slate-200/60 md:pr-4">
-                              <div className="flex items-center justify-between">
-                                <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
-                                  <Layers className="w-3.5 h-3.5 text-emerald-600" />
-                                  Progres Aktivitas Proposal
-                                </span>
-                                <span className="font-extrabold text-emerald-700 text-xs">
+                            {/* Kolom Tengah 1: Progress Program */}
+                            <div className="flex lg:flex-col items-center lg:items-start justify-between lg:justify-center min-w-[120px] lg:min-w-[140px] px-2 sm:px-4 lg:border-l border-slate-100 py-1 space-y-0 lg:space-y-1.5">
+                              <span className="text-[11px] font-semibold text-slate-500">
+                                Progress Program
+                              </span>
+                              <div className="space-y-1.5">
+                                <div className="text-base sm:text-lg font-black text-[#181343] tabular-nums">
                                   {activityProgress}%
+                                </div>
+                                <div className="w-24 sm:w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      activityProgress >= 100
+                                        ? "bg-emerald-500"
+                                        : activityProgress > 0
+                                        ? "bg-blue-600"
+                                        : "bg-slate-200"
+                                    }`}
+                                    style={{ width: `${Math.min(activityProgress, 100)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Kolom Tengah 2: Lokasi */}
+                            <div className="flex items-center gap-2 min-w-[130px] lg:min-w-[160px] px-2 sm:px-4 lg:border-l border-slate-100 py-1">
+                              <MapPin className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                              <div className="min-w-0 text-xs">
+                                <span className="font-bold text-[#181343] block truncate">
+                                  {prog.targetCity || "Indonesia"}
+                                </span>
+                                <span className="text-[11px] text-slate-500 block truncate">
+                                  {prog.targetProvince || "Nasional"}
                                 </span>
                               </div>
-                              <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                                <div
-                                  className="bg-emerald-600 h-full rounded-full transition-all duration-500"
-                                  style={{ width: `${Math.min(activityProgress, 100)}%` }}
-                                />
-                              </div>
-                              <span className="text-[10px] text-slate-500 block">
-                                {totalActs > 0
-                                  ? `${completedActs} dari ${totalActs} tahapan terselesaikan`
-                                  : "Tahapan disinkronkan dari proposal"}
-                              </span>
                             </div>
 
-                            {/* Column 2: Aktivitas Berikutnya & Jadwal */}
-                            <div className="space-y-1 md:border-r border-slate-200/60 md:pr-4">
-                              <span className="text-[11px] text-slate-500 font-semibold block">
-                                Aktivitas Berikutnya
-                              </span>
-                              <div className="text-xs font-bold text-slate-800 line-clamp-1">
-                                {prog.nextActivityTitle || "Semua tahapan terselesaikan"}
+                            {/* Kolom Kanan: Status & Anggaran */}
+                            <div className="flex sm:flex-col items-start sm:items-end justify-between sm:justify-center min-w-[160px] lg:min-w-[190px] px-2 sm:px-4 lg:border-l border-slate-100 py-1 space-y-1.5">
+                              {/* Status Badge Pill */}
+                              <div>{renderProgramStatusPill(prog.status, pendingVerif)}</div>
+
+                              {/* Anggaran & Serapan */}
+                              <div className="text-left sm:text-right space-y-0.5">
+                                <div className="flex items-center sm:justify-end gap-1.5 text-xs sm:text-sm font-extrabold text-[#181343] tabular-nums">
+                                  <Coins className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                  <span>{formatRupiah(prog.budget)}</span>
+                                </div>
+                                <span className="text-[11px] text-slate-500 font-medium block">
+                                  Serapan: {formatRupiah(prog.spentBudget || "0")}
+                                  {budgetNum > 0 ? ` (${spentPercent}%)` : ""}
+                                </span>
                               </div>
-                              <span className="text-[10px] text-slate-500 flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-slate-400" />
-                                {prog.nextActivityDate
-                                  ? `Target: ${formatDate(prog.nextActivityDate)}`
-                                  : "Jadwal Belum Ditetapkan"}
-                              </span>
                             </div>
 
-                            {/* Column 3: Status Laporan / Verifikasi Terakhir */}
-                            <div className="space-y-1.5">
-                              <span className="text-[11px] text-slate-500 font-semibold block">
-                                Status Laporan Terakhir
-                              </span>
-                              <div>
-                                {pendingVerif > 0 ? (
-                                  <Badge variant="amber" size="sm" hasDot>
-                                    {pendingVerif} Menunggu Verifikasi
-                                  </Badge>
-                                ) : prog.lastReportStatus === "VERIFIED" ? (
-                                  <Badge variant="emerald" size="sm" hasDot>
-                                    Laporan Terverifikasi
-                                  </Badge>
-                                ) : prog.lastReportStatus === "REVISION_REQUESTED" ? (
-                                  <Badge variant="rose" size="sm" hasDot>
-                                    Perlu Revisi
-                                  </Badge>
-                                ) : prog.lastReportStatus === "SUBMITTED" ? (
-                                  <Badge variant="amber" size="sm" hasDot>
-                                    Menunggu Verifikasi
-                                  </Badge>
-                                ) : (
-                                  <span className="text-xs text-slate-400 italic">
-                                    Belum Ada Laporan Kegiatan
-                                  </span>
-                                )}
+                            {/* Ujung Kanan: Tombol Navigasi Panah */}
+                            <div className="hidden lg:flex items-center justify-center pl-2">
+                              <div className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-slate-400 group-hover:bg-[#181343] group-hover:text-white group-hover:border-[#181343] group-hover:translate-x-0.5 transition-all shrink-0 shadow-2xs">
+                                <ArrowRight className="w-4 h-4" />
                               </div>
-                              <span className="text-[10px] text-slate-400 block">
-                                {prog.lastReportDate
-                                  ? `Pembaruan: ${formatDate(prog.lastReportDate)}`
-                                  : "Sesuai timeline proposal"}
-                              </span>
                             </div>
                           </div>
+                        );
+                      })}
+                    </div>
 
-                          {/* Card Footer: Ringkasan Anggaran & Target + Tombol Lihat Detail Monitoring */}
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-slate-100">
-                            <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-x-2 gap-y-1">
-                              <span>
-                                Anggaran MoU: <strong className="text-slate-700">{formatRupiah(prog.budget)}</strong>
-                              </span>
-                              <span className="text-slate-300">•</span>
-                              <span>
-                                Serapan: <strong className="text-slate-700">{formatRupiah(prog.spentBudget || "0")}</strong>
-                              </span>
-                              <span className="text-slate-300">•</span>
-                              <span>
-                                Target: <strong className="text-slate-700">{prog.targetBeneficiaries || "-"}</strong>
-                              </span>
-                            </div>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs cursor-pointer self-end sm:self-auto"
-                              onClick={() => setSelectedProgramForDetail(prog)}
-                              leftIcon={<Activity className="w-3.5 h-3.5" />}
-                            >
-                              Lihat Detail Monitoring
-                            </Button>
-                          </div>
+                    {/* Pagination Bar */}
+                    {filteredPrograms.length > 0 && (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
+                        <div>
+                          Menampilkan{" "}
+                          <span className="font-bold text-[#181343]">
+                            {Math.min((programPage - 1) * PROGRAM_ITEMS_PER_PAGE + 1, filteredPrograms.length)}
+                          </span>
+                          –
+                          <span className="font-bold text-[#181343]">
+                            {Math.min(programPage * PROGRAM_ITEMS_PER_PAGE, filteredPrograms.length)}
+                          </span>{" "}
+                          dari{" "}
+                          <span className="font-bold text-[#181343]">
+                            {filteredPrograms.length}
+                          </span>{" "}
+                          program
                         </div>
-                      );
-                    })}
+
+                        {totalProgramPages > 1 && (
+                          <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                            <button
+                              type="button"
+                              onClick={() => setProgramPage((prev) => Math.max(1, prev - 1))}
+                              disabled={programPage === 1}
+                              className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:hover:bg-white flex items-center justify-center transition cursor-pointer"
+                              title="Halaman sebelumnya"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+
+                            {Array.from({ length: totalProgramPages }, (_, i) => i + 1).map((pNum) => (
+                              <button
+                                key={pNum}
+                                type="button"
+                                onClick={() => setProgramPage(pNum)}
+                                className={`w-8 h-8 rounded-xl font-bold text-xs transition cursor-pointer ${
+                                  programPage === pNum
+                                    ? "bg-[#181343] text-white shadow-2xs"
+                                    : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                                }`}
+                              >
+                                {pNum}
+                              </button>
+                            ))}
+
+                            <button
+                              type="button"
+                              onClick={() => setProgramPage((prev) => Math.min(totalProgramPages, prev + 1))}
+                              disabled={programPage === totalProgramPages}
+                              className="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:hover:bg-white flex items-center justify-center transition cursor-pointer"
+                              title="Halaman berikutnya"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

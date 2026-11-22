@@ -24,6 +24,12 @@ import {
   Info,
   ChevronDown,
   ChevronUp,
+  Sprout,
+  GraduationCap,
+  HeartPulse,
+  ShieldAlert,
+  Layers,
+  Landmark,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +48,67 @@ import { ActivityTimeline } from "../../activities/ActivityTimeline";
 import { BeneficiaryReviewsTab } from "../../reviews/BeneficiaryReviewsTab";
 import { ProgramFinancesTab } from "../../finances/ProgramFinancesTab";
 import { EsgSustainabilityReportTab } from "./EsgSustainabilityReportTab";
+
+function getProgramCategoryVisual(focusArea: string | undefined | null) {
+  switch (focusArea) {
+    case "LINGKUNGAN":
+      return {
+        label: "Lingkungan & Alam",
+        icon: Sprout,
+        thumbnailBg: "bg-emerald-50 border border-emerald-100/90",
+        iconColor: "text-emerald-600",
+        badgeClass: "bg-emerald-50 text-emerald-700 border border-emerald-200/80",
+      };
+    case "PENDIDIKAN":
+      return {
+        label: "Pendidikan",
+        icon: GraduationCap,
+        thumbnailBg: "bg-indigo-50 border border-indigo-100/90",
+        iconColor: "text-indigo-600",
+        badgeClass: "bg-indigo-50 text-indigo-700 border border-indigo-200/80",
+      };
+    case "KESEHATAN":
+      return {
+        label: "Kesehatan",
+        icon: HeartPulse,
+        thumbnailBg: "bg-rose-50 border border-rose-100/90",
+        iconColor: "text-rose-600",
+        badgeClass: "bg-rose-50 text-rose-700 border border-rose-200/80",
+      };
+    case "PEMBERDAYAAN_EKONOMI":
+      return {
+        label: "Pemberdayaan Ekonomi",
+        icon: TrendingUp,
+        thumbnailBg: "bg-amber-50 border border-amber-100/90",
+        iconColor: "text-amber-600",
+        badgeClass: "bg-amber-50 text-amber-700 border border-amber-200/80",
+      };
+    case "INFRASTRUKTUR_SOSIAL":
+      return {
+        label: "Infrastruktur Sosial",
+        icon: Building2,
+        thumbnailBg: "bg-sky-50 border border-sky-100/90",
+        iconColor: "text-sky-600",
+        badgeClass: "bg-sky-50 text-sky-700 border border-sky-200/80",
+      };
+    case "TANGGAP_BENCANA":
+      return {
+        label: "Tanggap Bencana",
+        icon: ShieldAlert,
+        thumbnailBg: "bg-orange-50 border border-orange-100/90",
+        iconColor: "text-orange-600",
+        badgeClass: "bg-orange-50 text-orange-700 border border-orange-200/80",
+      };
+    default:
+      return {
+        label: "Inisiatif Umum",
+        icon: Layers,
+        thumbnailBg: "bg-slate-100 border border-slate-200/90",
+        iconColor: "text-slate-600",
+        badgeClass: "bg-slate-50 text-slate-700 border border-slate-200/80",
+      };
+  }
+}
 
 interface ProgramMonitoringDetailViewProps {
   program: CompanyProgramItem;
@@ -98,6 +165,9 @@ export function ProgramMonitoringDetailView({
     label: program.status,
     variant: "slate" as const,
   };
+
+  const categoryConfig = getProgramCategoryVisual(program.focusArea);
+  const CategoryIcon = categoryConfig.icon;
 
   const focusConfig = program.focusArea
     ? FOCUS_AREA_CONFIG[program.focusArea as CsrFocusArea]
@@ -162,7 +232,7 @@ export function ProgramMonitoringDetailView({
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* ============================================================ */}
-      {/* 1. TOP NAVIGATION ROW (Tanpa duplikasi breadcrumb lokal)      */}
+      {/* 1. TOP NAVIGATION ROW (Kembali & Status Pelaksanaan)         */}
       {/* ============================================================ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-3">
@@ -172,50 +242,13 @@ export function ProgramMonitoringDetailView({
             size="sm"
             onClick={onBack}
             leftIcon={<ArrowLeft className="w-4 h-4" />}
-            className="text-xs font-bold text-[#181343] hover:text-[#047857] border-[#E5E7EB] hover:border-emerald-300 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer"
+            className="text-xs font-bold text-[#181343] hover:text-[#047857] border-[#E5E7EB] hover:border-emerald-300 hover:bg-emerald-50 rounded-xl transition-all cursor-pointer shadow-2xs"
           >
             Kembali ke Daftar Program
           </Button>
         </div>
 
         <div className="flex items-center gap-2.5">
-          {program.collaborationMouUrl && (
-            <a
-              href={program.collaborationMouUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#181343] hover:bg-slate-50 bg-white border border-[#E5E7EB] hover:border-slate-300 px-3 py-1.5 rounded-xl shadow-2xs transition-all"
-            >
-              <FileCheck2 className="w-4 h-4 text-[#181343]" />
-              <span>Dokumen MoU</span>
-              <ExternalLink className="w-3 h-3 text-[#181343]" />
-            </a>
-          )}
-
-          {!isManagement && onOpenChat && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenChat(program.collaborationId)}
-              leftIcon={<MessageSquare className="w-3.5 h-3.5 text-[#181343]" />}
-              className="text-xs font-bold text-[#181343] bg-slate-50 hover:bg-slate-100 border-slate-200 rounded-xl cursor-pointer"
-            >
-              Pesan Mitra
-            </Button>
-          )}
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setActiveTab("esg-report")}
-            leftIcon={<Sparkles className="w-3.5 h-3.5 text-[#181343]" />}
-            className="text-xs font-extrabold text-[#181343] bg-slate-50 hover:bg-slate-100 border-slate-200 rounded-xl cursor-pointer shadow-2xs"
-          >
-            Laporan ESG (AI)
-          </Button>
-
           <Badge variant={statusConfig.variant} size="md" hasDot className="shadow-2xs">
             {statusConfig.label}
           </Badge>
@@ -223,98 +256,159 @@ export function ProgramMonitoringDetailView({
       </div>
 
       {/* ============================================================ */}
-      {/* 2. PROGRAM IDENTITY BANNER                                   */}
+      {/* 2. PROGRAM IDENTITY BANNER (Sesuai Referensi Visual)        */}
       {/* ============================================================ */}
-      <div className="p-6 sm:p-7 rounded-3xl bg-white border border-[#E8E8EA] shadow-2xs space-y-4">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-5">
-          <div className="flex items-start gap-4 min-w-0">
-            {/* Logo Mitra dengan graceful fallback initial */}
-            <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center font-black text-[#181343] text-lg overflow-hidden shrink-0 shadow-2xs">
+      <div className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-5">
+          {/* Sisi Kiri: Foto/Logo Mitra & Info Program */}
+          <div className="flex items-start gap-4 sm:gap-5 flex-1 min-w-0">
+            {/* Foto/Logo Profil Mitra Pelaksana */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-slate-50 border border-slate-200/90 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden transition-transform hover:scale-105">
               {program.partnerLogo && !partnerLogoError ? (
                 <img
                   src={program.partnerLogo}
-                  alt={program.partnerName || "Mitra"}
+                  alt={program.partnerName || "Mitra Pelaksana"}
                   onError={() => setPartnerLogoError(true)}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                (program.partnerName || "MP").substring(0, 2).toUpperCase()
+                <div className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 flex flex-col items-center justify-center p-2 text-center select-none">
+                  <Building2 className="w-8 h-8 sm:w-9 sm:h-9 text-[#181343]/60 mb-0.5" />
+                  <span className="text-[11px] font-black text-[#181343] tracking-wider uppercase truncate max-w-full px-1">
+                    {(program.partnerName || "MP").substring(0, 3)}
+                  </span>
+                </div>
               )}
             </div>
 
-            <div className="space-y-1.5 min-w-0">
+            {/* Info Block */}
+            <div className="space-y-2 flex-1 min-w-0">
+              {/* Badges & Meta Pill Row */}
               <div className="flex flex-wrap items-center gap-2">
-                {focusConfig && (
-                  <Badge variant={focusConfig.variant} size="sm">
-                    {focusConfig.label}
-                  </Badge>
-                )}
-                <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
-                  <MapPin className="w-3.5 h-3.5 text-[#181343]" />
+                <span
+                  className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full ${categoryConfig.badgeClass}`}
+                >
+                  <CategoryIcon className="w-3.5 h-3.5" />
+                  <span>{categoryConfig.label}</span>
+                </span>
+
+                <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <MapPin className="w-3.5 h-3.5 text-slate-500" />
                   {program.targetCity
                     ? `${program.targetCity}${program.targetProvince ? `, ${program.targetProvince}` : ""}`
                     : "Wilayah Sasaran"}
                 </span>
-                <span className="text-xs text-slate-600 flex items-center gap-1 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-[#181343]" />
+
+                <span className="text-xs text-slate-600 flex items-center gap-1.5 font-medium bg-slate-50 border border-slate-200/70 px-2.5 py-1 rounded-lg">
+                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
                   {program.startDate && program.endDate
                     ? `${formatDate(program.startDate)} s/d ${formatDate(program.endDate)}`
+                    : program.startDate
+                    ? `Mulai ${formatDate(program.startDate)}`
                     : "Periode Pelaksanaan"}
                 </span>
               </div>
 
               {/* Main Heading: Nama Program */}
               <h1
-                className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight leading-snug"
+                className="text-lg sm:text-xl md:text-2xl font-extrabold text-[#181343] tracking-tight leading-snug"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 {program.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600">
-                <span className="font-semibold text-[#181343] flex items-center gap-1">
-                  <Building2 className="w-3.5 h-3.5 text-[#181343]" />
-                  {program.partnerName || "Mitra Pelaksana"}
-                </span>
-                {program.opportunityTitle && (
-                  <>
-                    <span>&bull;</span>
-                    <span className="truncate">
-                      Peluang Asal: <strong className="text-[#181343]">{program.opportunityTitle}</strong>
-                    </span>
-                  </>
-                )}
-                <span>&bull;</span>
-                <span className="flex items-center gap-1 font-medium text-slate-700">
-                  <FileCheck2 className="w-3.5 h-3.5 text-[#181343]" />
-                  {program.collaborationMouUrl ? "MoU Telah Disepakati" : "MoU Dalam Pengesahan"}
+              {/* Meta: Mitra & MoU Status (Bersih & Lega tanpa Peluang Asal yang berdesakan) */}
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 pt-0.5">
+                <div className="flex items-center gap-1.5 font-bold text-[#181343]">
+                  <Landmark className="w-3.5 h-3.5 text-slate-500" />
+                  <span>{program.partnerName || "Mitra Pelaksana"}</span>
+                </div>
+
+                <span className="text-slate-300">•</span>
+
+                <span
+                  className={`inline-flex items-center gap-1 font-semibold px-2.5 py-0.5 rounded-md ${
+                    program.collaborationMouUrl
+                      ? "text-emerald-700 bg-emerald-50 border border-emerald-200/80"
+                      : "text-amber-700 bg-amber-50 border border-amber-200/80"
+                  }`}
+                >
+                  <FileCheck2 className="w-3.5 h-3.5" />
+                  <span>{program.collaborationMouUrl ? "MoU Telah Disepakati" : "MoU Dalam Pengesahan"}</span>
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Sisi Kanan: Aksi Cepat (Quick Actions) */}
+          <div className="flex flex-row md:flex-col items-center sm:items-stretch gap-2.5 shrink-0 w-full md:w-auto pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+            {!isManagement && onOpenChat && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChat(program.collaborationId)}
+                leftIcon={<MessageSquare className="w-3.5 h-3.5 text-[#181343]" />}
+                className="flex-1 md:flex-initial text-xs font-bold text-[#181343] bg-slate-50 hover:bg-slate-100 border-slate-200 rounded-xl cursor-pointer shadow-2xs"
+              >
+                Pesan Mitra
+              </Button>
+            )}
+
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => setActiveTab("esg-report")}
+              leftIcon={<Sparkles className="w-3.5 h-3.5 text-emerald-400" />}
+              className="flex-1 md:flex-initial text-xs font-extrabold text-white bg-[#181343] hover:bg-indigo-950 rounded-xl cursor-pointer shadow-2xs"
+            >
+              Laporan ESG (AI)
+            </Button>
+
+            {program.collaborationMouUrl && (
+              <a
+                href={program.collaborationMouUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 md:flex-initial inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#181343] hover:bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/80 transition-colors"
+              >
+                <FileCheck2 className="w-3.5 h-3.5 text-slate-500" />
+                <span>Berkas MoU</span>
+                <ExternalLink className="w-3 h-3 text-slate-400" />
+              </a>
+            )}
           </div>
         </div>
 
         {/* Ringkasan Deskripsi Program (Maksimal 2-3 baris dengan Opsi Lihat Selengkapnya) */}
         {program.description && (
-          <div className="pt-3 border-t border-[#F4F4F6] text-xs sm:text-sm text-[#47464F] leading-relaxed">
-            <p className={isDescriptionExpanded ? "whitespace-pre-line" : "line-clamp-2 sm:line-clamp-3"}>
+          <div className="pt-3.5 border-t border-slate-100 text-xs sm:text-sm text-slate-600 leading-relaxed space-y-2">
+            <p className={isDescriptionExpanded ? "whitespace-pre-line" : "line-clamp-2"}>
               {program.description}
             </p>
-            {program.description.length > 140 && (
+
+            {program.opportunityTitle && isDescriptionExpanded && (
+              <div className="pt-2 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-500">
+                <span className="text-slate-400 font-medium">Inisiatif Asal Proposal:</span>
+                <strong className="text-slate-700">{program.opportunityTitle}</strong>
+              </div>
+            )}
+
+            {program.description.length > 120 && (
               <button
                 type="button"
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                className="text-xs font-bold text-[#181343] hover:underline mt-1 inline-flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-[#181343] hover:text-emerald-700 hover:underline inline-flex items-center gap-1 cursor-pointer transition-colors"
               >
                 {isDescriptionExpanded ? (
                   <>
                     <span>Ciutkan Deskripsi</span>
-                    <ChevronUp className="w-3.5 h-3.5 text-[#181343]" />
+                    <ChevronUp className="w-3.5 h-3.5" />
                   </>
                 ) : (
                   <>
-                    <span>Lihat Selengkapnya</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-[#181343]" />
+                    <span>Lihat Metodologi &amp; Deskripsi Lengkap</span>
+                    <ChevronDown className="w-3.5 h-3.5" />
                   </>
                 )}
               </button>
