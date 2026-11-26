@@ -1,204 +1,247 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
-  FileSpreadsheet,
+  FileText,
   Camera,
-  Layers,
   Coins,
+  Sprout,
   QrCode,
   ShieldCheck,
-  TrendingUp,
+  ArrowLeft,
+  ArrowRight,
+  type LucideIcon,
 } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
+interface FeatureCardItem {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+}
+
+const FEATURES: FeatureCardItem[] = [
+  {
+    icon: FileText,
+    title: "Ekstraksi Proposal & RAB",
+    description: "Ekstraksi usulan dan RAB menjadi milestone siap verifikasi.",
+  },
+  {
+    icon: Camera,
+    title: "Jurnal & Bukti Lapangan",
+    description: "Validasi progres real-time dengan foto dan koordinat GPS.",
+  },
+  {
+    icon: Coins,
+    title: "Realisasi Dana Bertahap",
+    description: "Pencairan bertahap berbasis verifikasi nota kwitansi fisik.",
+  },
+  {
+    icon: Sprout,
+    title: "Penyelarasan SDGs & ESG",
+    description: "Pemetaan inisiatif ke 17 target SDGs dan 3 pilar ESG.",
+  },
+  {
+    icon: QrCode,
+    title: "Survei Responden Bebas Login",
+    description: "Penilaian kepuasan warga langsung via pemindaian QR Code.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Laporan Siap Audit",
+    description: "Konsolidasi rekam jejak dan serapan anggaran siap diaudit.",
+  },
+];
+
 export function FeaturesSection() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScrollability = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  useEffect(() => {
+    checkScrollability();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkScrollability, { passive: true });
+    window.addEventListener("resize", checkScrollability);
+    return () => {
+      el.removeEventListener("scroll", checkScrollability);
+      window.removeEventListener("resize", checkScrollability);
+    };
+  }, []);
+
+  const handleScroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 250; // card width + gap
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+    setTimeout(checkScrollability, 300);
+  };
+
+  const handleScrollEvent = () => {
+    checkScrollability();
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll <= 0) {
+      setActiveSlide(0);
+      return;
+    }
+    const ratio = Math.max(0, Math.min(1, scrollLeft / maxScroll));
+    const index = Math.round(ratio * (FEATURES.length - 1));
+    setActiveSlide(index);
+  };
+
+  const scrollToSlide = (index: number) => {
+    if (!scrollRef.current) return;
+    const { scrollWidth, clientWidth } = scrollRef.current;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll <= 0) return;
+    const targetScroll = (index / (FEATURES.length - 1)) * maxScroll;
+    scrollRef.current.scrollTo({
+      left: targetScroll,
+      behavior: "smooth",
+    });
+    setActiveSlide(index);
+    setTimeout(checkScrollability, 300);
+  };
+
   return (
     <section
       id="fitur"
-      className="min-h-[calc(100vh-5rem)] lg:min-h-[calc(100dvh-5rem)] flex flex-col justify-start pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#F9F9FB] relative overflow-hidden border-t border-[#E5E7EB] scroll-mt-[76px]"
+      className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#FFFFFF] via-[#F6F9FE] to-[#F8FAFF] relative overflow-hidden scroll-mt-[76px]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        {/* Section Header */}
-        <ScrollReveal animation="fade-up" delay={50}>
-          <div className="pb-6 sm:pb-8 border-b border-[#E5E7EB] space-y-3">
-            <div>
-              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-                Fitur Tata Kelola
-              </span>
+      {/* ========================================================================= */}
+      {/* ATMOSPHERIC AURA MESH GRADIENTS (MATCHING REFERENCE DESIGN)               */}
+      {/* ========================================================================= */}
+      {/* Left Flank Soft Lilac-Blue Aura */}
+      <div className="absolute top-1/4 -left-36 w-[550px] sm:w-[680px] h-[550px] sm:h-[680px] bg-gradient-to-tr from-[#DCE7FE]/60 via-[#E4ECFF]/45 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      {/* Right Flank Powder-Sky Blue Glow */}
+      <div className="absolute top-1/3 -right-36 w-[550px] sm:w-[700px] h-[550px] sm:h-[700px] bg-gradient-to-bl from-[#CBE7FD]/55 via-[#DBEFFF]/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      {/* Ambient Central Luminous Highlight */}
+      <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-white/70 rounded-full blur-2xl pointer-events-none" />
+
+      {/* Standard Container: Aligned with sections above (max-w-7xl mx-auto px-6 sm:px-8 lg:px-12) */}
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 xl:gap-12 items-center">
+          {/* ========================================================================= */}
+          {/* 1. LEFT COLUMN: ALIGNED IDENTICALLY TO SECTIONS ABOVE (~35% WIDTH)        */}
+          {/* ========================================================================= */}
+          <div className="lg:col-span-5 xl:col-span-4 space-y-4">
+            <ScrollReveal animation="fade-right" delay={30}>
+              {/* Eyebrow Label Capsule */}
+              <div className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#2B4FB1]/10 border border-[#2B4FB1]/20 text-[#2B4FB1] text-xs font-bold uppercase tracking-wider mb-2">
+                <span>FITUR UTAMA SIPENA</span>
+              </div>
+
+              {/* Main Headline (Clean 2-line structure) */}
+              <h2
+                className="text-3xl sm:text-4xl lg:text-[40px] font-extrabold text-[#0A2558] tracking-tight leading-[1.18]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Mengapa Memilih<br />SIPENA?
+              </h2>
+
+              {/* Description */}
+              <p className="text-sm sm:text-[14.5px] text-slate-600 leading-relaxed max-w-[320px]">
+                Instrumen digital terpadu untuk tata kelola program CSR yang terukur, transparan, dan berdampak nyata bagi seluruh pemangku kepentingan.
+              </p>
+
+              {/* Slider Arrow Navigation Buttons [<-] [->] */}
+              <div className="flex items-center gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => handleScroll("left")}
+                  disabled={!canScrollLeft}
+                  className="w-11 h-11 rounded-full border-2 border-slate-200 bg-white text-slate-800 hover:text-[#1765F5] hover:border-[#1765F5] flex items-center justify-center shadow-xs hover:shadow-sm transition-all cursor-pointer active:scale-95 disabled:opacity-35 disabled:pointer-events-none disabled:cursor-not-allowed"
+                  aria-label="Fitur Sebelumnya"
+                >
+                  <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleScroll("right")}
+                  disabled={!canScrollRight}
+                  className="w-11 h-11 rounded-full bg-gradient-to-r from-[#43A5FF] via-[#1765F5] to-[#1748D5] text-white flex items-center justify-center shadow-md shadow-[#1765F5]/30 hover:brightness-110 transition-all cursor-pointer active:scale-95 disabled:opacity-35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:shadow-none"
+                  aria-label="Fitur Berikutnya"
+                >
+                  <ArrowRight className="w-4 h-4 stroke-[2.2]" />
+                </button>
+              </div>
+            </ScrollReveal>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* 2. RIGHT COLUMN: BALANCED CAROUSEL IN COLUMN (~65% WIDTH)                 */}
+          {/* ========================================================================= */}
+          <div className="lg:col-span-7 xl:col-span-8 relative min-w-0">
+            {/* Gradient Ribbon (Matched to Signature Button Gradient from-[#43A5FF] via-[#1765F5] to-[#1748D5]) */}
+            <div className="absolute top-0 left-0 right-0 h-32 sm:h-36 bg-gradient-to-r from-[#43A5FF] via-[#1765F5] to-[#1748D5] rounded-2xl pointer-events-none -z-0 shadow-lg shadow-[#1765F5]/20" />
+
+            {/* Scrollable Cards Container (Spacious padding so Card 1 is not cramped against left corner) */}
+            <div
+              ref={scrollRef}
+              onScroll={handleScrollEvent}
+              className="relative z-10 flex gap-4 sm:gap-5 overflow-x-auto scroll-smooth pt-7 sm:pt-8 pb-5 pl-8 sm:pl-10 pr-6 select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            >
+              {FEATURES.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.title}
+                    className="relative w-[215px] sm:w-[225px] h-[245px] sm:h-[255px] shrink-0 bg-white rounded-2xl border border-slate-100/90 shadow-lg shadow-[#1765F5]/8 hover:shadow-xl hover:shadow-[#1765F5]/18 transition-all duration-300 hover:-translate-y-1.5 flex flex-col items-center justify-center p-4 sm:p-5 text-center group"
+                  >
+                    {/* Circular Icon Container */}
+                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[#F0F4FD] border border-[#1765F5]/15 flex items-center justify-center mb-3 group-hover:scale-105 group-hover:bg-[#1765F5] transition-all duration-300 shadow-2xs">
+                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-[#1765F5] group-hover:text-white transition-colors duration-300 stroke-[1.8]" />
+                    </div>
+
+                    {/* Feature Title (Title Case, Bold Navy) */}
+                    <h3
+                      className="text-xs sm:text-[13px] font-bold text-[#0A2558] group-hover:text-[#1765F5] transition-colors tracking-tight leading-snug mb-2 px-1"
+                      style={{ fontFamily: "var(--font-display)" }}
+                    >
+                      {item.title}
+                    </h3>
+
+                    {/* Feature Description (Fits completely in 2 lines, never clipped!) */}
+                    <p className="text-[10.5px] sm:text-[11px] text-slate-600 leading-relaxed px-1">
+                      {item.description}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
-              {/* Left Column (Headline ~55%) */}
-              <div className="lg:col-span-7">
-                <h2
-                  className="text-2xl sm:text-3xl lg:text-[34px] font-extrabold tracking-tight text-[#181343] leading-[1.2]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Instrumen Digital untuk Pengelolaan CSR yang Terukur &amp; Kredibel
-                </h2>
-              </div>
-
-              {/* Right Column (Description ~45%) */}
-              <div className="lg:col-span-5">
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                  Fitur SIPENA dirancang untuk menyederhanakan alur kerja administratif, memperkuat integritas data lapangan, dan memenuhi standar audit keberlanjutan.
-                </p>
-              </div>
+            {/* Slider Position Indicator (Gambar 3 style) */}
+            <div className="flex items-center justify-center gap-1.5 pt-3">
+              {FEATURES.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => scrollToSlide(i)}
+                  className={`h-1.5 transition-all duration-300 rounded-full cursor-pointer ${activeSlide === i
+                    ? "w-7 bg-[#1765F5]"
+                    : "w-2.5 bg-slate-200 hover:bg-slate-300"
+                    }`}
+                  aria-label={`Lihat fitur ${i + 1}`}
+                />
+              ))}
             </div>
           </div>
-        </ScrollReveal>
-
-        {/* Feature Bento Grid (Varied Asymmetrical Layout with Enriched Spacing & Sizing) */}
-        <div className="mt-8 sm:mt-10 lg:mt-14 grid grid-cols-1 md:grid-cols-12 gap-5 lg:gap-6 items-stretch">
-          {/* Feature 1: AI Proposal Extractor (Large Hero Bento Card - 7 Cols) */}
-          <ScrollReveal animation="fade-right" delay={100} className="md:col-span-7 h-full">
-            <div className="card-hover p-7 sm:p-8 lg:p-9 rounded-3xl bg-[#181343] text-white border border-[#26224C] shadow-lg flex flex-col justify-between relative overflow-hidden group h-full min-h-[360px] lg:min-h-[390px]">
-              <div className="space-y-3.5 relative z-10">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 text-white text-xs font-bold border border-white/15">
-                  <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-                  <span>Ekstraksi Otomatis PDF &amp; RAB Proposal</span>
-                </div>
-
-                <h3
-                  className="text-xl sm:text-2xl font-extrabold text-white leading-snug"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Konversi Dokumen Usulan Menjadi Milestone Terjadwal
-                </h3>
-
-                <p className="text-sm sm:text-[15px] text-slate-300 leading-relaxed max-w-xl">
-                  Membedah dokumen proposal tebal menjadi tahapan kegiatan sekuensial lengkap dengan panduan bukti verifikasi wajib, alokasi anggaran per pos, dan target indikator pencapaian.
-                </p>
-              </div>
-
-              {/* Visual Interactive Mockup Card */}
-              <div className="mt-7 p-4 sm:p-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 space-y-3 relative z-10">
-                <div className="flex items-center justify-between text-xs pb-2 border-b border-white/10">
-                  <span className="font-bold text-white flex items-center gap-1.5">
-                    <Layers className="w-4 h-4 text-emerald-400" />
-                    Struktur Tahapan Program
-                  </span>
-                  <span className="text-[11px] text-emerald-300 font-mono font-bold">
-                    4 Milestone Tervalidasi
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-emerald-400 font-bold block">Tahap 1: Sosialisasi &amp; Asesmen</span>
-                    <span className="text-slate-300 line-clamp-1">Foto rembug warga &amp; daftar hadir</span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
-                    <span className="text-teal-300 font-bold block">Tahap 2: Pengadaan &amp; Distribusi</span>
-                    <span className="text-slate-300 line-clamp-1">Surat jalan logistik &amp; nota belanja fisik</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Feature 2: Real-time Field Evidence Journal (5 Cols) */}
-          <ScrollReveal animation="fade-left" delay={200} className="md:col-span-5 h-full">
-            <div className="card-hover p-7 sm:p-8 lg:p-9 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between h-full min-h-[360px] lg:min-h-[390px]">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-2xl bg-[#181343]/5 text-[#181343] flex items-center justify-center">
-                  <Camera className="w-6 h-6 text-[#181343]" />
-                </div>
-
-                <h3
-                  className="text-lg sm:text-xl font-bold text-[#181343]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Jurnal &amp; Bukti Visual Lapangan
-                </h3>
-
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Mitra mengunggah foto progres riil, data warga terjangkau, dan dokumen BAST pada setiap tahapan kegiatan. Perusahaan dapat memverifikasi atau meminta klarifikasi secara langsung.
-                </p>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-[#E5E7EB] flex items-center justify-between text-xs text-slate-600">
-                <span className="flex items-center gap-1.5 font-semibold text-[#181343]">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  Anti-Klaim Fiktif
-                </span>
-                <span>Foto Multi-Slot &amp; Koordinat GPS</span>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Feature 3: Realisasi Dana Bertahap (4 Cols) */}
-          <ScrollReveal animation="fade-up" delay={100} className="md:col-span-4 h-full">
-            <div className="card-hover p-6 sm:p-7 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-4 h-full flex flex-col justify-between min-h-[260px] sm:min-h-[280px]">
-              <div className="space-y-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                  <Coins className="w-5 h-5 text-emerald-600" />
-                </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-[#181343]">
-                  Realisasi Dana Bertahap &amp; Audit Nota
-                </h3>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Anggaran program disalurkan per termin. Mitra wajib mengunggah nota kwitansi fisik sebelum termin berikutnya dicairkan, menjamin serapan dana 100% akuntabel.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F4F4F6] text-xs font-mono text-[#181343] font-semibold flex items-center justify-between mt-3">
-                <span>Termin Penyaluran</span>
-                <span className="text-emerald-700">Verifikasi Per Nota</span>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Feature 4: Pemetaan Otomatis SDGs & ESG (4 Cols) */}
-          <ScrollReveal animation="fade-up" delay={200} className="md:col-span-4 h-full">
-            <div className="card-hover p-6 sm:p-7 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-4 h-full flex flex-col justify-between min-h-[260px] sm:min-h-[280px]">
-              <div className="space-y-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-[#181343]/10 text-[#181343] flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-[#181343]" />
-                </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-[#181343]">
-                  Penyelarasan 17 SDGs &amp; 3 Pilar ESG
-                </h3>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Setiap inisiatif dipetakan ke target Tujuan Pembangunan Berkelanjutan (SDGs) dan pilar Environmental, Social, &amp; Governance untuk kebutuhan pelaporan keberlanjutan dan evaluasi dampak ESG.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F4F4F6] text-xs text-[#181343] font-semibold flex items-center justify-between mt-3">
-                <span>Pilar Keberlanjutan</span>
-                <span className="text-emerald-700 font-bold">17 SDGs &amp; Pilar ESG</span>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Feature 5: Public Beneficiary Review Channel (4 Cols) */}
-          <ScrollReveal animation="fade-up" delay={300} className="md:col-span-4 h-full">
-            <div className="card-hover p-6 sm:p-7 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-4 h-full flex flex-col justify-between min-h-[260px] sm:min-h-[280px]">
-              <div className="space-y-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center">
-                  <QrCode className="w-5 h-5 text-teal-600" />
-                </div>
-
-                <h3 className="text-base sm:text-lg font-bold text-[#181343]">
-                  Survei Penerima Manfaat Tanpa Hambatan
-                </h3>
-
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  Masyarakat penerima manfaat dapat memberikan penilaian kepuasan langsung melalui QR Code di lokasi kegiatan tanpa kewajiban registrasi akun.
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#F4F4F6] text-xs text-[#181343] font-semibold flex items-center justify-between mt-3">
-                <span>Akses Warga</span>
-                <span className="text-teal-700 font-bold">Pemindaian QR Bebas Login</span>
-              </div>
-            </div>
-          </ScrollReveal>
         </div>
       </div>
     </section>

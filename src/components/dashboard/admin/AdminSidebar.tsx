@@ -172,17 +172,15 @@ export function AdminSidebar({
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group ${
-                      isActive
-                        ? "bg-[#181343] text-white shadow-xs font-bold"
-                        : "text-[#181343] hover:bg-[#F4F4F6] hover:text-[#181343]"
-                    }`}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group ${isActive
+                      ? "bg-[#181343] text-white shadow-xs font-bold"
+                      : "text-[#181343] hover:bg-[#F4F4F6] hover:text-[#181343]"
+                      }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
-                        className={`w-4 h-4 shrink-0 transition-colors ${
-                          isActive ? "text-white" : "text-[#787680] group-hover:text-[#181343]"
-                        }`}
+                        className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-white" : "text-[#787680] group-hover:text-[#181343]"
+                          }`}
                         aria-hidden="true"
                       />
                       <span className="truncate">{item.label}</span>
@@ -191,11 +189,10 @@ export function AdminSidebar({
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {item.count !== undefined && item.count > 0 && (
                         <span
-                          className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${
-                            isActive
-                              ? "bg-white/20 text-white"
-                              : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
-                          }`}
+                          className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
+                            }`}
                         >
                           {item.count}
                         </span>

@@ -1,263 +1,237 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  MapPin,
-  Users,
-  TreePine,
-  GraduationCap,
-  Droplets,
-  Coins,
-} from "lucide-react";
+import React, { useRef, useState, useEffect } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { ScrollReveal } from "@/components/ui/scroll-reveal";
 
-interface ProgramItem {
+interface ImpactStory {
   id: string;
-  category: "LINGKUNGAN" | "PENDIDIKAN" | "KESEHATAN" | "EKONOMI";
-  categoryLabel: string;
-  title: string;
-  partnerName: string;
-  companyName: string;
-  location: string;
-  sdgTag: string;
-  sdgColor: string;
-  impactMetrics: string;
-  status: "Sedang Berjalan" | "Selesai Diverifikasi";
-  statusVariant: "navy" | "emerald";
-  description: string;
+  name: string;
+  role: string;
+  organization: string;
+  quote: string;
+  avatarUrl: string;
+  initials: string;
+  avatarGradient: string;
 }
 
-const SAMPLE_PROGRAMS: ProgramItem[] = [
+const IMPACT_STORIES: ImpactStory[] = [
   {
-    id: "prog-1",
-    category: "LINGKUNGAN",
-    categoryLabel: "Lingkungan Hidup",
-    title: "Restorasi Ekosistem & Penanaman 10.000 Bibit Mangrove",
-    partnerName: "Yayasan Pesisir Lestari Bahari",
-    companyName: "PT Energi Nusantara Sejahtera",
-    location: "Kec. Muara Gembong, Kab. Bekasi",
-    sdgTag: "SDG 13 · Penanganan Perubahan Iklim",
-    sdgColor: "bg-[#3F7E44]/15 text-[#3F7E44] border-[#3F7E44]/30",
-    impactMetrics: "120 Keluarga Nelayan & 4 Ha Lahan Pesisir",
-    status: "Sedang Berjalan",
-    statusVariant: "navy",
-    description: "Rehabilitasi garis pantai dari abrasi ekstrem disertai pembibitan lokal dan edukasi penjagaan tambak hijau bersama kelompok nelayan binaan.",
+    id: "story-1",
+    name: "Dra. Maya Puspitasari, M.Si",
+    role: "VP Sustainability & Corporate Affairs",
+    organization: "PT Mandiri Mineral Tbk",
+    quote:
+      "Pencatatan termin berbasis nota fisik dan validasi bertahap membuat laporan tahunan CSR kami siap diaudit kapan saja dengan transparansi penuh tanpa keraguan.",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&h=200&q=80",
+    initials: "MP",
+    avatarGradient: "from-[#1765F5] to-[#0A2558]",
   },
   {
-    id: "prog-2",
-    category: "PENDIDIKAN",
-    categoryLabel: "Pendidikan & Literasi",
-    title: "Digitalisasi Laboratorium Vokasi & Akses Internet Desa 3T",
-    partnerName: "Lembaga Bina Generasi Unggul",
-    companyName: "PT Telekomunikasi Mandiri Persada",
-    location: "Kab. Lebak, Banten",
-    sdgTag: "SDG 4 · Pendidikan Berkualitas",
-    sdgColor: "bg-[#C5192D]/15 text-[#C5192D] border-[#C5192D]/30",
-    impactMetrics: "450 Siswa & 24 Guru Vokasi",
-    status: "Selesai Diverifikasi",
-    statusVariant: "emerald",
-    description: "Pengadaan 30 unit perangkat komputer, instalasi jaringan satelit internet mandiri, serta pembekalan kompetensi kecakapan digital guru daerah pelosok.",
+    id: "story-2",
+    name: "Hendro Wicaksono, S.Hut",
+    role: "Direktur Eksekutif",
+    organization: "Yayasan Restorasi Pesisir Bahari",
+    quote:
+      "Pembaruan progres kegiatan lapangan terintegrasi langsung dengan titik koordinat GPS dan foto bukti nota secara real-time. Koordinasi kemitraan menjadi jauh lebih cepat dan terpercaya.",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&h=200&q=80",
+    initials: "HW",
+    avatarGradient: "from-emerald-500 to-teal-700",
   },
   {
-    id: "prog-3",
-    category: "KESEHATAN",
-    categoryLabel: "Kesehatan & Sanitasi",
-    title: "Pembangunan Sumur Bor Air Bersih & Sanitasi Higienis Warga",
-    partnerName: "Yayasan Air Sehat Komunitas",
-    companyName: "PT Manufaktur Baja Cemerlang",
-    location: "Kab. Gunungkidul, D.I. Yogyakarta",
-    sdgTag: "SDG 6 · Air Bersih & Sanitasi Layak",
-    sdgColor: "bg-[#26BDE2]/15 text-[#007D99] border-[#26BDE2]/30",
-    impactMetrics: "850 Jiwa Warga Terdampak Kekeringan",
-    status: "Selesai Diverifikasi",
-    statusVariant: "emerald",
-    description: "Pengeboran geolistrik sedalam 90 meter, pembangunan tandon air komunal 5.000 liter, dan instalasi pipa langsung ke pemukiman warga.",
+    id: "story-3",
+    name: "Siti Rahmawati",
+    role: "Koordinator Forum Komunitas",
+    organization: "Sentra Olahan Pesisir Mandiri",
+    quote:
+      "Warga penerima manfaat dapat memberikan penilaian langsung via pemindaian QR Code di lokasi kegiatan tanpa perlu login akun. Bantuan tersalurkan transparan dan tepat sasaran.",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=200&h=200&q=80",
+    initials: "SR",
+    avatarGradient: "from-amber-500 to-orange-600",
   },
   {
-    id: "prog-4",
-    category: "EKONOMI",
-    categoryLabel: "Pemberdayaan UMKM",
-    title: "Inkubasi Usaha Olahan Pesisir & Pengemasan Produk Bersih",
-    partnerName: "Koperasi Pemberdayaan Pesisir Mandiri",
-    companyName: "Bank Finansial Inklusi Terpadu",
-    location: "Kab. Banyuwangi, Jawa Timur",
-    sdgTag: "SDG 8 · Pekerjaan Layak & Pertumbuhan Ekonomi",
-    sdgColor: "bg-[#A21942]/15 text-[#A21942] border-[#A21942]/30",
-    impactMetrics: "60 Ibu Rumah Tangga & Pelaku Usaha Mikro",
-    status: "Sedang Berjalan",
-    statusVariant: "navy",
-    description: "Pelatihan higienitas pengemasan vakum hasil tangkapan laut, perizinan P-IRT resmi, serta akses pemasaran rantai pasok ritel modern.",
+    id: "story-4",
+    name: "Ir. Budi Prasetyo, M.T.",
+    role: "Head of CSR Governance & Compliance",
+    organization: "PT Tirta Mandiri Persada",
+    quote:
+      "Penyelarasan otomatis ke 17 target SDGs dan pilar ESG mempermudah evaluasi dampak serta kepatuhan tata kelola keberlanjutan perusahaan di setiap periode audit.",
+    avatarUrl:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&h=200&q=80",
+    initials: "BP",
+    avatarGradient: "from-indigo-500 to-blue-700",
   },
 ];
 
 export function ProgramsImpactSection() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const filteredPrograms =
-    selectedCategory === "ALL"
-      ? SAMPLE_PROGRAMS
-      : SAMPLE_PROGRAMS.filter((p) => p.category === selectedCategory);
+  const checkScrollability = () => {
+    if (!scrollRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+    setCanScrollLeft(scrollLeft > 10);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  const handleScroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 370; // card width + gap
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  useEffect(() => {
+    checkScrollability();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkScrollability, { passive: true });
+    window.addEventListener("resize", checkScrollability);
+    return () => {
+      el.removeEventListener("scroll", checkScrollability);
+      window.removeEventListener("resize", checkScrollability);
+    };
+  }, []);
 
   return (
     <section
-      id="program-dampak"
-      className="pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#F4F4F6] relative overflow-hidden border-t border-[#E5E7EB] scroll-mt-[76px]"
+      id="bukti-nyata"
+      className="py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-[#F7FAFF] via-[#F4F8FE] to-[#FFFFFF] relative overflow-hidden border-t border-slate-100/60 scroll-mt-[76px]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        {/* Section Header */}
-        <ScrollReveal animation="fade-up" delay={50}>
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E5E7EB]">
-            <div className="max-w-2xl space-y-3.5 sm:space-y-4">
-              <div>
-                <span className="inline-flex px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-                  Program &amp; Dampak Lapangan
-                </span>
-              </div>
-              <h2
-                className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#181343] leading-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Bukti Nyata Kolaborasi Sosial yang Tercatat &amp; Tervalidasi
-              </h2>
-            </div>
-            <p className="text-sm sm:text-base text-slate-600 max-w-md leading-relaxed">
-              Menampilkan contoh inisiatif kemitraan yang dikelola dengan mekanisme pemantauan berjenjang, pelaporan nota faktual, dan verifikasi langsung di lapangan.
+      {/* ========================================================================= */}
+      {/* ATMOSPHERIC AURA MESH GRADIENTS (MATCHING REFERENCE DESIGN)               */}
+      {/* ========================================================================= */}
+      {/* Left Flank Soft Sky-Blue Diffusion */}
+      <div className="absolute top-1/4 -left-36 w-[550px] sm:w-[700px] h-[550px] sm:h-[700px] bg-gradient-to-tr from-[#D6E6FE]/55 via-[#E2EEFF]/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      {/* Right Flank Soft Cyan-Blue Glow */}
+      <div className="absolute top-1/3 -right-36 w-[550px] sm:w-[700px] h-[550px] sm:h-[700px] bg-gradient-to-bl from-[#C2E4FD]/50 via-[#DBEFFF]/40 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      {/* Ambient Central Luminous Highlight */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-white/60 rounded-full blur-2xl pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+        {/* ========================================================================= */}
+        {/* SECTION HEADER: SINGLE LINE "Dipercaya oleh Mitra Kolaborasi"             */}
+        {/* ========================================================================= */}
+        <div className="text-center max-w-4xl mx-auto mb-12 sm:mb-14">
+          <ScrollReveal animation="fade-up" delay={20}>
+            {/* Main Headline (All in 1 single line on tablet & desktop) */}
+            <h2
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold text-[#0A2558] tracking-tight leading-tight mb-4 whitespace-normal sm:whitespace-nowrap"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Dipercaya oleh{" "}
+              <span className="text-[#1765F5]">Mitra Kolaborasi</span>
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-sm sm:text-base text-slate-500 leading-relaxed max-w-2xl mx-auto">
+              Umpan balik nyata dari para mitra perusahaan, lembaga pelaksana, hingga penerima manfaat yang bergerak bersama SIPENA dalam tata kelola CSR terukur, transparan, dan berdampak.
             </p>
-          </div>
-        </ScrollReveal>
+          </ScrollReveal>
+        </div>
 
-        {/* Category Filters */}
-        <ScrollReveal animation="fade-up" delay={100}>
-          <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2">
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("ALL")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                selectedCategory === "ALL"
-                  ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-              }`}
-            >
-              Semua Program ({SAMPLE_PROGRAMS.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("LINGKUNGAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "LINGKUNGAN"
-                  ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-              }`}
-            >
-              <TreePine className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Lingkungan Hidup</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("PENDIDIKAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "PENDIDIKAN"
-                  ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-              }`}
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Pendidikan &amp; Literasi</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("KESEHATAN")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "KESEHATAN"
-                  ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-              }`}
-            >
-              <Droplets className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Kesehatan &amp; Sanitasi</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedCategory("EKONOMI")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
-                selectedCategory === "EKONOMI"
-                  ? "bg-[#181343] text-white shadow-xs"
-                  : "bg-white text-slate-600 hover:bg-[#EEEEF0] border border-[#E5E7EB]"
-              }`}
-            >
-              <Coins className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Pemberdayaan UMKM</span>
-            </button>
-          </div>
-        </ScrollReveal>
+        {/* ========================================================================= */}
+        {/* TESTIMONIAL CARDS ROW / SLIDER                                            */}
+        {/* ========================================================================= */}
+        <div className="relative">
+          <div
+            ref={scrollRef}
+            className="flex gap-5 sm:gap-6 overflow-x-auto scroll-smooth py-4 px-2 sm:px-4 select-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] snap-x snap-mandatory justify-start"
+          >
+            {IMPACT_STORIES.map((story) => (
+              <div
+                key={story.id}
+                className="w-[300px] sm:w-[350px] lg:w-[360px] shrink-0 snap-start bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:border-blue-100 transition-all duration-300 flex flex-col justify-between"
+              >
+                <div>
+                  {/* Top Row: User Avatar (Left) + Large Blue Quote Icon (Right) */}
+                  <div className="flex items-start justify-between gap-4 mb-5">
+                    {/* User Avatar Circle */}
+                    <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-slate-100 shadow-xs shrink-0 bg-slate-100">
+                      <img
+                        src={story.avatarUrl}
+                        alt={story.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          target.style.display = "none";
+                          if (target.nextElementSibling) {
+                            (target.nextElementSibling as HTMLElement).style.display = "flex";
+                          }
+                        }}
+                      />
+                      <div
+                        className={`hidden absolute inset-0 bg-gradient-to-br ${story.avatarGradient} text-white items-center justify-center font-bold text-sm`}
+                      >
+                        {story.initials}
+                      </div>
+                    </div>
 
-        {/* Program Cards Grid */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredPrograms.map((prog, pIdx) => (
-            <ScrollReveal
-              key={prog.id}
-              animation="fade-up"
-              delay={100 + (pIdx % 2) * 120}
-              className="h-full"
-            >
-              <div className="card-hover p-6 sm:p-7 rounded-3xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between h-full">
-                <div className="space-y-3">
-                  {/* Meta Row: Status & SDG Tag */}
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-[11px] font-bold border ${prog.sdgColor}`}
+                    {/* Prominent Blue Double Quote Icon */}
+                    <svg
+                      className="w-9 h-9 text-[#1765F5] shrink-0 opacity-90"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
                     >
-                      {prog.sdgTag}
-                    </span>
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
-                        prog.statusVariant === "emerald"
-                          ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                          : "bg-[#181343]/10 text-[#181343] border border-[#181343]/20"
-                      }`}
-                    >
-                      {prog.status}
-                    </span>
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                    </svg>
                   </div>
 
-                  {/* Title */}
-                  <h3 className="text-lg sm:text-xl font-bold text-[#181343] leading-snug">
-                    {prog.title}
+                  {/* Author Name */}
+                  <h3
+                    className="text-lg sm:text-xl font-bold text-[#0A2558] tracking-tight leading-snug"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {story.name}
                   </h3>
 
-                  {/* Narrative description */}
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                    {prog.description}
+                  {/* Role & Company in Subtle Blue */}
+                  <p className="text-xs sm:text-[13px] font-semibold text-[#1765F5] mt-1 mb-4">
+                    {story.role}, {story.organization}
                   </p>
 
-                  {/* Sponsoring Companies & NGO Partner */}
-                  <div className="p-3.5 rounded-xl bg-[#F9F9FB] border border-[#E5E7EB] text-xs space-y-1.5 text-slate-600">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Mitra Pelaksana:</span>
-                      <strong className="text-[#181343]">{prog.partnerName}</strong>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500">Sponsor Utama:</span>
-                      <strong className="text-[#181343]">{prog.companyName}</strong>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom Row: Location & Metrics */}
-                <div className="pt-4 border-t border-[#E5E7EB] flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-                  <div className="flex items-center gap-1.5 font-medium">
-                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{prog.location}</span>
-                  </div>
-
-                  <div className="flex items-center gap-1.5 font-bold text-[#181343]">
-                    <Users className="w-3.5 h-3.5 text-teal-600" />
-                    <span>{prog.impactMetrics}</span>
-                  </div>
+                  {/* Feedback / Testimonial Quote */}
+                  <p className="text-xs sm:text-[13.5px] text-slate-600 leading-relaxed font-normal">
+                    {story.quote}
+                  </p>
                 </div>
               </div>
-            </ScrollReveal>
-          ))}
+            ))}
+          </div>
+
+          {/* ========================================================================= */}
+          {/* SLIDER CONTROLS: CLEAN NAVIGATION ARROWS WITHOUT CONFUSING DOT MARKERS   */}
+          {/* ========================================================================= */}
+          <div className="flex items-center justify-center gap-3 pt-8">
+            <button
+              type="button"
+              onClick={() => handleScroll("left")}
+              disabled={!canScrollLeft}
+              className="w-10 h-10 rounded-full border-2 border-slate-200 bg-white text-slate-800 hover:text-[#1765F5] hover:border-[#1765F5] flex items-center justify-center transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shadow-2xs active:scale-95"
+              aria-label="Ulasan Sebelumnya"
+            >
+              <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleScroll("right")}
+              disabled={!canScrollRight}
+              className="w-10 h-10 rounded-full bg-gradient-to-r from-[#43A5FF] via-[#1765F5] to-[#1748D5] text-white flex items-center justify-center shadow-md shadow-[#1765F5]/25 hover:brightness-110 transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer active:scale-95"
+              aria-label="Ulasan Berikutnya"
+            >
+              <ArrowRight className="w-4 h-4 stroke-[2.2]" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

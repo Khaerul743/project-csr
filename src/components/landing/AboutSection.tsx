@@ -1,238 +1,274 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
-  Building2,
-  Users2,
-  HeartHandshake,
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  ShieldAlert,
-  ShieldCheck,
   Target,
+  Users2,
+  Activity,
+  Award,
+  ShieldCheck,
+  CheckCircle2,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
-import { ScrollReveal, StaggerContainer } from "@/components/ui/scroll-reveal";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
+
+interface BenefitPoint {
+  id: number;
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  iconBg: string;
+  iconColor: string;
+}
+
+const BENEFIT_POINTS: BenefitPoint[] = [
+  {
+    id: 1,
+    title: "Pemetaan Kebutuhan yang Lebih Akurat",
+    description:
+      "Mengidentifikasi prioritas wilayah agar program CSR lebih tepat sasaran berdasarkan data riil masyarakat.",
+    icon: Target,
+    iconBg: "bg-[#1765F5]/10",
+    iconColor: "text-[#1765F5]",
+  },
+  {
+    id: 2,
+    title: "Kolaborasi yang Lebih Terarah",
+    description:
+      "Mempermudah perusahaan menemukan mitra pelaksana dan yayasan yang memiliki rekam jejak terverifikasi.",
+    icon: Users2,
+    iconBg: "bg-[#0875D1]/10",
+    iconColor: "text-[#0875D1]",
+  },
+  {
+    id: 3,
+    title: "Pemantauan Program yang Terstruktur",
+    description:
+      "Mengelola alur pelaksanaan, alokasi anggaran berkala, dan dokumentasi lapangan dalam satu platform digital.",
+    icon: Activity,
+    iconBg: "bg-[#059669]/10",
+    iconColor: "text-[#059669]",
+  },
+  {
+    id: 4,
+    title: "Evaluasi Dampak yang Lebih Jelas",
+    description:
+      "Menyajikan analisis capaian program dan metrik keberlanjutan untuk mendukung pengambilan keputusan strategis.",
+    icon: Award,
+    iconBg: "bg-[#7561E7]/10",
+    iconColor: "text-[#5141CD]",
+  },
+];
 
 export function AboutSection() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Function to smoothly scroll a card to the vertical center of the container
+  const scrollToCard = useCallback((index: number) => {
+    const card = cardRefs.current[index];
+    const container = containerRef.current;
+    if (!card || !container) return;
+
+    const cardCenter = card.offsetTop + card.clientHeight / 2;
+    const targetScrollTop = cardCenter - container.clientHeight / 2;
+
+    container.scrollTo({
+      top: targetScrollTop,
+      behavior: "smooth",
+    });
+    setActiveIndex(index);
+  }, []);
+
+  // Update active index based on scroll position
+  const handleScroll = () => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const containerCenter = container.scrollTop + container.clientHeight / 2;
+    let closestIndex = 0;
+    let minDistance = Infinity;
+
+    cardRefs.current.forEach((card, idx) => {
+      if (!card) return;
+      const cardCenter = card.offsetTop + card.clientHeight / 2;
+      const distance = Math.abs(containerCenter - cardCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closestIndex = idx;
+      }
+    });
+
+    setActiveIndex(closestIndex);
+  };
+
+  // Center the initial card on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToCard(0);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [scrollToCard]);
+
   return (
     <section
       id="tentang-kami"
-      className="pt-6 pb-20 sm:pt-8 sm:pb-24 lg:pt-10 lg:pb-32 bg-[#FFFFFF] relative overflow-hidden scroll-mt-[76px]"
+      className="pt-14 pb-16 sm:pt-18 sm:pb-20 lg:pt-20 lg:pb-24 bg-white relative overflow-hidden scroll-mt-[76px]"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        {/* Section Header */}
-        <ScrollReveal animation="fade-up" delay={50}>
-          <div className="max-w-4xl space-y-3.5 sm:space-y-4">
-            <div>
-              <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-                Tentang SIPENA
-              </span>
-            </div>
+      {/* Subtle Background Pattern */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.025]"
+        style={{
+          backgroundImage:
+            "radial-gradient(#102B58 1px, transparent 1px), radial-gradient(#102B58 1px, #FFFFFF 1px)",
+          backgroundSize: "32px 32px",
+          backgroundPosition: "0 0, 16px 16px",
+        }}
+      />
 
-            <h2
-              className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#181343] leading-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Menjembatani Niat Baik Perusahaan dengan Realitas Kebutuhan Masyarakat
-            </h2>
-
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl">
-              Menentukan kebutuhan masyarakat, membangun kemitraan yang tepat, dan mengevaluasi dampak program CSR bukanlah proses yang sederhana. SIPENA hadir untuk membantu menghubungkan seluruh tahapan tersebut dalam satu platform terintegrasi.
-            </p>
-          </div>
-        </ScrollReveal>
-
-        {/* Problem vs Solution Narrative Comparison */}
-        <div className="mt-8 sm:mt-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          {/* Card Tantangan Pengelolaan CSR */}
-          <ScrollReveal animation="fade-right" delay={150} className="h-full">
-            <div className="card-hover p-6 sm:p-8 rounded-2xl bg-[#F9F9FB] border border-[#E5E7EB] flex flex-col justify-between h-full shadow-2xs">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-[#FDE8E8] flex items-center justify-center text-[#E02424] mb-4 sm:mb-5">
-                  <AlertCircle className="w-5 h-5" />
-                </div>
-                <h3
-                  className="text-lg sm:text-xl font-bold text-[#181343]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Tantangan Tata Kelola CSR
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed mt-2">
-                  Pengelolaan program sosial konvensional sering terkendala proses manual yang memperbesar risiko ketidaksesuaian sasaran dan keterlambatan pelaporan.
-                </p>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        {/* ========================================================================= */}
+        {/* 2-COLUMN LAYOUT: Title & Narrative (Left) + Vertical Scroll Cards (Right) */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center">
+          
+          {/* ----------------------------------------------------------------------- */}
+          {/* LEFT COLUMN: Section Title, Subtitle & Narrative Description            */}
+          {/* ----------------------------------------------------------------------- */}
+          <div className="lg:col-span-5 space-y-4 sm:space-y-5">
+            <ScrollReveal animation="fade-up" delay={40}>
+              {/* Eyebrow Label */}
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#1765F5]/10 border border-[#1765F5]/20 text-[#1765F5] text-xs font-bold uppercase tracking-wider mb-2">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#1765F5]" />
+                <span>Tentang SIPENA</span>
               </div>
 
-              <div className="my-5 sm:my-6 h-px bg-[#E5E7EB]" />
-
-              <div className="space-y-4 sm:space-y-5">
-                <div>
-                  <h4 className="text-[15px] font-bold text-[#181343]">
-                    Prioritas Kebutuhan Terfragmentasi
-                  </h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-1">
-                    Ketiadaan data kebutuhan wilayah terpusat membuat program CSR kerap tumpang tindih dan kurang menyentuh sasaran yang paling mendesak.
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-[15px] font-bold text-[#181343]">
-                    Standardisasi Proposal &amp; RAB
-                  </h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-1">
-                    Format rencana anggaran biaya dari mitra pelaksana yang beragam menyulitkan due diligence dan kepatuhan audit internal perusahaan.
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-[15px] font-bold text-[#181343]">
-                    Verifikasi Bukti Lapangan &amp; LPJ
-                  </h4>
-                  <p className="text-sm text-slate-600 leading-relaxed mt-1">
-                    Rekapitulasi nota belanja fisik dan foto kegiatan sering tercecer, menyulitkan penyusunan Laporan Keberlanjutan dan evaluasi akuntabilitas program.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-
-          {/* Card Pendekatan SIPENA */}
-          <ScrollReveal animation="fade-left" delay={250} className="h-full">
-            <div className="card-hover p-6 sm:p-8 rounded-2xl bg-[#181343] text-white border border-[#26224C] flex flex-col justify-between h-full shadow-lg">
-              <div>
-                <div className="w-10 h-10 rounded-xl bg-[#0F382C] flex items-center justify-center text-[#34D399] mb-4 sm:mb-5">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <h3
-                  className="text-lg sm:text-xl font-bold text-white"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Solusi Tata Kelola SIPENA
-                </h3>
-                <p className="text-sm text-slate-300 leading-relaxed mt-2">
-                  SIPENA mengintegrasikan seluruh siklus kemitraan CSR dalam alur digital terstruktur yang transparan dan dapat diaudit setiap saat.
-                </p>
-              </div>
-
-              <div className="my-5 sm:my-6 h-px bg-white/10" />
-
-              <div className="space-y-4 sm:space-y-5">
-                <div>
-                  <h4 className="text-[15px] font-bold text-white">
-                    Pemetaan Prioritas Berbasis Data
-                  </h4>
-                  <p className="text-sm text-slate-300 leading-relaxed mt-1">
-                    Menganalisis indikator kebutuhan wilayah untuk mengarahkan alokasi program ke sektor dan kelompok sasaran yang paling tepat.
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-[15px] font-bold text-white">
-                    Standardisasi Rencana Anggaran &amp; Milestone
-                  </h4>
-                  <p className="text-sm text-slate-300 leading-relaxed mt-1">
-                    Ekstraksi otomatis ruang lingkup kegiatan dari berkas proposal menjadi tahapan terstruktur dengan rincian biaya yang transparan.
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-[15px] font-bold text-white">
-                    Audit Realisasi Bertahap &amp; Kepatuhan ESG
-                  </h4>
-                  <p className="text-sm text-slate-300 leading-relaxed mt-1">
-                    Penyaluran dana berbasis verifikasi nota fisik per termin, pemantauan foto berkoordinat, dan pemetaan otomatis ke 17 SDGs.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </ScrollReveal>
-        </div>
-
-        {/* ASA: Fondasi di Balik Setiap Aksi */}
-        <div className="mt-14 sm:mt-16 max-w-6xl mx-auto">
-          <ScrollReveal animation="fade-up" delay={50}>
-            <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10 space-y-3">
-              <div>
-                <span className="inline-flex items-center px-3.5 py-1 rounded-full bg-[#181343]/5 text-[#181343] text-xs font-bold tracking-wide uppercase border border-[#181343]/10">
-                  Nilai Utama SIPENA
-                </span>
-              </div>
-              <h3
-                className="text-2xl sm:text-3xl font-extrabold text-[#181343]"
+              {/* Main Headline */}
+              <h2
+                className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[#102B58] leading-tight"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                ASA: Fondasi di Balik Setiap Aksi
-              </h3>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Tiga nilai yang menjadi landasan SIPENA dalam mewujudkan pengelolaan CSR yang lebih terarah, kolaboratif, dan akuntabel.
+                Menjembatani Niat Baik Perusahaan dengan Realitas Kebutuhan Masyarakat
+              </h2>
+
+              {/* Short Supporting Paragraph */}
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal mt-3">
+                Menentukan kebutuhan masyarakat, membangun kemitraan yang tepat, dan mengevaluasi dampak program CSR bukanlah proses yang sederhana. SIPENA hadir untuk membantu menghubungkan seluruh tahapan tersebut dalam satu platform terintegrasi.
               </p>
-            </div>
-          </ScrollReveal>
 
-          <StaggerContainer staggerDelay={140} baseDelay={100} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
-            {/* Card 1: Arah */}
-            <div className="card-hover p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
-              <div
-                className="w-12 h-12 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-emerald-600 transition-colors duration-200"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                A
+              {/* Trust Badge */}
+              <div className="pt-2">
+                <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-[#F0F7FF] border border-[#D6EAFF] text-xs font-semibold text-[#102B58]">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <span>Platform Tata Kelola CSR Berbasis AI &amp; Akuntabilitas Terukur</span>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h4
-                  className="text-lg sm:text-xl font-bold text-[#181343]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Arah
-                </h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Menentukan prioritas program CSR berdasarkan kebutuhan masyarakat, kondisi wilayah, dan informasi yang relevan untuk mendukung perencanaan tepat sasaran.
-                </p>
-              </div>
-            </div>
+            </ScrollReveal>
+          </div>
 
-            {/* Card 2: Sinergi */}
-            <div className="card-hover p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
-              <div
-                className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-[#181343] transition-colors duration-200"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                S
-              </div>
-              <div className="space-y-2">
-                <h4
-                  className="text-lg sm:text-xl font-bold text-[#181343]"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  Sinergi
-                </h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Menghubungkan perusahaan dengan NGO, yayasan, dan komunitas untuk membangun kemitraan serta koordinasi program CSR yang lebih efektif.
-                </p>
-              </div>
-            </div>
+          {/* ----------------------------------------------------------------------- */}
+          {/* RIGHT COLUMN: Seamless Floating Vertical Scroll Reel with Blur Mask     */}
+          {/* ----------------------------------------------------------------------- */}
+          <div className="lg:col-span-7 relative">
+            <div className="flex items-center gap-3 sm:gap-4 lg:gap-5">
+              {/* Seamless Viewport (No outer border box, seamlessly floating) */}
+              <div className="flex-1 min-w-0 relative overflow-hidden py-1">
+                {/* TOP WHITE BLUR & GRADIENT FOG OVERLAY */}
+                <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-white via-white/80 to-transparent backdrop-blur-[2px] pointer-events-none z-20" />
 
-            {/* Card 3: Akuntabilitas */}
-            <div className="card-hover p-7 sm:p-8 rounded-2xl bg-[#FFFFFF] border border-[#E5E7EB] shadow-2xs hover:shadow-md transition-all flex flex-col justify-start space-y-4 group h-full">
-              <div
-                className="w-12 h-12 rounded-2xl bg-[#181343] text-white flex items-center justify-center font-extrabold text-2xl shadow-xs group-hover:bg-emerald-600 transition-colors duration-200"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                A
-              </div>
-              <div className="space-y-2">
-                <h4
-                  className="text-lg sm:text-xl font-bold text-[#181343]"
-                  style={{ fontFamily: "var(--font-display)" }}
+                {/* BOTTOM WHITE BLUR & GRADIENT FOG OVERLAY */}
+                <div className="absolute bottom-0 left-0 right-0 h-28 bg-gradient-to-t from-white via-white/80 to-transparent backdrop-blur-[2px] pointer-events-none z-20" />
+
+                {/* Scrollable Container */}
+                <div
+                  ref={containerRef}
+                  onScroll={handleScroll}
+                  className="h-[360px] sm:h-[400px] overflow-y-auto scrollbar-none snap-y snap-mandatory px-1 sm:px-3 relative z-10"
+                  style={{
+                    paddingTop: "140px",
+                    paddingBottom: "140px",
+                  }}
                 >
-                  Akuntabilitas
-                </h4>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Mendukung transparansi melalui pencatatan kegiatan lapangan, monitoring realisasi anggaran berkala, serta evaluasi hasil dan dampak program CSR secara menyeluruh.
-                </p>
+                  <div className="space-y-4">
+                    {BENEFIT_POINTS.map((point, idx) => {
+                      const Icon = point.icon;
+                      const isActive = idx === activeIndex;
+
+                      return (
+                        <div
+                          key={point.id}
+                          ref={(el) => {
+                            cardRefs.current[idx] = el;
+                          }}
+                          onClick={() => scrollToCard(idx)}
+                          className={`snap-center transition-all duration-300 rounded-2xl cursor-pointer p-4 sm:p-5 flex items-start gap-4 border ${
+                            isActive
+                              ? "bg-white border-[#1765F5]/45 shadow-xl shadow-[#1765F5]/10 scale-100 opacity-100 ring-2 ring-[#1765F5]/15 z-10"
+                              : "bg-[#F8FBFF]/70 hover:bg-[#F8FBFF] border-[#E2EDFA] scale-[0.96] opacity-35 blur-[0.6px] hover:opacity-60 z-0"
+                          }`}
+                        >
+                          {/* Circular Badge Icon */}
+                          <div
+                            className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full ${point.iconBg} ${point.iconColor} flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 ${
+                              isActive ? "scale-105 ring-2 ring-white" : ""
+                            }`}
+                          >
+                            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                          </div>
+
+                          {/* Title & Description */}
+                          <div className="space-y-1">
+                            <h3
+                              className={`text-sm sm:text-base font-bold transition-colors ${
+                                isActive ? "text-[#102B58]" : "text-slate-500"
+                              }`}
+                            >
+                              {point.title}
+                            </h3>
+                            <p
+                              className={`text-xs sm:text-sm leading-relaxed font-normal transition-colors ${
+                                isActive ? "text-slate-600" : "text-slate-400"
+                              }`}
+                            >
+                              {point.description}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Vertical Navigation Controls on the Right (Panah Atas Bawah) */}
+              <div className="flex flex-col items-center gap-2.5 sm:gap-3 shrink-0 z-30 select-none">
+                {/* Panah Atas (Selalu Tombol Putih) */}
+                <button
+                  type="button"
+                  onClick={() => scrollToCard(Math.max(0, activeIndex - 1))}
+                  disabled={activeIndex === 0}
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border-2 border-slate-200 bg-white text-slate-700 hover:text-[#1765F5] hover:border-[#1765F5] hover:bg-[#F0F7FF] flex items-center justify-center transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-35 disabled:pointer-events-none disabled:cursor-not-allowed"
+                  aria-label="Poin Sebelumnya (Ke Atas)"
+                >
+                  <ArrowUp className="w-4 h-4 stroke-[2.2]" />
+                </button>
+
+                {/* Panah Bawah (Selalu Tombol Biru) */}
+                <button
+                  type="button"
+                  onClick={() => scrollToCard(Math.min(BENEFIT_POINTS.length - 1, activeIndex + 1))}
+                  disabled={activeIndex === BENEFIT_POINTS.length - 1}
+                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-r from-[#43A5FF] via-[#1765F5] to-[#1748D5] text-white flex items-center justify-center shadow-md shadow-[#1765F5]/25 hover:brightness-110 transition-all active:scale-95 cursor-pointer disabled:opacity-35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:shadow-none"
+                  aria-label="Poin Berikutnya (Ke Bawah)"
+                >
+                  <ArrowDown className="w-4 h-4 stroke-[2.2]" />
+                </button>
               </div>
             </div>
-          </StaggerContainer>
+          </div>
+
         </div>
       </div>
     </section>

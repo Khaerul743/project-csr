@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { LandingNavbar } from "@/components/landing/Navbar";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { AboutSection } from "@/components/landing/AboutSection";
+import { ValuesSection } from "@/components/landing/ValuesSection";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { WorkflowSection } from "@/components/landing/WorkflowSection";
 import { ProgramsImpactSection } from "@/components/landing/ProgramsImpactSection";
-import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { ContactSection } from "@/components/landing/ContactSection";
 import { LandingFooter } from "@/components/landing/Footer";
 
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9F9FB] text-[#181343] selection:bg-emerald-600 selection:text-white antialiased font-sans">
+    <div className="min-h-screen flex flex-col bg-white text-[#181343] selection:bg-[#0875D1] selection:text-white antialiased font-sans">
       {/* Sticky Top Navigation */}
       <LandingNavbar />
 
@@ -30,19 +30,19 @@ export default function HomePage() {
         {/* 2. Tentang Kami */}
         <AboutSection />
 
-        {/* 3. Fitur Utama */}
+        {/* 3. Nilai Kami */}
+        <ValuesSection />
+
+        {/* 4. Fitur Utama */}
         <FeaturesSection />
 
         {/* 4. Cara Kerja */}
         <WorkflowSection />
 
-        {/* 5. Program & Dampak */}
+        {/* 5. Bukti Nyata */}
         <ProgramsImpactSection />
 
-        {/* 6. Testimoni Ekosistem */}
-        <TestimonialsSection />
-
-        {/* 7. Kontak & Kemitraan */}
+        {/* 6. Kontak & Kemitraan */}
         <ContactSection />
       </main>
 

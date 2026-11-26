@@ -1313,13 +1313,12 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
               ? { height: "calc(100vh - 72px)", maxHeight: "calc(100vh - 72px)" }
               : undefined
           }
-          className={`w-full mx-auto ${
-            activeMenu === "chat"
-              ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
-              : activeMenu === "conversations"
+          className={`w-full mx-auto ${activeMenu === "chat"
+            ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
+            : activeMenu === "conversations"
               ? "p-4 sm:p-5 lg:p-6 max-w-7xl flex-1 flex flex-col min-h-0 overflow-hidden"
               : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"
-          }`}
+            }`}
         >
           {/* ============================================================ */}
           {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF & BI ANALYTICS) */}
@@ -1923,154 +1922,154 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                       </Button>
                     )}
                   </div>
-            ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
-            {filteredCollaborations.map((collab) => {
-              const isAgreed = collab.status === "AGREED";
-              const isNegotiation = collab.status === "NEGOTIATION";
-              const isCancelled = collab.status === "CANCELLED";
-              const titleClean = cleanProposalText(collab.proposalTitle) || collab.opportunityTitle || "Program Kerja Sama CSR";
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
+                    {filteredCollaborations.map((collab) => {
+                      const isAgreed = collab.status === "AGREED";
+                      const isNegotiation = collab.status === "NEGOTIATION";
+                      const isCancelled = collab.status === "CANCELLED";
+                      const titleClean = cleanProposalText(collab.proposalTitle) || collab.opportunityTitle || "Program Kerja Sama CSR";
 
-              return (
-                <div
-                  key={collab.id}
-                  className="bg-white rounded-2xl border border-[#E8E8EA] hover:border-slate-300 shadow-2xs hover:shadow-xs p-5 flex flex-col justify-between gap-4 transition"
-                >
-                  {/* Header: Logo, Nama Mitra, Kota & Status Badge */}
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-2.5">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <ProposalPartnerLogo logoUrl={collab.partnerLogo} name={collab.partnerName || "Mitra"} />
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-[#181343] text-sm truncate" title={collab.partnerName || "Mitra CSR"}>
-                            {collab.partnerName || "Mitra CSR"}
-                          </h4>
-                          {collab.partnerCity && (
-                            <span className="flex items-center gap-1 text-[11px] text-slate-500">
-                              <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-                              <span className="truncate">{collab.partnerCity}</span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="shrink-0">
-                        {isAgreed ? (
-                          <Badge variant="emerald" size="sm" hasDot>
-                            MoU Disepakati
-                          </Badge>
-                        ) : isNegotiation ? (
-                          <Badge variant="amber" size="sm" hasDot>
-                            Negosiasi
-                          </Badge>
-                        ) : isCancelled ? (
-                          <Badge variant="rose" size="sm" hasDot>
-                            Dibatalkan
-                          </Badge>
-                        ) : (
-                          <Badge variant="slate" size="sm">
-                            {collab.status}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Judul Proposal & Peluang CSR */}
-                    <div className="space-y-1">
-                      <h3
-                        className="text-sm font-bold text-[#181343] leading-snug line-clamp-2"
-                        title={titleClean}
-                      >
-                        {titleClean}
-                      </h3>
-                      {collab.opportunityTitle && (
-                        <p className="text-[11px] text-slate-500 truncate" title={collab.opportunityTitle}>
-                          Inisiatif: <span className="font-medium text-slate-700">{collab.opportunityTitle}</span>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Parameter Utama: Anggaran & Jadwal/Sasaran */}
-                  <div className="space-y-3 pt-3 border-t border-slate-100">
-                    <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E8E8EA] space-y-1.5 text-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] text-slate-500">Anggaran Disepakati</span>
-                        <span className="font-bold text-[#009E75]">
-                          {formatRupiah(collab.finalBudget || collab.proposedBudget)}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500">Dokumen MoU</span>
-                        {isAgreed ? (
-                          <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Telah Disepakati
-                          </span>
-                        ) : collab.mouDocumentUrl ? (
-                          <span className="text-amber-700 font-semibold flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            Dalam Proses
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">Belum Diunggah</span>
-                        )}
-                      </div>
-
-                      {collab.targetBeneficiaries && (
-                        <div className="text-[11px] text-slate-600 truncate pt-0.5 border-t border-slate-200/60">
-                          Sasaran: <span className="text-slate-700">{collab.targetBeneficiaries}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Actions Bottom */}
-                    <div className="flex items-center justify-between gap-2 pt-1">
-                      {isAgreed ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const linkedProg = programs.find(
-                              (p) =>
-                                p.collaborationId === collab.id ||
-                                (p.opportunityId === collab.opportunityId && p.partnerId === collab.partnerId)
-                            );
-                            if (linkedProg) {
-                              setSelectedProgramForDetail(linkedProg);
-                            }
-                            setActiveMenu("programs");
-                          }}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition cursor-pointer"
+                      return (
+                        <div
+                          key={collab.id}
+                          className="bg-white rounded-2xl border border-[#E8E8EA] hover:border-slate-300 shadow-2xs hover:shadow-xs p-5 flex flex-col justify-between gap-4 transition"
                         >
-                          <Activity className="w-3.5 h-3.5" />
-                          <span>Monitoring</span>
-                        </button>
-                      ) : (
-                        <span className="text-[11px] text-slate-400">
-                          {collab.notes && collab.notes.trim() ? "Catatan terlampir" : ""}
-                        </span>
-                      )}
+                          {/* Header: Logo, Nama Mitra, Kota & Status Badge */}
+                          <div className="space-y-3">
+                            <div className="flex items-start justify-between gap-2.5">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <ProposalPartnerLogo logoUrl={collab.partnerLogo} name={collab.partnerName || "Mitra"} />
+                                <div className="min-w-0">
+                                  <h4 className="font-bold text-[#181343] text-sm truncate" title={collab.partnerName || "Mitra CSR"}>
+                                    {collab.partnerName || "Mitra CSR"}
+                                  </h4>
+                                  {collab.partnerCity && (
+                                    <span className="flex items-center gap-1 text-[11px] text-slate-500">
+                                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                      <span className="truncate">{collab.partnerCity}</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
 
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-semibold rounded-xl px-3 py-1.5 cursor-pointer ml-auto"
-                        onClick={() => setSelectedCollabForDetail(collab)}
-                        rightIcon={<ArrowRight className="w-3 h-3" />}
-                      >
-                        Detail Kesepakatan
-                      </Button>
-                      </div>
-                    </div>
+                              <div className="shrink-0">
+                                {isAgreed ? (
+                                  <Badge variant="emerald" size="sm" hasDot>
+                                    MoU Disepakati
+                                  </Badge>
+                                ) : isNegotiation ? (
+                                  <Badge variant="amber" size="sm" hasDot>
+                                    Negosiasi
+                                  </Badge>
+                                ) : isCancelled ? (
+                                  <Badge variant="rose" size="sm" hasDot>
+                                    Dibatalkan
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="slate" size="sm">
+                                    {collab.status}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Judul Proposal & Peluang CSR */}
+                            <div className="space-y-1">
+                              <h3
+                                className="text-sm font-bold text-[#181343] leading-snug line-clamp-2"
+                                title={titleClean}
+                              >
+                                {titleClean}
+                              </h3>
+                              {collab.opportunityTitle && (
+                                <p className="text-[11px] text-slate-500 truncate" title={collab.opportunityTitle}>
+                                  Inisiatif: <span className="font-medium text-slate-700">{collab.opportunityTitle}</span>
+                                </p>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Parameter Utama: Anggaran & Jadwal/Sasaran */}
+                          <div className="space-y-3 pt-3 border-t border-slate-100">
+                            <div className="p-3 rounded-xl bg-[#F8FAFC] border border-[#E8E8EA] space-y-1.5 text-xs">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[11px] text-slate-500">Anggaran Disepakati</span>
+                                <span className="font-bold text-[#009E75]">
+                                  {formatRupiah(collab.finalBudget || collab.proposedBudget)}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-slate-500">Dokumen MoU</span>
+                                {isAgreed ? (
+                                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                                    <CheckCircle2 className="w-3 h-3" />
+                                    Telah Disepakati
+                                  </span>
+                                ) : collab.mouDocumentUrl ? (
+                                  <span className="text-amber-700 font-semibold flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    Dalam Proses
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-400">Belum Diunggah</span>
+                                )}
+                              </div>
+
+                              {collab.targetBeneficiaries && (
+                                <div className="text-[11px] text-slate-600 truncate pt-0.5 border-t border-slate-200/60">
+                                  Sasaran: <span className="text-slate-700">{collab.targetBeneficiaries}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Actions Bottom */}
+                            <div className="flex items-center justify-between gap-2 pt-1">
+                              {isAgreed ? (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const linkedProg = programs.find(
+                                      (p) =>
+                                        p.collaborationId === collab.id ||
+                                        (p.opportunityId === collab.opportunityId && p.partnerId === collab.partnerId)
+                                    );
+                                    if (linkedProg) {
+                                      setSelectedProgramForDetail(linkedProg);
+                                    }
+                                    setActiveMenu("programs");
+                                  }}
+                                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 transition cursor-pointer"
+                                >
+                                  <Activity className="w-3.5 h-3.5" />
+                                  <span>Monitoring</span>
+                                </button>
+                              ) : (
+                                <span className="text-[11px] text-slate-400">
+                                  {collab.notes && collab.notes.trim() ? "Catatan terlampir" : ""}
+                                </span>
+                              )}
+
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-semibold rounded-xl px-3 py-1.5 cursor-pointer ml-auto"
+                                onClick={() => setSelectedCollabForDetail(collab)}
+                                rightIcon={<ArrowRight className="w-3 h-3" />}
+                              >
+                                Detail Kesepakatan
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+                )}
+              </div>
+            )
           )}
-        </div>
-      )
-    )}
           {/* ============================================================ */}
           {/* VIEW: PROGRAMS (PELAKSANAAN PROGRAM & MONITORING) */}
           {/* ============================================================ */}
@@ -2362,13 +2361,12 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                 </div>
                                 <div className="w-24 sm:w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                   <div
-                                    className={`h-full rounded-full transition-all duration-500 ${
-                                      activityProgress >= 100
-                                        ? "bg-emerald-600"
-                                        : activityProgress > 0
+                                    className={`h-full rounded-full transition-all duration-500 ${activityProgress >= 100
+                                      ? "bg-emerald-600"
+                                      : activityProgress > 0
                                         ? "bg-[#181343]"
                                         : "bg-slate-200"
-                                    }`}
+                                      }`}
                                     style={{ width: `${Math.min(activityProgress, 100)}%` }}
                                   />
                                 </div>
@@ -2424,7 +2422,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                           <span className="font-bold text-[#181343]">
                             {Math.min((programPage - 1) * PROGRAM_ITEMS_PER_PAGE + 1, filteredPrograms.length)}
                           </span>
-                          –
+                          -
                           <span className="font-bold text-[#181343]">
                             {Math.min(programPage * PROGRAM_ITEMS_PER_PAGE, filteredPrograms.length)}
                           </span>{" "}
@@ -2452,11 +2450,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                 key={pNum}
                                 type="button"
                                 onClick={() => setProgramPage(pNum)}
-                                className={`w-8 h-8 rounded-xl font-bold text-xs transition cursor-pointer ${
-                                  programPage === pNum
-                                    ? "bg-[#181343] text-white shadow-2xs"
-                                    : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-                                }`}
+                                className={`w-8 h-8 rounded-xl font-bold text-xs transition cursor-pointer ${programPage === pNum
+                                  ? "bg-[#181343] text-white shadow-2xs"
+                                  : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                                  }`}
                               >
                                 {pNum}
                               </button>
@@ -2630,11 +2627,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 onOpenCreateOpportunity={
                   !isManagement
                     ? (initialProvince, draftData) => {
-                        setActiveMenu("opportunities");
-                        setIsCreatingOpportunity(true);
-                        setOpportunityPrefillProvince(initialProvince || null);
-                        setOpportunityPrefillDraft(draftData || null);
-                      }
+                      setActiveMenu("opportunities");
+                      setIsCreatingOpportunity(true);
+                      setOpportunityPrefillProvince(initialProvince || null);
+                      setOpportunityPrefillDraft(draftData || null);
+                    }
                     : undefined
                 }
               />
