@@ -11,19 +11,53 @@ import {
   Clock,
   Info,
   ChevronDown,
+  LayoutTemplate,
+  RotateCcw,
+  Calendar,
 } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PartnerItem, OpportunityItem } from "./types";
 import { FOCUS_AREA_CONFIG, formatRupiah } from "./helpers";
+import type { CompanyTemplateItem } from "./templates/TemplateCustomizationView";
 
 interface InvitePartnerModalProps {
   isOpen: boolean;
   partner: PartnerItem | null;
   opportunities: OpportunityItem[];
+  initialOpportunityId?: string | null;
+  companyName?: string | null;
+  picName?: string | null;
+  picPosition?: string | null;
+  onNavigateToTemplates?: () => void;
   onClose: () => void;
   onSuccess: () => void;
+}
+
+function getLocalDateString(offsetDays: number = 0): string {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatDeadlineIndo(dateStr: string): string {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-");
+  if (parts.length !== 3) return dateStr;
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const localDate = new Date(year, month, day);
+  if (isNaN(localDate.getTime())) return dateStr;
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(localDate);
 }
 
 // Fallback Circular Logo Component matching the updated partner profile system
@@ -69,11 +103,22 @@ export function InvitePartnerModal({
   isOpen,
   partner,
   opportunities,
+  initialOpportunityId,
+  companyName,
+  picName,
+  picPosition,
+  onNavigateToTemplates,
   onClose,
   onSuccess,
 }: InvitePartnerModalProps) {
+  const todayDateStr = useMemo(() => getLocalDateString(0), []);
   const [selectedOpportunityId, setSelectedOpportunityId] = useState<string>("");
+  const [responseDeadline, setResponseDeadline] = useState<string>(() => getLocalDateString(7));
   const [message, setMessage] = useState("");
+  const [templates, setTemplates] = useState<CompanyTemplateItem[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [hasManualEdit, setHasManualEdit] = useState(false);
+  const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -141,7 +186,7 @@ export function InvitePartnerModal({
           const exists = list.some(
             (inv: any) =>
               inv.partnerId === partner.id &&
-              inv.status !== "DECLINED"
+              (inv.status === "INVITED" || inv.status === "ACCEPTED")
           );
           setIsAlreadyInvited(exists);
         }
@@ -158,6 +203,124 @@ export function InvitePartnerModal({
       isMounted = false;
     };
   }, [isOpen, partner?.id, activeOpportunity?.id]);
+
+  const resolveTemplateContent = (
+    rawContent: string,
+    overrideDeadline?: string
+  ) => {
+    const opp = activeOpportunity;
+    const focusLabel = opp?.focusArea
+      ? FOCUS_AREA_CONFIG[opp.focusArea as keyof typeof FOCUS_AREA_CONFIG]?.label || opp.focusArea
+      : "Program CSR";
+
+    const locationParts = [opp?.targetCity, opp?.targetProvince].filter(
+      (p) => Boolean(p && p.trim())
+    );
+    const locationText =
+      locationParts.length > 0
+        ? locationParts.join(", ")
+        : "Seluruh Wilayah Indonesia";
+
+    const deadlineText =
+      formatDeadlineIndo(overrideDeadline ?? responseDeadline) ||
+      "sesuai jadwal yang disepakati";
+
+    return rawContent
+      .replace(/\{\{nama_yayasan\}\}/gi, partner?.name || "Mitra")
+      .replace(/\{\{nama_mitra\}\}/gi, partner?.name || "Mitra")
+      .replace(/\{\{nama_program\}\}/gi, opp?.title || "Program CSR")
+      .replace(/\{\{bidang_csr\}\}/gi, focusLabel)
+      .replace(/\{\{lokasi_program\}\}/gi, locationText)
+      .replace(/\{\{batas_respons\}\}/gi, deadlineText)
+      .replace(/\{\{nama_pic\}\}/gi, picName?.trim() || "Tim CSR")
+      .replace(/\{\{jabatan_pic\}\}/gi, picPosition?.trim() || "CSR Administrator")
+      .replace(/\{\{nama_perusahaan\}\}/gi, companyName?.trim() || "Perusahaan Kami");
+  };
+
+  // 5. Fetch saved invitation templates when modal opens
+  useEffect(() => {
+    let isMounted = true;
+    if (!isOpen) return;
+
+    const defaultDeadline = getLocalDateString(7);
+    setResponseDeadline(defaultDeadline);
+    setHasManualEdit(false);
+    if (initialOpportunityId) {
+      setSelectedOpportunityId(initialOpportunityId);
+    }
+
+    const loadTemplates = async () => {
+      setIsLoadingTemplates(true);
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+
+        const res = await fetch(
+          "/api/companies/current/templates?category=PARTNER_INVITATION",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.ok && isMounted) {
+          const json = await res.json();
+          const list: CompanyTemplateItem[] = Array.isArray(json.data)
+            ? json.data
+            : [];
+          setTemplates(list);
+
+          const defaultTpl = list.find((t) => t.isDefault);
+          if (defaultTpl) {
+            setSelectedTemplateId(defaultTpl.id);
+            setMessage(resolveTemplateContent(defaultTpl.content, defaultDeadline));
+          } else {
+            setSelectedTemplateId("");
+          }
+        }
+      } catch {
+        // Fallback silently to manual input
+      } finally {
+        if (isMounted) setIsLoadingTemplates(false);
+      }
+    };
+
+    loadTemplates();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, partner?.id]);
+
+  // Auto-update pesan jika peluang CSR atau batas respons diubah selama belum diedit manual
+  useEffect(() => {
+    if (!isOpen || !selectedTemplateId || hasManualEdit) return;
+    const found = templates.find((t) => t.id === selectedTemplateId);
+    if (found) {
+      setMessage(resolveTemplateContent(found.content));
+    }
+  }, [activeOpportunity?.id, responseDeadline, selectedTemplateId, hasManualEdit, isOpen, templates]);
+
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    setHasManualEdit(false);
+    if (!templateId) {
+      setMessage("");
+      return;
+    }
+    const found = templates.find((t) => t.id === templateId);
+    if (found) {
+      setMessage(resolveTemplateContent(found.content));
+    }
+  };
+
+  const handleResyncTemplate = () => {
+    if (!selectedTemplateId) return;
+    const found = templates.find((t) => t.id === selectedTemplateId);
+    if (found) {
+      setHasManualEdit(false);
+      setMessage(resolveTemplateContent(found.content));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,6 +351,9 @@ export function InvitePartnerModal({
         body: JSON.stringify({
           partnerId: partner.id,
           message: message.trim() || undefined,
+          responseDeadline: responseDeadline
+            ? `${responseDeadline}T23:59:59`
+            : undefined,
         }),
       });
 
@@ -214,6 +380,9 @@ export function InvitePartnerModal({
 
   const handleReset = () => {
     setSelectedOpportunityId("");
+    setSelectedTemplateId("");
+    setResponseDeadline(getLocalDateString(7));
+    setHasManualEdit(false);
     setMessage("");
     setErrorMessage(null);
     setIsSuccess(false);
@@ -393,18 +562,119 @@ export function InvitePartnerModal({
             )}
           </div>
 
-          {/* 3. Pesan Tambahan (Opsional) */}
+          {/* 2b. Batas Waktu Tanggapan Mitra */}
           <div className="space-y-1.5">
-            <label htmlFor="invite-partner-message" className="text-xs font-semibold text-[#181343] block">
-              Pesan Tambahan untuk Calon Mitra <span className="text-[#64748B] font-normal">(Opsional)</span>
-            </label>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="invite-response-deadline" className="text-xs font-semibold text-[#181343] block">
+                Batas Waktu Tanggapan Mitra <span className="text-rose-500">*</span>
+              </label>
+              {responseDeadline && (
+                <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/70">
+                  Di pesan: {formatDeadlineIndo(responseDeadline)}
+                </span>
+              )}
+            </div>
+            <div className="relative">
+              <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                id="invite-response-deadline"
+                type="date"
+                min={todayDateStr}
+                value={responseDeadline}
+                onChange={(e) => setResponseDeadline(e.target.value)}
+                required
+                className="w-full text-xs sm:text-sm bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl pl-10 pr-3.5 py-2.5 text-[#181343] outline-none focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/10 font-medium transition-colors"
+              />
+            </div>
+          </div>
+
+          {/* 3. Pesan Tambahan (Template / Manual) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="invite-partner-message" className="text-xs font-semibold text-[#181343] block">
+                Pesan Tambahan untuk Calon Mitra <span className="text-[#64748B] font-normal">(Opsional)</span>
+              </label>
+              {onNavigateToTemplates && (
+                <button
+                  type="button"
+                  onClick={onNavigateToTemplates}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 hover:text-emerald-900 transition-colors cursor-pointer"
+                >
+                  <LayoutTemplate className="w-3 h-3" />
+                  <span>Kelola Template</span>
+                </button>
+              )}
+            </div>
+
+            {/* Pemilih Template Pesan */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <select
+                  aria-label="Pilih template pesan undangan"
+                  value={selectedTemplateId}
+                  onChange={(e) => handleSelectTemplate(e.target.value)}
+                  disabled={isLoadingTemplates}
+                  className="w-full text-xs bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl px-3 py-2 text-[#181343] outline-none focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/10 cursor-pointer font-medium transition-colors pr-8 appearance-none"
+                >
+                  <option value="">
+                    {isLoadingTemplates
+                      ? "Memuat template..."
+                      : templates.length > 0
+                        ? "-- Tulis Manual / Pilih Template Tersimpan --"
+                        : "-- Tulis Manual (Belum ada template tersimpan) --"}
+                  </option>
+                  {templates.map((tpl) => (
+                    <option key={tpl.id} value={tpl.id}>
+                      {tpl.title}
+                      {tpl.isDefault ? " (Default)" : ""}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
+
+              {selectedTemplateId && hasManualEdit && (
+                <button
+                  type="button"
+                  onClick={handleResyncTemplate}
+                  className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-700 transition-colors cursor-pointer shrink-0"
+                  title="Terapkan ulang variabel template sesuai pilihan program & tanggal terbaru"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Sinkronkan</span>
+                </button>
+              )}
+
+              {message && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTemplateId("");
+                    setHasManualEdit(false);
+                    setMessage("");
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-2 rounded-xl border border-[#E2E8F0] bg-white hover:bg-slate-50 text-xs font-medium text-slate-600 transition-colors cursor-pointer shrink-0"
+                  title="Kosongkan pesan untuk menulis manual"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Reset</span>
+                </button>
+              )}
+            </div>
+
             <textarea
               id="invite-partner-message"
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (selectedTemplateId) {
+                  setHasManualEdit(true);
+                }
+              }}
               placeholder="Tuliskan arahan singkat, fokus kolaborasi, atau jadwal diskusi awal untuk calon mitra..."
-              rows={3}
-              className="w-full text-xs sm:text-sm bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl p-3 text-[#181343] placeholder:text-slate-400 focus:outline-none focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/10 resize-none transition-colors"
+              rows={7}
+              maxLength={3000}
+              className="w-full text-xs sm:text-sm bg-white border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl p-3 text-[#181343] placeholder:text-slate-400 focus:outline-none focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/10 resize-y transition-colors leading-relaxed"
             />
           </div>
 

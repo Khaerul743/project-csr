@@ -34,7 +34,8 @@ export const updateOpportunitySchema = createOpportunitySchema.partial();
 
 export const invitePartnerSchema = z.object({
   partnerId: z.string().uuid("ID Mitra tidak valid"),
-  message: z.string().max(1000).optional().nullable(),
+  message: z.string().max(3000, "Pesan undangan maksimal 3000 karakter").optional().nullable(),
+  responseDeadline: z.string().optional().nullable(),
 });
 
 export const needPrioritizationRequestSchema = z.object({

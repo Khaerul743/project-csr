@@ -328,8 +328,8 @@ export function OpportunityDetailModal({
                       {inv.partner?.city} • Diundang pada {formatDate(inv.createdAt)}
                     </span>
                     {inv.message && (
-                      <p className="text-[11px] text-slate-600 italic mt-1 bg-[#F9F9FB] p-2 rounded-lg border border-[#E8E8EA]">
-                        "{inv.message}"
+                      <p className="text-[11px] text-slate-600 mt-1 bg-[#F9F9FB] p-2.5 rounded-lg border border-[#E8E8EA] whitespace-pre-line leading-relaxed">
+                        {inv.message}
                       </p>
                     )}
                   </div>
@@ -341,6 +341,10 @@ export function OpportunityDetailModal({
                     ) : inv.status === "DECLINED" ? (
                       <Badge variant="rose" size="sm" hasDot>
                         Menolak
+                      </Badge>
+                    ) : inv.status === "OVERDUE" ? (
+                      <Badge variant="rose" size="sm" hasDot>
+                        Overdue
                       </Badge>
                     ) : (
                       <Badge variant="amber" size="sm" hasDot>

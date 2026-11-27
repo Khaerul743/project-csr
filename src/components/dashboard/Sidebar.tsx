@@ -18,6 +18,7 @@ import {
   Wallet,
   Award,
   MessageSquareHeart,
+  LayoutTemplate,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AppLogo } from "@/components/ui/app-logo";
@@ -36,6 +37,7 @@ export type CompanyNavMenu =
   | "sentiment"
   | "analytics"
   | "team"
+  | "templates"
   | "profile";
 
 interface NavItem {
@@ -261,6 +263,11 @@ export function Sidebar({
             id: "team" as CompanyNavMenu,
             label: "Anggota Tim",
             icon: Users,
+          },
+          {
+            id: "templates" as CompanyNavMenu,
+            label: "Kustomisasi Template",
+            icon: LayoutTemplate,
           },
           {
             id: "profile" as CompanyNavMenu,

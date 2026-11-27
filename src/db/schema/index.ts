@@ -16,3 +16,4 @@ export * from "./program-disbursements";
 export * from "./program-expenses";
 export * from "./admin-audit-logs";
 export * from "./email-verifications";
+export * from "./company-templates";

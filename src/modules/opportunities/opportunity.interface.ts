@@ -33,6 +33,7 @@ export interface UpdateOpportunityDTO {
 export interface InvitePartnerDTO {
   partnerId: string;
   message?: string | null;
+  responseDeadline?: string | null;
 }
 
 export interface OpportunityQueryDTO {
@@ -75,6 +76,41 @@ export interface PartnerOpportunityInvitation extends OpportunityInvitation {
   companyLogo?: string | null;
   companyCity?: string | null;
   invitedByName?: string | null;
+}
+
+export interface CompanyOpportunityInvitation extends OpportunityInvitation {
+  opportunityTitle?: string | null;
+  opportunityFocusArea?: string | null;
+  opportunityStatus?: string | null;
+  opportunityTargetCity?: string | null;
+  opportunityTargetProvince?: string | null;
+  opportunityBudget?: string | null;
+  opportunityDeadline?: string | null;
+  partnerName?: string | null;
+  partnerLogo?: string | null;
+  partnerCity?: string | null;
+  partnerProvince?: string | null;
+  partnerFocusArea?: string | null;
+  partnerOrganizationType?: string | null;
+  partnerEmail?: string | null;
+  invitedByName?: string | null;
+  invitedByPosition?: string | null;
+}
+
+export interface OverdueInvitationTransitionResult {
+  invitationId: string;
+  companyId: string;
+  partnerId: string;
+  partnerName: string;
+  partnerEmail: string | null;
+  companyName: string;
+  programName: string;
+  focusArea: string;
+  targetCity: string | null;
+  targetProvince: string | null;
+  invitedByName: string | null;
+  invitedByPosition: string | null;
+  responseDeadline: Date;
 }
 
 export interface NeedPrioritizationRequestDTO {

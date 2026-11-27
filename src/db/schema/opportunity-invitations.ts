@@ -4,7 +4,12 @@ import { companies } from "./companies";
 import { partners } from "./partners";
 import { users } from "./users";
 
-export const opportunityInvitationStatusEnum = ["INVITED", "ACCEPTED", "DECLINED"] as const;
+export const opportunityInvitationStatusEnum = [
+  "INVITED",
+  "ACCEPTED",
+  "DECLINED",
+  "OVERDUE",
+] as const;
 export type OpportunityInvitationStatus = (typeof opportunityInvitationStatusEnum)[number];
 
 export const opportunityInvitations = mysqlTable("opportunity_invitations", {
@@ -24,6 +29,7 @@ export const opportunityInvitations = mysqlTable("opportunity_invitations", {
     .notNull()
     .references(() => users.id),
   message: text("message"),
+  responseDeadline: timestamp("response_deadline"),
   status: mysqlEnum("status", opportunityInvitationStatusEnum).notNull().default("INVITED"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),

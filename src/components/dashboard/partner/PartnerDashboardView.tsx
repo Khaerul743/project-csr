@@ -2341,6 +2341,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                         };
                         const isPending = inv.status === "INVITED";
                         const isDeclined = inv.status === "DECLINED";
+                        const isOverdue = inv.status === "OVERDUE";
                         const oppMatch = opportunities.find((o) => o.id === inv.opportunityId);
                         const focusArea = (inv.opportunityFocusArea || oppMatch?.focusArea) as CsrFocusArea | undefined;
                         const focusConfig = focusArea ? FOCUS_AREA_CONFIG[focusArea] : null;
@@ -2349,7 +2350,7 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                           <div
                             key={inv.id}
                             className={`bg-white p-5 sm:p-6 rounded-2xl border transition-all space-y-4 shadow-xs ${
-                              isDeclined
+                              isDeclined || isOverdue
                                 ? "border-slate-200/80 bg-slate-50/50"
                                 : "border-[#E5E7EB] hover:border-slate-300"
                             }`}
@@ -2412,8 +2413,8 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
 
                             {/* 3. Pesan Undangan (Gaya korespondensi formal beraksen, bukan teks slop miring generik) */}
                             {inv.message && (
-                              <div className="relative pl-3.5 border-l-2 border-[#181343]/25 py-1 bg-slate-50/70 rounded-r-xl pr-3">
-                                <p className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-normal">
+                              <div className="relative pl-3.5 border-l-2 border-[#181343]/25 py-2 bg-slate-50/70 rounded-r-xl pr-3">
+                                <p className="text-xs sm:text-[13px] text-slate-700 leading-relaxed font-normal whitespace-pre-line">
                                   {inv.message}
                                 </p>
                               </div>
@@ -2429,6 +2430,15 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                                     {formatRupiah(inv.opportunityBudget)}
                                   </span>
                                 </div>
+                                {inv.responseDeadline && (
+                                  <div className="flex items-center gap-1.5 text-amber-800 bg-amber-50 border border-amber-200/70 px-2.5 py-1 rounded-lg">
+                                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                    <span>Batas Respons:</span>
+                                    <span className="font-bold">
+                                      {formatDate(inv.responseDeadline)}
+                                    </span>
+                                  </div>
+                                )}
                                 {inv.opportunityDeadline && (
                                   <div className="flex items-center gap-1.5 text-slate-600">
                                     <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -2478,11 +2488,15 @@ export function PartnerDashboardView({ user, onLogout, onProfileUpdated }: Partn
                                       Terima &amp; Buat Proposal
                                     </Button>
                                   </>
-                                ) : isDeclined ? (
-                                  <span className="text-xs text-slate-400 font-medium">
-                                    Undangan ditolak pada {formatDate(inv.updatedAt || inv.createdAt)}
-                                  </span>
-                                ) : (
+                                  ) : isDeclined ? (
+                                    <span className="text-xs text-slate-600 font-medium">
+                                      Undangan ditolak pada {formatDate(inv.updatedAt || inv.createdAt)}
+                                    </span>
+                                  ) : isOverdue ? (
+                                    <span className="text-xs text-rose-700 font-semibold">
+                                      Undangan kedaluwarsa (Overdue){inv.responseDeadline ? ` pada ${formatDate(inv.responseDeadline)}` : ""}
+                                    </span>
+                                  ) : (
                                   <Button
                                     variant="outline"
                                     size="sm"

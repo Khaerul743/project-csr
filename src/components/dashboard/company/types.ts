@@ -114,8 +114,10 @@ export interface OpportunityInvitationItem {
   partnerId: string;
   invitedBy: string;
   message?: string | null;
-  status: "INVITED" | "ACCEPTED" | "DECLINED";
+  responseDeadline?: string | null;
+  status: "INVITED" | "ACCEPTED" | "DECLINED" | "OVERDUE";
   createdAt: string;
+  updatedAt?: string;
   partner?: {
     id: string;
     name: string;
@@ -124,6 +126,35 @@ export interface OpportunityInvitationItem {
     focusArea: string;
     logoUrl?: string | null;
   };
+}
+
+export interface CompanyOpportunityInvitationItem {
+  id: string;
+  opportunityId: string;
+  companyId: string;
+  partnerId: string;
+  invitedBy: string;
+  message?: string | null;
+  responseDeadline?: string | null;
+  status: "INVITED" | "ACCEPTED" | "DECLINED" | "OVERDUE";
+  createdAt: string;
+  updatedAt: string;
+  opportunityTitle?: string | null;
+  opportunityFocusArea?: string | null;
+  opportunityStatus?: string | null;
+  opportunityTargetCity?: string | null;
+  opportunityTargetProvince?: string | null;
+  opportunityBudget?: string | null;
+  opportunityDeadline?: string | null;
+  partnerName?: string | null;
+  partnerLogo?: string | null;
+  partnerCity?: string | null;
+  partnerProvince?: string | null;
+  partnerFocusArea?: string | null;
+  partnerOrganizationType?: string | null;
+  partnerEmail?: string | null;
+  invitedByName?: string | null;
+  invitedByPosition?: string | null;
 }
 
 export interface CompanyProposalItem {

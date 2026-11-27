@@ -147,6 +147,21 @@ export class OpportunityController {
     }
   }
 
+  async getCompanyInvitations(request: Request): Promise<NextResponse> {
+    try {
+      const authUser = AuthGuard.authenticate(request);
+      AuthGuard.authorize(authUser, ["MANAGEMENT", "CSR_ADMIN"]);
+
+      const result = await this.opportunityService.getCompanyInvitations(
+        authUser.companyId
+      );
+
+      return ApiResponse.success(result, "Daftar undangan perusahaan berhasil diambil");
+    } catch (error) {
+      return ErrorHandler.handle(error);
+    }
+  }
+
   async getInvitations(request: Request, id: string): Promise<NextResponse> {
     try {
       const authUser = AuthGuard.authenticate(request);

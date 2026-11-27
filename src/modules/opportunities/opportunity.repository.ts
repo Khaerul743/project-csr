@@ -1,4 +1,4 @@
-import { eq, and, or, like, desc, count, inArray, ne, isNotNull } from "drizzle-orm";
+import { eq, and, or, like, desc, count, inArray, ne, isNotNull, lt } from "drizzle-orm";
 import { db } from "@/db";
 import { opportunities, Opportunity, NewOpportunity } from "@/db/schema/opportunities";
 import {
@@ -25,6 +25,8 @@ import {
   OpportunityWithDetails,
   OpportunityInvitationWithDetails,
   PartnerOpportunityInvitation,
+  CompanyOpportunityInvitation,
+  OverdueInvitationTransitionResult,
 } from "./opportunity.interface";
 
 export class OpportunityRepository {
@@ -303,6 +305,177 @@ export class OpportunityRepository {
       .limit(1);
 
     return updated;
+  }
+
+  async reinviteExistingInvitation(
+    id: string,
+    data: {
+      invitedBy: string;
+      message: string | null;
+      responseDeadline: Date | null;
+    }
+  ): Promise<OpportunityInvitation> {
+    const now = new Date();
+    await db
+      .update(opportunityInvitations)
+      .set({
+        invitedBy: data.invitedBy,
+        message: data.message,
+        responseDeadline: data.responseDeadline,
+        status: "INVITED",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .where(eq(opportunityInvitations.id, id));
+
+    const [updated] = await db
+      .select()
+      .from(opportunityInvitations)
+      .where(eq(opportunityInvitations.id, id))
+      .limit(1);
+
+    if (!updated) {
+      throw new Error("Gagal memperbarui data undangan ulang");
+    }
+    return updated;
+  }
+
+  async markOverdueInvitations(filter: {
+    companyId?: string;
+    partnerId?: string;
+    opportunityId?: string;
+  }): Promise<OverdueInvitationTransitionResult[]> {
+    const now = new Date();
+    const conditions = [
+      eq(opportunityInvitations.status, "INVITED"),
+      isNotNull(opportunityInvitations.responseDeadline),
+      lt(opportunityInvitations.responseDeadline, now),
+    ];
+
+    if (filter.companyId) {
+      conditions.push(eq(opportunityInvitations.companyId, filter.companyId));
+    }
+    if (filter.partnerId) {
+      conditions.push(eq(opportunityInvitations.partnerId, filter.partnerId));
+    }
+    if (filter.opportunityId) {
+      conditions.push(eq(opportunityInvitations.opportunityId, filter.opportunityId));
+    }
+
+    const candidates = await db
+      .select({
+        invitationId: opportunityInvitations.id,
+        companyId: opportunityInvitations.companyId,
+        partnerId: opportunityInvitations.partnerId,
+        responseDeadline: opportunityInvitations.responseDeadline,
+        partnerName: partners.name,
+        partnerEmail: partners.email,
+        companyName: companies.name,
+        programName: opportunities.title,
+        focusArea: opportunities.focusArea,
+        targetCity: opportunities.targetCity,
+        targetProvince: opportunities.targetProvince,
+        invitedByName: users.name,
+        invitedByPosition: users.position,
+      })
+      .from(opportunityInvitations)
+      .innerJoin(opportunities, eq(opportunityInvitations.opportunityId, opportunities.id))
+      .innerJoin(partners, eq(opportunityInvitations.partnerId, partners.id))
+      .innerJoin(companies, eq(opportunityInvitations.companyId, companies.id))
+      .leftJoin(users, eq(opportunityInvitations.invitedBy, users.id))
+      .where(and(...conditions));
+
+    if (candidates.length === 0) return [];
+
+    const transitioned: OverdueInvitationTransitionResult[] = [];
+    for (const item of candidates) {
+      if (!item.responseDeadline) continue;
+      // Atomic conditional update so concurrent reads never transition or email twice
+      const res = await db
+        .update(opportunityInvitations)
+        .set({
+          status: "OVERDUE",
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(opportunityInvitations.id, item.invitationId),
+            eq(opportunityInvitations.status, "INVITED")
+          )
+        );
+
+      const affected = (res as any)?.[0]?.affectedRows ?? 0;
+      if (affected > 0) {
+        transitioned.push({
+          invitationId: item.invitationId,
+          companyId: item.companyId,
+          partnerId: item.partnerId,
+          partnerName: item.partnerName,
+          partnerEmail: item.partnerEmail,
+          companyName: item.companyName,
+          programName: item.programName,
+          focusArea: item.focusArea,
+          targetCity: item.targetCity,
+          targetProvince: item.targetProvince,
+          invitedByName: item.invitedByName,
+          invitedByPosition: item.invitedByPosition,
+          responseDeadline: item.responseDeadline,
+        });
+      }
+    }
+
+    return transitioned;
+  }
+
+  async findInvitationsByCompany(
+    companyId: string
+  ): Promise<CompanyOpportunityInvitation[]> {
+    const rows = await db
+      .select({
+        invitation: opportunityInvitations,
+        opportunityTitle: opportunities.title,
+        opportunityFocusArea: opportunities.focusArea,
+        opportunityStatus: opportunities.status,
+        opportunityTargetCity: opportunities.targetCity,
+        opportunityTargetProvince: opportunities.targetProvince,
+        opportunityBudget: opportunities.estimatedBudget,
+        opportunityDeadline: opportunities.deadline,
+        partnerName: partners.name,
+        partnerLogo: partners.logoUrl,
+        partnerCity: partners.city,
+        partnerProvince: partners.province,
+        partnerFocusArea: partners.focusArea,
+        partnerOrganizationType: partners.organizationType,
+        partnerEmail: partners.email,
+        invitedByName: users.name,
+        invitedByPosition: users.position,
+      })
+      .from(opportunityInvitations)
+      .innerJoin(opportunities, eq(opportunityInvitations.opportunityId, opportunities.id))
+      .leftJoin(partners, eq(opportunityInvitations.partnerId, partners.id))
+      .leftJoin(users, eq(opportunityInvitations.invitedBy, users.id))
+      .where(eq(opportunityInvitations.companyId, companyId))
+      .orderBy(desc(opportunityInvitations.createdAt));
+
+    return rows.map((r) => ({
+      ...r.invitation,
+      opportunityTitle: r.opportunityTitle,
+      opportunityFocusArea: r.opportunityFocusArea,
+      opportunityStatus: r.opportunityStatus,
+      opportunityTargetCity: r.opportunityTargetCity,
+      opportunityTargetProvince: r.opportunityTargetProvince,
+      opportunityBudget: r.opportunityBudget,
+      opportunityDeadline: r.opportunityDeadline ? r.opportunityDeadline.toISOString() : null,
+      partnerName: r.partnerName,
+      partnerLogo: r.partnerLogo,
+      partnerCity: r.partnerCity,
+      partnerProvince: r.partnerProvince,
+      partnerFocusArea: r.partnerFocusArea,
+      partnerOrganizationType: r.partnerOrganizationType,
+      partnerEmail: r.partnerEmail,
+      invitedByName: r.invitedByName,
+      invitedByPosition: r.invitedByPosition,
+    }));
   }
 
   private normalizeLocationToken(raw: string): string {

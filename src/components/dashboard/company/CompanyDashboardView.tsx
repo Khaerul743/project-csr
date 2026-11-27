@@ -64,6 +64,7 @@ import { CreateOpportunityPageView, type OpportunityDraftData } from "./opportun
 import { EditOpportunityPageView } from "./opportunities/EditOpportunityPageView";
 import { InvitePartnerModal } from "./InvitePartnerModal";
 import { OpportunityDetailModal } from "./OpportunityDetailModal";
+import { TemplateCustomizationView } from "./templates/TemplateCustomizationView";
 import {
   CompanyProfile,
   OpportunityItem,
@@ -72,6 +73,7 @@ import {
   CompanyProposalItem,
   CompanyCollaborationItem,
   CompanyProgramItem,
+  CompanyOpportunityInvitationItem,
 } from "./types";
 import {
   FOCUS_AREA_CONFIG,
@@ -84,6 +86,7 @@ import {
 } from "./helpers";
 import { ReviewProposalPageView, cleanProposalText } from "./proposals/ReviewProposalPageView";
 import { CollaborationDetailFullPageView } from "./collaborations/CollaborationDetailFullPageView";
+import { CompanyInvitationsTab } from "./collaborations/CompanyInvitationsTab";
 import { ProgramMonitoringDetailView } from "./programs/ProgramMonitoringDetailView";
 import { EsgAnalyticsView } from "../analytics/EsgAnalyticsView";
 import { ConversationCenterView } from "../conversations/ConversationCenterView";
@@ -267,6 +270,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
   const [proposals, setProposals] = useState<CompanyProposalItem[]>([]);
   const [collaborations, setCollaborations] = useState<CompanyCollaborationItem[]>([]);
+  const [companyInvitations, setCompanyInvitations] = useState<CompanyOpportunityInvitationItem[]>([]);
   const [programs, setPrograms] = useState<CompanyProgramItem[]>([]);
 
   // Loading states
@@ -274,6 +278,8 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   const [isLoadingOpportunities, setIsLoadingOpportunities] = useState(true);
   const [isLoadingPartners, setIsLoadingPartners] = useState(false);
   const [isLoadingInvitations, setIsLoadingInvitations] = useState(false);
+  const [isLoadingCompanyInvitations, setIsLoadingCompanyInvitations] = useState(false);
+  const [companyInvitationsError, setCompanyInvitationsError] = useState<string | null>(null);
   const [isLoadingProposals, setIsLoadingProposals] = useState(false);
   const [isLoadingCollaborations, setIsLoadingCollaborations] = useState(false);
   const [isLoadingPrograms, setIsLoadingPrograms] = useState(false);
@@ -286,6 +292,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   const [proposalSearch, setProposalSearch] = useState("");
   const [proposalStatusFilter, setProposalStatusFilter] = useState<string>("ALL");
   const [proposalOppFilter, setProposalOppFilter] = useState<string>("ALL");
+  const [collabMainTab, setCollabMainTab] = useState<"mou" | "invitations">("mou");
   const [collabSearch, setCollabSearch] = useState("");
   const [collabStatusFilter, setCollabStatusFilter] = useState<string>("ALL");
   const [collabOppFilter, setCollabOppFilter] = useState<string>("ALL");
@@ -301,6 +308,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
   const [selectedOppForEdit, setSelectedOppForEdit] = useState<OpportunityItem | null>(null);
   const [selectedOppForDetail, setSelectedOppForDetail] = useState<OpportunityItem | null>(null);
   const [selectedPartnerForInvite, setSelectedPartnerForInvite] = useState<PartnerItem | null>(null);
+  const [selectedInviteInitialOppId, setSelectedInviteInitialOppId] = useState<string | null>(null);
   const [isInviteMemberOpen, setIsInviteMemberOpen] = useState(false);
   const [selectedProposalForReview, setSelectedProposalForReview] = useState<CompanyProposalItem | null>(null);
   const [selectedCollabForDetail, setSelectedCollabForDetail] = useState<CompanyCollaborationItem | null>(null);
@@ -517,6 +525,31 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
     }
   };
 
+  const fetchCompanyInvitations = async () => {
+    if (isManagement) return;
+    setIsLoadingCompanyInvitations(true);
+    setCompanyInvitationsError(null);
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) return;
+      const res = await fetch("/api/companies/current/invitations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        throw new Error(json.message || "Gagal memuat daftar undangan mitra.");
+      }
+      const list = Array.isArray(json.data) ? json.data : [];
+      setCompanyInvitations(list);
+    } catch (err: any) {
+      setCompanyInvitationsError(
+        err?.message || "Terjadi kendala jaringan saat memuat daftar undangan."
+      );
+    } finally {
+      setIsLoadingCompanyInvitations(false);
+    }
+  };
+
   const fetchPrograms = async () => {
     setIsLoadingPrograms(true);
     try {
@@ -551,6 +584,8 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
     fetchPrograms();
     if (isManagement) {
       fetchInvitations();
+    } else {
+      fetchCompanyInvitations();
     }
   }, [user.role]);
 
@@ -1111,6 +1146,10 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
       title: "Anggota Tim & Akses",
       subtitle: "Kelola anggota organisasi, penugasan hak akses peran (Role-Based Access Control), dan undangan tim internal.",
     },
+    templates: {
+      title: "Kustomisasi Template",
+      subtitle: "Kelola template pesan standar organisasi untuk mempercepat komunikasi kemitraan CSR.",
+    },
     profile: {
       title: "Profil Perusahaan",
       subtitle: "Informasi legalitas, domisili, dan profil publik organisasi",
@@ -1247,7 +1286,12 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                 { label: isManagement ? "Tata Kelola Korporat" : "Organisasi" },
                                 { label: "Anggota Tim & Akses" },
                               ]
-                              : activeMenu === "profile"
+                              : activeMenu === "templates"
+                                ? [
+                                  { label: "Organisasi" },
+                                  { label: "Kustomisasi Template" },
+                                ]
+                                : activeMenu === "profile"
                                 ? [
                                   { label: isManagement ? "Tata Kelola Korporat" : "Organisasi" },
                                   { label: "Profil Perusahaan" },
@@ -1768,13 +1812,121 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                       Kelola Kerja Sama &amp; MoU
                     </h1>
                     <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                      Pantau proses kesepakatan, dokumen perjanjian, dan kesiapan pelaksanaan program CSR bersama mitra.
+                      Pantau proses kesepakatan MoU, dokumen perjanjian, dan status undangan kolaborasi yang dikirim kepada mitra.
                     </p>
                   </div>
-                  <div className="px-3.5 py-1.5 rounded-xl bg-slate-50 border border-[#E8E8EA] text-xs font-semibold text-[#181343] self-start sm:self-auto shrink-0 shadow-2xs">
-                    Total <span className="font-bold text-[#181343]">{collaborations.length}</span> kerja sama aktif
+                  <div className="px-3.5 py-2 rounded-xl bg-slate-50 border border-[#E8E8EA] text-xs font-semibold text-[#181343] self-start sm:self-auto shrink-0">
+                    {collabMainTab === "mou" ? (
+                      <>
+                        Total <span className="font-bold text-[#181343]">{collaborations.length}</span> kerja sama aktif
+                      </>
+                    ) : (
+                      <>
+                        Total <span className="font-bold text-[#181343]">{companyInvitations.length}</span> undangan dikirim
+                      </>
+                    )}
                   </div>
                 </div>
+
+                {/* Tab Switcher: Kesepakatan & MoU vs Daftar Undangan Mitra */}
+                <div
+                  role="tablist"
+                  aria-label="Sub-menu Kolaborasi dan Undangan Mitra"
+                  className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    id="tab-collab-mou"
+                    aria-selected={collabMainTab === "mou"}
+                    onClick={() => setCollabMainTab("mou")}
+                    className={`inline-flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] ${
+                      collabMainTab === "mou"
+                        ? "bg-[#181343] text-white font-bold"
+                        : "bg-white border border-[#E8E8EA] text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>Kesepakatan &amp; MoU</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+                        collabMainTab === "mou"
+                          ? "bg-white/20 text-white"
+                          : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {collaborations.length}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    role="tab"
+                    id="tab-collab-invitations"
+                    aria-selected={collabMainTab === "invitations"}
+                    onClick={() => {
+                      setCollabMainTab("invitations");
+                      fetchCompanyInvitations();
+                    }}
+                    className={`inline-flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] ${
+                      collabMainTab === "invitations"
+                        ? "bg-[#181343] text-white font-bold"
+                        : "bg-white border border-[#E8E8EA] text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    <span>Daftar Undangan Mitra</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+                        collabMainTab === "invitations"
+                          ? "bg-white/20 text-white"
+                          : "bg-slate-100 text-slate-700"
+                      }`}
+                    >
+                      {companyInvitations.length}
+                    </span>
+                  </button>
+                </div>
+
+                {collabMainTab === "invitations" ? (
+                  <div
+                    role="tabpanel"
+                    aria-labelledby="tab-collab-invitations"
+                  >
+                    <CompanyInvitationsTab
+                      invitations={companyInvitations}
+                      opportunities={opportunities}
+                      isLoading={isLoadingCompanyInvitations}
+                      errorMessage={companyInvitationsError}
+                      onRetry={fetchCompanyInvitations}
+                      onNavigateToPartners={() => setActiveMenu("partners")}
+                      onNavigateToProposals={() => setActiveMenu("proposals")}
+                      onReinvitePartner={(inv) => {
+                        const existingPartner = partners.find(
+                          (p) => p.id === inv.partnerId
+                        );
+                        setSelectedInviteInitialOppId(inv.opportunityId);
+                        setSelectedPartnerForInvite(
+                          existingPartner || {
+                            id: inv.partnerId,
+                            name: inv.partnerName || "Organisasi Mitra",
+                            city: inv.partnerCity,
+                            province: inv.partnerProvince,
+                            logoUrl: inv.partnerLogo,
+                            organizationType: inv.partnerOrganizationType,
+                            email: inv.partnerEmail,
+                            focusArea: (inv.partnerFocusArea as any) || "LAINNYA",
+                            status: "ACTIVE",
+                            createdAt: inv.createdAt,
+                          }
+                        );
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    role="tabpanel"
+                    aria-labelledby="tab-collab-mou"
+                    className="space-y-6"
+                  >
 
                 {/* 3 KPI Cards Horizontal (Statistik Read-Only) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
@@ -2065,6 +2217,8 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                         </div>
                       );
                     })}
+                  </div>
+                )}
                   </div>
                 )}
               </div>
@@ -2567,6 +2721,17 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           )}
 
           {/* ============================================================ */}
+          {/* VIEW: TEMPLATES (KUSTOMISASI TEMPLATE - KHUSUS CSR_ADMIN) */}
+          {/* ============================================================ */}
+          {!isManagement && activeMenu === "templates" && (
+            <TemplateCustomizationView
+              companyName={company?.name}
+              picName={currentUser.name}
+              picPosition={currentUser.position}
+            />
+          )}
+
+          {/* ============================================================ */}
           {/* VIEW: CONVERSATIONS (PESAN & NEGOSIASI - KHUSUS CSR_ADMIN) */}
           {/* ============================================================ */}
           {!isManagement && activeMenu === "conversations" && (
@@ -2668,9 +2833,22 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
           isOpen={!!selectedPartnerForInvite}
           partner={selectedPartnerForInvite}
           opportunities={opportunities}
-          onClose={() => setSelectedPartnerForInvite(null)}
+          initialOpportunityId={selectedInviteInitialOppId}
+          companyName={company?.name}
+          picName={currentUser.name}
+          picPosition={currentUser.position}
+          onNavigateToTemplates={() => {
+            setSelectedPartnerForInvite(null);
+            setSelectedInviteInitialOppId(null);
+            setActiveMenu("templates");
+          }}
+          onClose={() => {
+            setSelectedPartnerForInvite(null);
+            setSelectedInviteInitialOppId(null);
+          }}
           onSuccess={() => {
             fetchOpportunities();
+            fetchCompanyInvitations();
           }}
         />
       )}

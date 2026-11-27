@@ -85,6 +85,7 @@ export interface PartnerOpportunityInvitationItem {
   partnerId: string;
   invitedBy: string;
   message?: string | null;
+  responseDeadline?: string | null;
   status: OpportunityInvitationStatus;
   createdAt: string;
   updatedAt?: string | null;

@@ -45,6 +45,7 @@ export const INVITATION_STATUS_CONFIG: Record<
   INVITED: { label: "Menunggu Respon", variant: "amber" },
   ACCEPTED: { label: "Diterima", variant: "emerald" },
   DECLINED: { label: "Ditolak", variant: "slate" },
+  OVERDUE: { label: "Overdue", variant: "rose" },
 };
 
 export const COLLABORATION_STATUS_CONFIG: Record<
