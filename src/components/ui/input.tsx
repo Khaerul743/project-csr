@@ -57,7 +57,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="text-xs font-semibold text-slate-700 tracking-wide"
+            className="text-xs font-semibold text-[#0A2558] tracking-wide"
           >
             {renderLabelContent()}
           </label>
@@ -65,7 +65,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute left-3.5 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute left-3.5 flex items-center pointer-events-none text-slate-500">
               {leftIcon}
             </div>
           )}
@@ -73,18 +73,18 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             id={inputId}
             ref={ref}
-            className={`w-full text-sm bg-white border rounded-xl transition-all duration-200 outline-none placeholder:text-slate-400 text-slate-900 disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed ${
+            className={`w-full text-sm bg-white border rounded-xl transition-all duration-200 outline-none placeholder:text-slate-400 text-[#0A2558] disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed ${
               leftIcon ? "pl-10" : "pl-4"
             } ${rightIcon ? "pr-10" : "pr-4"} py-2.5 ${
               error
                 ? "border-rose-400 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20"
-                : "border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                : "border-[#E2E8F0] focus:border-[#1765F5] focus:ring-2 focus:ring-[#1765F5]/15"
             } ${className}`}
             {...props}
           />
 
           {rightIcon && (
-            <div className="absolute right-3.5 flex items-center text-slate-400">
+            <div className="absolute right-3.5 flex items-center text-slate-500">
               {rightIcon}
             </div>
           )}
@@ -93,7 +93,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {error ? (
           <p className="text-xs text-rose-600 font-medium">{error}</p>
         ) : helperText ? (
-          <p className="text-xs text-slate-500">{helperText}</p>
+          <p className="text-xs text-slate-600">{helperText}</p>
         ) : null}
       </div>
     );

@@ -14,7 +14,7 @@ Setiap dokumen di bawah ini memiliki fokus teknis yang spesifik:
 | **[`database-schema.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/database-schema.md)** | Definisi 16+ tabel MySQL via Drizzle ORM, relasi ERD, enum status, dan pola query. | Sebelum memodifikasi skema data atau membuat query database baru. |
 | **[`business-workflows.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/business-workflows.md)** | *State machines* & siklus hidup bisnis: Onboarding, Proposal, MoU, Milestone, Termin Finansial, dan Ulasan Publik. | Sebelum memodifikasi logika bisnis atau alur transisi status. |
 | **[`developer-guide.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/developer-guide.md)** | Panduan praktis penambahan modul baru, aturan Next.js 16, migrasi Drizzle, dan troubleshooting. | Saat mulai menulis kode (backend/frontend) atau memperbaiki bug. |
-| **[`design-system.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)** | Panduan palet warna (Emerald Green & Slate Navy), tipografi, token, dan standar komponen UI. | Saat membuat atau merombak antarmuka halaman React / Tailwind CSS. |
+| **[`design-system.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)** | Panduan Design System v2 (Vibrant Sky-Blue & Deep Navy), kontras WCAG AA, standar ilustrasi/abstract blob, dan anatomi workspace dashboard. | Saat membuat atau merombak antarmuka halaman React / Tailwind CSS. |
 | **[`folder-structure.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/folder-structure.md)** | Rincian direktori dan peran setiap file di dalam `app/`, `src/`, `public/`, dan `drizzle/`. | Saat mencari lokasi kode atau file komponen tertentu. |
 | **[`api-documentation.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)** | Kontrak lengkap REST API (request body, parameter URL, response JSON, dan status code). | Saat menghubungkan frontend ke backend atau integrasi pihak ketiga. |
 | **[`super-admin-role.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/super-admin-role.md)** | Blueprint & spesifikasi arsitektur role `SUPER_ADMIN` (skema DB, audit log, 3-tier API `/api/admin/*`, sidebar 8 menu, & seeding). | Sebelum atau selama mengimplementasikan dan memelihara modul Super Admin platform. |
@@ -57,10 +57,10 @@ Sebelum melakukan perubahan apa pun, patuhi 6 aturan absolut ini:
    - Service mengeksekusi aturan bisnis (validasi domain, state machine).
    - Repository menangani interaksi langsung ke database MySQL via Drizzle ORM.
    - **Jangan pernah melakukan query database langsung di dalam Route Handler atau UI Component!**
-2. **Kepatuhan Design System**:
-   - Warna Brand Utama: **Emerald Green** (`#059669` / `#10B981`) dan **Corporate Slate Navy** (`#181343` / `#0D0A26`).
-   - Aksen Transisi: **Warm Amber / Orange** (`#F6AC2F`).
-   - Jangan gunakan warna merah sembarangan (warna merah hanya untuk bahaya/error/penolakan fatal).
+2. **Kepatuhan Design System (v2 - Sky-Blue Identity)**:
+   - Mengikuti panduan lengkap pada [`design-system.md`](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md) dengan warna utama Deep Navy (`#0A2558`), gradien biru cerah (`#1D6CE0` -> `#1765F5` -> `#1748D5`), surface ice-blue (`#EDF6FF` / `#F4F9FF`), dan border `#DBEAFE`.
+   - Setiap halaman baru/redesign dilengkapi aset visual hidup (ikon custom, ilustrasi tematik PNG transparan, dan dekorasi *abstract organic gradient blob* proporsional di latar header).
+   - Jangan gunakan warna merah sembarangan (warna merah hanya untuk bahaya/error/penolakan fatal) dan pastikan teks putih tidak diletakkan di atas biru terlalu terang (`#43A5FF`).
 3. **Type-Safety & Drizzle ORM**:
    - Seluruh tabel didefinisikan di `src/db/schema/`. Jika ada perubahan kolom/tabel, buat file migrasi melalui `npm run db:generate` lalu `npm run db:migrate`.
 4. **Keamanan Multi-Tenant & RBAC**:

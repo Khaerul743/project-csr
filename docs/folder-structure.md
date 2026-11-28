@@ -36,7 +36,7 @@ Pusat dokumentasi lengkap proyek untuk pengembang & AI:
 - **[database-schema.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/database-schema.md)**: Skema 16+ tabel MySQL, ERD Mermaid, master enum, dan konvensi Drizzle.
 - **[business-workflows.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/business-workflows.md)**: Siklus hidup bisnis, alur transisi status, MoU, realisasi termin & QR survei publik.
 - **[developer-guide.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/developer-guide.md)**: Panduan praktis penambahan modul baru, langkah Drizzle, dan tips pencegahan bug.
-- **[design-system.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)**: Panduan palet warna (Emerald & Slate Navy), tipografi, dan komponen UI.
+- **[design-system.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/design-system.md)**: Panduan Design System v2 (Vibrant Sky-Blue & Deep Navy `#0A2558`), aset ilustrasi/abstract blob, tipografi, dan komponen UI.
 - **[api-documentation.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/api-documentation.md)**: Dokumentasi kontrak lengkap seluruh endpoint REST API.
 - **[ai-service-milestone-extraction.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-milestone-extraction.md)**: Dokumentasi teknis ekstraksi milestone otomatis dari proposal PDF via LangChain.
 - **[ai-service-proposal-screener.md](file:///c:/Users/Pongo/Documents/projects/next.js/project-csr/docs/ai-service-proposal-screener.md)**: Dokumentasi AI Proposal Screener & Scoring Assistant (skor kelayakan, audit anggaran, dan deteksi risiko).

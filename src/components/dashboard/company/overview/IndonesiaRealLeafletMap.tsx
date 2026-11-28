@@ -241,7 +241,7 @@ export default function IndonesiaRealLeafletMap({
             <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-white shadow-md border transition-all duration-150 transform group-hover:-translate-y-0.5 group-hover:shadow-lg ${
               isCurrentSelected ? "ring-2 ring-white/80" : ""
             }"
-                 style="background-color: #181343; border-color: ${primaryColor};">
+                 style="background-color: #0A2558; border-color: ${primaryColor};">
               <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${primaryColor};"></span>
               <span class="tracking-tight text-white font-semibold text-xs whitespace-nowrap">${provName}</span>
               <span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold text-white tabular-nums leading-none" style="background-color: ${primaryColor};">
@@ -271,18 +271,18 @@ export default function IndonesiaRealLeafletMap({
         if (hasPrograms && showPrograms) {
           popupProgramsHtml = `
             <div class="space-y-1.5 pt-2 border-t border-slate-100">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
                 Program Berjalan (${data.programs.length})
               </span>
               ${data.programs
                 .slice(0, 2)
                 .map(
                   (p) => `
-                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200/80 space-y-0.5">
-                  <div class="font-bold text-slate-900 line-clamp-1">${p.title}</div>
+                <div class="p-2 rounded-lg bg-[#F8FBFF] border border-[#DBEAFE] space-y-0.5">
+                  <div class="font-bold text-[#0A2558] line-clamp-1">${p.title}</div>
                   <div class="flex items-center justify-between text-[11px]">
-                    <span class="text-emerald-700 font-semibold">${formatRupiah(p.budget)}</span>
-                    <button id="btn-prog-${p.id}" class="text-[10px] font-bold text-[#181343] hover:underline cursor-pointer">Rincian &rarr;</button>
+                    <span class="text-[#047857] font-semibold">${formatRupiah(p.budget)}</span>
+                    <button id="btn-prog-${p.id}" class="text-[10px] font-bold text-[#1765F5] hover:underline cursor-pointer">Rincian &rarr;</button>
                   </div>
                 </div>
               `
@@ -296,18 +296,18 @@ export default function IndonesiaRealLeafletMap({
         if (hasOpportunities && showOpportunities) {
           popupOpportunitiesHtml = `
             <div class="space-y-1.5 pt-2 border-t border-slate-100">
-              <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">
+              <span class="text-[10px] font-bold text-[#1765F5] uppercase tracking-wider block">
                 Peluang Terbuka (${data.opportunities.length})
               </span>
               ${data.opportunities
                 .slice(0, 2)
                 .map(
                   (o) => `
-                <div class="p-2 rounded-lg bg-indigo-50/50 border border-indigo-100 space-y-0.5">
-                  <div class="font-bold text-indigo-950 line-clamp-1">${o.title}</div>
-                  <div class="flex items-center justify-between text-[11px] text-slate-500">
+                <div class="p-2 rounded-lg bg-[#EDF6FF] border border-[#CBE7FD] space-y-0.5">
+                  <div class="font-bold text-[#0A2558] line-clamp-1">${o.title}</div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-600">
                     <span>${o.focusArea.replace("_", " ")}</span>
-                    <button id="btn-opp-${o.id}" class="text-[10px] font-bold text-indigo-700 hover:underline cursor-pointer">Lihat &rarr;</button>
+                    <button id="btn-opp-${o.id}" class="text-[10px] font-bold text-[#1765F5] hover:underline cursor-pointer">Lihat &rarr;</button>
                   </div>
                 </div>
               `
@@ -334,19 +334,19 @@ export default function IndonesiaRealLeafletMap({
         popupDiv.innerHTML = `
           <div>
             <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Provinsi</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 text-slate-700">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Provinsi</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-[#EDF6FF] text-[#0A2558]">
                 ${INDONESIA_PROVINCE_GEO[provName]?.island || "Indonesia"}
               </span>
             </div>
-            <h4 class="text-sm font-extrabold text-[#181343] mt-0.5">${provName}</h4>
+            <h4 class="text-sm font-extrabold text-[#0A2558] mt-0.5">${provName}</h4>
           </div>
           ${popupProgramsHtml}
           ${popupOpportunitiesHtml}
           ${popupPartnersHtml}
           <div class="pt-2">
             <button id="btn-select-prov-${provName.replace(/\s+/g, "-")}"
-                    class="w-full py-2 px-3 rounded-xl bg-[#181343] hover:bg-[#181343]/90 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm">
+                    class="w-full py-2 px-3 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm">
               <span>Buka Rincian Wilayah</span>
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -404,7 +404,7 @@ export default function IndonesiaRealLeafletMap({
         const unreachedHtml = `
           <div class="group relative cursor-pointer flex items-center justify-center">
             <div class="w-2.5 h-2.5 rounded-full bg-slate-300 border-2 border-white shadow-2xs hover:bg-slate-600 hover:scale-125 transition-all"></div>
-            <div class="absolute bottom-4 hidden group-hover:block bg-[#181343] text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-md whitespace-nowrap z-50">
+            <div class="absolute bottom-4 hidden group-hover:block bg-[#0A2558] text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-md whitespace-nowrap z-50">
               ${provName} (${unreachedLabel})
             </div>
           </div>
@@ -427,7 +427,7 @@ export default function IndonesiaRealLeafletMap({
         unreachedPopupDiv.className = "p-4 space-y-3 min-w-[240px] text-slate-800 text-xs";
         unreachedPopupDiv.innerHTML = `
           <div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
               ${
                 activeLayer === "PROGRAM"
                   ? "Wilayah Sasaran Baru"
@@ -436,8 +436,8 @@ export default function IndonesiaRealLeafletMap({
                   : "Jaringan Kemitraan"
               }
             </span>
-            <h4 class="text-sm font-extrabold text-[#181343] mt-0.5">${provName}</h4>
-            <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">
+            <h4 class="text-sm font-extrabold text-[#0A2558] mt-0.5">${provName}</h4>
+            <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
               ${
                 activeLayer === "PROGRAM"
                   ? "Perusahaan belum menjalankan inisiatif program CSR di wilayah ini."
@@ -447,9 +447,9 @@ export default function IndonesiaRealLeafletMap({
               }
             </p>
           </div>
-          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-700 space-y-1">
-            <div class="font-bold text-xs text-[#181343]">Peluang Kemitraan Baru</div>
-            <p class="text-[11px] text-slate-500 leading-snug">
+          <div class="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE] text-slate-700 space-y-1">
+            <div class="font-bold text-xs text-[#0A2558]">Peluang Kemitraan Baru</div>
+            <p class="text-[11px] text-slate-600 leading-snug">
               Buka peluang kemitraan CSR untuk menjangkau masyarakat di ${provName}.
             </p>
           </div>
@@ -457,7 +457,7 @@ export default function IndonesiaRealLeafletMap({
             onOpenCreateOpportunity
               ? `
             <button id="btn-create-opp-${provName.replace(/\s+/g, "-")}"
-                    class="w-full py-2 px-3 rounded-xl bg-[#181343] hover:bg-[#25205c] text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs">
+                    class="w-full py-2 px-3 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
@@ -537,14 +537,14 @@ export default function IndonesiaRealLeafletMap({
           {/* When detail is open, show Basemap & Reset on the right of Row 1 */}
           {isDetailOpen && (
             <div className="flex items-center gap-2">
-              <div className="flex items-center p-0.5 rounded-xl bg-slate-200/70 border border-slate-300/60 text-xs font-medium">
+              <div className="flex items-center p-0.5 rounded-full bg-[#EDF6FF] border border-[#DBEAFE] text-xs font-medium">
                 <button
                   type="button"
                   onClick={() => setBasemap("osm")}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                     basemap === "osm"
-                      ? "bg-white text-[#181343] font-bold shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900"
+                      ? "bg-white text-[#0A2558] font-bold shadow-2xs"
+                      : "text-slate-600 hover:text-[#0A2558]"
                   }`}
                 >
                   Peta Standar
@@ -552,10 +552,10 @@ export default function IndonesiaRealLeafletMap({
                 <button
                   type="button"
                   onClick={() => setBasemap("satellite")}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                     basemap === "satellite"
-                      ? "bg-white text-[#181343] font-bold shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900"
+                      ? "bg-white text-[#0A2558] font-bold shadow-2xs"
+                      : "text-slate-600 hover:text-[#0A2558]"
                   }`}
                 >
                   Satelit
@@ -565,29 +565,29 @@ export default function IndonesiaRealLeafletMap({
               <button
                 type="button"
                 onClick={handleResetView}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-semibold transition-all cursor-pointer shadow-2xs text-xs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#CBE7FD] hover:bg-[#EDF6FF] text-[#0A2558] font-semibold transition-all cursor-pointer shadow-2xs text-xs"
                 title="Reset ke Tampilan Seluruh Indonesia"
               >
-                <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                <RotateCcw className="w-3.5 h-3.5 text-[#1765F5]" />
                 <span className="hidden sm:inline">Reset Posisi</span>
               </button>
             </div>
           )}
         </div>
 
-        {/* Layer Selection (Single Choice / Clean Tabs without Top Badge) */}
+        {/* Layer Selection (Pill Tabs Design System v2) */}
         <div className={`flex items-center gap-2 flex-wrap ${isDetailOpen ? "pt-0.5" : ""}`}>
           {/* Program Option */}
           <button
             type="button"
             onClick={() => handleSelectLayer("PROGRAM")}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeLayer === "PROGRAM"
-                ? "bg-[#181343] text-white shadow-2xs"
-                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20"
+                : "bg-white text-[#0A2558] hover:bg-[#F4F9FF] border border-[#DBEAFE]"
             }`}
           >
-            <span className={`w-2 h-2 rounded-full ${activeLayer === "PROGRAM" ? "bg-emerald-400" : "bg-slate-300"}`} />
+            <span className={`w-2 h-2 rounded-full ${activeLayer === "PROGRAM" ? "bg-emerald-300" : "bg-slate-300"}`} />
             <span>Program</span>
           </button>
 
@@ -595,13 +595,13 @@ export default function IndonesiaRealLeafletMap({
           <button
             type="button"
             onClick={() => handleSelectLayer("OPPORTUNITY")}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeLayer === "OPPORTUNITY"
-                ? "bg-[#181343] text-white shadow-2xs"
-                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20"
+                : "bg-white text-[#0A2558] hover:bg-[#F4F9FF] border border-[#DBEAFE]"
             }`}
           >
-            <span className={`w-2 h-2 rounded-full ${activeLayer === "OPPORTUNITY" ? "bg-indigo-400" : "bg-slate-300"}`} />
+            <span className={`w-2 h-2 rounded-full ${activeLayer === "OPPORTUNITY" ? "bg-sky-200" : "bg-slate-300"}`} />
             <span>Peluang</span>
           </button>
 
@@ -609,13 +609,13 @@ export default function IndonesiaRealLeafletMap({
           <button
             type="button"
             onClick={() => handleSelectLayer("PARTNER")}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeLayer === "PARTNER"
-                ? "bg-[#181343] text-white shadow-2xs"
-                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20"
+                : "bg-white text-[#0A2558] hover:bg-[#F4F9FF] border border-[#DBEAFE]"
             }`}
           >
-            <span className={`w-2 h-2 rounded-full ${activeLayer === "PARTNER" ? "bg-amber-400" : "bg-slate-300"}`} />
+            <span className={`w-2 h-2 rounded-full ${activeLayer === "PARTNER" ? "bg-amber-300" : "bg-slate-300"}`} />
             <span>Mitra</span>
           </button>
         </div>
@@ -624,14 +624,14 @@ export default function IndonesiaRealLeafletMap({
         {!isDetailOpen && (
           <div className="flex items-center gap-2 self-start sm:self-auto">
             {/* Basemap Selection */}
-            <div className="flex items-center p-0.5 rounded-xl bg-slate-200/70 border border-slate-300/60 text-xs font-medium">
+            <div className="flex items-center p-0.5 rounded-full bg-[#EDF6FF] border border-[#DBEAFE] text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setBasemap("osm")}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                   basemap === "osm"
-                    ? "bg-white text-[#181343] font-bold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-[#0A2558] font-bold shadow-2xs"
+                    : "text-slate-600 hover:text-[#0A2558]"
                 }`}
               >
                 Peta Standar
@@ -639,10 +639,10 @@ export default function IndonesiaRealLeafletMap({
               <button
                 type="button"
                 onClick={() => setBasemap("satellite")}
-                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-full transition-all cursor-pointer ${
                   basemap === "satellite"
-                    ? "bg-white text-[#181343] font-bold shadow-2xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-[#0A2558] font-bold shadow-2xs"
+                    : "text-slate-600 hover:text-[#0A2558]"
                 }`}
               >
                 Satelit
@@ -653,10 +653,10 @@ export default function IndonesiaRealLeafletMap({
             <button
               type="button"
               onClick={handleResetView}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 hover:bg-slate-100 text-slate-700 font-semibold transition-all cursor-pointer shadow-2xs text-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#CBE7FD] hover:bg-[#EDF6FF] text-[#0A2558] font-semibold transition-all cursor-pointer shadow-2xs text-xs"
               title="Reset ke Tampilan Seluruh Indonesia"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+              <RotateCcw className="w-3.5 h-3.5 text-[#1765F5]" />
               <span className="hidden sm:inline">Reset Posisi</span>
             </button>
           </div>
@@ -664,7 +664,7 @@ export default function IndonesiaRealLeafletMap({
       </div>
 
       {/* Map Target Canvas Container */}
-      <div className="relative w-full h-[480px] sm:h-[530px] rounded-2xl overflow-hidden border border-[#E8E8EA] bg-slate-100 shadow-2xs">
+      <div className="relative w-full h-[480px] sm:h-[530px] rounded-2xl overflow-hidden border border-[#DBEAFE] bg-[#F8FBFF] shadow-2xs">
         <div ref={mapContainerRef} className="w-full h-full z-0" />
 
         {/* Minimal Grounded Legend in Bottom-Left with Layer Counts */}

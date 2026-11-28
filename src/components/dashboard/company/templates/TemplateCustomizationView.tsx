@@ -1,23 +1,27 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import Image from "next/image";
 import {
-  LayoutTemplate,
   Plus,
   Pencil,
   Trash2,
-  Star,
+  Check,
   CheckCircle2,
   AlertCircle,
   Copy,
   FileText,
-  Clock,
+  Calendar,
   Info,
   MailWarning,
   RefreshCw,
+  Settings,
+  Eye,
+  Save,
+  ChevronRight,
+  LayoutTemplate,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Modal } from "@/components/ui/modal";
 
 export type CompanyTemplateCategory =
@@ -46,41 +50,49 @@ const PLACEHOLDERS = [
   {
     token: "{{nama_yayasan}}",
     label: "Nama Yayasan/Mitra",
+    description: "Nama organisasi yayasan atau NGO tujuan undangan.",
     sample: "Yayasan Bina Nusantara",
   },
   {
     token: "{{nama_perusahaan}}",
     label: "Nama Perusahaan",
+    description: "Nama resmi perusahaan Anda.",
     sample: "PT Sinergi Karya",
   },
   {
     token: "{{nama_program}}",
     label: "Nama Program",
+    description: "Judul inisiatif atau peluang program CSR yang dipilih.",
     sample: "Program Beasiswa Pendidikan Digital",
   },
   {
     token: "{{bidang_csr}}",
     label: "Bidang CSR",
-    sample: "Pendidikan",
+    description: "Kategori bidang fokus program CSR (misal Pendidikan).",
+    sample: "Pendidikan & Literasi",
   },
   {
     token: "{{lokasi_program}}",
     label: "Lokasi Program",
+    description: "Kota dan provinsi sasaran program CSR.",
     sample: "Kota Bandung, Jawa Barat",
   },
   {
     token: "{{batas_respons}}",
     label: "Batas Respons",
+    description: "Tanggal tenggat waktu tanggapan yang ditentukan perusahaan.",
     sample: "3 Desember 2026",
   },
   {
     token: "{{nama_pic}}",
     label: "Nama PIC",
+    description: "Nama akun CSR Admin pengirim undangan.",
     sample: "Budi Santoso",
   },
   {
     token: "{{jabatan_pic}}",
     label: "Jabatan PIC",
+    description: "Jabatan pada profil akun pengirim undangan.",
     sample: "CSR Administrator",
   },
 ];
@@ -155,6 +167,8 @@ function formatDate(dateStr?: string) {
   }
 }
 
+export { DashboardHeaderBackdrop as TemplateHeaderBackdrop } from "../../common/DashboardPageHeader";
+
 export function TemplateCustomizationView({
   companyName,
   picName,
@@ -163,26 +177,40 @@ export function TemplateCustomizationView({
   const [templates, setTemplates] = useState<CompanyTemplateItem[]>([]);
   const [activeCategory, setActiveCategory] =
     useState<CompanyTemplateCategory>("PARTNER_INVITATION");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Modal Create / Edit state
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] =
-    useState<CompanyTemplateItem | null>(null);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [isDefault, setIsDefault] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  // Inline Right-Panel Editor states
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editIsDefault, setEditIsDefault] = useState(false);
+  const [isSavingInline, setIsSavingInline] = useState(false);
+  const [inlineError, setInlineError] = useState<string | null>(null);
+  const [showStatusInfo, setShowStatusInfo] = useState(false);
+
+  // Preview Modal & Tips Guide Modal states
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
+
+  // Create New Template Modal states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [newIsDefault, setNewIsDefault] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createFormError, setCreateFormError] = useState<string | null>(null);
 
   // Delete confirmation state
   const [templateToDelete, setTemplateToDelete] =
     useState<CompanyTemplateItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const inlineTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const createTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -232,38 +260,60 @@ export function TemplateCustomizationView({
     return templates.filter((t) => t.category === activeCategory);
   }, [templates, activeCategory]);
 
-  const openCreateModal = (preset?: { title: string; content: string }) => {
-    setEditingTemplate(null);
-    setTitle(preset?.title || "");
-    setContent(preset?.content || "");
-    setIsDefault(displayedTemplates.length === 0);
-    setFormError(null);
-    setIsEditorOpen(true);
-  };
+  // Resolve currently active template for selected category
+  const activeTemplate = useMemo(() => {
+    if (displayedTemplates.length === 0) return null;
+    const matched = displayedTemplates.find((t) => t.id === selectedTemplateId);
+    if (matched) return matched;
+    return (
+      displayedTemplates.find((t) => t.isDefault) || displayedTemplates[0]
+    );
+  }, [displayedTemplates, selectedTemplateId]);
 
-  const openEditModal = (tpl: CompanyTemplateItem) => {
-    setEditingTemplate(tpl);
-    setTitle(tpl.title);
-    setContent(tpl.content);
-    setIsDefault(tpl.isDefault);
-    setFormError(null);
-    setIsEditorOpen(true);
-  };
+  // Sync inline editor values when activeTemplate changes
+  useEffect(() => {
+    if (!activeTemplate) {
+      setEditTitle("");
+      setEditContent("");
+      setEditIsDefault(false);
+      setInlineError(null);
+      return;
+    }
+    setSelectedTemplateId(activeTemplate.id);
+    setEditTitle(activeTemplate.title);
+    setEditContent(activeTemplate.content);
+    setEditIsDefault(activeTemplate.isDefault);
+    setInlineError(null);
+  }, [activeTemplate?.id, activeTemplate?.updatedAt]);
 
-  const handleInsertPlaceholder = (token: string) => {
-    const el = textareaRef.current;
+  const isDirty = useMemo(() => {
+    if (!activeTemplate) return false;
+    return (
+      editTitle.trim() !== activeTemplate.title.trim() ||
+      editContent.trim() !== activeTemplate.content.trim() ||
+      editIsDefault !== activeTemplate.isDefault
+    );
+  }, [activeTemplate, editTitle, editContent, editIsDefault]);
+
+  const insertPlaceholderAtCursor = (
+    token: string,
+    ref: React.RefObject<HTMLTextAreaElement | null>,
+    currentValue: string,
+    setter: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    const el = ref.current;
     if (!el) {
-      setContent(
+      setter(
         (prev) => `${prev}${prev && !prev.endsWith(" ") ? " " : ""}${token}`
       );
       return;
     }
 
-    const start = el.selectionStart ?? content.length;
-    const end = el.selectionEnd ?? content.length;
+    const start = el.selectionStart ?? currentValue.length;
+    const end = el.selectionEnd ?? currentValue.length;
     const updated =
-      content.substring(0, start) + token + content.substring(end);
-    setContent(updated);
+      currentValue.substring(0, start) + token + currentValue.substring(end);
+    setter(updated);
 
     setTimeout(() => {
       el.focus();
@@ -272,40 +322,97 @@ export function TemplateCustomizationView({
     }, 0);
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSaveInline = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
+    if (!activeTemplate) return;
+    setInlineError(null);
 
-    if (title.trim().length < 3) {
-      setFormError("Judul template minimal 3 karakter.");
+    if (editTitle.trim().length < 3) {
+      setInlineError("Judul template minimal 3 karakter.");
       return;
     }
-    if (content.trim().length < 10) {
-      setFormError("Isi pesan template minimal 10 karakter.");
+    if (editContent.trim().length < 10) {
+      setInlineError("Isi pesan template minimal 10 karakter.");
       return;
     }
 
     try {
-      setIsSaving(true);
+      setIsSavingInline(true);
       const token = localStorage.getItem("accessToken");
       if (!token) throw new Error("Sesi login tidak valid.");
 
-      const url = editingTemplate
-        ? `/api/companies/current/templates/${editingTemplate.id}`
-        : "/api/companies/current/templates";
-      const method = editingTemplate ? "PATCH" : "POST";
+      const res = await fetch(
+        `/api/companies/current/templates/${activeTemplate.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: editTitle.trim(),
+            content: editContent.trim(),
+            isDefault: editIsDefault,
+          }),
+        }
+      );
 
-      const res = await fetch(url, {
-        method,
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        if (json.details && Array.isArray(json.details)) {
+          throw new Error(json.details.map((d: any) => d.message).join(", "));
+        }
+        throw new Error(json.message || "Gagal menyimpan perubahan template.");
+      }
+
+      setSuccessMessage("Perubahan template berhasil disimpan.");
+      await fetchTemplates();
+    } catch (err: any) {
+      setInlineError(
+        err.message || "Terjadi kesalahan saat menyimpan perubahan template."
+      );
+    } finally {
+      setIsSavingInline(false);
+    }
+  };
+
+  const openCreateModal = (preset?: { title: string; content: string }) => {
+    setNewTitle(preset?.title || "");
+    setNewContent(preset?.content || "");
+    setNewIsDefault(displayedTemplates.length === 0);
+    setCreateFormError(null);
+    setIsCreateModalOpen(true);
+  };
+
+  const handleCreateTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateFormError(null);
+
+    if (newTitle.trim().length < 3) {
+      setCreateFormError("Judul template minimal 3 karakter.");
+      return;
+    }
+    if (newContent.trim().length < 10) {
+      setCreateFormError("Isi pesan template minimal 10 karakter.");
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+      const token = localStorage.getItem("accessToken");
+      if (!token) throw new Error("Sesi login tidak valid.");
+
+      const res = await fetch("/api/companies/current/templates", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...(editingTemplate ? {} : { category: activeCategory }),
-          title: title.trim(),
-          content: content.trim(),
-          isDefault,
+          category: activeCategory,
+          title: newTitle.trim(),
+          content: newContent.trim(),
+          isDefault: newIsDefault,
         }),
       });
 
@@ -314,50 +421,21 @@ export function TemplateCustomizationView({
         if (json.details && Array.isArray(json.details)) {
           throw new Error(json.details.map((d: any) => d.message).join(", "));
         }
-        throw new Error(json.message || "Gagal menyimpan template.");
+        throw new Error(json.message || "Gagal membuat template baru.");
       }
 
-      setIsEditorOpen(false);
-      setSuccessMessage(
-        editingTemplate
-          ? "Template pesan berhasil diperbarui."
-          : "Template pesan baru berhasil ditambahkan."
-      );
+      setIsCreateModalOpen(false);
+      if (json.data?.id) {
+        setSelectedTemplateId(json.data.id);
+      }
+      setSuccessMessage("Template baru berhasil ditambahkan.");
       await fetchTemplates();
     } catch (err: any) {
-      setFormError(err.message || "Terjadi kesalahan saat menyimpan template.");
+      setCreateFormError(
+        err.message || "Terjadi kesalahan saat membuat template."
+      );
     } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSetDefault = async (tpl: CompanyTemplateItem) => {
-    try {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
-
-      const res = await fetch(`/api/companies/current/templates/${tpl.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isDefault: !tpl.isDefault }),
-      });
-
-      const json = await res.json();
-      if (!res.ok || !json.success) {
-        throw new Error(json.message || "Gagal memperbarui status default.");
-      }
-
-      setSuccessMessage(
-        !tpl.isDefault
-          ? `"${tpl.title}" dijadikan template utama (default).`
-          : `Status default untuk "${tpl.title}" dinonaktifkan.`
-      );
-      await fetchTemplates();
-    } catch (err: any) {
-      setErrorMessage(err.message || "Gagal memperbarui template.");
+      setIsCreating(false);
     }
   };
 
@@ -381,6 +459,9 @@ export function TemplateCustomizationView({
         throw new Error(json.message || "Gagal menghapus template.");
       }
 
+      if (selectedTemplateId === templateToDelete.id) {
+        setSelectedTemplateId(null);
+      }
       setTemplateToDelete(null);
       setSuccessMessage("Template berhasil dihapus.");
       await fetchTemplates();
@@ -396,7 +477,7 @@ export function TemplateCustomizationView({
       .replace(/\{\{nama_yayasan\}\}/gi, "Yayasan Bina Nusantara")
       .replace(/\{\{nama_mitra\}\}/gi, "Yayasan Bina Nusantara")
       .replace(/\{\{nama_program\}\}/gi, "Program Beasiswa Pendidikan Digital")
-      .replace(/\{\{bidang_csr\}\}/gi, "Pendidikan")
+      .replace(/\{\{bidang_csr\}\}/gi, "Pendidikan & Literasi")
       .replace(/\{\{lokasi_program\}\}/gi, "Kota Bandung, Jawa Barat")
       .replace(/\{\{batas_respons\}\}/gi, "3 Desember 2026")
       .replace(/\{\{nama_pic\}\}/gi, picName?.trim() || "Budi Santoso")
@@ -411,67 +492,76 @@ export function TemplateCustomizationView({
   const starterPresets = STARTER_TEMPLATES_BY_CATEGORY[activeCategory];
 
   return (
-    <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#181343]/5 border border-[#181343]/10 flex items-center justify-center text-[#181343]">
-              <LayoutTemplate aria-hidden="true" className="w-4.5 h-4.5" />
-            </div>
+    <div className="relative space-y-5">
+      {/* A. Page Header (Compact, Aligned with Landing Page Blue Identity) */}
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] flex items-center justify-center shrink-0">
+            <Image
+              src="/images/templates/template-header-icon.png"
+              alt=""
+              width={28}
+              height={28}
+              className="w-7 h-7 object-contain"
+            />
+          </div>
+          <div className="min-w-0">
             <h1
-              className="text-lg sm:text-xl font-extrabold text-[#181343] tracking-tight"
+              className="text-xl sm:text-2xl font-extrabold text-[#0A2558] tracking-tight"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Kustomisasi Template
             </h1>
+            <p className="text-xs sm:text-sm text-slate-600 mt-0.5 max-w-2xl leading-relaxed">
+              Kelola naskah pesan undangan mitra dan email pemberitahuan batas waktu (Overdue) agar komunikasi kemitraan tetap konsisten.
+            </p>
           </div>
-          <p className="text-xs sm:text-sm text-[#47464F] max-w-2xl">
-            Kelola naskah pesan undangan mitra dan email pemberitahuan batas waktu (Overdue) agar komunikasi kemitraan perusahaan tetap konsisten dan cepat disesuaikan.
-          </p>
         </div>
 
-        <Button
+        <button
           type="button"
           onClick={() => openCreateModal()}
-          leftIcon={<Plus className="w-4 h-4" />}
-          className="min-h-[44px] shrink-0 cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#1765F5]/20 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] focus-visible:ring-offset-2"
         >
-          Buat Template Baru
-        </Button>
+          <Plus aria-hidden="true" className="w-4 h-4" />
+          <span>Buat Template Baru</span>
+        </button>
       </div>
 
-      {/* Category Tabs */}
+      {/* B. Template Category Tabs */}
       <div
         role="tablist"
         aria-label="Kategori Template Perusahaan"
-        className="flex flex-wrap items-center gap-2 border-b border-[#E5E7EB] pb-3"
+        className="relative z-10 flex flex-wrap items-center gap-2.5 pt-1"
       >
         <button
           type="button"
           role="tab"
           aria-selected={activeCategory === "PARTNER_INVITATION"}
-          onClick={() => setActiveCategory("PARTNER_INVITATION")}
-          className={`inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] ${
+          onClick={() => {
+            setActiveCategory("PARTNER_INVITATION");
+            setSelectedTemplateId(null);
+          }}
+          className={`inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
             activeCategory === "PARTNER_INVITATION"
-              ? "bg-[#181343] text-white font-bold"
-              : "bg-white border border-[#E2E8F0] text-slate-700 hover:bg-slate-50"
+              ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20 font-bold"
+              : "bg-white border border-[#DBEAFE] text-[#0A2558] hover:bg-[#F4F9FF]"
           }`}
         >
           <FileText
             aria-hidden="true"
             className={`w-4 h-4 ${
               activeCategory === "PARTNER_INVITATION"
-                ? "text-emerald-400"
-                : "text-slate-600"
+                ? "text-white"
+                : "text-[#1765F5]"
             }`}
           />
           <span>Undangan Mitra</span>
           <span
-            className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+            className={`px-2 py-0.5 rounded-full text-xs font-bold ${
               activeCategory === "PARTNER_INVITATION"
                 ? "bg-white/20 text-white"
-                : "bg-slate-100 text-slate-700"
+                : "bg-[#EDF6FF] text-[#0A2558]"
             }`}
           >
             {countsByCategory.PARTNER_INVITATION}
@@ -482,27 +572,30 @@ export function TemplateCustomizationView({
           type="button"
           role="tab"
           aria-selected={activeCategory === "INVITATION_OVERDUE"}
-          onClick={() => setActiveCategory("INVITATION_OVERDUE")}
-          className={`inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] ${
+          onClick={() => {
+            setActiveCategory("INVITATION_OVERDUE");
+            setSelectedTemplateId(null);
+          }}
+          className={`inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
             activeCategory === "INVITATION_OVERDUE"
-              ? "bg-[#181343] text-white font-bold"
-              : "bg-white border border-[#E2E8F0] text-slate-700 hover:bg-slate-50"
+              ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20 font-bold"
+              : "bg-white border border-[#DBEAFE] text-[#0A2558] hover:bg-[#F4F9FF]"
           }`}
         >
           <MailWarning
             aria-hidden="true"
             className={`w-4 h-4 ${
               activeCategory === "INVITATION_OVERDUE"
-                ? "text-rose-300"
-                : "text-slate-600"
+                ? "text-white"
+                : "text-[#1765F5]"
             }`}
           />
           <span>Notifikasi Overdue</span>
           <span
-            className={`px-2 py-0.5 rounded-md text-xs font-bold ${
+            className={`px-2 py-0.5 rounded-full text-xs font-bold ${
               activeCategory === "INVITATION_OVERDUE"
                 ? "bg-white/20 text-white"
-                : "bg-slate-100 text-slate-700"
+                : "bg-[#EDF6FF] text-[#0A2558]"
             }`}
           >
             {countsByCategory.INVITATION_OVERDUE}
@@ -510,11 +603,11 @@ export function TemplateCustomizationView({
         </button>
       </div>
 
-      {/* Feedback Alerts */}
+      {/* Global Alerts */}
       {errorMessage && (
         <div
           role="alert"
-          className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+          className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div className="flex items-start gap-2.5">
             <AlertCircle
@@ -539,46 +632,46 @@ export function TemplateCustomizationView({
       {successMessage && (
         <div
           role="status"
-          className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs sm:text-sm flex items-start gap-2.5"
+          className="p-3.5 rounded-2xl bg-[#ECFDF5] border border-emerald-200 text-[#065F46] text-xs sm:text-sm flex items-center gap-2.5"
         >
           <CheckCircle2
             aria-hidden="true"
-            className="w-4 h-4 shrink-0 mt-0.5 text-emerald-700"
+            className="w-4 h-4 shrink-0 text-[#047857]"
           />
-          <span>{successMessage}</span>
+          <span className="font-medium">{successMessage}</span>
         </div>
       )}
 
-      {/* Template List / Loading / Empty State */}
+      {/* Main Content Area: Loading / Empty / Split Layout Workspace */}
       {isLoading ? (
         <div
           aria-busy="true"
-          aria-label="Memuat daftar template"
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          aria-label="Memuat workspace kustomisasi template"
+          className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5"
         >
-          {[1, 2].map((n) => (
-            <div
-              key={n}
-              className="bg-white rounded-2xl border border-[#E5E7EB] p-5 space-y-3 animate-pulse"
-            >
-              <div className="h-5 w-1/2 bg-slate-200 rounded" />
-              <div className="h-24 w-full bg-slate-100 rounded-xl" />
-              <div className="h-4 w-1/3 bg-slate-100 rounded" />
-            </div>
-          ))}
+          <div className="lg:col-span-5 bg-white rounded-3xl border border-[#E2E8F0] p-6 space-y-4 animate-pulse">
+            <div className="h-32 w-full bg-[#EDF6FF] rounded-2xl" />
+            <div className="h-5 w-2/3 mx-auto bg-slate-200 rounded" />
+            <div className="h-40 w-full bg-slate-100 rounded-2xl" />
+          </div>
+          <div className="lg:col-span-7 bg-white rounded-3xl border border-[#E2E8F0] p-6 space-y-4 animate-pulse">
+            <div className="h-12 w-full bg-[#EDF6FF] rounded-2xl" />
+            <div className="h-10 w-full bg-slate-100 rounded-xl" />
+            <div className="h-52 w-full bg-slate-100 rounded-2xl" />
+          </div>
         </div>
       ) : displayedTemplates.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-10 text-center space-y-6">
+        <div className="relative z-10 bg-white rounded-3xl border border-[#DBEAFE] p-6 sm:p-10 text-center space-y-6">
           <div className="max-w-md mx-auto space-y-2">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center mx-auto mb-3">
               <LayoutTemplate aria-hidden="true" className="w-6 h-6" />
             </div>
-            <h2 className="text-base font-bold text-[#181343]">
+            <h2 className="text-base font-bold text-[#0A2558]">
               {isOverdueCategory
                 ? "Belum Ada Template Notifikasi Overdue"
                 : "Belum Ada Template Undangan Mitra"}
             </h2>
-            <p className="text-xs sm:text-sm text-[#47464F] leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               {isOverdueCategory
                 ? "Buat template email pemberitahuan yang otomatis dikirimkan kepada mitra apabila undangan melewati batas waktu tanggapan."
                 : "Buat template pesan undangan agar saat mengundang mitra di menu Kurasi Mitra, pesan dapat langsung dipilih dalam satu klik."}
@@ -594,13 +687,13 @@ export function TemplateCustomizationView({
               {starterPresets.map((preset) => (
                 <div
                   key={preset.title}
-                  className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E2E8F0] hover:border-emerald-400 transition-colors flex flex-col justify-between gap-3"
+                  className="p-4 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE] hover:border-[#1765F5]/40 transition-colors flex flex-col justify-between gap-3"
                 >
                   <div className="space-y-1.5">
-                    <h3 className="text-xs sm:text-sm font-bold text-[#181343]">
+                    <h3 className="text-xs sm:text-sm font-bold text-[#0A2558]">
                       {preset.title}
                     </h3>
-                    <p className="text-xs text-[#47464F] line-clamp-3 whitespace-pre-line">
+                    <p className="text-xs text-slate-600 line-clamp-3 whitespace-pre-line">
                       {preset.content}
                     </p>
                   </div>
@@ -610,7 +703,7 @@ export function TemplateCustomizationView({
                     size="sm"
                     onClick={() => openCreateModal(preset)}
                     leftIcon={<Copy className="w-3.5 h-3.5" />}
-                    className="w-full min-h-[40px] cursor-pointer"
+                    className="w-full min-h-[44px] border-[#CBE7FD] text-[#0A2558] hover:bg-[#EDF6FF] cursor-pointer"
                   >
                     Gunakan Contoh Ini
                   </Button>
@@ -620,128 +713,481 @@ export function TemplateCustomizationView({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {displayedTemplates.map((tpl) => (
-            <div
-              key={tpl.id}
-              className={`bg-white rounded-2xl border p-5 flex flex-col justify-between gap-4 transition-colors ${
-                tpl.isDefault
-                  ? "border-emerald-300 ring-1 ring-emerald-500/10"
-                  : "border-[#E5E7EB] hover:border-slate-300"
-              }`}
-            >
-              <div className="space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-sm sm:text-base font-bold text-[#181343] truncate">
+        <>
+          {/* Compact Template Selector Strip (Top of Workspace) */}
+          <div className="relative z-10 space-y-2">
+            <div className="flex items-center">
+              <span className="text-xs font-bold text-[#0A2558]">
+                Pilih Template ({displayedTemplates.length})
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+              {displayedTemplates.map((tpl) => {
+                const isSelected = activeTemplate?.id === tpl.id;
+                return (
+                  <button
+                    key={tpl.id}
+                    type="button"
+                    onClick={() => setSelectedTemplateId(tpl.id)}
+                    aria-pressed={isSelected}
+                    className={`w-full text-left px-3.5 py-2.5 rounded-2xl border transition-all cursor-pointer min-h-[44px] flex items-center justify-between gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
+                      isSelected
+                        ? "bg-[#EDF6FF] border-[#1765F5] ring-1 ring-[#1765F5]/20"
+                        : "bg-white border-[#E2E8F0] hover:border-[#93C5FD] hover:bg-[#F8FBFF]"
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-xs font-bold truncate ${
+                          isSelected ? "text-[#0A2558]" : "text-slate-700"
+                        }`}
+                        title={tpl.title}
+                      >
                         {tpl.title}
-                      </h3>
-                      {tpl.isDefault && (
-                        <Badge variant="emerald" className="text-[11px] font-bold">
-                          Utama (Default)
-                        </Badge>
-                      )}
+                      </p>
+                      <p className="text-[11px] text-slate-600 mt-0.5 truncate">
+                        Diperbarui {formatDate(tpl.updatedAt)}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                      <Clock aria-hidden="true" className="w-3.5 h-3.5" />
-                      <span>Diperbarui {formatDate(tpl.updatedAt)}</span>
+
+                    {tpl.isDefault && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ECFDF5] border border-emerald-200 text-[#065F46] text-[10px] font-bold shrink-0">
+                        <Check aria-hidden="true" className="w-2.5 h-2.5" />
+                        <span>Default</span>
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* C. Main Split Workspace (42:58 => 5/12 Left Preview : 7/12 Right Editor) */}
+          {activeTemplate && (
+            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+              {/* LEFT COLUMN (~42%): Template Preview Card */}
+              <div className="lg:col-span-5 bg-white rounded-3xl border border-[#DBEAFE] shadow-xs overflow-hidden">
+                {/* Soft Sky-Blue Top Hero Zone */}
+                <div className="relative bg-gradient-to-b from-[#EDF6FF] via-[#F4F9FF] to-white px-6 pt-6 pb-5 text-center border-b border-[#EDF6FF]">
+                  {/* Default Badge top-right */}
+                  {editIsDefault && (
+                    <div className="flex justify-end mb-1">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#ECFDF5] border border-emerald-200 text-[#065F46] text-xs font-bold">
+                        <Check aria-hidden="true" className="w-3.5 h-3.5" />
+                        <span>Default</span>
+                      </span>
                     </div>
+                  )}
+
+                  {/* Centered Illustration */}
+                  <div className="mx-auto w-[156px] h-[112px] flex items-center justify-center">
+                    <Image
+                      src={
+                        isOverdueCategory
+                          ? "/images/templates/overdue-clock-notice.png"
+                          : "/images/templates/paper-plane-invite.png"
+                      }
+                      alt={
+                        isOverdueCategory
+                          ? "Ilustrasi notifikasi batas waktu undangan"
+                          : "Ilustrasi pesawat kertas undangan mitra"
+                      }
+                      width={156}
+                      height={112}
+                      className="w-full h-full object-contain"
+                      priority
+                    />
                   </div>
+
+                  <h2
+                    className="mt-3 text-base sm:text-lg font-extrabold text-[#0A2558] tracking-tight leading-snug break-words"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {editTitle.trim() || activeTemplate.title}
+                  </h2>
+
+                  <p className="mt-1.5 inline-flex items-center justify-center gap-1.5 text-xs text-slate-600">
+                    <Calendar aria-hidden="true" className="w-3.5 h-3.5 text-[#1765F5]" />
+                    <span>Diperbarui: {formatDate(activeTemplate.updatedAt)}</span>
+                  </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] text-xs text-[#334155] whitespace-pre-line leading-relaxed max-h-44 overflow-y-auto">
-                  {tpl.content}
+                {/* Partner Message Preview Body */}
+                <div className="p-5 sm:p-6 bg-white">
+                  <div className="rounded-2xl bg-[#F8FBFF] border border-[#E6F0FD] p-4 sm:p-5">
+                    <p className="text-xs sm:text-[13px] text-[#334155] whitespace-pre-line leading-relaxed max-h-[290px] overflow-y-auto pr-1">
+                      {editContent.trim() || activeTemplate.content}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => handleSetDefault(tpl)}
-                  className={`inline-flex items-center gap-1.5 min-h-[40px] px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] ${
-                    tpl.isDefault
-                      ? "bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-                      : "text-slate-700 hover:text-[#181343] hover:bg-slate-100"
-                  }`}
-                >
-                  <Star
-                    aria-hidden="true"
-                    className={`w-3.5 h-3.5 ${
-                      tpl.isDefault ? "fill-emerald-600 text-emerald-600" : ""
-                    }`}
-                  />
-                  <span>{tpl.isDefault ? "Default Aktif" : "Jadikan Default"}</span>
-                </button>
+              {/* RIGHT COLUMN (~58%): Inline Template Settings & Editor */}
+              <form
+                onSubmit={handleSaveInline}
+                className="lg:col-span-7 bg-white rounded-3xl border border-[#DBEAFE] shadow-xs overflow-hidden"
+              >
+                {/* 1. Template Info Header */}
+                <div className="px-5 sm:px-6 py-4 bg-[#F8FBFF] border-b border-[#E6F0FD] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-[#E6F1FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+                      <Pencil aria-hidden="true" className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3
+                        className="text-sm sm:text-base font-extrabold text-[#0A2558] truncate"
+                        title={editTitle || activeTemplate.title}
+                      >
+                        {editTitle.trim() || activeTemplate.title}
+                      </h3>
+                      <p className="text-xs text-slate-600 truncate">
+                        {isOverdueCategory
+                          ? "Template pemberitahuan otomatis saat undangan melewati batas waktu."
+                          : "Template pesan untuk mengundang mitra dalam program CSR."}
+                      </p>
+                    </div>
+                  </div>
 
-                <div className="flex items-center gap-1.5">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditModal(tpl)}
-                    leftIcon={<Pencil className="w-3.5 h-3.5" />}
-                    className="min-h-[40px] cursor-pointer"
-                  >
-                    Ubah
-                  </Button>
                   <button
                     type="button"
-                    onClick={() => setTemplateToDelete(tpl)}
-                    className="inline-flex items-center justify-center min-w-[40px] min-h-[40px] p-2 rounded-xl text-slate-600 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
-                    aria-label={`Hapus template ${tpl.title}`}
+                    onClick={() => setTemplateToDelete(activeTemplate)}
+                    className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] rounded-xl text-slate-600 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
+                    aria-label={`Hapus template ${activeTemplate.title}`}
                     title="Hapus Template"
                   >
                     <Trash2 aria-hidden="true" className="w-4 h-4" />
                   </button>
                 </div>
-              </div>
+
+                <div className="p-5 sm:p-6 space-y-5">
+                  {inlineError && (
+                    <div
+                      role="alert"
+                      className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2"
+                    >
+                      <AlertCircle
+                        aria-hidden="true"
+                        className="w-4 h-4 shrink-0 mt-0.5 text-rose-700"
+                      />
+                      <span>{inlineError}</span>
+                    </div>
+                  )}
+
+                  {/* 2. Pengaturan Template */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#0A2558]">
+                      <Settings
+                        aria-hidden="true"
+                        className="w-4 h-4 text-[#1765F5]"
+                      />
+                      <span>Pengaturan Template</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
+                      <div className="sm:col-span-8 space-y-1.5">
+                        <label
+                          htmlFor="inline-template-title"
+                          className="text-xs font-semibold text-[#0A2558] block"
+                        >
+                          Nama Template
+                        </label>
+                        <input
+                          id="inline-template-title"
+                          type="text"
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          maxLength={120}
+                          required
+                          placeholder="Masukkan nama template..."
+                          className="w-full min-h-[44px] text-xs sm:text-sm bg-white border border-[#CBD5E1] hover:border-[#93C5FD] rounded-xl px-3.5 py-2 text-[#0A2558] placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] transition-colors"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-4 space-y-1.5">
+                        <span className="text-xs font-semibold text-[#0A2558] block">
+                          Status
+                        </span>
+                        <div className="flex items-center gap-2 min-h-[44px]">
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={editIsDefault}
+                            aria-label="Jadikan template utama default"
+                            onClick={() => setEditIsDefault((prev) => !prev)}
+                            className={`inline-flex items-center gap-2 min-h-[40px] pl-1.5 pr-3 py-1 rounded-full border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
+                              editIsDefault
+                                ? "bg-[#ECFDF5] border-emerald-200 text-[#065F46]"
+                                : "bg-slate-100 border-slate-200 text-slate-700"
+                            }`}
+                          >
+                            <span
+                              className={`w-7 h-5 rounded-full flex items-center px-0.5 transition-colors ${
+                                editIsDefault ? "bg-[#047857]" : "bg-slate-400"
+                              }`}
+                            >
+                              <span
+                                className={`w-4 h-4 rounded-full bg-white flex items-center justify-center transition-transform ${
+                                  editIsDefault
+                                    ? "translate-x-2"
+                                    : "translate-x-0"
+                                }`}
+                              >
+                                {editIsDefault && (
+                                  <Check
+                                    aria-hidden="true"
+                                    className="w-2.5 h-2.5 text-[#047857]"
+                                  />
+                                )}
+                              </span>
+                            </span>
+                            <span className="text-xs font-bold">
+                              {editIsDefault ? "Default" : "Standar"}
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowStatusInfo((prev) => !prev)}
+                            aria-expanded={showStatusInfo}
+                            aria-label="Informasi status default template"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-full text-slate-600 hover:text-[#1765F5] hover:bg-[#EDF6FF] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5]"
+                          >
+                            <Info aria-hidden="true" className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {showStatusInfo && (
+                      <p className="text-xs text-slate-600 bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl px-3.5 py-2.5">
+                        {isOverdueCategory
+                          ? "Template berstatus Default otomatis dipakai sistem saat mengirim email pemberitahuan undangan Overdue ke mitra."
+                          : "Template berstatus Default otomatis terisi saat Anda membuka form Undang Mitra di Kurasi Mitra."}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 3. Konten Template Editor */}
+                  <div className="space-y-2.5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <label
+                        htmlFor="inline-template-content"
+                        className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-[#0A2558]"
+                      >
+                        <FileText
+                          aria-hidden="true"
+                          className="w-4 h-4 text-[#1765F5]"
+                        />
+                        <span>Konten Template</span>
+                      </label>
+                      <span className="text-xs text-slate-600">
+                        {editContent.length}/2000 karakter
+                      </span>
+                    </div>
+
+                    {/* Quick-Insert Variable Chips */}
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="text-xs font-medium text-slate-600 mr-1">
+                        Sisipkan variabel:
+                      </span>
+                      {PLACEHOLDERS.map((ph) => (
+                        <button
+                          key={ph.token}
+                          type="button"
+                          onClick={() =>
+                            insertPlaceholderAtCursor(
+                              ph.token,
+                              inlineTextareaRef,
+                              editContent,
+                              setEditContent
+                            )
+                          }
+                          className="inline-flex items-center gap-1 min-h-[32px] px-2.5 py-1 rounded-lg bg-[#EDF6FF] hover:bg-[#1765F5] hover:text-white text-[#0A2558] border border-[#CBE7FD] text-[11px] font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5]"
+                        >
+                          <Plus aria-hidden="true" className="w-3 h-3" />
+                          <span>{ph.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <textarea
+                      ref={inlineTextareaRef}
+                      id="inline-template-content"
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      rows={9}
+                      maxLength={2000}
+                      required
+                      placeholder="Tuliskan isi pesan template..."
+                      className="w-full text-xs sm:text-[13px] bg-white border border-[#CBD5E1] hover:border-[#93C5FD] rounded-2xl p-4 text-[#1E293B] placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] resize-y transition-colors leading-relaxed"
+                    />
+                  </div>
+
+                  {/* 4. Action Buttons */}
+                  <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    <span className="text-xs text-slate-600">
+                      {isDirty ? (
+                        <span className="font-semibold text-amber-800">
+                          Ada perubahan yang belum disimpan
+                        </span>
+                      ) : (
+                        <span>Seluruh perubahan tersimpan</span>
+                      )}
+                    </span>
+
+                    <div className="flex items-center gap-2.5 ml-auto">
+                      <button
+                        type="button"
+                        onClick={() => setIsPreviewModalOpen(true)}
+                        className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 py-2 rounded-xl border border-[#CBD5E1] bg-white hover:bg-[#F8FBFF] hover:border-[#93C5FD] text-xs sm:text-sm font-semibold text-[#0A2558] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5]"
+                      >
+                        <Eye aria-hidden="true" className="w-4 h-4 text-[#1765F5]" />
+                        <span>Preview</span>
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={isSavingInline || !isDirty}
+                        className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2 rounded-xl bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#1765F5]/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] focus-visible:ring-offset-2"
+                      >
+                        {isSavingInline ? (
+                          <RefreshCw
+                            aria-hidden="true"
+                            className="w-4 h-4 animate-spin"
+                          />
+                        ) : (
+                          <Save aria-hidden="true" className="w-4 h-4" />
+                        )}
+                        <span>
+                          {isSavingInline ? "Menyimpan..." : "Simpan Perubahan"}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
-      {/* Info Box Cara Kerja */}
-      <div className="flex items-start gap-2.5 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-[#334155] leading-relaxed">
-        <Info aria-hidden="true" className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-        <p>
-          <strong className="text-[#181343]">Tips Penggunaan:</strong>{" "}
-          {isOverdueCategory
-            ? "Template Notifikasi Overdue yang berstatus Default otomatis dipakai sistem untuk mengirim email pemberitahuan kepada mitra ketika undangan melewati batas waktu tanggapan."
-            : "Template Undangan Mitra yang berstatus Default otomatis terisi di form Undang Mitra pada menu Kurasi Mitra, dan tetap dapat disunting sebelum dikirim."}{" "}
-          Anda dapat menyisipkan variabel pintar seperti{" "}
-          <code className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[#181343] font-semibold">
-            {"{{nama_yayasan}}"}
-          </code>
-          ,{" "}
-          <code className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[#181343] font-semibold">
-            {"{{nama_program}}"}
-          </code>
-          ,{" "}
-          <code className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-[#181343] font-semibold">
-            {"{{batas_respons}}"}
-          </code>
-          , dan lainnya agar data terisi otomatis.
-        </p>
+      {/* D. Compact Bottom Tips Banner */}
+      <div className="bg-[#F4F9FF] border border-[#DBEFFF] rounded-2xl px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-start sm:items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-full bg-white border border-[#DBEFFF] flex items-center justify-center shrink-0">
+            <Image
+              src="/images/templates/tips-lightbulb-icon.png"
+              alt=""
+              width={22}
+              height={22}
+              className="w-5.5 h-5.5 object-contain"
+            />
+          </div>
+          <div className="min-w-0">
+            <span className="text-xs font-bold text-[#0A2558] block">
+              Tips Penggunaan
+            </span>
+            <p className="text-xs text-[#334155] leading-relaxed">
+              {isOverdueCategory
+                ? "Template berstatus Default otomatis digunakan saat sistem mengirim email pemberitahuan Overdue ke mitra."
+                : "Template berstatus Default otomatis terisi di form Undang Mitra, namun tetap bisa Anda sunting atau buat variasinya."}
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsTipsModalOpen(true)}
+          className="inline-flex items-center gap-1 min-h-[40px] px-2 text-xs font-bold text-[#1765F5] hover:text-[#1748D5] transition-colors cursor-pointer shrink-0 self-end sm:self-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] rounded-lg"
+        >
+          <span>Pelajari lebih lanjut</span>
+          <ChevronRight aria-hidden="true" className="w-4 h-4" />
+        </button>
       </div>
 
-      {/* Modal Tambah / Edit Template */}
+      {/* Modal Preview Hasil Variabel */}
       <Modal
-        isOpen={isEditorOpen}
-        onClose={() => !isSaving && setIsEditorOpen(false)}
+        isOpen={isPreviewModalOpen}
+        onClose={() => setIsPreviewModalOpen(false)}
+        title="Pratinjau Pesan Terisi"
+        description="Simulasi tampilan pesan yang akan diterima oleh mitra setelah variabel otomatis diisi oleh sistem."
+        maxWidth="lg"
+        footer={
+          <div className="flex justify-end w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsPreviewModalOpen(false)}
+              className="min-h-[44px] cursor-pointer"
+            >
+              Tutup Pratinjau
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <div className="p-4 sm:p-5 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE] text-xs sm:text-sm text-[#1E293B] whitespace-pre-line leading-relaxed max-h-[420px] overflow-y-auto">
+            {renderPreviewText(editContent || activeTemplate?.content || "")}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal Panduan Variabel ("Pelajari lebih lanjut") */}
+      <Modal
+        isOpen={isTipsModalOpen}
+        onClose={() => setIsTipsModalOpen(false)}
+        title="Panduan Variabel Otomatis Template"
+        description="Daftar variabel pintar yang dapat disisipkan ke dalam pesan Undangan Mitra maupun Notifikasi Overdue."
+        maxWidth="lg"
+        footer={
+          <div className="flex justify-end w-full">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsTipsModalOpen(false)}
+              className="min-h-[44px] cursor-pointer"
+            >
+              Tutup
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <div className="divide-y divide-slate-100 border border-[#E2E8F0] rounded-2xl overflow-hidden bg-white">
+            {PLACEHOLDERS.map((ph) => (
+              <div
+                key={ph.token}
+                className="p-3 sm:px-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+              >
+                <div className="space-y-0.5">
+                  <code className="px-2 py-0.5 rounded-md bg-[#EDF6FF] border border-[#CBE7FD] text-[#0A2558] font-bold">
+                    {ph.token}
+                  </code>
+                  <p className="text-slate-600 mt-1">{ph.description}</p>
+                </div>
+                <span className="text-[11px] font-medium text-slate-600 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 shrink-0">
+                  Contoh: {ph.sample}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Modal Buat Template Baru */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => !isCreating && setIsCreateModalOpen(false)}
         title={
-          editingTemplate
-            ? isOverdueCategory
-              ? "Ubah Template Notifikasi Overdue"
-              : "Ubah Template Undangan"
-            : isOverdueCategory
-              ? "Buat Template Notifikasi Overdue Baru"
-              : "Buat Template Undangan Baru"
+          isOverdueCategory
+            ? "Buat Template Notifikasi Overdue Baru"
+            : "Buat Template Undangan Baru"
         }
         description={
           isOverdueCategory
-            ? "Sesuaikan isi email pemberitahuan otomatis saat undangan melewati batas waktu tanggapan."
-            : "Siapkan pesan undangan standar untuk mempercepat proses kolaborasi di menu Kurasi Mitra."
+            ? "Buat variasi pesan email pemberitahuan ketika undangan kolaborasi melewati batas waktu."
+            : "Buat variasi pesan undangan baru untuk dipilih pada modal Undang Mitra."
         }
         maxWidth="lg"
         footer={
@@ -749,25 +1195,29 @@ export function TemplateCustomizationView({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsEditorOpen(false)}
-              disabled={isSaving}
+              onClick={() => setIsCreateModalOpen(false)}
+              disabled={isCreating}
               className="min-h-[44px] cursor-pointer"
             >
               Batal
             </Button>
-            <Button
+            <button
               type="submit"
-              form="template-editor-form"
-              isLoading={isSaving}
-              className="min-h-[44px] cursor-pointer"
+              form="create-template-form"
+              disabled={isCreating}
+              className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2 rounded-xl bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 disabled:opacity-50 text-white text-xs sm:text-sm font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5]"
             >
-              {editingTemplate ? "Simpan Perubahan" : "Simpan Template"}
-            </Button>
+              {isCreating ? "Menyimpan..." : "Simpan Template"}
+            </button>
           </div>
         }
       >
-        <form id="template-editor-form" onSubmit={handleSave} className="space-y-4">
-          {formError && (
+        <form
+          id="create-template-form"
+          onSubmit={handleCreateTemplate}
+          className="space-y-4"
+        >
+          {createFormError && (
             <div
               role="alert"
               className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2"
@@ -776,58 +1226,60 @@ export function TemplateCustomizationView({
                 aria-hidden="true"
                 className="w-4 h-4 shrink-0 mt-0.5 text-rose-700"
               />
-              <span>{formError}</span>
+              <span>{createFormError}</span>
             </div>
           )}
 
-          {/* Judul Template */}
           <div className="space-y-1.5">
             <label
-              htmlFor="template-title-input"
-              className="text-xs font-semibold text-[#181343] block"
+              htmlFor="new-template-title"
+              className="text-xs font-semibold text-[#0A2558] block"
             >
               Judul Template <span className="text-rose-600">*</span>
             </label>
             <input
-              id="template-title-input"
+              id="new-template-title"
               type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
               placeholder={
                 isOverdueCategory
-                  ? "Contoh: Pemberitahuan Undangan Melewati Batas Waktu"
-                  : "Contoh: Undangan Kolaborasi Program Pendidikan"
+                  ? "Contoh: Pemberitahuan Pembatalan Undangan Formal"
+                  : "Contoh: Undangan Program Lingkungan Prioritas"
               }
               maxLength={120}
               required
-              className="w-full min-h-[44px] text-xs sm:text-sm bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-[#181343] placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] transition-colors"
+              className="w-full min-h-[44px] text-xs sm:text-sm bg-white border border-[#CBD5E1] rounded-xl px-3.5 py-2.5 text-[#0A2558] placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] transition-colors"
             />
           </div>
 
-          {/* Quick-insert Placeholder Chips */}
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <label
-                htmlFor="template-content-input"
-                className="text-xs font-semibold text-[#181343]"
+                htmlFor="new-template-content"
+                className="text-xs font-semibold text-[#0A2558]"
               >
                 Isi Pesan Template <span className="text-rose-600">*</span>
               </label>
               <span className="text-xs text-slate-600">
-                {content.length}/2000 karakter
+                {newContent.length}/2000 karakter
               </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-1.5 pb-1">
-              <span className="text-xs font-medium text-slate-600 mr-1">
-                Sisipkan variabel:
-              </span>
+            <div className="flex flex-wrap items-center gap-1.5">
               {PLACEHOLDERS.map((ph) => (
                 <button
                   key={ph.token}
                   type="button"
-                  onClick={() => handleInsertPlaceholder(ph.token)}
-                  className="inline-flex items-center gap-1 min-h-[34px] px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-[#181343] hover:text-white text-[#181343] text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343]"
+                  onClick={() =>
+                    insertPlaceholderAtCursor(
+                      ph.token,
+                      createTextareaRef,
+                      newContent,
+                      setNewContent
+                    )
+                  }
+                  className="inline-flex items-center gap-1 min-h-[32px] px-2.5 py-1 rounded-lg bg-[#EDF6FF] hover:bg-[#1765F5] hover:text-white text-[#0A2558] border border-[#CBE7FD] text-[11px] font-semibold transition-colors cursor-pointer"
                 >
                   <Plus aria-hidden="true" className="w-3 h-3" />
                   <span>{ph.label}</span>
@@ -836,50 +1288,33 @@ export function TemplateCustomizationView({
             </div>
 
             <textarea
-              ref={textareaRef}
-              id="template-content-input"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder={
-                isOverdueCategory
-                  ? "Tuliskan isi email pemberitahuan pembatalan undangan karena melewati batas waktu..."
-                  : "Tuliskan isi pesan undangan kepada mitra..."
-              }
+              ref={createTextareaRef}
+              id="new-template-content"
+              value={newContent}
+              onChange={(e) => setNewContent(e.target.value)}
+              placeholder="Tuliskan isi pesan template..."
               rows={7}
               maxLength={2000}
               required
-              className="w-full text-xs sm:text-sm bg-white border border-[#CBD5E1] rounded-xl p-3.5 text-[#181343] placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#181343] resize-y transition-colors leading-relaxed"
+              className="w-full text-xs sm:text-sm bg-white border border-[#CBD5E1] rounded-xl p-3.5 text-[#1E293B] placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] resize-y transition-colors leading-relaxed"
             />
           </div>
 
-          {/* Live Preview */}
-          {content.trim() && (
-            <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] space-y-1.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-600 block">
-                Pratinjau Hasil Pesan
-              </span>
-              <p className="text-xs text-[#334155] whitespace-pre-line leading-relaxed">
-                {renderPreviewText(content)}
-              </p>
-            </div>
-          )}
-
-          {/* Checkbox Default */}
-          <label className="flex items-start gap-2.5 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 cursor-pointer">
+          <label className="flex items-start gap-2.5 p-3 rounded-xl bg-[#ECFDF5] border border-emerald-200 cursor-pointer">
             <input
               type="checkbox"
-              checked={isDefault}
-              onChange={(e) => setIsDefault(e.target.checked)}
-              className="mt-0.5 rounded border-emerald-500 text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-700 cursor-pointer"
+              checked={newIsDefault}
+              onChange={(e) => setNewIsDefault(e.target.checked)}
+              className="mt-0.5 rounded border-emerald-500 text-[#047857] focus-visible:ring-2 focus-visible:ring-[#047857] cursor-pointer"
             />
             <div className="text-xs">
-              <span className="font-semibold text-[#181343] block">
+              <span className="font-bold text-[#0A2558] block">
                 Jadikan sebagai template utama (Default)
               </span>
               <span className="text-[#334155]">
                 {isOverdueCategory
-                  ? "Otomatis digunakan oleh sistem saat mengirim email pemberitahuan undangan Overdue ke mitra."
-                  : "Otomatis dipilih saat Anda membuka form Undang Mitra di Kurasi Mitra (tetap bisa diganti atau dihapus kapan saja)."}
+                  ? "Otomatis dipakai sistem untuk email pemberitahuan Overdue."
+                  : "Otomatis terisi saat membuka form Undang Mitra."}
               </span>
             </div>
           </label>
@@ -917,7 +1352,7 @@ export function TemplateCustomizationView({
       >
         <p className="text-xs sm:text-sm text-[#334155] leading-relaxed">
           Apakah Anda yakin ingin menghapus template{" "}
-          <strong className="text-[#181343]">
+          <strong className="text-[#0A2558]">
             &quot;{templateToDelete?.title}&quot;
           </strong>
           ?

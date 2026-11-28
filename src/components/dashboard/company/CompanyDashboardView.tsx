@@ -64,6 +64,7 @@ import { CreateOpportunityPageView, type OpportunityDraftData } from "./opportun
 import { EditOpportunityPageView } from "./opportunities/EditOpportunityPageView";
 import { InvitePartnerModal } from "./InvitePartnerModal";
 import { OpportunityDetailModal } from "./OpportunityDetailModal";
+import { DashboardHeaderBackdrop } from "../common/DashboardPageHeader";
 import { TemplateCustomizationView } from "./templates/TemplateCustomizationView";
 import {
   CompanyProfile,
@@ -1351,19 +1352,26 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
         />
 
         {/* Content Body Container */}
-        <main
-          style={
-            activeMenu === "chat" || activeMenu === "conversations"
-              ? { height: "calc(100vh - 72px)", maxHeight: "calc(100vh - 72px)" }
-              : undefined
-          }
-          className={`w-full mx-auto ${activeMenu === "chat"
-            ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
-            : activeMenu === "conversations"
-              ? "p-4 sm:p-5 lg:p-6 max-w-7xl flex-1 flex flex-col min-h-0 overflow-hidden"
-              : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"
-            }`}
-        >
+        <div className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-x-clip">
+          {(activeMenu === "overview" ||
+            activeMenu === "opportunities" ||
+            activeMenu === "chat" ||
+            (!isManagement && activeMenu === "templates")) && (
+            <DashboardHeaderBackdrop />
+          )}
+          <main
+            style={
+              activeMenu === "chat" || activeMenu === "conversations"
+                ? { height: "calc(100vh - 72px)", maxHeight: "calc(100vh - 72px)" }
+                : undefined
+            }
+            className={`relative z-10 w-full mx-auto ${activeMenu === "chat"
+              ? "p-4 sm:p-5 lg:p-6 max-w-[1150px] flex-1 flex flex-col min-h-0 overflow-hidden"
+              : activeMenu === "conversations"
+                ? "p-4 sm:p-5 lg:p-6 max-w-7xl flex-1 flex flex-col min-h-0 overflow-hidden"
+                : "flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl space-y-8"
+              }`}
+          >
           {/* ============================================================ */}
           {/* VIEW: OVERVIEW (RINGKASAN EKSEKUTIF & BI ANALYTICS) */}
           {/* ============================================================ */}
@@ -2803,6 +2811,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
             </div>
           )}
         </main>
+        </div>
       </div>
 
       {/* --- Modals --- */}

@@ -74,7 +74,7 @@ const FORM_STEPS = [
 ];
 
 const INPUT_BASE_CLASS =
-  "w-full h-11 px-3.5 bg-[#F8FAFC] border border-[#E2E8F0] hover:border-[#CBD5E1] rounded-xl text-[14px] text-[#181343] placeholder:text-[#94A3B8] focus-visible:outline-none focus-visible:bg-white focus-visible:border-[#181343] focus-visible:ring-2 focus-visible:ring-[#181343]/15 transition-all font-medium";
+  "w-full h-11 px-3.5 bg-[#F8FBFF] border border-[#DBEAFE] hover:border-[#93C5FD] rounded-xl text-[14px] text-[#0A2558] placeholder:text-slate-400 focus-visible:outline-none focus-visible:bg-white focus-visible:border-[#1765F5] focus-visible:ring-2 focus-visible:ring-[#1765F5]/15 transition-all font-medium";
 
 // Searchable Dropdown for Province and City
 function SearchableSelect({
@@ -135,7 +135,7 @@ function SearchableSelect({
 
   return (
     <div className="flex flex-col relative" ref={dropdownRef}>
-      <label className="text-[13px] font-semibold text-[#181343] mb-1.5 block">
+      <label className="text-[13px] font-semibold text-[#0A2558] mb-1.5 block">
         {renderLabel()}
       </label>
 
@@ -149,38 +149,38 @@ function SearchableSelect({
           disabled
             ? "bg-slate-100 border-[#E2E8F0] text-slate-400 cursor-not-allowed"
             : isOpen
-            ? "bg-white border-[#181343] ring-2 ring-[#181343]/15 text-[#181343] shadow-2xs"
-            : "bg-[#F8FAFC] border-[#E2E8F0] hover:border-[#CBD5E1] text-[#181343] cursor-pointer"
+            ? "bg-white border-[#1765F5] ring-2 ring-[#1765F5]/15 text-[#0A2558] shadow-2xs"
+            : "bg-[#F8FBFF] border-[#DBEAFE] hover:border-[#93C5FD] text-[#0A2558] cursor-pointer"
         }`}
       >
-        <span className={value ? "text-[#181343]" : "text-[#94A3B8] font-normal"}>
+        <span className={value ? "text-[#0A2558]" : "text-slate-400 font-normal"}>
           {value || placeholder}
         </span>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-4 h-4 text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
-      {helperText && <span className="text-[11px] text-[#64748B] mt-1">{helperText}</span>}
+      {helperText && <span className="text-[11px] text-slate-600 mt-1">{helperText}</span>}
 
       {/* Popover list */}
       {isOpen && !disabled && (
-        <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-[#E2E8F0] rounded-xl shadow-xl z-30 overflow-hidden animate-in fade-in duration-150">
-          <div className="p-2 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+        <div className="absolute top-[100%] left-0 right-0 mt-1.5 bg-white border border-[#DBEAFE] rounded-2xl shadow-xl z-30 overflow-hidden animate-in fade-in duration-150">
+          <div className="p-2 border-b border-[#EDF6FF] bg-[#F8FBFF]">
             <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 autoFocus
                 placeholder="Cari wilayah..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#E2E8F0] rounded-lg outline-none focus:border-[#181343]"
+                className="w-full pl-8 pr-3 py-1.5 text-xs bg-white border border-[#DBEAFE] rounded-lg outline-none focus:border-[#1765F5] text-[#0A2558]"
               />
             </div>
           </div>
 
-          <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 text-xs">
+          <div className="max-h-56 overflow-y-auto divide-y divide-[#EDF6FF] text-xs">
             {filtered.length === 0 ? (
-              <div className="p-4 text-center text-slate-400 text-xs italic">
+              <div className="p-4 text-center text-slate-500 text-xs italic">
                 Wilayah tidak ditemukan
               </div>
             ) : (
@@ -197,8 +197,8 @@ function SearchableSelect({
                     }}
                     className={`w-full text-left px-3.5 py-2.5 transition flex items-center justify-between cursor-pointer ${
                       isSelected
-                        ? "bg-[#181343] text-white font-semibold"
-                        : "hover:bg-slate-50 text-slate-700"
+                        ? "bg-gradient-to-r from-[#1D6CE0] to-[#1765F5] text-white font-semibold"
+                        : "hover:bg-[#EDF6FF] text-[#0A2558]"
                     }`}
                   >
                     <span>{item}</span>
@@ -927,29 +927,33 @@ export function OpportunityFormPageView({
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 animate-in fade-in duration-200">
       {/* 1. Header Bar */}
-      <div className="space-y-1 pb-3 border-b border-slate-200/80 w-full">
+      <div className="space-y-1.5 pb-3 border-b border-[#DBEAFE] w-full">
         <button
           type="button"
           onClick={handleCancel}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#64748B] hover:text-[#181343] transition mb-1 cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#1765F5] transition mb-1 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Daftar Peluang CSR</span>
         </button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <h1
-            className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+            className="text-2xl sm:text-3xl font-extrabold text-[#0A2558] tracking-tight"
             style={{ fontFamily: "var(--font-display)" }}
           >
             {isEdit ? "Edit Peluang CSR" : "Buat Peluang CSR Baru"}
           </h1>
           {isEdit && opportunity && (
-            <Badge variant={STATUS_CONFIG[opportunity.status]?.variant || "slate"} size="sm" hasDot>
+            <Badge
+              variant={opportunity.status === "OPEN" ? "blue" : STATUS_CONFIG[opportunity.status]?.variant || "slate"}
+              size="sm"
+              hasDot
+            >
               {STATUS_CONFIG[opportunity.status]?.label || opportunity.status}
             </Badge>
           )}
         </div>
-        <p className="text-xs sm:text-sm text-[#64748B]">
+        <p className="text-xs sm:text-sm text-slate-600">
           {isEdit
             ? "Perbarui rincian inisiatif kolaborasi CSR melalui tahapan formulir di bawah ini."
             : "Rencanakan dan publikasikan peluang kolaborasi CSR melalui 5 tahapan yang terstruktur."}
@@ -957,7 +961,7 @@ export function OpportunityFormPageView({
       </div>
 
       {/* 2. Top Stepper Card */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-3 sm:p-4 shadow-2xs">
+      <div className="bg-white rounded-3xl border border-[#DBEAFE] p-3 sm:p-4 shadow-xs">
         {/* Desktop 5-step segments */}
         <div className="hidden sm:grid grid-cols-5 gap-2">
           {FORM_STEPS.map((step) => {
@@ -969,21 +973,21 @@ export function OpportunityFormPageView({
                 key={step.id}
                 type="button"
                 onClick={() => goToStep(step.id)}
-                className={`flex items-center gap-2.5 p-2 rounded-xl text-left transition-all cursor-pointer ${
+                className={`flex items-center gap-2.5 p-2.5 rounded-2xl text-left transition-all cursor-pointer ${
                   isCurrent
-                    ? "bg-[#181343]/5 border border-[#181343]/20"
+                    ? "bg-[#EDF6FF] border border-[#1765F5]/40"
                     : isCompleted
-                    ? "hover:bg-slate-50 border border-transparent"
-                    : "opacity-60 hover:opacity-100 border border-transparent"
+                    ? "hover:bg-[#F4F9FF] border border-transparent"
+                    : "opacity-65 hover:opacity-100 border border-transparent"
                 }`}
               >
                 <div
-                  className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
+                  className={`w-7 h-7 rounded-xl text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
                     isCurrent
-                      ? "bg-[#181343] text-white"
+                      ? "bg-gradient-to-br from-[#1D6CE0] to-[#1748D5] text-white shadow-2xs"
                       : isCompleted
-                      ? "bg-emerald-600 text-white"
-                      : "bg-slate-100 text-slate-500"
+                      ? "bg-[#1765F5] text-white"
+                      : "bg-[#F4F9FF] text-[#0A2558] border border-[#DBEAFE]"
                   }`}
                 >
                   {isCompleted ? <Check className="w-3.5 h-3.5" /> : step.id}
@@ -991,12 +995,12 @@ export function OpportunityFormPageView({
                 <div className="min-w-0">
                   <span
                     className={`text-xs block truncate ${
-                      isCurrent ? "font-bold text-[#181343]" : "font-medium text-slate-700"
+                      isCurrent ? "font-bold text-[#0A2558]" : "font-medium text-slate-700"
                     }`}
                   >
                     {step.label}
                   </span>
-                  <span className="text-[11px] text-[#64748B] block truncate">
+                  <span className="text-[11px] text-slate-600 block truncate">
                     {step.shortDesc}
                   </span>
                 </div>
@@ -1008,16 +1012,16 @@ export function OpportunityFormPageView({
         {/* Mobile Stepper bar */}
         <div className="sm:hidden space-y-2 px-1 py-0.5">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-[#181343]">
+            <span className="font-bold text-[#0A2558]">
               Langkah {currentStep} dari 5: {FORM_STEPS[currentStep - 1].label}
             </span>
-            <span className="text-slate-500 font-medium">
+            <span className="text-[#1765F5] font-bold">
               {Math.round((currentStep / 5) * 100)}%
             </span>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-[#EDF6FF] overflow-hidden">
             <div
-              className="h-full bg-[#181343] rounded-full transition-all duration-300"
+              className="h-full bg-gradient-to-r from-[#1D6CE0] to-[#1765F5] rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / 5) * 100}%` }}
             />
           </div>
@@ -1026,29 +1030,29 @@ export function OpportunityFormPageView({
 
       {/* Alert Error / Success */}
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs sm:text-sm text-rose-700 flex items-start gap-2.5 animate-in fade-in">
-          <AlertCircle className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs sm:text-sm text-rose-800 flex items-start gap-2.5 animate-in fade-in">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
           <span className="font-medium">{errorMessage}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-800 flex items-start gap-2.5 animate-in fade-in">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          <span className="font-medium">{successMessage}</span>
+        <div className="p-4 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-xs sm:text-sm text-[#0A2558] flex items-start gap-2.5 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 text-[#1765F5] shrink-0 mt-0.5" />
+          <span className="font-semibold">{successMessage}</span>
         </div>
       )}
 
       {/* Banner Informasi Draf Otomatis AI Advisor */}
       {!isEdit && initialDraft && (
-        <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
-          <div className="w-8 h-8 rounded-lg bg-[#181343] text-white flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 rounded-2xl bg-[#F4F9FF] border border-[#CBE7FD] text-xs text-slate-800 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1D6CE0] to-[#1765F5] text-white flex items-center justify-center shrink-0 mt-0.5">
             <FileText className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-xs sm:text-sm text-[#181343] flex items-center gap-1.5 flex-wrap">
+            <h4 className="font-bold text-xs sm:text-sm text-[#0A2558] flex items-center gap-1.5 flex-wrap">
               <span>Draf Inisiatif dari Analisis Prioritas Wilayah</span>
-              <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[10px] font-bold">
+              <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#DBEAFE] text-[#1765F5] text-[10px] font-bold">
                 {targetProvince || initialDraft.targetProvince || "Wilayah Terpilih"}
               </span>
             </h4>
@@ -1075,22 +1079,22 @@ export function OpportunityFormPageView({
       ) : null}
 
       {/* 3. Main Step Form Card */}
-      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 shadow-2xs space-y-6">
+      <div className="bg-white rounded-3xl border border-[#DBEAFE] p-6 sm:p-8 shadow-xs space-y-6">
         {/* ============================================================ */}
         {/* LANGKAH 1: INFORMASI DASAR */}
         {/* ============================================================ */}
         {currentStep === 1 && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+            <div className="pb-4 border-b border-[#EDF6FF]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center font-bold text-xs">
                   1
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#181343]">
+                  <h3 className="text-base font-bold text-[#0A2558]">
                     Informasi Dasar Inisiatif CSR
                   </h3>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-slate-600">
                     Tentukan judul inisiatif, bidang fokus, alokasi anggaran, dan uraian ruang lingkup program.
                   </p>
                 </div>
@@ -1100,7 +1104,7 @@ export function OpportunityFormPageView({
             <div className="space-y-4">
               {/* Nama / Judul */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-semibold text-[#181343] block">
+                <label className="text-[13px] font-semibold text-[#0A2558] block">
                   Nama / Judul Peluang CSR <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1116,7 +1120,7 @@ export function OpportunityFormPageView({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 {/* Bidang Fokus */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[13px] font-semibold text-[#181343] block">
+                  <label className="text-[13px] font-semibold text-[#0A2558] block">
                     Bidang Fokus CSR <span className="text-rose-500">*</span>
                   </label>
                   <select
@@ -1134,11 +1138,11 @@ export function OpportunityFormPageView({
 
                 {/* Estimasi Alokasi Anggaran */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[13px] font-semibold text-[#181343] block">
+                  <label className="text-[13px] font-semibold text-[#0A2558] block">
                     Estimasi Alokasi Anggaran (Opsional)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
                       Rp
                     </span>
                     <input
@@ -1158,12 +1162,12 @@ export function OpportunityFormPageView({
               {/* Deskripsi & Ruang Lingkup Textarea */}
               <div className="flex flex-col gap-1.5 pt-1">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="field-description" className="text-[13px] font-semibold text-[#181343] block">
+                  <label htmlFor="field-description" className="text-[13px] font-semibold text-[#0A2558] block">
                     Deskripsi &amp; Ruang Lingkup Inisiatif <span className="text-rose-500">*</span>
                   </label>
                   {isDescriptionHighlighted && (
-                    <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-300 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-in fade-in">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="text-xs font-semibold text-[#1765F5] bg-[#EDF6FF] border border-[#CBE7FD] px-2.5 py-0.5 rounded-full flex items-center gap-1.5 animate-in fade-in">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#1765F5]" />
                       Rekomendasi AI Disisipkan
                     </span>
                   )}
@@ -1174,13 +1178,13 @@ export function OpportunityFormPageView({
                   placeholder="Jelaskan latar belakang program, target masalah sosial yang ingin diselesaikan, sasaran penerima manfaat, ruang lingkup kegiatan yang diharapkan, serta kriteria mitra pelaksana..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className={`w-full p-3.5 rounded-xl border text-[14px] text-[#181343] focus:outline-none transition-all duration-300 leading-relaxed resize-y ${
+                  className={`w-full p-3.5 rounded-xl border text-[14px] text-[#0A2558] focus:outline-none transition-all duration-300 leading-relaxed resize-y ${
                     isDescriptionHighlighted
-                      ? "bg-emerald-50/50 border-emerald-500 ring-2 ring-emerald-500/25 shadow-sm"
-                      : "border-[#E2E8F0] bg-[#F8FAFC] focus:bg-white focus:ring-2 focus:ring-[#181343]/15 focus:border-[#181343]"
+                      ? "bg-[#EDF6FF]/70 border-[#1765F5] ring-2 ring-[#1765F5]/20 shadow-sm"
+                      : "border-[#DBEAFE] bg-[#F8FBFF] focus:bg-white focus:ring-2 focus:ring-[#1765F5]/15 focus:border-[#1765F5]"
                   }`}
                 />
-                <span className="text-[12px] text-[#64748B]">
+                <span className="text-[12px] text-slate-600">
                   Uraian yang jelas mempermudah AI memetakan prioritas daerah dan sasaran SDGs yang akurat, serta mempermudah calon mitra menyusun proposal.
                 </span>
               </div>
@@ -1193,16 +1197,16 @@ export function OpportunityFormPageView({
         {/* ============================================================ */}
         {currentStep === 2 && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+            <div className="pb-4 border-b border-[#EDF6FF]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center font-bold text-xs">
                   2
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#181343]">
+                  <h3 className="text-base font-bold text-[#0A2558]">
                     Wilayah Sasaran &amp; Analisis Kebutuhan
                   </h3>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-slate-600">
                     Tentukan wilayah intervensi dan gunakan asisten AI untuk memetakan prioritas masyarakat lokal.
                   </p>
                 </div>
@@ -1258,37 +1262,37 @@ export function OpportunityFormPageView({
         {/* ============================================================ */}
         {currentStep === 3 && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="pb-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+            <div className="pb-4 border-b border-[#EDF6FF] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center font-bold text-xs">
                   3
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#181343]">
+                  <h3 className="text-base font-bold text-[#0A2558]">
                     Sasaran SDGs &amp; Pemetaan Pilar ESG
                   </h3>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-slate-600">
                     Tentukan sasaran SDGs yang relevan dengan inisiatif. Sistem memetakan pilar ESG secara terintegrasi.
                   </p>
                 </div>
               </div>
-              <Badge variant="emerald" size="sm" className="font-bold self-start sm:self-auto">
+              <Badge variant="blue" size="sm" className="font-bold self-start sm:self-auto">
                 {selectedSdgs.length} SDGs Terpilih
               </Badge>
             </div>
 
             {/* Recommendation Banner / Card */}
-            <div className="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-3">
+            <div className="p-4 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE] shadow-2xs space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-[#181343]/5 text-[#181343] flex items-center justify-center shrink-0">
-                    <Target className="w-4 h-4 text-[#181343]" />
+                  <div className="w-8 h-8 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+                    <Target className="w-4 h-4 text-[#1765F5]" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-[#181343]">
+                    <h4 className="text-xs font-bold text-[#0A2558]">
                       Rekomendasi Sasaran SDGs
                     </h4>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-[11px] text-slate-600">
                       Dianalisis otomatis dari judul inisiatif, bidang fokus, dan uraian ruang lingkup program.
                     </p>
                   </div>
@@ -1298,16 +1302,16 @@ export function OpportunityFormPageView({
                   type="button"
                   onClick={() => handleRecommendSdgs()}
                   disabled={isAnalyzingSdgs}
-                  className="self-start sm:self-auto px-3 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-50"
+                  className="self-start sm:self-auto px-3.5 py-1.5 rounded-full border border-[#CBE7FD] hover:bg-[#EDF6FF] bg-white text-[#0A2558] text-xs font-semibold transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-50"
                 >
                   {isAnalyzingSdgs ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-slate-500" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1765F5]" />
                       <span>Menganalisis...</span>
                     </>
                   ) : (
                     <>
-                      <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                      <RotateCcw className="w-3.5 h-3.5 text-[#1765F5]" />
                       <span>Analisis Ulang</span>
                     </>
                   )}
@@ -1315,17 +1319,17 @@ export function OpportunityFormPageView({
               </div>
 
               {isAnalyzingSdgs ? (
-                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center gap-2.5 text-xs text-slate-600 animate-pulse">
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-500 shrink-0" />
+                <div className="p-3.5 rounded-xl bg-white border border-[#DBEAFE] flex items-center gap-2.5 text-xs text-[#0A2558] animate-pulse">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#1765F5] shrink-0" />
                   <span>Sistem sedang memetakan sasaran SDGs paling relevan dari inisiatif Anda...</span>
                 </div>
               ) : aiSdgResult ? (
-                <div className="p-3.5 rounded-lg bg-slate-50/70 border border-slate-200/80 space-y-2.5">
+                <div className="p-3.5 rounded-xl bg-white border border-[#DBEAFE] space-y-2.5">
                   <p className="text-xs text-slate-700 leading-relaxed font-normal">
                     {aiSdgResult.conciseRationale}
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                    <span className="text-[11px] font-semibold text-slate-500 mr-1">Rekomendasi Teratas:</span>
+                    <span className="text-[11px] font-semibold text-slate-600 mr-1">Rekomendasi Teratas:</span>
                     {aiSdgResult.recommendedSdgs.map((sdgId) => {
                       const goal = ALL_17_SDGS.find((g) => g.id === sdgId);
                       if (!goal) return null;
@@ -1337,7 +1341,7 @@ export function OpportunityFormPageView({
                       return (
                         <span
                           key={sdgId}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-medium bg-white border border-slate-200 text-slate-800 shadow-2xs"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#F8FBFF] border border-[#DBEAFE] text-[#0A2558]"
                         >
                           <span
                             className="w-2 h-2 rounded-full shrink-0"
@@ -1345,12 +1349,12 @@ export function OpportunityFormPageView({
                           />
                           <span>{goal.code}: {goal.name}</span>
                           {prob !== undefined && (
-                            <span className="text-[10px] font-bold text-slate-600">
+                            <span className="text-[10px] font-bold text-[#1765F5]">
                               ({prob}%)
                             </span>
                           )}
                           {isPrimary && (
-                            <span className="ml-0.5 text-[9px] bg-[#181343] text-white px-1.5 py-0.2 rounded font-bold uppercase tracking-wider">
+                            <span className="ml-0.5 text-[9px] bg-[#1765F5] text-white px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                               Utama
                             </span>
                           )}
@@ -1360,7 +1364,7 @@ export function OpportunityFormPageView({
                   </div>
                 </div>
               ) : (
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-500 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-white border border-[#DBEAFE] text-[11px] text-slate-600 flex items-center justify-between">
                   <span>Klik tombol <b>Analisis Ulang</b> di atas untuk menjalankan deteksi otomatis sasaran SDGs kapan saja.</span>
                 </div>
               )}
@@ -1370,23 +1374,23 @@ export function OpportunityFormPageView({
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <span className="text-[13px] font-semibold text-[#181343] block">
+                  <span className="text-[13px] font-semibold text-[#0A2558] block">
                     Pilih Sasaran SDGs yang Ditargetkan:
                   </span>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-slate-600">
                     Nilai persentase menunjukkan kedekatan relevansi sasaran SDG dengan inisiatif Anda.
                   </span>
                 </div>
 
                 {aiSdgResult?.probabilityMap && (
-                  <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-[11px] font-medium text-slate-600 self-start sm:self-auto shrink-0">
+                  <div className="flex items-center gap-1 bg-[#F4F9FF] border border-[#DBEAFE] p-0.5 rounded-full text-[11px] font-medium text-slate-600 self-start sm:self-auto shrink-0">
                     <button
                       type="button"
                       onClick={() => setSdgSortMode("default")}
-                      className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
+                      className={`px-3 py-1 rounded-full transition cursor-pointer ${
                         sdgSortMode === "default"
-                          ? "bg-white text-[#181343] font-bold shadow-2xs"
-                          : "hover:text-slate-900"
+                          ? "bg-white text-[#0A2558] font-bold shadow-2xs"
+                          : "hover:text-[#0A2558]"
                       }`}
                     >
                       Nomor 1-17
@@ -1394,13 +1398,13 @@ export function OpportunityFormPageView({
                     <button
                       type="button"
                       onClick={() => setSdgSortMode("relevance")}
-                      className={`px-2.5 py-1 rounded-md transition flex items-center gap-1 cursor-pointer ${
+                      className={`px-3 py-1 rounded-full transition flex items-center gap-1 cursor-pointer ${
                         sdgSortMode === "relevance"
-                          ? "bg-white text-[#181343] font-bold shadow-2xs"
-                          : "hover:text-slate-900"
+                          ? "bg-white text-[#0A2558] font-bold shadow-2xs"
+                          : "hover:text-[#0A2558]"
                       }`}
                     >
-                      <ArrowUpDown className="w-3 h-3 text-slate-500" />
+                      <ArrowUpDown className="w-3 h-3 text-[#1765F5]" />
                       <span>Relevansi Tertinggi</span>
                     </button>
                   </div>
@@ -1420,12 +1424,12 @@ export function OpportunityFormPageView({
                       key={sdg.id}
                       type="button"
                       onClick={() => toggleSdg(sdg.id)}
-                      className={`p-3 rounded-xl text-left transition-all duration-150 border flex items-center justify-between gap-2.5 cursor-pointer ${
+                      className={`p-3 rounded-2xl text-left transition-all duration-150 border flex items-center justify-between gap-2.5 cursor-pointer ${
                         isChecked
-                          ? "bg-emerald-50/60 border-[#35B98E] text-[#181343] shadow-2xs ring-1 ring-[#35B98E]/30"
+                          ? "bg-[#EDF6FF] border-[#1765F5] text-[#0A2558] shadow-2xs ring-1 ring-[#1765F5]/20"
                           : prob !== undefined && prob >= 20
-                          ? "bg-white hover:bg-slate-50 border-slate-300 text-[#181343] shadow-2xs"
-                          : "bg-white hover:bg-slate-50/80 border-slate-200 text-[#181343]"
+                          ? "bg-white hover:bg-[#F4F9FF] border-[#93C5FD] text-[#0A2558] shadow-2xs"
+                          : "bg-white hover:bg-[#F8FBFF] border-[#DBEAFE] text-[#0A2558]"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -1435,18 +1439,18 @@ export function OpportunityFormPageView({
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-[#181343]">
+                            <span className="font-bold text-xs text-[#0A2558]">
                               {sdg.code}
                             </span>
                             {isPrimary && (
-                              <span className="text-[9px] bg-[#181343] text-white px-1.5 py-0.2 rounded font-bold uppercase tracking-wider shrink-0">
+                              <span className="text-[9px] bg-[#1765F5] text-white px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0">
                                 Utama
                               </span>
                             )}
                           </div>
                           <p
                             className={`text-[11px] truncate mt-0.5 ${
-                              isChecked ? "text-slate-900 font-medium" : "text-slate-500"
+                              isChecked ? "text-[#0A2558] font-medium" : "text-slate-600"
                             }`}
                             title={sdg.name}
                           >
@@ -1460,10 +1464,10 @@ export function OpportunityFormPageView({
                           <span
                             className={`text-[11px] px-1.5 py-0.5 rounded font-medium ${
                               prob >= 20
-                                ? "bg-emerald-100 text-emerald-800 font-bold border border-emerald-300/60"
+                                ? "bg-[#EDF6FF] text-[#1765F5] font-bold border border-[#CBE7FD]"
                                 : prob >= 10
-                                ? "bg-teal-50 text-teal-700 font-semibold border border-teal-200/60"
-                                : "text-slate-400"
+                                ? "bg-[#F4F9FF] text-[#0A2558] font-semibold border border-[#DBEAFE]"
+                                : "text-slate-500"
                             }`}
                           >
                             {prob}%
@@ -1477,8 +1481,8 @@ export function OpportunityFormPageView({
                         <div
                           className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors ${
                             isChecked
-                              ? "bg-[#009E75] text-white"
-                              : "border border-slate-300 bg-white"
+                              ? "bg-[#1765F5] text-white"
+                              : "border border-[#CBE7FD] bg-white"
                           }`}
                         >
                           {isChecked && (
@@ -1494,17 +1498,17 @@ export function OpportunityFormPageView({
 
             {/* Mapped ESG Summary */}
             <div className="space-y-2 pt-2">
-              <span className="text-[13px] font-semibold text-[#181343] block">
+              <span className="text-[13px] font-semibold text-[#0A2558] block">
                 Hasil Pemetaan Otomatis Pilar ESG:
               </span>
-              <div className="p-4 rounded-xl bg-slate-50 border border-[#E5E7EB] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="p-4 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                 {/* E */}
-                <div className="p-3 rounded-lg bg-white border border-[#E5E7EB] space-y-1">
+                <div className="p-3 rounded-xl bg-white border border-[#DBEAFE] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-800">Lingkungan (E)</span>
-                    <span className="font-bold text-[#181343]">{mappedEsgPillars.E.length}</span>
+                    <span className="font-bold text-[#0A2558]">Lingkungan (E)</span>
+                    <span className="font-bold text-[#1765F5]">{mappedEsgPillars.E.length}</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 line-clamp-2">
+                  <div className="text-[11px] text-slate-600 line-clamp-2">
                     {mappedEsgPillars.E.length > 0
                       ? mappedEsgPillars.E.map((g) => g.code).join(", ")
                       : "Tidak ada sasaran lingkungan langsung"}
@@ -1512,12 +1516,12 @@ export function OpportunityFormPageView({
                 </div>
 
                 {/* S */}
-                <div className="p-3 rounded-lg bg-white border border-[#E5E7EB] space-y-1">
+                <div className="p-3 rounded-xl bg-white border border-[#DBEAFE] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-blue-800">Sosial (S)</span>
-                    <span className="font-bold text-[#181343]">{mappedEsgPillars.S.length}</span>
+                    <span className="font-bold text-[#0A2558]">Sosial (S)</span>
+                    <span className="font-bold text-[#1765F5]">{mappedEsgPillars.S.length}</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 line-clamp-2">
+                  <div className="text-[11px] text-slate-600 line-clamp-2">
                     {mappedEsgPillars.S.length > 0
                       ? mappedEsgPillars.S.map((g) => g.code).join(", ")
                       : "Tidak ada sasaran sosial langsung"}
@@ -1525,19 +1529,19 @@ export function OpportunityFormPageView({
                 </div>
 
                 {/* G */}
-                <div className="p-3 rounded-lg bg-white border border-[#E5E7EB] space-y-1">
+                <div className="p-3 rounded-xl bg-white border border-[#DBEAFE] space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-purple-800">Tata Kelola (G)</span>
-                    <span className="font-bold text-[#181343]">{mappedEsgPillars.G.length}</span>
+                    <span className="font-bold text-[#0A2558]">Tata Kelola (G)</span>
+                    <span className="font-bold text-[#1765F5]">{mappedEsgPillars.G.length}</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 line-clamp-2">
+                  <div className="text-[11px] text-slate-600 line-clamp-2">
                     {mappedEsgPillars.G.length > 0
                       ? mappedEsgPillars.G.map((g) => g.code).join(", ")
                       : "Tidak ada sasaran tata kelola langsung"}
                   </div>
                 </div>
               </div>
-              <span className="text-[11px] text-[#64748B] block mt-1">
+              <span className="text-[11px] text-slate-600 block mt-1">
                 Klasifikasi SDGs dan ESG tersimpan otomatis untuk integrasi laporan Analisis Kontribusi.
               </span>
             </div>
@@ -1549,16 +1553,16 @@ export function OpportunityFormPageView({
         {/* ============================================================ */}
         {currentStep === 4 && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+            <div className="pb-4 border-b border-[#EDF6FF]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center font-bold text-xs">
                   4
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#181343]">
+                  <h3 className="text-base font-bold text-[#0A2558]">
                     Jadwal Peluang &amp; Pelaksanaan Program
                   </h3>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-slate-600">
                     Atur batas waktu pengajuan proposal bagi calon mitra serta estimasi periode eksekusi program.
                   </p>
                 </div>
@@ -1568,7 +1572,7 @@ export function OpportunityFormPageView({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {/* Batas Pengajuan Proposal */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-semibold text-[#181343] block">
+                <label className="text-[13px] font-semibold text-[#0A2558] block">
                   Batas Pengajuan Proposal <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -1581,7 +1585,7 @@ export function OpportunityFormPageView({
 
               {/* Tanggal Mulai Program */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-semibold text-[#181343] block">
+                <label className="text-[13px] font-semibold text-[#0A2558] block">
                   Mulai Program (Estimasi)
                 </label>
                 <input
@@ -1594,7 +1598,7 @@ export function OpportunityFormPageView({
 
               {/* Tanggal Selesai Program */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[13px] font-semibold text-[#181343] block">
+                <label className="text-[13px] font-semibold text-[#0A2558] block">
                   Selesai Program (Estimasi)
                 </label>
                 <input
@@ -1613,26 +1617,25 @@ export function OpportunityFormPageView({
         {/* ============================================================ */}
         {currentStep === 5 && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center font-bold text-xs">
+            <div className="pb-4 border-b border-[#EDF6FF]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center font-bold text-xs">
                   5
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-[#181343]">
+                  <h3 className="text-base font-bold text-[#0A2558]">
                     Banner Sampul &amp; Pratinjau Akhir
                   </h3>
-                  <p className="text-xs text-[#64748B]">
+                  <p className="text-xs text-slate-600">
                     Lengkapi gambar sampul inisiatif dan tinjau seluruh ringkasan program sebelum mempublikasikannya.
                   </p>
                 </div>
               </div>
             </div>
 
-
             {/* Banner Upload / Preview */}
             <div className="space-y-2">
-              <label className="text-[13px] font-semibold text-[#181343] block">
+              <label className="text-[13px] font-semibold text-[#0A2558] block">
                 Gambar Sampul / Banner Peluang (Opsional)
               </label>
 
@@ -1644,16 +1647,16 @@ export function OpportunityFormPageView({
               )}
 
               {bannerUrl && !imageError ? (
-                <div className="relative rounded-2xl overflow-hidden border border-[#E5E7EB] h-48 sm:h-56 bg-slate-100 group">
+                <div className="relative rounded-2xl overflow-hidden border border-[#DBEAFE] h-48 sm:h-56 bg-[#EDF6FF] group">
                   <img
                     src={bannerUrl}
                     alt="Pratinjau Sampul"
                     onError={() => setImageError(true)}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <label className="px-3.5 py-2 rounded-xl bg-white text-slate-800 text-xs font-bold cursor-pointer shadow-sm transition flex items-center gap-1.5 hover:bg-slate-50">
-                      <Upload className="w-3.5 h-3.5" />
+                  <div className="absolute inset-0 bg-[#0A2558]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <label className="px-4 py-2 rounded-full bg-white text-[#0A2558] text-xs font-bold cursor-pointer shadow-sm transition flex items-center gap-1.5 hover:bg-[#EDF6FF]">
+                      <Upload className="w-3.5 h-3.5 text-[#1765F5]" />
                       <span>Ganti Gambar</span>
                       <input
                         type="file"
@@ -1666,7 +1669,7 @@ export function OpportunityFormPageView({
                     <button
                       type="button"
                       onClick={() => setBannerUrl("")}
-                      className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                       <span>Hapus</span>
@@ -1674,7 +1677,7 @@ export function OpportunityFormPageView({
                   </div>
                 </div>
               ) : (
-                <label className="border-2 border-dashed border-[#E5E7EB] hover:border-slate-400 rounded-2xl p-6 text-center cursor-pointer transition bg-[#F9F9FB] hover:bg-white flex flex-col items-center justify-center gap-2 group">
+                <label className="border-2 border-dashed border-[#CBE7FD] hover:border-[#1765F5] rounded-2xl p-6 text-center cursor-pointer transition bg-[#F8FBFF] hover:bg-[#EDF6FF]/60 flex flex-col items-center justify-center gap-2 group">
                   <input
                     type="file"
                     accept="image/*"
@@ -1684,23 +1687,23 @@ export function OpportunityFormPageView({
                   />
                   {isUploadingImage ? (
                     <div className="flex flex-col items-center gap-2 py-3">
-                      <Loader2 className="w-6 h-6 animate-spin text-slate-600" />
-                      <span className="text-xs font-semibold text-slate-600">
+                      <Loader2 className="w-6 h-6 animate-spin text-[#1765F5]" />
+                      <span className="text-xs font-semibold text-[#0A2558]">
                         Mengunggah gambar sampul...
                       </span>
                     </div>
                   ) : (
                     <>
-                      <div className="w-10 h-10 rounded-xl bg-white border border-[#E5E7EB] text-slate-600 flex items-center justify-center shadow-2xs group-hover:scale-105 transition">
-                        <ImageIcon className="w-5 h-5 text-slate-500" />
+                      <div className="w-10 h-10 rounded-xl bg-white border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shadow-2xs group-hover:scale-105 transition">
+                        <ImageIcon className="w-5 h-5" />
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-slate-800 block">
+                        <span className="text-xs font-bold text-[#0A2558] block">
                           {imageError
                             ? "Gambar sebelumnya tidak dapat dimuat. Klik untuk mengunggah gambar baru"
                             : "Pilih Gambar Sampul dari Komputer"}
                         </span>
-                        <span className="text-[11px] text-slate-400 block mt-0.5">
+                        <span className="text-[11px] text-slate-600 block mt-0.5">
                           Format PNG, JPG, atau WEBP - Maksimal 5MB
                         </span>
                       </div>
@@ -1712,55 +1715,55 @@ export function OpportunityFormPageView({
 
             {/* Pratinjau Ringkasan Inisiatif */}
             <div className="pt-2">
-              <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-[#E5E7EB] space-y-4">
+              <div className="p-5 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE] space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#181343] block">
+                  <span className="text-xs font-bold text-[#0A2558] block">
                     Ringkasan Pratinjau Peluang:
                   </span>
                   <button
                     type="button"
                     onClick={() => goToStep(1)}
-                    className="text-[11px] font-bold text-[#009E75] hover:text-emerald-800 transition"
+                    className="text-[11px] font-bold text-[#1765F5] hover:text-[#0A2558] hover:underline transition cursor-pointer"
                   >
                     Edit Informasi Dasar
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                   <div>
-                    <span className="text-[11px] text-[#64748B] block">Judul Inisiatif</span>
-                    <span className="font-semibold text-[#181343]">{title || "Belum diisi"}</span>
+                    <span className="text-[11px] text-slate-600 block">Judul Inisiatif</span>
+                    <span className="font-semibold text-[#0A2558]">{title || "Belum diisi"}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#64748B] block">Bidang Fokus</span>
-                    <span className="font-semibold text-[#181343]">{FOCUS_AREA_CONFIG[focusArea]?.label}</span>
+                    <span className="text-[11px] text-slate-600 block">Bidang Fokus</span>
+                    <span className="font-semibold text-[#0A2558]">{FOCUS_AREA_CONFIG[focusArea]?.label}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#64748B] block">Wilayah Sasaran</span>
-                    <span className="font-semibold text-[#181343]">
+                    <span className="text-[11px] text-slate-600 block">Wilayah Sasaran</span>
+                    <span className="font-semibold text-[#0A2558]">
                       {targetCity && targetProvince ? `${targetCity}, ${targetProvince}` : "Belum ditentukan"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#64748B] block">Estimasi Anggaran</span>
-                    <span className="font-bold text-[#047857]">
+                    <span className="text-[11px] text-slate-600 block">Estimasi Anggaran</span>
+                    <span className="font-bold text-[#1765F5] tabular-nums">
                       {estimatedBudget && parseFloat(estimatedBudget) > 0 ? formatRupiah(estimatedBudget) : "Fleksibel / Belum Ditentukan"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#64748B] block">Batas Pengajuan Proposal</span>
-                    <span className="font-medium text-[#181343]">{deadline || "Belum ditentukan"}</span>
+                    <span className="text-[11px] text-slate-600 block">Batas Pengajuan Proposal</span>
+                    <span className="font-medium text-[#0A2558]">{deadline || "Belum ditentukan"}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#64748B] block">Sasaran SDGs &amp; ESG</span>
-                    <span className="font-medium text-[#181343]">
+                    <span className="text-[11px] text-slate-600 block">Sasaran SDGs &amp; ESG</span>
+                    <span className="font-medium text-[#0A2558]">
                       {selectedSdgs.length > 0 ? `${selectedSdgs.length} SDGs (E:${mappedEsgPillars.E.length}, S:${mappedEsgPillars.S.length}, G:${mappedEsgPillars.G.length})` : "Belum dipilih"}
                     </span>
                   </div>
 
                   {/* Deskripsi & Ruang Lingkup Preview */}
-                  <div className="sm:col-span-2 pt-2 border-t border-slate-200/70">
-                    <span className="text-[11px] text-[#64748B] block mb-1">Deskripsi &amp; Ruang Lingkup</span>
-                    <p className="font-medium text-[#181343] text-xs leading-relaxed whitespace-pre-line bg-white p-3 rounded-xl border border-slate-200/80">
+                  <div className="sm:col-span-2 pt-2 border-t border-[#DBEAFE]">
+                    <span className="text-[11px] text-slate-600 block mb-1">Deskripsi &amp; Ruang Lingkup</span>
+                    <p className="font-medium text-[#0A2558] text-xs leading-relaxed whitespace-pre-line bg-white p-3.5 rounded-xl border border-[#DBEAFE]">
                       {description.trim() || "Belum diisi"}
                     </p>
                   </div>
@@ -1773,7 +1776,7 @@ export function OpportunityFormPageView({
         {/* ============================================================ */}
         {/* STEP FOOTER / NAVIGATION CONTROLS */}
         {/* ============================================================ */}
-        <div className="pt-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
+        <div className="pt-6 border-t border-[#EDF6FF] flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
           {/* Tombol Kiri */}
           <div>
             {currentStep === 1 ? (
@@ -1781,7 +1784,7 @@ export function OpportunityFormPageView({
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto text-xs sm:text-sm font-semibold text-[#47464F] hover:text-[#181343] py-2.5 px-4 rounded-xl border border-[#E5E7EB] hover:bg-slate-50 transition-colors cursor-pointer text-center"
+                className="w-full sm:w-auto min-h-[42px] text-xs sm:text-sm font-semibold text-[#0A2558] py-2 px-5 rounded-full border border-[#CBE7FD] hover:bg-[#EDF6FF] transition-colors cursor-pointer text-center"
               >
                 Batal
               </button>
@@ -1790,7 +1793,7 @@ export function OpportunityFormPageView({
                 type="button"
                 onClick={handlePrevStep}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto text-xs sm:text-sm font-semibold text-[#47464F] hover:text-[#181343] py-2.5 px-4 rounded-xl border border-[#E5E7EB] hover:bg-slate-50 transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
+                className="w-full sm:w-auto min-h-[42px] text-xs sm:text-sm font-semibold text-[#0A2558] py-2 px-5 rounded-full border border-[#CBE7FD] hover:bg-[#EDF6FF] transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Sebelumnya</span>
@@ -1808,7 +1811,7 @@ export function OpportunityFormPageView({
                 size="md"
                 onClick={() => handleSaveCreate("DRAFT")}
                 disabled={isSubmitting}
-                className="flex-1 sm:flex-initial text-xs sm:text-sm font-semibold border-[#E5E7EB] text-[#47464F] hover:bg-slate-50 rounded-xl px-4 py-2.5 cursor-pointer"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm font-semibold rounded-full px-5 py-2.5 cursor-pointer"
               >
                 Simpan Draf
               </Button>
@@ -1821,7 +1824,7 @@ export function OpportunityFormPageView({
                 size="md"
                 onClick={handleNextStep}
                 disabled={isSubmitting}
-                className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-6 py-2.5 shadow-2xs cursor-pointer inline-flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-full px-6 py-2.5 cursor-pointer inline-flex items-center justify-center gap-2"
               >
                 <span>Lanjut ke Langkah Berikutnya</span>
                 <ArrowRight className="w-4 h-4" />
@@ -1833,7 +1836,7 @@ export function OpportunityFormPageView({
                 size="md"
                 onClick={handleSaveEdit}
                 disabled={isSubmitting}
-                className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-7 py-2.5 shadow-2xs cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-full px-7 py-2.5 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -1851,7 +1854,7 @@ export function OpportunityFormPageView({
                 size="md"
                 onClick={() => handleSaveCreate("OPEN")}
                 disabled={isSubmitting}
-                className="flex-1 sm:flex-initial bg-[#181343] hover:bg-[#25205c] text-white text-xs sm:text-sm font-bold rounded-xl px-7 py-2.5 shadow-2xs cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 sm:flex-initial text-xs sm:text-sm font-bold rounded-full px-7 py-2.5 cursor-pointer flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -1870,16 +1873,16 @@ export function OpportunityFormPageView({
       {/* Discard Confirmation Modal */}
       {isDiscardModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95">
+          <div className="bg-white rounded-3xl border border-[#DBEAFE] shadow-2xl max-w-md w-full p-6 space-y-4 animate-in zoom-in-95">
             <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
               <AlertCircle className="w-6 h-6" />
             </div>
 
             <div className="text-center space-y-1">
-              <h3 className="text-base font-black text-slate-900">
+              <h3 className="text-base font-extrabold text-[#0A2558]">
                 Buang Perubahan Program?
               </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Anda memiliki beberapa perubahan informasi yang belum disimpan. Jika keluar sekarang, seluruh perubahan tersebut akan hilang.
               </p>
             </div>
@@ -1888,7 +1891,7 @@ export function OpportunityFormPageView({
               <button
                 type="button"
                 onClick={() => setIsDiscardModalOpen(false)}
-                className="flex-1 h-11 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-bold transition-colors cursor-pointer"
+                className="flex-1 h-11 rounded-full bg-[#F4F9FF] hover:bg-[#EDF6FF] border border-[#DBEAFE] text-[#0A2558] text-xs sm:text-sm font-bold transition-colors cursor-pointer"
               >
                 Tetap di Halaman Ini
               </button>

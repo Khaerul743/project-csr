@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useRef } from "react";
+import Image from "next/image";
 import {
   TrendingUp,
   Activity,
@@ -17,12 +18,12 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  Info,
   Target,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CompanyNavMenu } from "../../Sidebar";
+import { DashboardPageHeader } from "../../common/DashboardPageHeader";
 import {
   CompanyProfile,
   OpportunityItem,
@@ -442,33 +443,33 @@ export function ExecutiveOverviewView({
         label: "Sedang Berjalan",
         count: inProgress,
         percentage: inProgressPct,
-        color: "#059669", // Emerald SIPENA
-        dotColor: "bg-[#059669]",
-        lightBg: "bg-[#EAF8F4]",
+        color: "#047857",
+        dotColor: "bg-[#047857]",
+        lightBg: "bg-[#ECFDF5]",
         borderColor: "border-emerald-200",
-        textColor: "text-emerald-800",
+        textColor: "text-[#065F46]",
       },
       {
         key: "PLANNED",
         label: "Persiapan",
         count: planned,
         percentage: plannedPct,
-        color: "#3B82F6", // Blue / Soft Indigo
-        dotColor: "bg-[#3B82F6]",
-        lightBg: "bg-blue-50",
-        borderColor: "border-blue-200",
-        textColor: "text-blue-800",
+        color: "#1765F5",
+        dotColor: "bg-[#1765F5]",
+        lightBg: "bg-[#EDF6FF]",
+        borderColor: "border-[#BFDBFE]",
+        textColor: "text-[#1D4ED8]",
       },
       {
         key: "COMPLETED",
         label: "Selesai",
         count: completed,
         percentage: completedPct,
-        color: "#181343", // Deep Navy
-        dotColor: "bg-[#181343]",
-        lightBg: "bg-[#181343]/5",
-        borderColor: "border-[#181343]/20",
-        textColor: "text-[#181343]",
+        color: "#0A2558",
+        dotColor: "bg-[#0A2558]",
+        lightBg: "bg-[#0A2558]/5",
+        borderColor: "border-[#DBEAFE]",
+        textColor: "text-[#0A2558]",
       },
     ];
   }, [scopePrograms]);
@@ -688,23 +689,30 @@ export function ExecutiveOverviewView({
   };
 
   return (
-    <div className="space-y-8 w-full animate-in fade-in duration-300">
-      {/* 1. Header Ringkas & Toolbar Filter Segaris (Selaras Halaman Kinerja Mitra) */}
-      <div className="space-y-3">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
-          <div className="space-y-1">
-            <h1
-              className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {isManagement ? "Ringkasan Eksekutif Portofolio" : "Ringkasan Manajemen Inisiatif CSR"}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600">
-              Alokasi anggaran, progres pelaksanaan program, dan persebaran dampak CSR perusahaan.
-            </p>
-          </div>
+    <div className="space-y-6 w-full animate-in fade-in duration-300">
+      {/* 1. Open Canvas Page Header + Filter Strip Terpisah */}
+      <div className="space-y-4">
+        <DashboardPageHeader
+          title={isManagement ? "Ringkasan Eksekutif Portofolio" : "Ringkasan Manajemen Inisiatif CSR"}
+          description="Alokasi anggaran, progres pelaksanaan program, dan persebaran dampak CSR perusahaan."
+          iconSrc="/images/overview/overview-header-icon.png"
+          actions={
+            !isManagement && onOpenCreateOpportunity ? (
+              <button
+                type="button"
+                onClick={() => onOpenCreateOpportunity()}
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#1765F5]/20 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] focus-visible:ring-offset-2"
+              >
+                <Plus aria-hidden="true" className="w-4 h-4" />
+                <span>Buat Peluang CSR</span>
+              </button>
+            ) : undefined
+          }
+        />
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+        {/* Toolbar Filter Segaris */}
+        <div className="bg-white/95 rounded-2xl border border-[#DBEAFE] px-4 py-3 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <select
               aria-label="Filter tahun pelaporan"
               value={selectedYear}
@@ -712,7 +720,7 @@ export function ExecutiveOverviewView({
                 setSelectedYear(e.target.value);
                 setSelectedMonth(null);
               }}
-              className="px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
+              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-[#DBEAFE] text-xs font-semibold text-[#0A2558] bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5]"
             >
               <option value="ALL">Semua Tahun</option>
               {availableYears.map((yr) => (
@@ -736,7 +744,7 @@ export function ExecutiveOverviewView({
                   }
                 }
               }}
-              className="px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
+              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-[#DBEAFE] text-xs font-semibold text-[#0A2558] bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5]"
             >
               <option value="ALL">Semua Status</option>
               {statusDistribution.map((st) => (
@@ -750,7 +758,7 @@ export function ExecutiveOverviewView({
               aria-label="Filter bidang fokus CSR"
               value={selectedFocusArea}
               onChange={(e) => setSelectedFocusArea(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-[#E5E7EB] text-xs font-semibold text-[#181343] bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#059669]/25 focus:border-[#059669]"
+              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-[#DBEAFE] text-xs font-semibold text-[#0A2558] bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5]"
             >
               <option value="ALL">Semua Bidang</option>
               <option value="LINGKUNGAN">Lingkungan Hidup</option>
@@ -774,27 +782,12 @@ export function ExecutiveOverviewView({
                 Reset
               </Button>
             )}
-
-            {!isManagement && onOpenCreateOpportunity && (
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => onOpenCreateOpportunity()}
-                leftIcon={<Plus className="w-3.5 h-3.5" />}
-                className="text-xs font-semibold cursor-pointer"
-              >
-                Buat Peluang CSR
-              </Button>
-            )}
           </div>
-        </div>
 
-        {/* Active Filter Indicator Strip */}
-        {hasActiveFilters && (
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-            <span className="font-medium">Filter aktif:</span>
+            {hasActiveFilters && <span className="font-semibold text-[#0A2558]">Filter aktif:</span>}
             {selectedYear !== "ALL" && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] font-semibold text-[#181343] text-[11px]">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
                 Tahun {selectedYear}
               </span>
             )}
@@ -802,13 +795,13 @@ export function ExecutiveOverviewView({
               <button
                 type="button"
                 onClick={() => setSelectedMonth(null)}
-                className="px-2.5 py-0.5 rounded-lg bg-white border border-[#E5E7EB] font-semibold text-[#181343] text-[11px] hover:border-rose-300 hover:text-rose-600 cursor-pointer"
+                className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px] hover:border-rose-300 hover:text-rose-700 cursor-pointer"
               >
                 Bulan: {MONTH_NAMES.find((m) => m.num === selectedMonth)?.name || selectedMonth} ×
               </button>
             )}
             {selectedStatus !== "ALL" && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px]">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#ECFDF5] border border-emerald-200 font-semibold text-[#065F46] text-[11px]">
                 {selectedStatus === "IN_PROGRESS"
                   ? "Sedang Berjalan"
                   : selectedStatus === "PLANNED"
@@ -817,82 +810,98 @@ export function ExecutiveOverviewView({
               </span>
             )}
             {selectedFocusArea !== "ALL" && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px]">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
                 {FOCUS_AREA_CONFIG[selectedFocusArea as keyof typeof FOCUS_AREA_CONFIG]?.label || selectedFocusArea}
               </span>
             )}
             {selectedProvince && (
-              <span className="px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-200 font-semibold text-emerald-800 text-[11px]">
+              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
                 {selectedProvince}
               </span>
             )}
-            <span className="text-[11px] text-slate-500 ml-auto tabular-nums">
+            <span className="text-[11px] font-semibold text-slate-600 tabular-nums lg:ml-2">
               {filteredPrograms.length} dari {programs.length} program
             </span>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* 2. Ringkasan 4 KPI Utama yang Lega */}
+      {/* 2. Ringkasan 4 KPI Utama */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
-        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Total Pagu CSR</span>
-            <TrendingUp className="w-4 h-4 text-slate-400" />
+            <div className="w-10 h-10 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+          <div className="text-3xl font-extrabold text-[#0A2558] tabular-nums">
             {formatCompact(kpiData.totalAllocated)}
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             Alokasi resmi dari {kpiData.totalPrograms} program
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-emerald-300 shadow-xs transition-all space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Realisasi Anggaran</span>
-            <Activity className="w-4 h-4 text-[#059669]" />
+            <div className="w-10 h-10 rounded-2xl bg-[#ECFDF5] border border-emerald-200 text-[#047857] flex items-center justify-center shrink-0">
+              <Activity className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#059669] tabular-nums">
+            <span className="text-3xl font-extrabold text-[#047857] tabular-nums">
               {formatCompact(kpiData.totalSpent)}
             </span>
-            <span className="text-xs font-semibold text-slate-500 tabular-nums">
-              ({kpiData.absorptionRate}%)
+            <span className="text-xs font-bold text-[#065F46] bg-[#ECFDF5] border border-emerald-200 px-2 py-0.5 rounded-full tabular-nums">
+              {kpiData.absorptionRate}%
             </span>
           </div>
-          <p className="text-xs text-slate-500">
-            Serapan terverifikasi terhadap pagu
-          </p>
+          <div className="space-y-1.5">
+            <div className="w-full h-1.5 rounded-full bg-emerald-100/80 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#047857] to-[#10B981] transition-all duration-500"
+                style={{ width: `${Math.min(100, Math.max(0, kpiData.absorptionRate))}%` }}
+              />
+            </div>
+            <p className="text-xs text-slate-600">
+              Serapan terverifikasi terhadap pagu
+            </p>
+          </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Program Berjalan</span>
-            <Target className="w-4 h-4 text-slate-400" />
+            <div className="w-10 h-10 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+              <Target className="w-4 h-4" />
+            </div>
           </div>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-extrabold text-[#181343] tabular-nums">
+            <span className="text-3xl font-extrabold text-[#0A2558] tabular-nums">
               {kpiData.runningCount}
             </span>
-            <span className="text-xs font-semibold text-slate-500 tabular-nums">
+            <span className="text-xs font-semibold text-slate-600 tabular-nums">
               / {kpiData.totalPrograms} program
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             {kpiData.completedCount} program telah selesai
           </p>
         </div>
 
-        <div className="p-6 rounded-2xl bg-white border border-[#E5E7EB] space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Mitra Berkontrak</span>
-            <HeartHandshake className="w-4 h-4 text-slate-400" />
+            <div className="w-10 h-10 rounded-2xl bg-[#F4F9FF] border border-[#DBEAFE] text-[#0A2558] flex items-center justify-center shrink-0">
+              <HeartHandshake className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-3xl font-extrabold text-[#181343] tabular-nums">
+          <div className="text-3xl font-extrabold text-[#0A2558] tabular-nums">
             {kpiData.uniquePartnersCount}
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-600">
             Lembaga pelaksana program aktif
           </p>
         </div>
@@ -903,11 +912,11 @@ export function ExecutiveOverviewView({
       {/* ============================================================ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left Column (7 cols): Tren Anggaran CSR */}
-        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-[#E5E7EB] flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-[#DBEAFE] shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
               <div className="space-y-0.5">
-                <h2 className="text-base font-bold text-[#181343]">
+                <h2 className="text-base font-bold text-[#0A2558]">
                   Tren Alokasi vs Realisasi
                 </h2>
                 <p className="text-xs text-slate-600">
@@ -926,7 +935,7 @@ export function ExecutiveOverviewView({
                       setMonthlyYear(e.target.value);
                       setSelectedMonth(null);
                     }}
-                    className="text-xs font-semibold bg-white border border-[#E5E7EB] rounded-xl px-2.5 py-1.5 text-[#181343] focus:outline-none focus:ring-2 focus:ring-[#059669]/25 cursor-pointer"
+                    className="text-xs font-semibold bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl px-2.5 py-1.5 text-[#0A2558] focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5] cursor-pointer"
                   >
                     {availableYears.map((yr) => (
                       <option key={yr} value={yr}>
@@ -936,17 +945,17 @@ export function ExecutiveOverviewView({
                   </select>
                 )}
 
-                <div className="inline-flex items-center bg-[#F9F9FB] p-1 rounded-xl border border-[#E5E7EB]">
+                <div className="inline-flex items-center bg-[#F4F9FF] p-1 rounded-full border border-[#DBEAFE]">
                   <button
                     type="button"
                     onClick={() => {
                       setBudgetTrendMode("annual");
                       setSelectedMonth(null);
                     }}
-                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                    className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${
                       budgetTrendMode === "annual"
-                        ? "bg-[#181343] text-white"
-                        : "text-slate-600 hover:text-[#181343]"
+                        ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-xs"
+                        : "text-slate-600 hover:text-[#0A2558]"
                     }`}
                   >
                     Tahunan
@@ -954,10 +963,10 @@ export function ExecutiveOverviewView({
                   <button
                     type="button"
                     onClick={() => setBudgetTrendMode("monthly")}
-                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                    className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${
                       budgetTrendMode === "monthly"
-                        ? "bg-[#181343] text-white"
-                        : "text-slate-600 hover:text-[#181343]"
+                        ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-xs"
+                        : "text-slate-600 hover:text-[#0A2558]"
                     }`}
                   >
                     Bulanan
@@ -967,14 +976,14 @@ export function ExecutiveOverviewView({
             </div>
 
             {/* Minimalist Legend */}
-            <div className="flex items-center justify-between pb-3 text-xs border-b border-slate-100">
+            <div className="flex items-center justify-between pb-3 text-xs border-b border-[#EDF6FF]">
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#181343]" />
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#0A2558]" />
                   <span className="text-slate-700 font-medium">Alokasi</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#059669]" />
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#047857]" />
                   <span className="text-slate-700 font-medium">Realisasi</span>
                 </div>
               </div>
@@ -983,7 +992,7 @@ export function ExecutiveOverviewView({
                 <button
                   type="button"
                   onClick={() => setSelectedMonth(null)}
-                  className="text-[#059669] font-semibold hover:underline cursor-pointer"
+                  className="text-[#1765F5] font-semibold hover:underline cursor-pointer"
                 >
                   Tampilkan Semua Bulan
                 </button>
@@ -999,7 +1008,7 @@ export function ExecutiveOverviewView({
                   </div>
                 ) : (
                   <div>
-                    <div className="h-56 flex items-end justify-around gap-6 sm:gap-10 px-4 border-b border-[#E5E7EB]">
+                    <div className="h-56 flex items-end justify-around gap-6 sm:gap-10 px-4 border-b border-[#DBEAFE]">
                       {annualTrendData.data.map((item) => {
                         const allocatedHeight =
                           annualTrendData.maxVal > 0
@@ -1026,12 +1035,12 @@ export function ExecutiveOverviewView({
                             }}
                           >
                             <div
-                              className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#181343] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center ${
+                              className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#0A2558] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center ${
                                 isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 hidden sm:block"
                               }`}
                             >
                               <div className="font-bold">Tahun {item.year}</div>
-                              <div className="text-slate-300">
+                              <div className="text-sky-200">
                                 Alokasi: {formatRupiah(item.allocated)}
                               </div>
                               <div className="text-emerald-300">
@@ -1041,12 +1050,12 @@ export function ExecutiveOverviewView({
 
                             <div className="w-full flex items-end justify-center gap-2 h-44">
                               <div
-                                className="w-1/2 max-w-[30px] bg-[#181343] rounded-t-md transition-all duration-300 group-hover:brightness-125"
+                                className="w-1/2 max-w-[30px] bg-[#0A2558] rounded-t-md transition-all duration-300 group-hover:brightness-125"
                                 style={{ height: `${allocatedHeight}%` }}
                                 title={`Alokasi ${item.year}: ${formatRupiah(item.allocated)}`}
                               />
                               <div
-                                className="w-1/2 max-w-[30px] bg-[#059669] rounded-t-md transition-all duration-300 group-hover:brightness-110"
+                                className="w-1/2 max-w-[30px] bg-[#047857] rounded-t-md transition-all duration-300 group-hover:brightness-110"
                                 style={{ height: `${spentHeight}%` }}
                                 title={`Realisasi ${item.year}: ${formatRupiah(item.spent)}`}
                               />
@@ -1056,8 +1065,8 @@ export function ExecutiveOverviewView({
                               <span
                                 className={`text-xs font-bold tabular-nums transition-colors ${
                                   isSelected
-                                    ? "text-[#059669] underline"
-                                    : "text-[#181343] group-hover:text-[#059669]"
+                                    ? "text-[#047857] underline"
+                                    : "text-[#0A2558] group-hover:text-[#1765F5]"
                                 }`}
                               >
                                 {item.year}
@@ -1075,7 +1084,7 @@ export function ExecutiveOverviewView({
             {/* VISUALISASI MODE BULANAN */}
             {budgetTrendMode === "monthly" && (
               <div className="pt-5">
-                <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-[#E5E7EB] overflow-x-auto">
+                <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-[#DBEAFE] overflow-x-auto">
                   {monthlyTrendData.months.map((m) => {
                     const allocatedHeight =
                       monthlyTrendData.maxVal > 0 && m.allocated > 0
@@ -1102,14 +1111,14 @@ export function ExecutiveOverviewView({
                         }}
                       >
                         <div
-                          className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#181343] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center whitespace-nowrap z-20 ${
+                          className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#0A2558] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center whitespace-nowrap z-20 ${
                             isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 hidden sm:block"
                           }`}
                         >
                           <div className="font-bold">{m.name} {monthlyYear}</div>
                           {m.hasData ? (
                             <>
-                              <div className="text-slate-300">
+                              <div className="text-sky-200">
                                 Alokasi: {formatRupiah(m.allocated)}
                               </div>
                               <div className="text-emerald-300">
@@ -1117,7 +1126,7 @@ export function ExecutiveOverviewView({
                               </div>
                             </>
                           ) : (
-                            <div className="text-slate-400 text-[10px]">
+                            <div className="text-slate-300 text-[10px]">
                               Belum ada realisasi
                             </div>
                           )}
@@ -1127,18 +1136,18 @@ export function ExecutiveOverviewView({
                           {m.hasData ? (
                             <>
                               <div
-                                className="w-1/2 max-w-[14px] bg-[#181343] rounded-t-sm transition-all duration-300 group-hover:brightness-125"
+                                className="w-1/2 max-w-[14px] bg-[#0A2558] rounded-t-sm transition-all duration-300 group-hover:brightness-125"
                                 style={{ height: `${allocatedHeight}%` }}
                                 title={`${m.name}: Alokasi ${formatRupiah(m.allocated)}`}
                               />
                               <div
-                                className="w-1/2 max-w-[14px] bg-[#059669] rounded-t-sm transition-all duration-300 group-hover:brightness-110"
+                                className="w-1/2 max-w-[14px] bg-[#047857] rounded-t-sm transition-all duration-300 group-hover:brightness-110"
                                 style={{ height: `${spentHeight}%` }}
                                 title={`${m.name}: Realisasi ${formatRupiah(m.spent)}`}
                               />
                             </>
                           ) : (
-                            <div className="w-full h-1 bg-slate-100 rounded-full group-hover:bg-slate-200 transition-colors" />
+                            <div className="w-full h-1 bg-[#EDF6FF] rounded-full group-hover:bg-[#DBEAFE] transition-colors" />
                           )}
                         </div>
 
@@ -1146,8 +1155,8 @@ export function ExecutiveOverviewView({
                           <span
                             className={`text-[11px] font-semibold transition-colors ${
                               isSelected
-                                ? "text-[#059669] underline font-bold"
-                                : "text-slate-600 group-hover:text-[#181343]"
+                                ? "text-[#047857] underline font-bold"
+                                : "text-slate-600 group-hover:text-[#0A2558]"
                             }`}
                           >
                             {m.short}
@@ -1160,8 +1169,8 @@ export function ExecutiveOverviewView({
 
                 <div className="pt-3 flex items-center justify-between text-xs text-slate-600">
                   <span>Klik bulan untuk memfilter rincian</span>
-                  <span className="font-medium text-[#181343] tabular-nums">
-                    Total {monthlyYear}: <strong className="text-[#059669]">{formatCompact(monthlyTrendData.totalYearSpent)}</strong>
+                  <span className="font-medium text-[#0A2558] tabular-nums">
+                    Total {monthlyYear}: <strong className="text-[#047857]">{formatCompact(monthlyTrendData.totalYearSpent)}</strong>
                   </span>
                 </div>
               </div>
@@ -1170,10 +1179,10 @@ export function ExecutiveOverviewView({
         </div>
 
         {/* Right Column (5 cols): Distribusi Status & Perhatian */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-[#E5E7EB] flex flex-col justify-between gap-5">
+        <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-[#DBEAFE] shadow-xs flex flex-col justify-between gap-5">
           <div className="space-y-5">
             <div className="space-y-0.5">
-              <h2 className="text-base font-bold text-[#181343]">
+              <h2 className="text-base font-bold text-[#0A2558]">
                 Status Program CSR
               </h2>
               <p className="text-xs text-slate-600">
@@ -1186,7 +1195,7 @@ export function ExecutiveOverviewView({
               <div className="relative w-32 h-32 shrink-0 flex items-center justify-center">
                 <svg viewBox="0 0 100 100" className="w-32 h-32 transform -rotate-90">
                   {donutConfig.type === "empty" && (
-                    <circle cx="50" cy="50" r="35" fill="none" stroke="#E5E7EB" strokeWidth="13" />
+                    <circle cx="50" cy="50" r="35" fill="none" stroke="#E2E8F0" strokeWidth="13" />
                   )}
 
                   {donutConfig.type === "single" && donutConfig.singleSlice && (
@@ -1217,15 +1226,15 @@ export function ExecutiveOverviewView({
                 </svg>
 
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
-                  <span className="text-xl font-extrabold text-[#181343] leading-none tabular-nums">
+                  <span className="text-xl font-extrabold text-[#0A2558] leading-none tabular-nums">
                     {donutConfig.total}
                   </span>
-                  <span className="text-[11px] text-slate-500 font-medium mt-0.5">Program</span>
+                  <span className="text-[11px] text-slate-600 font-medium mt-0.5">Program</span>
                 </div>
               </div>
 
-              {/* Clean Flat Status Rows (No nested boxes per status) */}
-              <div className="flex-1 w-full divide-y divide-slate-100">
+              {/* Clean Status Filter Rows */}
+              <div className="flex-1 w-full divide-y divide-[#EDF6FF]">
                 {statusDistribution.map((st) => {
                   const isSelected = selectedStatus === st.key;
                   const isZero = st.count === 0;
@@ -1236,21 +1245,21 @@ export function ExecutiveOverviewView({
                       key={st.key}
                       disabled={isZero}
                       onClick={() => handleSelectStatus(st.key)}
-                      className={`w-full py-2.5 px-2 flex items-center justify-between text-left transition-colors rounded-lg ${
+                      className={`w-full py-2.5 px-2.5 flex items-center justify-between text-left transition-colors rounded-xl ${
                         isZero
                           ? "opacity-45 cursor-not-allowed"
                           : isSelected
-                          ? "bg-emerald-50/70 text-emerald-900 cursor-pointer"
-                          : "hover:bg-slate-50 cursor-pointer"
+                          ? `${st.lightBg} ${st.textColor} cursor-pointer`
+                          : "hover:bg-[#F4F9FF] cursor-pointer"
                       }`}
                     >
                       <span className="flex items-center gap-2.5">
                         <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${st.dotColor}`} />
-                        <span className="text-xs font-semibold text-[#181343]">{st.label}</span>
+                        <span className="text-xs font-semibold text-[#0A2558]">{st.label}</span>
                       </span>
                       <span className="flex items-center gap-2.5 tabular-nums">
-                        <span className="text-xs font-bold text-[#181343]">{st.count}</span>
-                        <span className="text-xs text-slate-500 w-9 text-right">{st.percentage}%</span>
+                        <span className="text-xs font-bold text-[#0A2558]">{st.count}</span>
+                        <span className="text-xs text-slate-600 w-9 text-right">{st.percentage}%</span>
                       </span>
                     </button>
                   );
@@ -1261,11 +1270,11 @@ export function ExecutiveOverviewView({
 
           {/* Compact Attention Strip (Only if items exist) */}
           {followUpPriorities.length > 0 && (
-            <div className="pt-4 border-t border-slate-100 space-y-2">
-              <span className="text-xs font-semibold text-slate-600 block">
+            <div className="pt-4 border-t border-[#EDF6FF] space-y-2.5">
+              <span className="text-xs font-bold text-[#0A2558] block">
                 {isManagement ? "Perhatian Eksekutif" : "Prioritas Tindak Lanjut"}
               </span>
-              <div className="divide-y divide-slate-100">
+              <div className="space-y-2">
                 {followUpPriorities.map((item) => {
                   const IconComponent = item.icon;
                   return (
@@ -1273,20 +1282,22 @@ export function ExecutiveOverviewView({
                       type="button"
                       key={item.id}
                       onClick={item.onClick}
-                      className="w-full py-2 px-1.5 rounded-lg hover:bg-amber-50/60 transition-colors flex items-center justify-between gap-3 text-left cursor-pointer group"
+                      className="w-full p-2.5 rounded-2xl bg-[#FFFBEB]/60 border border-amber-200/70 hover:bg-amber-50 transition-colors flex items-center justify-between gap-3 text-left cursor-pointer group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <IconComponent className="w-4 h-4 text-amber-600 shrink-0" />
+                        <div className="w-8 h-8 rounded-xl bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+                          <IconComponent className="w-4 h-4" />
+                        </div>
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold text-[#181343] truncate">
+                          <p className="text-xs font-semibold text-[#0A2558] truncate">
                             {item.title}
                           </p>
-                          <p className="text-[11px] text-slate-500 truncate">
+                          <p className="text-[11px] text-slate-600 truncate">
                             {item.description}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md shrink-0 tabular-nums">
+                      <span className="text-[11px] font-bold text-amber-900 bg-white border border-amber-200 px-2.5 py-0.5 rounded-full shrink-0 tabular-nums">
                         {item.badgeLabel}
                       </span>
                     </button>
@@ -1304,7 +1315,7 @@ export function ExecutiveOverviewView({
       <div ref={drillDownTableRef} className="space-y-5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div
-            className="flex items-center gap-2 shrink-0 whitespace-nowrap overflow-x-auto max-w-full"
+            className="flex items-center gap-2.5 shrink-0 whitespace-nowrap overflow-x-auto max-w-full"
             role="tablist"
             aria-label="Tampilan detail portofolio"
           >
@@ -1321,16 +1332,16 @@ export function ExecutiveOverviewView({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setDetailTab(tab.id)}
-                  className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#059669]/40 ${
+                  className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap min-h-[44px] px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
                     isSelected
-                      ? "bg-[#181343] text-white border-[#181343]"
-                      : "bg-white text-slate-700 border-[#E5E7EB] hover:bg-slate-50"
+                      ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white border-transparent shadow-sm shadow-[#1765F5]/20 font-bold"
+                      : "bg-white text-[#0A2558] border-[#DBEAFE] hover:bg-[#F4F9FF]"
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`px-1.5 py-0.5 rounded-md text-[11px] font-bold tabular-nums ${
-                      isSelected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${
+                      isSelected ? "bg-white/20 text-white" : "bg-[#EDF6FF] text-[#0A2558]"
                     }`}
                   >
                     {tab.count}
@@ -1347,8 +1358,8 @@ export function ExecutiveOverviewView({
             onClick={() =>
               onNavigateMenu(detailTab === "opportunities" ? "opportunities" : "programs")
             }
-            rightIcon={<ArrowRight className="w-3.5 h-3.5 text-[#059669]" />}
-            className="text-xs font-semibold text-[#181343] border-[#E5E7EB] hover:bg-slate-50 cursor-pointer self-start sm:self-auto"
+            rightIcon={<ArrowRight className="w-3.5 h-3.5 text-[#1765F5]" />}
+            className="text-xs font-semibold rounded-full min-h-[40px] px-4 cursor-pointer self-start sm:self-auto"
           >
             {detailTab === "opportunities"
               ? "Lihat Semua Peluang"
@@ -1362,14 +1373,22 @@ export function ExecutiveOverviewView({
         {detailTab === "programs" && (
           <>
             {filteredPrograms.length === 0 ? (
-              <div className="py-14 px-6 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
-                <Info className="w-7 h-7 text-slate-400 mx-auto" />
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-[#181343]">
+              <div className="py-10 px-6 rounded-3xl bg-white border border-[#DBEAFE] shadow-xs text-center space-y-4">
+                <div className="mx-auto w-[140px] h-[116px] flex items-center justify-center">
+                  <Image
+                    src="/images/overview/overview-empty-state.png"
+                    alt="Tidak ada data program"
+                    width={140}
+                    height={116}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-1 max-w-md mx-auto">
+                  <p className="text-sm font-bold text-[#0A2558]">
                     Tidak ada program pada filter saat ini
                   </p>
-                  <p className="text-xs text-slate-600">
-                    Ubah filter tahun, status, atau bidang fokus untuk melihat daftar program.
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Ubah filter tahun, status, atau bidang fokus untuk melihat daftar program CSR perusahaan.
                   </p>
                 </div>
                 {hasActiveFilters && (
@@ -1378,18 +1397,18 @@ export function ExecutiveOverviewView({
                     size="sm"
                     onClick={handleResetFilters}
                     leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
-                    className="text-xs font-semibold cursor-pointer"
+                    className="text-xs font-semibold rounded-full cursor-pointer"
                   >
                     Reset Filter
                   </Button>
                 )}
               </div>
             ) : (
-              <div className="rounded-2xl bg-white border border-[#E5E7EB] overflow-hidden">
+              <div className="rounded-3xl bg-white border border-[#DBEAFE] shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse min-w-[760px]">
                     <thead>
-                      <tr className="border-b border-[#E5E7EB] text-slate-600 font-bold bg-slate-50/70">
+                      <tr className="border-b border-[#DBEAFE] text-[#0A2558] font-bold bg-[#F8FBFF]">
                         <th className="py-3.5 px-5 w-[34%]">Program CSR</th>
                         <th className="py-3.5 px-4 w-[24%]">Mitra Pelaksana</th>
                         <th className="py-3.5 px-4 w-[14%]">Status</th>
@@ -1397,7 +1416,7 @@ export function ExecutiveOverviewView({
                         <th className="py-3.5 px-5 w-[10%] text-right">Rincian</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[#EDF6FF]">
                       {filteredPrograms.map((prog) => {
                         const focus =
                           FOCUS_AREA_CONFIG[prog.focusArea as keyof typeof FOCUS_AREA_CONFIG] || {
@@ -1411,7 +1430,7 @@ export function ExecutiveOverviewView({
                             : prog.status === "PLANNED"
                             ? { label: "Persiapan", variant: "blue" as const }
                             : prog.status === "COMPLETED"
-                            ? { label: "Selesai", variant: "slate" as const }
+                            ? { label: "Selesai", variant: "navy" as const }
                             : STATUS_CONFIG[prog.status as keyof typeof STATUS_CONFIG] || {
                                 label: prog.status,
                                 variant: "emerald" as const,
@@ -1438,28 +1457,28 @@ export function ExecutiveOverviewView({
                         return (
                           <React.Fragment key={prog.id}>
                             <tr
-                              className={`hover:bg-slate-50/70 transition-colors cursor-pointer ${
-                                isExpanded ? "bg-slate-50/80" : ""
+                              className={`hover:bg-[#F4F9FF]/70 transition-colors cursor-pointer ${
+                                isExpanded ? "bg-[#EDF6FF]/50" : ""
                               }`}
                               onClick={() =>
                                 setExpandedProgramId(isExpanded ? null : prog.id)
                               }
                             >
                               <td className="py-4 px-5">
-                                <p className="font-bold text-[#181343] text-[13px] line-clamp-1">
+                                <p className="font-bold text-[#0A2558] text-[13px] line-clamp-1">
                                   {prog.title}
                                 </p>
-                                <p className="text-[11px] text-slate-500 mt-0.5">
+                                <p className="text-[11px] text-slate-600 mt-0.5">
                                   {focus.label} &middot;{" "}
                                   {prog.targetCity || prog.targetProvince || "Nasional"}
                                 </p>
                               </td>
 
                               <td className="py-4 px-4">
-                                <p className="font-semibold text-[#181343]">
+                                <p className="font-semibold text-[#0A2558]">
                                   {prog.partnerName || "Mitra Pelaksana"}
                                 </p>
-                                <p className="text-[11px] text-slate-500">
+                                <p className="text-[11px] text-slate-600">
                                   {prog.partnerCity || "Indonesia"}
                                 </p>
                               </td>
@@ -1471,13 +1490,13 @@ export function ExecutiveOverviewView({
                               </td>
 
                               <td className="py-4 px-4 text-right tabular-nums">
-                                <p className="font-bold text-[#059669]">
+                                <p className="font-bold text-[#047857]">
                                   {formatCompact(spent)}{" "}
-                                  <span className="text-slate-500 font-medium">
+                                  <span className="text-slate-600 font-medium">
                                     / {formatCompact(alloc)}
                                   </span>
                                 </p>
-                                <p className="text-[11px] text-slate-500">
+                                <p className="text-[11px] text-slate-600">
                                   {progAbsorption}% terserap
                                 </p>
                               </td>
@@ -1491,7 +1510,7 @@ export function ExecutiveOverviewView({
                                   onClick={() =>
                                     setExpandedProgramId(isExpanded ? null : prog.id)
                                   }
-                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#181343] hover:text-[#059669] cursor-pointer px-1.5 py-1 rounded-md"
+                                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#0A2558] hover:text-[#1765F5] cursor-pointer px-2 py-1 rounded-lg hover:bg-[#EDF6FF]"
                                 >
                                   <span>{isExpanded ? "Tutup" : "Detail"}</span>
                                   {isExpanded ? (
@@ -1504,12 +1523,12 @@ export function ExecutiveOverviewView({
                             </tr>
 
                             {isExpanded && (
-                              <tr className="bg-slate-50/70 border-b border-[#E5E7EB]">
+                              <tr className="bg-[#F8FBFF] border-b border-[#DBEAFE]">
                                 <td colSpan={5} className="p-5">
-                                  <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] space-y-4">
-                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                                  <div className="bg-white rounded-2xl p-5 border border-[#DBEAFE] space-y-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EDF6FF] pb-3">
                                       <div>
-                                        <h4 className="text-sm font-bold text-[#181343]">
+                                        <h4 className="text-sm font-bold text-[#0A2558]">
                                           Indikator &amp; Dampak Program
                                         </h4>
                                         <p className="text-xs text-slate-600">
@@ -1521,7 +1540,7 @@ export function ExecutiveOverviewView({
                                         size="sm"
                                         onClick={() => onNavigateMenu("programs")}
                                         rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-                                        className="text-xs self-start sm:self-auto cursor-pointer"
+                                        className="text-xs rounded-full self-start sm:self-auto cursor-pointer"
                                       >
                                         {isManagement
                                           ? "Buka Pengawasan Program"
@@ -1531,16 +1550,16 @@ export function ExecutiveOverviewView({
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                       <div className="space-y-1.5">
-                                        <span className="text-xs font-semibold text-slate-500 block">
+                                        <span className="text-xs font-semibold text-slate-600 block">
                                           Penerima Manfaat
                                         </span>
-                                        <p className="text-xs text-[#181343]">
+                                        <p className="text-xs text-[#0A2558]">
                                           Target:{" "}
                                           <strong className="tabular-nums">
                                             {targetBen > 0 ? `${targetBen.toLocaleString("id-ID")} Jiwa` : "-"}
                                           </strong>
                                         </p>
-                                        <p className="text-xs text-[#059669] font-semibold">
+                                        <p className="text-xs text-[#047857] font-semibold">
                                           Realisasi:{" "}
                                           <strong className="tabular-nums">
                                             {actualBen > 0
@@ -1551,12 +1570,12 @@ export function ExecutiveOverviewView({
                                       </div>
 
                                       <div className="space-y-1.5">
-                                        <span className="text-xs font-semibold text-slate-500 block">
+                                        <span className="text-xs font-semibold text-slate-600 block">
                                           Sasaran SDGs Terkait
                                         </span>
                                         <div className="flex flex-wrap gap-1.5">
                                           {progSdgs.length === 0 ? (
-                                            <span className="text-xs text-slate-500">
+                                            <span className="text-xs text-slate-600">
                                               Belum dipetakan
                                             </span>
                                           ) : (
@@ -1567,7 +1586,7 @@ export function ExecutiveOverviewView({
                                                   key={sdgId}
                                                   className="px-2 py-0.5 rounded-md text-white text-[10px] font-bold"
                                                   style={{
-                                                    backgroundColor: sdgInfo?.color || "#059669",
+                                                    backgroundColor: sdgInfo?.color || "#047857",
                                                   }}
                                                   title={sdgInfo?.name}
                                                 >
@@ -1580,11 +1599,11 @@ export function ExecutiveOverviewView({
                                       </div>
 
                                       <div className="space-y-1.5">
-                                        <span className="text-xs font-semibold text-slate-500 block">
+                                        <span className="text-xs font-semibold text-slate-600 block">
                                           Periode Pelaksanaan
                                         </span>
-                                        <div className="flex items-center gap-1.5 text-xs text-[#181343] font-medium">
-                                          <Calendar className="w-3.5 h-3.5 text-[#059669]" />
+                                        <div className="flex items-center gap-1.5 text-xs text-[#0A2558] font-medium">
+                                          <Calendar className="w-3.5 h-3.5 text-[#1765F5]" />
                                           <span>
                                             {formatDate(prog.startDate)} s/d {formatDate(prog.endDate)}
                                           </span>
@@ -1609,23 +1628,23 @@ export function ExecutiveOverviewView({
         {/* TAB 2: SEBARAN WILAYAH & BIDANG FOKUS */}
         {detailTab === "geography" && (
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl border border-[#E5E7EB] space-y-5">
+            <div className="bg-white p-6 rounded-3xl border border-[#DBEAFE] shadow-xs space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-base font-bold text-[#181343]">
+                  <h3 className="text-base font-bold text-[#0A2558]">
                     Sebaran Bidang Fokus CSR
                   </h3>
                   <p className="text-xs text-slate-600">
                     Klik salah satu kategori tematik untuk memfilter seluruh dashboard
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-semibold text-[#0A2558] bg-[#EDF6FF] border border-[#CBE7FD] px-3 py-1 rounded-full self-start sm:self-auto">
                   {categoryDistribution.length} Kategori Aktif
                 </span>
               </div>
 
               {categoryDistribution.length === 0 ? (
-                <div className="py-8 text-center text-xs text-slate-500">
+                <div className="py-8 text-center text-xs text-slate-600">
                   Belum ada data kategori tematik untuk filter yang dipilih.
                 </div>
               ) : (
@@ -1639,14 +1658,14 @@ export function ExecutiveOverviewView({
                         onClick={() =>
                           setSelectedFocusArea(selectedFocusArea === item.key ? "ALL" : item.key)
                         }
-                        className={`p-3 rounded-xl text-left transition-colors space-y-2 cursor-pointer border ${
+                        className={`p-3 rounded-2xl text-left transition-all space-y-2 cursor-pointer border ${
                           isSelected
-                            ? "bg-emerald-50/70 border-emerald-400"
-                            : "bg-transparent border-transparent hover:bg-slate-50 hover:border-[#E5E7EB]"
+                            ? "bg-[#EDF6FF] border-[#1765F5] ring-1 ring-[#1765F5]/20"
+                            : "bg-transparent border-transparent hover:bg-[#F4F9FF] hover:border-[#CBE7FD]"
                         }`}
                       >
                         <div className="flex items-center justify-between text-xs">
-                          <span className="flex items-center gap-2 font-bold text-[#181343]">
+                          <span className="flex items-center gap-2 font-bold text-[#0A2558]">
                             <span
                               className="w-2.5 h-2.5 rounded-full shrink-0"
                               style={{ backgroundColor: item.color }}
@@ -1654,7 +1673,7 @@ export function ExecutiveOverviewView({
                             {item.label}
                           </span>
                           <span className="tabular-nums text-slate-600">
-                            <strong className="text-[#181343]">{item.count} Program</strong> &middot;{" "}
+                            <strong className="text-[#0A2558]">{item.count} Program</strong> &middot;{" "}
                             {formatCompact(item.totalBudget)} ({item.programShare}%)
                           </span>
                         </div>
@@ -1699,17 +1718,31 @@ export function ExecutiveOverviewView({
         {detailTab === "opportunities" && (
           <>
             {opportunities.length === 0 ? (
-              <div className="py-12 px-6 rounded-2xl bg-white border border-dashed border-slate-300 text-center space-y-3">
-                <p className="text-xs text-slate-600">
-                  Belum ada inisiatif peluang CSR yang dipublikasikan perusahaan.
-                </p>
+              <div className="py-10 px-6 rounded-3xl bg-white border border-[#DBEAFE] shadow-xs text-center space-y-4">
+                <div className="mx-auto w-[140px] h-[116px] flex items-center justify-center">
+                  <Image
+                    src="/images/overview/overview-empty-state.png"
+                    alt="Belum ada peluang CSR"
+                    width={140}
+                    height={116}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-1 max-w-md mx-auto">
+                  <p className="text-sm font-bold text-[#0A2558]">
+                    Belum Ada Peluang CSR Terpublikasi
+                  </p>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    Mulai publikasikan inisiatif program perusahaan agar mitra pelaksana dapat mengajukan proposal kolaborasi.
+                  </p>
+                </div>
                 {!isManagement && onOpenCreateOpportunity && (
                   <Button
                     variant="primary"
                     size="sm"
                     onClick={() => onOpenCreateOpportunity()}
                     leftIcon={<Plus className="w-4 h-4" />}
-                    className="text-xs cursor-pointer"
+                    className="text-xs rounded-full cursor-pointer"
                   >
                     Buat Peluang CSR Baru
                   </Button>
@@ -1733,11 +1766,11 @@ export function ExecutiveOverviewView({
                   return (
                     <div
                       key={opp.id}
-                      className="rounded-2xl bg-white border border-[#E5E7EB] hover:border-slate-300 transition-colors flex flex-col justify-between overflow-hidden"
+                      className="rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all flex flex-col justify-between overflow-hidden"
                     >
                       <div>
                         {opp.bannerUrl ? (
-                          <div className="h-36 overflow-hidden bg-slate-100 border-b border-[#E5E7EB]">
+                          <div className="h-36 overflow-hidden bg-[#EDF6FF] border-b border-[#DBEAFE]">
                             <img
                               src={opp.bannerUrl}
                               alt={opp.title}
@@ -1754,26 +1787,26 @@ export function ExecutiveOverviewView({
                             <Badge variant={statusCfg.variant} size="sm" hasDot={!isDraft}>
                               {statusCfg.label}
                             </Badge>
-                            <span className="text-[11px] font-medium text-slate-500">
+                            <span className="text-[11px] font-medium text-slate-600">
                               {focus.label}
                             </span>
                           </div>
 
-                          <h3 className="text-sm font-bold text-[#181343] line-clamp-2 leading-snug">
+                          <h3 className="text-sm font-bold text-[#0A2558] line-clamp-2 leading-snug">
                             {opp.title}
                           </h3>
 
-                          <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                          <div className="pt-2.5 border-t border-[#EDF6FF] flex items-center justify-between text-xs">
                             <div>
-                              <span className="text-[11px] text-slate-500 block">Alokasi</span>
-                              <span className="font-bold text-[#059669] tabular-nums">
+                              <span className="text-[11px] text-slate-600 block">Alokasi</span>
+                              <span className="font-bold text-[#047857] tabular-nums">
                                 {formatCompact(parseFloat(opp.estimatedBudget || "0") || 0)}
                               </span>
                             </div>
                             <div className="text-right">
-                              <span className="text-[11px] text-slate-500 block">Lokasi</span>
-                              <span className="font-medium text-[#181343] flex items-center gap-1 justify-end">
-                                <MapPin className="w-3 h-3 text-slate-400" />
+                              <span className="text-[11px] text-slate-600 block">Lokasi</span>
+                              <span className="font-medium text-[#0A2558] flex items-center gap-1 justify-end">
+                                <MapPin className="w-3 h-3 text-[#1765F5]" />
                                 {opp.targetCity || opp.targetProvince || "Nasional"}
                               </span>
                             </div>
@@ -1786,8 +1819,8 @@ export function ExecutiveOverviewView({
                           variant="outline"
                           size="sm"
                           onClick={() => onSelectOpportunityDetail(opp)}
-                          leftIcon={<Eye className="w-3.5 h-3.5 text-slate-600" />}
-                          className="w-full text-xs font-semibold text-[#181343] border-[#E5E7EB] hover:bg-slate-50 cursor-pointer"
+                          leftIcon={<Eye className="w-3.5 h-3.5 text-[#1765F5]" />}
+                          className="w-full text-xs font-semibold rounded-full cursor-pointer"
                         >
                           Buka Detail
                         </Button>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Image from "next/image";
 import {
   Search,
   RefreshCw,
@@ -9,14 +10,16 @@ import {
   Edit,
   Trash2,
   MapPin,
-  Calendar,
-  FileText,
   ArrowUpDown,
   Sparkles,
+  Layers,
+  Globe2,
+  FileEdit,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CardGridSkeleton } from "@/components/ui/skeleton";
+import { DashboardPageHeader } from "../../common/DashboardPageHeader";
 import { opportunityStatusEnum } from "@/db/schema/opportunities";
 import { csrFocusAreaEnum } from "@/db/schema/csr-focus-areas";
 import { OpportunityItem } from "../types";
@@ -58,7 +61,7 @@ function OpportunityCover({
   const [hasError, setHasError] = useState(false);
 
   return (
-    <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-[#F9F9FB] border-b border-[#E8E8EA]">
+    <div className="relative h-36 sm:h-40 w-full overflow-hidden bg-[#F4F9FF] border-b border-[#DBEAFE]">
       {bannerUrl && !hasError ? (
         <>
           <img
@@ -67,14 +70,14 @@ function OpportunityCover({
             onError={() => setHasError(true)}
             className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A2558]/40 via-transparent to-transparent pointer-events-none" />
         </>
       ) : (
-        <div className="w-full h-full bg-gradient-to-br from-slate-50 via-[#F9F9FB] to-slate-200/50 flex flex-col items-center justify-center p-4 text-center select-none">
-          <div className="w-10 h-10 rounded-xl bg-white border border-[#E8E8EA] shadow-2xs text-[#181343] flex items-center justify-center mb-1">
-            <Sparkles className="w-5 h-5 text-emerald-600" />
+        <div className="w-full h-full bg-gradient-to-br from-[#EDF6FF] via-[#F4F9FF] to-[#DBEAFE]/70 flex flex-col items-center justify-center p-4 text-center select-none">
+          <div className="w-10 h-10 rounded-xl bg-white border border-[#CBE7FD] shadow-2xs text-[#1765F5] flex items-center justify-center mb-1.5">
+            <Sparkles className="w-5 h-5 text-[#1765F5]" />
           </div>
-          <span className="text-[11px] font-bold text-[#181343] tracking-tight">{focusLabel}</span>
+          <span className="text-[11px] font-bold text-[#0A2558] tracking-tight">{focusLabel}</span>
         </div>
       )}
 
@@ -195,105 +198,114 @@ export function OpportunitiesManagementView({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300 w-full">
-      {/* 1. Header Identitas & Satu Tombol Utama */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1
-              className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {isManagement ? "Katalog Peluang CSR" : "Kelola Peluang CSR"}
-            </h1>
+      {/* 1. Open Canvas Page Header + Satu Tombol Utama */}
+      <DashboardPageHeader
+        title={isManagement ? "Katalog Peluang CSR" : "Kelola Peluang CSR"}
+        description={
+          isManagement
+            ? "Tinjau daftar peluang inisiatif CSR yang dibuka oleh tim operasional perusahaan untuk kolaborasi mitra."
+            : "Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat."
+        }
+        iconSrc="/images/opportunities/opportunities-header-icon.png"
+        actions={
+          <div className="flex items-center gap-2.5 flex-wrap">
             {isManagement && (
-              <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 tracking-wide uppercase">
+              <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-[#EDF6FF] text-[#0A2558] border border-[#CBE7FD] tracking-wide">
                 Akses Tinjauan (Read-Only)
               </span>
             )}
+            {!isManagement && onOpenCreateModal && (
+              <button
+                type="button"
+                onClick={onOpenCreateModal}
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#1765F5]/20 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] focus-visible:ring-offset-2"
+              >
+                <Plus aria-hidden="true" className="w-4 h-4" />
+                <span>Buat Peluang CSR</span>
+              </button>
+            )}
           </div>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1">
-            {isManagement
-              ? "Tinjau daftar peluang inisiatif CSR yang dibuka oleh tim operasional perusahaan untuk kolaborasi mitra."
-              : "Rencanakan dan kelola peluang kerja sama CSR berdasarkan kebutuhan masyarakat."}
-          </p>
+        }
+      />
+
+      {/* 2. Informasi Status Compact (Read-Only, Seragam Palet Biru) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+        <div className="p-5 rounded-3xl bg-white border border-[#DBEAFE] shadow-xs flex items-start justify-between gap-3 cursor-default">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-600 block">
+              Total Peluang
+            </span>
+            <div className="text-2xl sm:text-3xl font-extrabold text-[#0A2558] tabular-nums">
+              {oppMetrics.totalCount}
+            </div>
+            <span className="text-xs text-slate-600 block">
+              Seluruh inisiatif CSR terdaftar
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+            <Layers className="w-4 h-4" aria-hidden="true" />
+          </div>
         </div>
 
-        {/* Tombol Buat Peluang CSR (Khusus CSR_ADMIN) */}
-        {!isManagement && onOpenCreateModal && (
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={onOpenCreateModal}
-            leftIcon={<Plus className="w-4 h-4" />}
-            className="bg-[#181343] hover:bg-[#25205c] text-white font-bold rounded-xl text-xs sm:text-sm py-2.5 px-4 cursor-pointer shadow-2xs shrink-0 self-start sm:self-auto"
-          >
-            Buat Peluang CSR
-          </Button>
-        )}
-      </div>
-
-      {/* 2. Informasi Status Compact (Read-Only) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
-        <div className="p-4 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between cursor-default">
-          <span className="text-xs font-semibold text-slate-600 block">
-            Total Peluang
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1">
-            {oppMetrics.totalCount}
+        <div className="p-5 rounded-3xl bg-white border border-[#DBEAFE] shadow-xs flex items-start justify-between gap-3 cursor-default">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-600 block">
+              Peluang Terbuka
+            </span>
+            <div className="text-2xl sm:text-3xl font-extrabold text-[#1765F5] tabular-nums">
+              {oppMetrics.openCount}
+            </div>
+            <span className="text-xs text-slate-600 block">
+              Aktif menerima pengajuan mitra
+            </span>
           </div>
-          <span className="text-xs text-[#787680] block">
-            Seluruh inisiatif CSR terdaftar
-          </span>
+          <div className="w-10 h-10 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+            <Globe2 className="w-4 h-4" aria-hidden="true" />
+          </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between cursor-default">
-          <span className="text-xs font-semibold text-slate-600 block">
-            Peluang Terbuka
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[#009E75] my-1">
-            {oppMetrics.openCount}
+        <div className="p-5 rounded-3xl bg-white border border-[#DBEAFE] shadow-xs flex items-start justify-between gap-3 cursor-default">
+          <div className="space-y-1">
+            <span className="text-xs font-semibold text-slate-600 block">
+              Draf Internal
+            </span>
+            <div className="text-2xl sm:text-3xl font-extrabold text-[#0A2558] tabular-nums">
+              {oppMetrics.draftCount}
+            </div>
+            <span className="text-xs text-slate-600 block">
+              Rencana inisiatif yang disiapkan
+            </span>
           </div>
-          <span className="text-xs text-[#787680] block">
-            Aktif menerima pengajuan mitra
-          </span>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col justify-between cursor-default">
-          <span className="text-xs font-semibold text-slate-600 block">
-            Draf
-          </span>
-          <div className="text-2xl sm:text-3xl font-extrabold text-[#181343] my-1">
-            {oppMetrics.draftCount}
+          <div className="w-10 h-10 rounded-2xl bg-[#F4F9FF] border border-[#DBEAFE] text-[#0A2558] flex items-center justify-center shrink-0">
+            <FileEdit className="w-4 h-4" aria-hidden="true" />
           </div>
-          <span className="text-xs text-[#787680] block">
-            Rencana inisiatif internal
-          </span>
         </div>
       </div>
 
       {/* 3. Toolbar Pencarian & Filter Selebar Area Konten */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E8EA] shadow-2xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#DBEAFE] shadow-2xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 w-full">
         {/* Search Input */}
         <div className="relative flex-1 min-w-[240px]">
-          <Search className="w-4 h-4 text-[#787680] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             placeholder="Cari nama peluang, kata kunci, atau lokasi sasaran..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full text-xs sm:text-sm bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl pl-10 pr-4 py-2.5 outline-none transition-colors focus:bg-white focus:border-[#181343]/30 focus:ring-2 focus:ring-[#181343]/10 text-[#181343] placeholder:text-[#9A98A6]"
+            className="w-full min-h-[40px] text-xs sm:text-sm bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl pl-10 pr-4 py-2 outline-none transition-all focus:bg-white focus:border-[#1765F5] focus:ring-2 focus:ring-[#1765F5]/15 text-[#0A2558] placeholder:text-slate-400"
           />
         </div>
 
-        {/* Filter Controls (Tanpa Tombol Duplikat) */}
+        {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-3 py-2">
-            <span className="text-[11px] font-semibold text-[#787680]">Status:</span>
+          <div className="min-h-[40px] flex items-center gap-1.5 bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl px-3 py-1.5 focus-within:border-[#1765F5] focus-within:ring-2 focus-within:ring-[#1765F5]/15">
+            <span className="text-[11px] font-semibold text-slate-600">Status:</span>
             <select
+              aria-label="Filter status peluang"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-xs bg-transparent text-[#181343] font-semibold outline-none cursor-pointer"
+              className="text-xs bg-transparent text-[#0A2558] font-semibold outline-none cursor-pointer"
             >
               <option value="ALL">Semua Status</option>
               {opportunityStatusEnum.map((st) => (
@@ -305,12 +317,13 @@ export function OpportunitiesManagementView({
           </div>
 
           {/* Focus Area Filter */}
-          <div className="flex items-center gap-1.5 bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-3 py-2">
-            <span className="text-[11px] font-semibold text-[#787680]">Bidang CSR:</span>
+          <div className="min-h-[40px] flex items-center gap-1.5 bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl px-3 py-1.5 focus-within:border-[#1765F5] focus-within:ring-2 focus-within:ring-[#1765F5]/15">
+            <span className="text-[11px] font-semibold text-slate-600">Bidang CSR:</span>
             <select
+              aria-label="Filter bidang fokus peluang"
               value={focusFilter}
               onChange={(e) => setFocusFilter(e.target.value)}
-              className="text-xs bg-transparent text-[#181343] font-semibold outline-none cursor-pointer max-w-[140px] truncate"
+              className="text-xs bg-transparent text-[#0A2558] font-semibold outline-none cursor-pointer max-w-[140px] truncate"
             >
               <option value="ALL">Semua Bidang</option>
               {csrFocusAreaEnum.map((area) => (
@@ -322,12 +335,13 @@ export function OpportunitiesManagementView({
           </div>
 
           {/* Sort By */}
-          <div className="flex items-center gap-1.5 bg-[#F9F9FB] border border-[#E8E8EA] rounded-xl px-3 py-2">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#787680]" />
+          <div className="min-h-[40px] flex items-center gap-1.5 bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl px-3 py-1.5 focus-within:border-[#1765F5] focus-within:ring-2 focus-within:ring-[#1765F5]/15">
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#1765F5]" />
             <select
+              aria-label="Urutkan peluang"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-xs bg-transparent text-[#181343] font-semibold outline-none cursor-pointer"
+              className="text-xs bg-transparent text-[#0A2558] font-semibold outline-none cursor-pointer"
             >
               <option value="newest">Terbaru</option>
               <option value="oldest">Terlama</option>
@@ -341,7 +355,8 @@ export function OpportunitiesManagementView({
             type="button"
             onClick={onRefresh}
             title="Muat ulang data"
-            className="p-2.5 rounded-xl border border-[#E8E8EA] bg-[#F9F9FB] hover:bg-white text-[#787680] hover:text-[#181343] transition-colors cursor-pointer shadow-2xs"
+            aria-label="Muat ulang data peluang"
+            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl border border-[#DBEAFE] bg-[#F8FBFF] hover:bg-[#EDF6FF] text-slate-600 hover:text-[#1765F5] transition-colors cursor-pointer shadow-2xs"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -352,29 +367,37 @@ export function OpportunitiesManagementView({
       {isLoading ? (
         <CardGridSkeleton count={3} />
       ) : filteredAndSortedOpportunities.length === 0 ? (
-        <div className="py-16 px-6 rounded-2xl bg-white border border-dashed border-[#E8E8EA] text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#F9F9FB] border border-[#E8E8EA] text-[#181343] flex items-center justify-center mx-auto">
-            <FileText className="w-6 h-6" />
+        <div className="py-12 px-6 rounded-3xl bg-white border border-[#DBEAFE] shadow-xs text-center space-y-4">
+          <div className="mx-auto w-[148px] h-[120px] flex items-center justify-center">
+            <Image
+              src="/images/opportunities/opportunities-empty-state.png"
+              alt="Belum ada peluang CSR"
+              width={148}
+              height={120}
+              className="w-full h-full object-contain"
+            />
           </div>
-          <h4 className="text-base font-bold text-[#181343]">
-            {searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL"
-              ? "Tidak Ada Peluang yang Sesuai Filter"
-              : "Belum Ada Peluang CSR Dibuat"}
-          </h4>
-          <p className="text-xs text-[#787680] max-w-sm mx-auto leading-relaxed">
-            {searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL"
-              ? "Coba sesuaikan kata kunci pencarian atau ubah filter untuk menampilkan peluang."
-              : isManagement
-                ? "Belum ada peluang inisiatif kerja sama CSR yang dibuka oleh tim operasional perusahaan Anda."
-                : "Rencanakan peluang kerja sama CSR baru perusahaan Anda agar calon mitra dapat mengajukan inisiatif solutif."}
-          </p>
+          <div className="space-y-1.5 max-w-md mx-auto">
+            <h4 className="text-base font-bold text-[#0A2558]">
+              {searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL"
+                ? "Tidak Ada Peluang yang Sesuai Filter"
+                : "Belum Ada Peluang CSR Dibuat"}
+            </h4>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              {searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL"
+                ? "Coba sesuaikan kata kunci pencarian atau ubah filter untuk menampilkan peluang."
+                : isManagement
+                  ? "Belum ada peluang inisiatif kerja sama CSR yang dibuka oleh tim operasional perusahaan Anda."
+                  : "Rencanakan peluang kerja sama CSR baru perusahaan Anda agar calon mitra dapat mengajukan inisiatif solutif."}
+            </p>
+          </div>
           {!isManagement && onOpenCreateModal && !(searchQuery || statusFilter !== "ALL" || focusFilter !== "ALL") && (
             <Button
               variant="primary"
               size="sm"
               onClick={onOpenCreateModal}
               leftIcon={<Plus className="w-4 h-4" />}
-              className="bg-[#181343] hover:bg-[#25205c] text-white font-bold rounded-xl text-xs cursor-pointer mt-2"
+              className="rounded-full min-h-[44px] px-5 text-xs font-semibold cursor-pointer mt-2"
             >
               Buat Peluang CSR
             </Button>
@@ -387,10 +410,13 @@ export function OpportunitiesManagementView({
               label: opp.focusArea,
               variant: "slate" as const,
             };
-            const statusCfg = STATUS_CONFIG[opp.status] || {
-              label: opp.status,
-              variant: "navy" as const,
-            };
+            const statusCfg =
+              opp.status === "OPEN"
+                ? { label: "Buka Proposal", variant: "blue" as const }
+                : STATUS_CONFIG[opp.status] || {
+                    label: opp.status,
+                    variant: "navy" as const,
+                  };
 
             const daysLeft = getDaysRemaining(opp.deadline);
             const sdgs = getOpportunitySdgs(opp);
@@ -398,7 +424,7 @@ export function OpportunitiesManagementView({
             return (
               <div
                 key={opp.id}
-                className="rounded-2xl bg-white border border-[#E8E8EA] hover:border-slate-300 shadow-2xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 ease-out flex flex-col justify-between overflow-hidden group"
+                className="rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 ease-out flex flex-col justify-between overflow-hidden group"
               >
                 <div>
                   {/* Cover Header */}
@@ -415,7 +441,7 @@ export function OpportunitiesManagementView({
                   <div className="p-5 space-y-3">
                     {/* Judul Peluang */}
                     <div>
-                      <h3 className="text-base font-bold text-[#181343] group-hover:text-emerald-700 transition-colors line-clamp-2 leading-snug">
+                      <h3 className="text-base font-bold text-[#0A2558] group-hover:text-[#1765F5] transition-colors line-clamp-2 leading-snug">
                         {opp.title}
                       </h3>
                     </div>
@@ -423,7 +449,7 @@ export function OpportunitiesManagementView({
                     {/* Wilayah Sasaran (Di Atas SDG) */}
                     <div className="flex items-center justify-between gap-2 text-xs text-slate-600">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-[#1765F5] shrink-0" />
                         <span
                           className="font-medium truncate"
                           title={[opp.targetCity, opp.targetProvince].filter(Boolean).join(", ") || "Wilayah belum ditentukan"}
@@ -432,7 +458,7 @@ export function OpportunitiesManagementView({
                         </span>
                       </div>
                       {opp.stats?.proposalsCount !== undefined && opp.stats.proposalsCount > 0 && (
-                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full shrink-0">
+                        <span className="text-[10px] font-bold text-[#1765F5] bg-[#EDF6FF] border border-[#CBE7FD] px-2 py-0.5 rounded-full shrink-0">
                           {opp.stats.proposalsCount} Proposal
                         </span>
                       )}
@@ -457,7 +483,7 @@ export function OpportunitiesManagementView({
                         ))}
                         {sdgs.length > 4 && (
                           <span
-                            className="text-[10px] font-semibold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded shrink-0"
+                            className="text-[10px] font-semibold text-slate-600 bg-[#EDF6FF] px-1.5 py-0.5 rounded shrink-0"
                             title={sdgs.slice(4).map((s) => `${s.code}: ${s.name}`).join(", ")}
                           >
                             +{sdgs.length - 4}
@@ -467,11 +493,11 @@ export function OpportunitiesManagementView({
                     )}
 
                     {/* Metadata Strip Bersih (2 Kolom Sejajar: Estimasi Anggaran & Batas Pengajuan) */}
-                    <div className="pt-2.5 border-t border-[#F4F4F6] text-xs">
+                    <div className="pt-2.5 border-t border-[#EDF6FF] text-xs">
                       <div className="grid grid-cols-2 gap-2 items-end">
                         <div className="min-w-0">
-                          <span className="text-[11px] text-[#787680] block font-medium">Estimasi Anggaran</span>
-                          <span className="text-sm font-extrabold text-[#009E75] block truncate mt-0.5">
+                          <span className="text-[11px] text-slate-600 block font-medium">Estimasi Anggaran</span>
+                          <span className="text-sm font-extrabold text-[#1765F5] block truncate mt-0.5 tabular-nums">
                             {opp.estimatedBudget && parseFloat(opp.estimatedBudget) > 0
                               ? formatRupiah(opp.estimatedBudget)
                               : "Fleksibel"}
@@ -479,13 +505,13 @@ export function OpportunitiesManagementView({
                         </div>
 
                         <div className="text-right min-w-0">
-                          <span className="text-[11px] text-[#787680] block font-medium">Batas Pengajuan</span>
+                          <span className="text-[11px] text-slate-600 block font-medium">Batas Pengajuan</span>
                           <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                            <span className="font-semibold text-slate-800 truncate">
+                            <span className="font-semibold text-[#0A2558] truncate">
                               {opp.deadline ? formatDate(opp.deadline) : "Terbuka"}
                             </span>
                             {daysLeft !== null && daysLeft >= 0 && daysLeft <= 14 && (
-                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 shrink-0">
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
                                 Sisa {daysLeft} hr
                               </span>
                             )}
@@ -497,14 +523,14 @@ export function OpportunitiesManagementView({
                 </div>
 
                 {/* Card Action Row */}
-                <div className="p-5 pt-0 border-t border-[#F4F4F6] mt-2 flex items-center justify-between gap-2">
+                <div className="p-5 pt-3 border-t border-[#EDF6FF] flex items-center justify-between gap-2">
                   {isManagement ? (
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => onOpenDetailModal(opp)}
                       leftIcon={<Eye className="w-3.5 h-3.5" />}
-                      className="w-full text-xs font-bold text-[#181343] hover:text-[#181343] hover:bg-slate-50 border-[#E8E8EA] rounded-xl shadow-2xs cursor-pointer"
+                      className="w-full text-xs font-bold rounded-full cursor-pointer"
                     >
                       Lihat Rincian Peluang
                     </Button>
@@ -514,7 +540,7 @@ export function OpportunitiesManagementView({
                       size="sm"
                       onClick={() => onOpenEditModal(opp)}
                       leftIcon={<Edit className="w-3.5 h-3.5" />}
-                      className="flex-1 text-xs font-bold bg-[#181343] hover:bg-[#25205c] text-white rounded-xl shadow-2xs cursor-pointer"
+                      className="flex-1 text-xs font-bold rounded-full cursor-pointer"
                     >
                       Lanjutkan Draf
                     </Button>
@@ -524,7 +550,7 @@ export function OpportunitiesManagementView({
                       size="sm"
                       onClick={() => onOpenDetailModal(opp)}
                       leftIcon={<Eye className="w-3.5 h-3.5" />}
-                      className="flex-1 text-xs font-bold text-[#181343] hover:text-[#181343] hover:bg-slate-50 border-[#E8E8EA] rounded-xl shadow-2xs cursor-pointer"
+                      className="flex-1 text-xs font-bold rounded-full cursor-pointer"
                     >
                       Lihat Detail Peluang
                     </Button>
@@ -537,7 +563,7 @@ export function OpportunitiesManagementView({
                           type="button"
                           onClick={() => onOpenDetailModal(opp)}
                           title="Lihat Pratinjau Draf"
-                          className="p-2 rounded-xl text-[#787680] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl text-slate-500 hover:text-[#1765F5] hover:bg-[#EDF6FF] transition-colors cursor-pointer"
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -546,7 +572,7 @@ export function OpportunitiesManagementView({
                           type="button"
                           onClick={() => onOpenEditModal(opp)}
                           title="Edit Peluang"
-                          className="p-2 rounded-xl text-[#787680] hover:text-[#181343] hover:bg-[#F4F4F6] transition-colors cursor-pointer"
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl text-slate-500 hover:text-[#1765F5] hover:bg-[#EDF6FF] transition-colors cursor-pointer"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -557,7 +583,7 @@ export function OpportunitiesManagementView({
                           type="button"
                           onClick={() => onDeleteOpportunity(opp.id, opp.title)}
                           title="Hapus Peluang"
-                          className="p-2 rounded-xl text-[#787680] hover:text-[#BA1A1A] hover:bg-rose-50 transition-colors cursor-pointer"
+                          className="min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl text-slate-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

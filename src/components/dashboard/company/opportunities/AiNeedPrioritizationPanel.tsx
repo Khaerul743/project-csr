@@ -65,11 +65,11 @@ const EVIDENCE_BADGE: Record<
 > = {
   PLATFORM_DATA: {
     label: "Data Program SIPENA",
-    className: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    className: "bg-[#EDF6FF] text-[#1765F5] border-[#CBE7FD]",
   },
   RESIDENT_FEEDBACK: {
     label: "Suara Warga SIPENA",
-    className: "bg-[#181343]/10 text-[#181343] border-[#181343]/20",
+    className: "bg-[#F4F9FF] text-[#0A2558] border-[#DBEAFE]",
   },
   REGIONAL_CONTEXT: {
     label: "Konteks Wilayah",
@@ -83,7 +83,7 @@ const COVERAGE_META: Record<
 > = {
   RICH_DATA: {
     label: "Cakupan Data Tinggi",
-    className: "bg-emerald-50 text-emerald-800 border-emerald-200",
+    className: "bg-[#EDF6FF] text-[#1765F5] border-[#CBE7FD]",
   },
   LIMITED_DATA: {
     label: "Cakupan Data Terbatas",
@@ -201,21 +201,21 @@ export function AiNeedPrioritizationPanel({
       ? "bg-rose-50 text-rose-700 border-rose-200"
       : result?.overlapAssessment.riskLevel === "MEDIUM"
       ? "bg-amber-50 text-amber-800 border-amber-200"
-      : "bg-emerald-50 text-emerald-800 border-emerald-200";
+      : "bg-[#EDF6FF] text-[#1765F5] border-[#CBE7FD]";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-[#F9FAFB] p-4 sm:p-5 space-y-4">
+    <div className="rounded-3xl border border-[#DBEAFE] bg-[#F8FBFF] p-4 sm:p-5 space-y-4">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-start sm:items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#181343]/10 text-[#181343] flex items-center justify-center shrink-0">
-            <Sparkles className="w-4 h-4 text-[#181343]" aria-hidden="true" />
+          <div className="w-9 h-9 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-[#1765F5]" aria-hidden="true" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-[#181343]">
+            <h4 className="text-sm font-bold text-[#0A2558]">
               Asisten Rekomendasi Wilayah &amp; Prioritas (AI)
             </h4>
-            <p className="text-xs text-[#64748B]">
+            <p className="text-xs text-slate-600">
               Analisis kebutuhan masyarakat riil dan cegah tumpang tindih program CSR di lokasi sasaran.
             </p>
           </div>
@@ -225,37 +225,37 @@ export function AiNeedPrioritizationPanel({
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-expanded={isOpen}
-          className="min-h-[40px] px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-[#181343] inline-flex items-center justify-center gap-1.5 self-start sm:self-auto transition-colors cursor-pointer"
+          className="min-h-[40px] px-3.5 py-1.5 rounded-full border border-[#CBE7FD] bg-white hover:bg-[#EDF6FF] text-xs font-semibold text-[#0A2558] inline-flex items-center justify-center gap-1.5 self-start sm:self-auto transition-colors cursor-pointer"
         >
           <span>{isOpen ? "Sembunyikan Panel" : "Buka Asisten AI"}</span>
           {isOpen ? (
-            <ChevronUp className="w-4 h-4 text-slate-500" aria-hidden="true" />
+            <ChevronUp className="w-4 h-4 text-[#1765F5]" aria-hidden="true" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />
+            <ChevronDown className="w-4 h-4 text-[#1765F5]" aria-hidden="true" />
           )}
         </button>
       </div>
 
       {isOpen && (
-        <div className="pt-2 border-t border-slate-200 space-y-4">
+        <div className="pt-3 border-t border-[#DBEAFE] space-y-4">
           {/* Action Trigger Card */}
-          <div className="bg-white rounded-xl border border-slate-200 p-3.5 space-y-3">
+          <div className="bg-white rounded-2xl border border-[#DBEAFE] p-3.5 space-y-3">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-              {/* Sisi Kiri: Informasi Target (Sejajar satu baris) */}
+              {/* Sisi Kiri: Informasi Target */}
               <div className="min-w-0">
                 {currentLocationReady ? (
                   <div className="flex items-center gap-2 text-xs text-slate-700 flex-wrap">
-                    <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <MapPin className="w-4 h-4 text-[#1765F5] shrink-0" />
                     <span>
                       Target Analisis:{" "}
-                      <strong className="text-[#181343]">
+                      <strong className="text-[#0A2558]">
                         {targetCity}, {targetProvince}
                       </strong>
                     </span>
-                    <span className="text-slate-300">|</span>
+                    <span className="text-[#CBE7FD]">|</span>
                     <span>
                       Fokus:{" "}
-                      <strong className="text-[#181343]">
+                      <strong className="text-[#0A2558]">
                         {FOCUS_AREA_CONFIG[focusArea]?.label || focusArea}
                       </strong>
                     </span>
@@ -270,19 +270,19 @@ export function AiNeedPrioritizationPanel({
                 )}
               </div>
 
-              {/* Sisi Kanan: Tombol Sejajar (Catatan Lapangan & Tombol Analisis) */}
+              {/* Sisi Kanan: Tombol Sejajar */}
               <div className="flex items-center gap-2 self-start lg:self-auto shrink-0 flex-wrap">
                 {currentLocationReady && (
                   <button
                     type="button"
                     onClick={() => setShowNotes((prev) => !prev)}
-                    className={`min-h-[38px] px-3 py-1.5 rounded-xl border text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                    className={`min-h-[38px] px-3.5 py-1.5 rounded-full border text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       showNotes || fieldContextNotes.trim()
-                        ? "bg-emerald-50 border-emerald-300 text-emerald-800"
-                        : "bg-white hover:bg-slate-50 border-slate-200 text-[#181343]"
+                        ? "bg-[#EDF6FF] border-[#1765F5] text-[#0A2558]"
+                        : "bg-white hover:bg-[#F4F9FF] border-[#CBE7FD] text-[#0A2558]"
                     }`}
                   >
-                    <FileText className="w-3.5 h-3.5 text-slate-500" />
+                    <FileText className="w-3.5 h-3.5 text-[#1765F5]" />
                     <span>
                       {showNotes
                         ? "Tutup Catatan"
@@ -297,7 +297,7 @@ export function AiNeedPrioritizationPanel({
                   type="button"
                   onClick={handleAnalyze}
                   disabled={isAnalyzing || !currentLocationReady}
-                  className="min-h-[38px] px-4 py-1.5 rounded-xl bg-[#181343] hover:bg-[#26224C] disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shrink-0 transition-colors cursor-pointer shadow-2xs"
+                  className="min-h-[38px] px-4 py-1.5 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shrink-0 transition-all cursor-pointer shadow-sm shadow-[#1765F5]/20"
                 >
                   {isAnalyzing ? (
                     <>
@@ -311,7 +311,7 @@ export function AiNeedPrioritizationPanel({
                     </>
                   ) : (
                     <>
-                      <Sparkles className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+                      <Sparkles className="w-4 h-4 text-sky-200" aria-hidden="true" />
                       <span>Analisis Wilayah Ini</span>
                     </>
                   )}
@@ -321,18 +321,18 @@ export function AiNeedPrioritizationPanel({
 
             {/* Collapsible Field Notes Box */}
             {showNotes && (
-              <div className="space-y-2 pt-2.5 border-t border-slate-100 animate-in fade-in">
+              <div className="space-y-2 pt-2.5 border-t border-[#EDF6FF] animate-in fade-in">
                 <div className="flex items-center justify-between">
                   <label
                     htmlFor="ai-need-field-context"
-                    className="text-xs font-semibold text-[#181343]"
+                    className="text-xs font-semibold text-[#0A2558]"
                   >
                     Catatan Survei Awal / Kondisi Lapangan (Opsional)
                   </label>
                   <button
                     type="button"
                     onClick={() => setShowNotes(false)}
-                    className="text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer"
+                    className="text-[11px] text-slate-500 hover:text-[#0A2558] cursor-pointer"
                   >
                     Tutup
                   </button>
@@ -343,7 +343,7 @@ export function AiNeedPrioritizationPanel({
                   value={fieldContextNotes}
                   onChange={(e) => setFieldContextNotes(e.target.value)}
                   placeholder="Contoh: Kawasan pesisir sering banjir rob, pelaku UMKM olahan ikan butuh sanitasi..."
-                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-[#F8FAFC] text-xs text-[#181343] placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#181343] focus:ring-2 focus:ring-[#181343]/15 transition resize-y"
+                  className="w-full p-2.5 rounded-xl border border-[#DBEAFE] bg-[#F8FBFF] text-xs text-[#0A2558] placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#1765F5] focus:ring-2 focus:ring-[#1765F5]/15 transition resize-y"
                 />
               </div>
             )}
@@ -353,7 +353,7 @@ export function AiNeedPrioritizationPanel({
           {errorMessage && (
             <div
               role="alert"
-              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in"
+              className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in"
             >
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" aria-hidden="true" />
               <div className="flex-1">
@@ -367,21 +367,21 @@ export function AiNeedPrioritizationPanel({
           {appliedNotice && (
             <div
               role="status"
-              className="p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-900 font-semibold flex items-center gap-2 animate-in fade-in"
+              className="p-3 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-xs text-[#0A2558] font-semibold flex items-center gap-2 animate-in fade-in"
             >
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
+              <CheckCircle2 className="w-4 h-4 text-[#1765F5] shrink-0" aria-hidden="true" />
               <span>{appliedNotice}</span>
             </div>
           )}
 
           {/* Loading Skeleton */}
           {isAnalyzing && (
-            <div className="p-6 rounded-xl bg-white border border-slate-200 text-center space-y-2 animate-in fade-in">
-              <Loader2 className="w-6 h-6 animate-spin text-[#181343] mx-auto" aria-hidden="true" />
-              <p className="text-xs font-bold text-[#181343]">
+            <div className="p-6 rounded-2xl bg-white border border-[#DBEAFE] text-center space-y-2 animate-in fade-in">
+              <Loader2 className="w-6 h-6 animate-spin text-[#1765F5] mx-auto" aria-hidden="true" />
+              <p className="text-xs font-bold text-[#0A2558]">
                 Memeriksa data program CSR, peluang aktif, dan suara warga di {targetCity}...
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-600">
                 Menyusun pemetaan tumpang tindih sektor serta rekomendasi intervensi terprioritas.
               </p>
             </div>
@@ -389,7 +389,7 @@ export function AiNeedPrioritizationPanel({
 
           {/* Stale Notice */}
           {!isAnalyzing && isStale && (
-            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between gap-2 animate-in fade-in">
+            <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between gap-2 animate-in fade-in">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" aria-hidden="true" />
                 <span>
@@ -401,12 +401,12 @@ export function AiNeedPrioritizationPanel({
 
           {/* Empty State before running */}
           {!isAnalyzing && !result && !errorMessage && currentLocationReady && (
-            <div className="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center space-y-1">
-              <Compass className="w-5 h-5 text-emerald-600 mx-auto" aria-hidden="true" />
-              <p className="text-xs font-semibold text-[#181343]">
+            <div className="p-4 rounded-2xl bg-white border border-dashed border-[#CBE7FD] text-center space-y-1">
+              <Compass className="w-5 h-5 text-[#1765F5] mx-auto" aria-hidden="true" />
+              <p className="text-xs font-semibold text-[#0A2558]">
                 Siap Menganalisis Prioritas Wilayah {targetCity}
               </p>
-              <p className="text-xs text-slate-500 max-w-md mx-auto">
+              <p className="text-xs text-slate-600 max-w-md mx-auto">
                 Klik tombol <strong>Analisis Wilayah Ini</strong> untuk memeriksa potensi tumpang tindih sektor dan rekomendasi sasaran program.
               </p>
             </div>
@@ -416,11 +416,11 @@ export function AiNeedPrioritizationPanel({
           {!isAnalyzing && result && (
             <div className="space-y-4 animate-in fade-in duration-200">
               {/* 1. Ringkasan Kejenuhan Sektor & Status Risiko */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-100">
+              <div className="bg-white rounded-2xl border border-[#DBEAFE] p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-[#EDF6FF]">
                   <div className="flex items-center gap-2">
-                    <ShieldAlert className="w-4 h-4 text-[#181343]" aria-hidden="true" />
-                    <span className="text-xs font-bold text-[#181343]">
+                    <ShieldAlert className="w-4 h-4 text-[#1765F5]" aria-hidden="true" />
+                    <span className="text-xs font-bold text-[#0A2558]">
                       Status Tumpang Tindih Sektor di {result.regionalSnapshot.targetCity}
                     </span>
                   </div>
@@ -435,7 +435,7 @@ export function AiNeedPrioritizationPanel({
 
                 {/* Sektor Padat vs Celah Kebutuhan */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
-                  <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                  <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE] space-y-1">
                     <span className="text-[11px] font-semibold text-slate-600 block">
                       Sektor Sudah Terisi / Padat:
                     </span>
@@ -444,19 +444,19 @@ export function AiNeedPrioritizationPanel({
                         {result.overlapAssessment.crowdedFocusAreas.map((area) => (
                           <span
                             key={`crowd-${area}`}
-                            className="px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold"
+                            className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold"
                           >
                             {FOCUS_AREA_CONFIG[area]?.label || area}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-slate-500 text-[11px]">Belum ada sektor yang jenuh.</span>
+                      <span className="text-slate-600 text-[11px]">Belum ada sektor yang jenuh.</span>
                     )}
                   </div>
 
-                  <div className="p-2.5 rounded-lg bg-emerald-50/50 border border-emerald-200 space-y-1">
-                    <span className="text-[11px] font-semibold text-emerald-800 block">
+                  <div className="p-2.5 rounded-xl bg-[#EDF6FF] border border-[#CBE7FD] space-y-1">
+                    <span className="text-[11px] font-semibold text-[#0A2558] block">
                       Sektor Minim Intervensi (Celah Prioritas):
                     </span>
                     {result.overlapAssessment.underservedFocusAreas.length > 0 ? (
@@ -464,14 +464,14 @@ export function AiNeedPrioritizationPanel({
                         {result.overlapAssessment.underservedFocusAreas.map((area) => (
                           <span
                             key={`gap-${area}`}
-                            className="px-2 py-0.5 rounded bg-emerald-100/70 border border-emerald-300 text-emerald-900 text-[11px] font-semibold"
+                            className="px-2 py-0.5 rounded-full bg-white border border-[#CBE7FD] text-[#1765F5] text-[11px] font-semibold"
                           >
                             {FOCUS_AREA_CONFIG[area]?.label || area}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-slate-500 text-[11px]">Distribusi program relatif merata.</span>
+                      <span className="text-slate-600 text-[11px]">Distribusi program relatif merata.</span>
                     )}
                   </div>
                 </div>
@@ -480,10 +480,10 @@ export function AiNeedPrioritizationPanel({
               {/* 2. Daftar Rekomendasi Prioritas Utama */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#181343] block">
+                  <span className="text-xs font-bold text-[#0A2558] block">
                     Rekomendasi Prioritas Kebutuhan Masyarakat ({result.priorityNeeds.length})
                   </span>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-slate-600">
                     Klik tombol untuk langsung menyelaraskan formulir
                   </span>
                 </div>
@@ -498,15 +498,14 @@ export function AiNeedPrioritizationPanel({
                     return (
                       <div
                         key={`priority-${item.rank}-${item.focusArea}`}
-                        className={`bg-white rounded-xl border p-4 space-y-3 transition-colors ${
-                          isApplied ? "border-emerald-500 bg-emerald-50/20" : "border-slate-200"
+                        className={`bg-white rounded-2xl border p-4 space-y-3 transition-colors ${
+                          isApplied ? "border-[#1765F5] bg-[#EDF6FF]/40 ring-1 ring-[#1765F5]/20" : "border-[#DBEAFE]"
                         }`}
                       >
-                        {/* Priority Header: Badges row, then Title & Description with balanced spacing */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-2 flex-wrap">
                             <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="w-5 h-5 rounded-md bg-[#181343] text-white text-[11px] font-bold inline-flex items-center justify-center">
+                              <span className="w-5 h-5 rounded-md bg-[#1765F5] text-white text-[11px] font-bold inline-flex items-center justify-center">
                                 #{item.rank}
                               </span>
                               <span className={`px-2 py-0.5 rounded-full border text-[11px] font-bold ${urgency.className}`}>
@@ -517,13 +516,13 @@ export function AiNeedPrioritizationPanel({
                               </span>
                             </div>
 
-                            <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 text-[11px] font-semibold text-[#181343] shrink-0">
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] text-[11px] font-semibold text-[#0A2558] shrink-0">
                               {FOCUS_AREA_CONFIG[item.focusArea]?.label || item.focusArea}
                             </span>
                           </div>
 
                           <div className="space-y-1.5 pt-0.5">
-                            <h5 className="text-[14px] sm:text-[15px] font-bold text-[#181343] leading-snug">
+                            <h5 className="text-[14px] sm:text-[15px] font-bold text-[#0A2558] leading-snug">
                               {item.needTitle}
                             </h5>
                             <p className="text-xs text-slate-600 leading-relaxed">
@@ -533,18 +532,18 @@ export function AiNeedPrioritizationPanel({
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                            <span className="font-semibold text-[#181343] flex items-center gap-1.5 text-[11px]">
-                              <Layers className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                          <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE]">
+                            <span className="font-semibold text-[#0A2558] flex items-center gap-1.5 text-[11px]">
+                              <Layers className="w-3.5 h-3.5 text-[#1765F5]" aria-hidden="true" />
                               Saran Intervensi:
                             </span>
                             <p className="text-slate-700 mt-0.5 leading-relaxed text-[11px]">
                               {item.recommendedIntervention}
                             </p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                            <span className="font-semibold text-[#181343] flex items-center gap-1.5 text-[11px]">
-                              <Users className="w-3.5 h-3.5 text-[#181343]" aria-hidden="true" />
+                          <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE]">
+                            <span className="font-semibold text-[#0A2558] flex items-center gap-1.5 text-[11px]">
+                              <Users className="w-3.5 h-3.5 text-[#1765F5]" aria-hidden="true" />
                               Sasaran Penerima:
                             </span>
                             <p className="text-slate-700 mt-0.5 leading-relaxed text-[11px]">
@@ -554,13 +553,13 @@ export function AiNeedPrioritizationPanel({
                         </div>
 
                         {/* Bottom Row: SDGs & Action Button */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-slate-100">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-[#EDF6FF]">
                           <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-600">
                             <span className="font-semibold">SDGs Terkait:</span>
                             {item.suggestedSdgs.map((sdgId) => (
                               <span
                                 key={`p-${item.rank}-sdg-${sdgId}`}
-                                className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 font-bold text-[#181343]"
+                                className="px-2 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-bold text-[#0A2558]"
                               >
                                 SDG {sdgId}
                               </span>
@@ -577,10 +576,10 @@ export function AiNeedPrioritizationPanel({
                                 feedbackMessage: `Prioritas #${item.rank} (${FOCUS_AREA_CONFIG[item.focusArea]?.label || item.focusArea}) beserta SDGs & draf deskripsi berhasil diterapkan.`,
                               })
                             }
-                            className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1.5 shrink-0 transition-colors cursor-pointer ${
+                            className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-semibold inline-flex items-center justify-center gap-1.5 shrink-0 transition-all cursor-pointer ${
                               isApplied
-                                ? "bg-emerald-600 text-white shadow-xs"
-                                : "bg-[#181343] hover:bg-[#26224C] text-white"
+                                ? "bg-[#0A2558] text-white shadow-xs"
+                                : "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 text-white shadow-sm shadow-[#1765F5]/20"
                             }`}
                           >
                             <Check className="w-3.5 h-3.5" aria-hidden="true" />
@@ -598,11 +597,11 @@ export function AiNeedPrioritizationPanel({
               </div>
 
               {/* 3. Draf Deskripsi Siap Pakai */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+              <div className="bg-white rounded-2xl border border-[#DBEAFE] p-4 space-y-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5">
-                    <FileText className="w-4 h-4 text-[#181343]" />
-                    <span className="text-xs font-bold text-[#181343]">
+                    <FileText className="w-4 h-4 text-[#1765F5]" />
+                    <span className="text-xs font-bold text-[#0A2558]">
                       Draf Kalimat Rekomendasi untuk Deskripsi
                     </span>
                   </div>
@@ -611,7 +610,7 @@ export function AiNeedPrioritizationPanel({
                   </p>
                 </div>
 
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                <div className="p-3 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE] text-xs text-slate-700 leading-relaxed">
                   {result.formSuggestions.draftDescriptionSnippet}
                 </div>
 
@@ -624,10 +623,10 @@ export function AiNeedPrioritizationPanel({
                         feedbackMessage: "Draf paragraf prioritas berhasil disisipkan ke kolom deskripsi.",
                       })
                     }
-                    className={`min-h-[38px] px-3.5 py-1.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                    className={`min-h-[38px] px-4 py-1.5 rounded-full border text-xs font-semibold transition-colors cursor-pointer ${
                       appliedActionId === "draft-desc"
-                        ? "bg-emerald-50 border-emerald-400 text-emerald-800"
-                        : "border-slate-300 bg-white hover:bg-slate-50 text-[#181343]"
+                        ? "bg-[#EDF6FF] border-[#1765F5] text-[#0A2558]"
+                        : "border-[#CBE7FD] bg-white hover:bg-[#EDF6FF] text-[#0A2558]"
                     }`}
                   >
                     {appliedActionId === "draft-desc"
@@ -645,11 +644,7 @@ export function AiNeedPrioritizationPanel({
                         feedbackMessage: `Fokus (${FOCUS_AREA_CONFIG[result.formSuggestions.recommendedFocusArea]?.label}), SDGs rekomendasi, dan draf deskripsi berhasil diterapkan.`,
                       })
                     }
-                    className={`min-h-[38px] px-4 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
-                      appliedActionId === "apply-all"
-                        ? "bg-emerald-700 text-white"
-                        : "bg-emerald-700 hover:bg-emerald-800 text-white"
-                    }`}
+                    className="min-h-[38px] px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 text-white shadow-sm shadow-[#1765F5]/20"
                   >
                     {appliedActionId === "apply-all"
                       ? "✓ Semua Rekomendasi Diterapkan"
@@ -659,14 +654,14 @@ export function AiNeedPrioritizationPanel({
               </div>
 
               {/* 4. Accordion: Detail Data & Konteks Wilayah */}
-              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div className="bg-white rounded-2xl border border-[#DBEAFE] overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setShowDetails((prev) => !prev)}
-                  className="w-full p-3.5 text-left flex items-center justify-between text-xs font-semibold text-[#181343] hover:bg-slate-50 transition cursor-pointer"
+                  className="w-full p-3.5 text-left flex items-center justify-between text-xs font-semibold text-[#0A2558] hover:bg-[#F4F9FF] transition cursor-pointer"
                 >
                   <span className="flex items-center gap-2">
-                    <Info className="w-4 h-4 text-emerald-600" />
+                    <Info className="w-4 h-4 text-[#1765F5]" />
                     <span>
                       {showDetails
                         ? "Sembunyikan Detail Statistik & Potensi Wilayah"
@@ -674,39 +669,39 @@ export function AiNeedPrioritizationPanel({
                     </span>
                   </span>
                   {showDetails ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
+                    <ChevronUp className="w-4 h-4 text-slate-500" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-4 h-4 text-slate-500" />
                   )}
                 </button>
 
                 {showDetails && (
-                  <div className="p-4 pt-1 border-t border-slate-100 space-y-3.5 animate-in fade-in">
+                  <div className="p-4 pt-2 border-t border-[#EDF6FF] space-y-3.5 animate-in fade-in">
                     {/* Snapshot 4 KPIs */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                        <span className="text-[11px] text-slate-500 block">Program Wilayah</span>
-                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                      <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE]">
+                        <span className="text-[11px] text-slate-600 block">Program Wilayah</span>
+                        <span className="text-sm font-bold text-[#0A2558] mt-0.5 block">
                           {result.regionalSnapshot.programsInCity} Kota / {result.regionalSnapshot.programsInProvince} Prov
                         </span>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                        <span className="text-[11px] text-slate-500 block">Peluang Aktif</span>
-                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                      <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE]">
+                        <span className="text-[11px] text-slate-600 block">Peluang Aktif</span>
+                        <span className="text-sm font-bold text-[#1765F5] mt-0.5 block">
                           {result.regionalSnapshot.openOpportunitiesInRegion} peluang
                         </span>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                        <span className="text-[11px] text-slate-500 block">Suara Warga</span>
-                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                      <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE]">
+                        <span className="text-[11px] text-slate-600 block">Suara Warga</span>
+                        <span className="text-sm font-bold text-[#0A2558] mt-0.5 block">
                           {result.regionalSnapshot.totalReviewsInRegion > 0
                             ? `${result.regionalSnapshot.averageRatingInRegion}/5 (${result.regionalSnapshot.totalReviewsInRegion} ulasan)`
                             : "Belum ada ulasan"}
                         </span>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                        <span className="text-[11px] text-slate-500 block">Mitra Lokal Aktif</span>
-                        <span className="text-sm font-bold text-[#181343] mt-0.5 block">
+                      <div className="p-2.5 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE]">
+                        <span className="text-[11px] text-slate-600 block">Mitra Lokal Aktif</span>
+                        <span className="text-sm font-bold text-[#0A2558] mt-0.5 block">
                           {result.regionalSnapshot.localPartnersReady} NGO ({result.regionalSnapshot.verifiedPartnersReady} verif)
                         </span>
                       </div>
@@ -714,16 +709,16 @@ export function AiNeedPrioritizationPanel({
 
                     {/* Potensi & Celah Wilayah */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                        <span className="font-semibold text-[#181343] block">
+                      <div className="p-3 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE] space-y-1">
+                        <span className="font-semibold text-[#0A2558] block">
                           Kondisi &amp; Potensi Ekosistem:
                         </span>
                         <p className="text-slate-600 leading-relaxed text-[11px]">
                           {result.regionalPotentialSummary.conditionsAndPotential}
                         </p>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                        <span className="font-semibold text-[#181343] block">
+                      <div className="p-3 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE] space-y-1">
+                        <span className="font-semibold text-[#0A2558] block">
                           Kebutuhan Belum Terpenuhi:
                         </span>
                         <p className="text-slate-600 leading-relaxed text-[11px]">
@@ -732,9 +727,9 @@ export function AiNeedPrioritizationPanel({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1">
                       <span>Basis data: {result.regionalPotentialSummary.basisNote}</span>
-                      <span className={`px-2 py-0.5 rounded border font-semibold ${COVERAGE_META[result.regionalSnapshot.dataCoverage].className}`}>
+                      <span className={`px-2 py-0.5 rounded-full border font-semibold ${COVERAGE_META[result.regionalSnapshot.dataCoverage].className}`}>
                         {COVERAGE_META[result.regionalSnapshot.dataCoverage].label}
                       </span>
                     </div>
@@ -745,8 +740,8 @@ export function AiNeedPrioritizationPanel({
           )}
 
           {/* Decision Support Disclaimer */}
-          <div className="flex items-start gap-2 text-[11px] text-slate-500 bg-white p-3 rounded-xl border border-slate-200">
-            <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="flex items-start gap-2 text-[11px] text-slate-600 bg-white p-3 rounded-xl border border-[#DBEAFE]">
+            <Info className="w-3.5 h-3.5 text-[#1765F5] shrink-0 mt-0.5" aria-hidden="true" />
             <span>
               <strong>Catatan:</strong> Asisten AI dirancang sebagai pendukung pertimbangan strategis perusahaan berbasis data program SIPENA dan kondisi wilayah, bukan ketetapan mutlak sistem.
             </span>

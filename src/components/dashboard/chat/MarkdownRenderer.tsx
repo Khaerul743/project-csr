@@ -40,7 +40,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
         return (
           <code
             key={index}
-            className="px-1.5 py-0.5 rounded-md bg-slate-100 text-emerald-800 text-[12px] font-mono font-semibold border border-slate-200/80"
+            className="px-1.5 py-0.5 rounded-md bg-[#EDF6FF] text-[#0A2558] text-[12px] font-mono font-semibold border border-[#CBE7FD]"
           >
             {part.slice(1, -1)}
           </code>
@@ -77,7 +77,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
           return (
             <h4
               key={idx}
-              className="text-sm font-extrabold text-[#181343] mt-3.5 mb-1 flex items-center gap-1.5"
+              className="text-sm font-extrabold text-[#0A2558] mt-3.5 mb-1 flex items-center gap-1.5"
             >
               {renderInline(line.slice(4))}
             </h4>
@@ -89,7 +89,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
           return (
             <h3
               key={idx}
-              className="text-base font-extrabold text-[#181343] mt-4 mb-1.5 border-b border-slate-100 pb-1"
+              className="text-base font-extrabold text-[#0A2558] mt-4 mb-1.5 border-b border-[#DBEAFE]/80 pb-1"
             >
               {renderInline(line.slice(3))}
             </h3>
@@ -99,7 +99,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
         // Headings: #
         if (line.startsWith("# ")) {
           return (
-            <h2 key={idx} className="text-lg font-black text-[#181343] mt-4 mb-2">
+            <h2 key={idx} className="text-lg font-black text-[#0A2558] mt-4 mb-2">
               {renderInline(line.slice(2))}
             </h2>
           );
@@ -115,7 +115,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
           return (
             <div
               key={idx}
-              className="my-2 p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 text-emerald-950 text-xs font-medium leading-relaxed flex items-start gap-2 shadow-xs"
+              className="my-2 p-3 rounded-2xl bg-[#F4F9FF] border border-[#CBE7FD] text-[#0A2558] text-xs font-medium leading-relaxed flex items-start gap-2 shadow-2xs"
             >
               <div className="flex-1">{renderInline(trimmed)}</div>
             </div>
@@ -127,7 +127,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
         if (numberedMatch) {
           return (
             <div key={idx} className="flex items-start gap-2.5 my-1.5 pl-0.5">
-              <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 border border-emerald-200/50">
+              <span className="w-5 h-5 rounded-full bg-[#EDF6FF] text-[#0A2558] text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5 border border-[#CBE7FD]">
                 {numberedMatch[1]}
               </span>
               <div className="flex-1 text-slate-800 font-medium">
@@ -142,7 +142,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
         if (indentedBulletMatch) {
           return (
             <div key={idx} className="flex items-start gap-2 my-1 pl-6 text-[13px] text-slate-700">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 mt-2" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5EB8FF] shrink-0 mt-2" />
               <div className="flex-1 leading-relaxed">
                 {renderInline(indentedBulletMatch[2])}
               </div>
@@ -155,7 +155,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
         if (rootBulletMatch) {
           return (
             <div key={idx} className="flex items-start gap-2.5 my-1.5 pl-1.5 text-slate-800">
-              <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0 mt-2" />
+              <span className="w-2 h-2 rounded-full bg-[#1765F5] shrink-0 mt-2" />
               <div className="flex-1 leading-relaxed">
                 {renderInline(rootBulletMatch[1])}
               </div>
@@ -174,7 +174,7 @@ export function MarkdownRenderer({ content, isTyping }: MarkdownRendererProps) {
       {/* Blinking Typing Cursor */}
       {isTyping && (
         <span
-          className="inline-block w-1.5 h-4 ml-1 bg-emerald-600 rounded-xs animate-pulse align-middle"
+          className="inline-block w-1.5 h-4 ml-1 bg-[#1765F5] rounded-xs animate-pulse align-middle"
           title="Mengetik..."
         />
       )}

@@ -57,20 +57,20 @@ export function Modal({
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidthStyles[maxWidth]} max-h-[90vh] bg-white rounded-2xl border border-slate-200 shadow-2xl z-10 flex flex-col overflow-hidden my-auto transition-all animate-in zoom-in-95 duration-200`}
+        className={`relative w-full ${maxWidthStyles[maxWidth]} max-h-[90vh] bg-white rounded-3xl border border-[#DBEAFE] shadow-2xl z-10 flex flex-col overflow-hidden my-auto transition-all animate-in zoom-in-95 duration-200`}
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 shrink-0">
+        <div className="flex items-start justify-between p-6 pb-4 border-b border-[#DBEAFE]/80 bg-[#F8FBFF]/75 shrink-0">
           <div>
             {title && (
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+              <h3 className="text-lg sm:text-xl font-extrabold text-[#0A2558] tracking-tight">
                 {title}
               </h3>
             )}
             {description && (
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                 {description}
               </p>
             )}
@@ -78,9 +78,10 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            aria-label="Tutup dialog"
+            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-slate-500 hover:text-[#0A2558] hover:bg-[#EDF6FF] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5]"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -89,7 +90,7 @@ export function Modal({
 
         {/* Optional Sticky Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/70 shrink-0 flex items-center justify-end gap-3 rounded-b-2xl">
+          <div className="px-6 py-4 border-t border-[#DBEAFE]/80 bg-[#F8FBFF]/80 shrink-0 flex items-center justify-end gap-3 rounded-b-3xl">
             {footer}
           </div>
         )}

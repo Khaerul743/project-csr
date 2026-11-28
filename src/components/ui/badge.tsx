@@ -15,21 +15,21 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variantStyles = {
-    navy: "bg-[#181343]/10 text-[#181343] border-[#181343]/20",
+    navy: "bg-[#0A2558]/10 text-[#0A2558] border-[#0A2558]/20",
     red: "bg-red-50 text-red-700 border-red-200/80",
-    emerald: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
-    blue: "bg-blue-50 text-blue-700 border-blue-200/80",
+    emerald: "bg-[#ECFDF5] text-[#065F46] border-emerald-200",
+    blue: "bg-[#EDF6FF] text-[#1D4ED8] border-[#BFDBFE]",
     rose: "bg-rose-50 text-rose-700 border-rose-200/80",
-    amber: "bg-amber-50 text-amber-700 border-amber-200/80",
-    purple: "bg-purple-50 text-purple-700 border-purple-200/80",
+    amber: "bg-amber-50 text-amber-800 border-amber-200/80",
+    purple: "bg-purple-50 text-purple-800 border-purple-200/80",
     slate: "bg-slate-100 text-slate-700 border-slate-200/80",
   };
 
   const dotColors = {
-    navy: "bg-[#181343]",
+    navy: "bg-[#0A2558]",
     red: "bg-red-500",
-    emerald: "bg-emerald-500",
-    blue: "bg-blue-500",
+    emerald: "bg-[#047857]",
+    blue: "bg-[#1765F5]",
     rose: "bg-rose-500",
     amber: "bg-amber-500",
     purple: "bg-purple-500",

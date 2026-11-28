@@ -154,9 +154,9 @@ export function PartnerSidebar({
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-white text-[#181343] border-r border-[#E5E7EB] select-none">
-      {/* 1. Header & Brand - Tepat h-[72px], Nama Lembaga di bawah SIPENA dengan Truncate (...) */}
-      <div className="h-[72px] px-5 border-b border-[#E5E7EB] flex items-center justify-between shrink-0">
+    <div className="flex flex-col h-full bg-white text-[#0A2558] border-r border-[#DBEAFE]/80 select-none">
+      {/* 1. Header & Brand - Tepat h-[74px], Logo Terpadu Landing Page & Nama Lembaga dengan Truncate */}
+      <div className="h-[74px] px-5 border-b border-[#DBEAFE]/80 flex items-center justify-between gap-2 shrink-0">
         <AppLogo
           size="md"
           theme="light"
@@ -166,19 +166,20 @@ export function PartnerSidebar({
 
         {/* Mobile close button */}
         <button
+          type="button"
           onClick={onCloseMobile}
-          className="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-[#181343] hover:bg-slate-100 transition-colors cursor-pointer shrink-0"
+          className="lg:hidden min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl text-slate-500 hover:text-[#0A2558] hover:bg-[#EDF6FF] transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5]"
           aria-label="Tutup Menu"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
       </div>
 
-      {/* 2. Navigation Sections (Langsung ke menu navigasi, tanpa bar repetitif 'Workspace Mitra') */}
+      {/* 2. Navigation Sections */}
       <div className="flex-1 overflow-y-auto px-3.5 py-4 pb-8 space-y-6">
         {navigationSections.map((section) => (
           <div key={section.title} className="space-y-1">
-            <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-600">
               {section.title}
             </h3>
             <div className="space-y-1 pt-1.5">
@@ -188,15 +189,16 @@ export function PartnerSidebar({
                 return (
                   <button
                     key={item.id}
+                    type="button"
                     onClick={() => handleItemClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group ${isActive
-                      ? "bg-[#181343] text-white shadow-xs font-bold"
-                      : "text-[#181343] hover:bg-[#F4F4F6] hover:text-[#181343]"
+                    className={`w-full min-h-[40px] flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${isActive
+                      ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20 font-bold"
+                      : "text-[#0A2558] hover:bg-[#EDF6FF] hover:text-[#1765F5]"
                       }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon
-                        className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-white" : "text-[#787680] group-hover:text-[#181343]"
+                        className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-white" : "text-slate-500 group-hover:text-[#1765F5]"
                           }`}
                       />
                       <span className="truncate">{item.label}</span>
@@ -205,9 +207,9 @@ export function PartnerSidebar({
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {item.count !== undefined && item.count > 0 && (
                         <span
-                          className={`min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${isActive
+                          className={`min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${isActive
                             ? "bg-white/20 text-white"
-                            : "bg-[#ECEAF8] text-[#181343] border border-[#D8D2F2]"
+                            : "bg-[#EDF6FF] text-[#0A2558] border border-[#CBE7FD]"
                             }`}
                         >
                           {item.count}
@@ -223,14 +225,14 @@ export function PartnerSidebar({
       </div>
 
       {/* Footer Logout di Sudut Kiri Bawah */}
-      <div className="px-3.5 py-2.5 border-t border-[#E5E7EB] bg-white shrink-0">
+      <div className="px-3.5 py-2.5 border-t border-[#DBEAFE]/80 bg-white shrink-0">
         <button
           type="button"
           onClick={onLogout}
-          className="group w-full h-11 pl-1 pr-4 rounded-full bg-transparent hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all duration-150 cursor-pointer flex items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#181343]"
+          className="group w-full h-11 pl-1 pr-4 rounded-full bg-transparent hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-all duration-150 cursor-pointer flex items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1765F5]"
           title="Keluar dari akun"
         >
-          <div className="w-9 h-9 rounded-full bg-[#2B2D31] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+          <div className="w-9 h-9 rounded-full bg-[#0A2558] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
@@ -241,12 +243,12 @@ export function PartnerSidebar({
               <span>{user.name ? user.name.trim().charAt(0).toUpperCase() : "U"}</span>
             )}
           </div>
-          <div className="flex items-center gap-2.5 ml-5 shrink-0">
+          <div className="flex items-center gap-2.5 ml-4 shrink-0">
             <LogOut
-              className="w-4 h-4 text-[#181343] group-hover:text-rose-600 transition-colors shrink-0"
+              className="w-4 h-4 text-[#0A2558] group-hover:text-rose-600 transition-colors shrink-0"
               aria-hidden="true"
             />
-            <span className="text-xs font-semibold text-[#181343] group-hover:text-rose-700 transition-colors whitespace-nowrap">
+            <span className="text-xs font-semibold text-[#0A2558] group-hover:text-rose-700 transition-colors whitespace-nowrap">
               Keluar dari akun
             </span>
           </div>

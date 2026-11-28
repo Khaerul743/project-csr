@@ -103,10 +103,13 @@ export function OpportunityDetailModal({
     variant: "slate" as const,
   };
 
-  const statusConfig = STATUS_CONFIG[opportunity.status] || {
-    label: opportunity.status,
-    variant: "navy" as const,
-  };
+  const statusConfig =
+    opportunity.status === "OPEN"
+      ? { label: "Buka Proposal", variant: "blue" as const }
+      : STATUS_CONFIG[opportunity.status] || {
+          label: opportunity.status,
+          variant: "navy" as const,
+        };
 
   // Clean description removing raw JSON or tags
   const cleanDescription = opportunity.description
@@ -124,19 +127,19 @@ export function OpportunityDetailModal({
       <div className="space-y-6">
         {/* Banner Cover with Fallback */}
         {opportunity.bannerUrl && !hasImgError ? (
-          <div className="relative w-full aspect-video max-h-56 rounded-2xl overflow-hidden border border-[#E8E8EA] shadow-2xs bg-slate-900">
+          <div className="relative w-full aspect-video max-h-56 rounded-2xl overflow-hidden border border-[#DBEAFE] shadow-2xs bg-[#0A2558]">
             <img
               src={opportunity.bannerUrl}
               alt={opportunity.title}
               onError={() => setHasImgError(true)}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0A2558]/40 via-transparent to-transparent pointer-events-none" />
           </div>
         ) : null}
 
         {/* Header Badges */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E8E8EA]">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#EDF6FF]">
           <div className="flex items-center gap-2">
             <Badge variant={statusConfig.variant} size="md" hasDot>
               {statusConfig.label}
@@ -145,57 +148,57 @@ export function OpportunityDetailModal({
               {focusConfig.label}
             </Badge>
           </div>
-          <span className="text-xs text-[#787680]">
+          <span className="text-xs text-slate-600">
             Dibuat: {formatDate(opportunity.createdAt)}
           </span>
         </div>
 
         {/* Title */}
         <div>
-          <h3 className="text-lg sm:text-xl font-bold text-[#181343] leading-snug">
+          <h3 className="text-lg sm:text-xl font-bold text-[#0A2558] leading-snug">
             {opportunity.title}
           </h3>
         </div>
 
         {/* Quick Highlights Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA]">
-            <span className="text-[11px] font-semibold text-[#787680] block">
+          <div className="p-3.5 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE]">
+            <span className="text-[11px] font-semibold text-slate-600 block">
               Estimasi Anggaran
             </span>
-            <span className="text-sm font-bold text-[#009E75] mt-0.5 block truncate">
+            <span className="text-sm font-bold text-[#1765F5] mt-0.5 block truncate tabular-nums">
               {opportunity.estimatedBudget && parseFloat(opportunity.estimatedBudget) > 0
                 ? formatRupiah(opportunity.estimatedBudget)
                 : "Belum Ditentukan"}
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA]">
-            <span className="text-[11px] font-semibold text-[#787680] block">
+          <div className="p-3.5 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE]">
+            <span className="text-[11px] font-semibold text-slate-600 block">
               Lokasi Sasaran
             </span>
             <span
-              className="text-sm font-bold text-[#181343] mt-0.5 block truncate"
+              className="text-sm font-bold text-[#0A2558] mt-0.5 block truncate"
               title={[opportunity.targetCity, opportunity.targetProvince].filter(Boolean).join(", ") || "Belum ditentukan"}
             >
               {[opportunity.targetCity, opportunity.targetProvince].filter(Boolean).join(", ") || "Belum ditentukan"}
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA]">
-            <span className="text-[11px] font-semibold text-[#787680] block">
+          <div className="p-3.5 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE]">
+            <span className="text-[11px] font-semibold text-slate-600 block">
               Batas Proposal
             </span>
-            <span className="text-sm font-bold text-[#181343] mt-0.5 block truncate">
+            <span className="text-sm font-bold text-[#0A2558] mt-0.5 block truncate">
               {opportunity.deadline ? formatDate(opportunity.deadline) : "Belum Ditentukan"}
             </span>
           </div>
 
-          <div className="p-3 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA]">
-            <span className="text-[11px] font-semibold text-[#787680] block">
+          <div className="p-3.5 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE]">
+            <span className="text-[11px] font-semibold text-slate-600 block">
               Periode Pelaksanaan
             </span>
-            <span className="text-sm font-bold text-[#181343] mt-0.5 block truncate">
+            <span className="text-sm font-bold text-[#0A2558] mt-0.5 block truncate">
               {opportunity.startDate && opportunity.endDate
                 ? `${formatDate(opportunity.startDate)} s/d ${formatDate(opportunity.endDate)}`
                 : "Sesuai Jadwal"}
@@ -205,22 +208,22 @@ export function OpportunityDetailModal({
 
         {/* Description */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
+          <h4 className="text-xs font-bold text-[#0A2558] uppercase tracking-wider">
             Deskripsi Program &amp; Ruang Lingkup
           </h4>
-          <div className="p-4 rounded-xl bg-[#F9F9FB] border border-[#E8E8EA] text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+          <div className="p-4 rounded-2xl bg-[#F8FBFF] border border-[#DBEAFE] text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
             {cleanDescription || "Tidak ada rincian deskripsi tambahan."}
           </div>
         </div>
 
         {/* SDGs & ESG Classification */}
         {sdgs.length > 0 && (
-          <div className="p-4 rounded-xl bg-white border border-[#E8E8EA] shadow-2xs space-y-3">
+          <div className="p-4 rounded-2xl bg-white border border-[#DBEAFE] shadow-2xs space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#181343] uppercase tracking-wider block">
+              <span className="text-xs font-bold text-[#0A2558] uppercase tracking-wider block">
                 Klasifikasi SDGs &amp; Pemetaan Pilar ESG
               </span>
-              <span className="text-[11px] font-semibold text-[#787680]">
+              <span className="text-[11px] font-semibold text-[#1765F5] bg-[#EDF6FF] border border-[#CBE7FD] px-2.5 py-0.5 rounded-full">
                 {sdgs.length} Sasaran Terhubung
               </span>
             </div>
@@ -245,28 +248,28 @@ export function OpportunityDetailModal({
             </div>
 
             {/* Mapped ESG Pillars */}
-            <div className="p-3 rounded-lg bg-[#F9F9FB] border border-[#E8E8EA] grid grid-cols-3 gap-2 text-center text-xs">
+            <div className="p-3 rounded-xl bg-[#F8FBFF] border border-[#DBEAFE] grid grid-cols-3 gap-2 text-center text-xs">
               <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-emerald-800 uppercase block">
-                  🌿 Lingkungan (E)
+                <span className="text-[10px] font-bold text-[#0A2558] uppercase block">
+                  Lingkungan (E)
                 </span>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold text-[#1765F5]">
                   {mappedEsgPillars.E.length > 0 ? `${mappedEsgPillars.E.length} Sasaran` : "-"}
                 </span>
               </div>
               <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-blue-800 uppercase block">
-                  👥 Sosial (S)
+                <span className="text-[10px] font-bold text-[#0A2558] uppercase block">
+                  Sosial (S)
                 </span>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold text-[#1765F5]">
                   {mappedEsgPillars.S.length > 0 ? `${mappedEsgPillars.S.length} Sasaran` : "-"}
                 </span>
               </div>
               <div className="space-y-0.5">
-                <span className="text-[10px] font-bold text-purple-800 uppercase block">
-                  🏛️ Tata Kelola (G)
+                <span className="text-[10px] font-bold text-[#0A2558] uppercase block">
+                  Tata Kelola (G)
                 </span>
-                <span className="text-xs font-bold text-slate-800">
+                <span className="text-xs font-bold text-[#1765F5]">
                   {mappedEsgPillars.G.length > 0 ? `${mappedEsgPillars.G.length} Sasaran` : "-"}
                 </span>
               </div>
@@ -278,8 +281,8 @@ export function OpportunityDetailModal({
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-[#181343]" />
-              <h4 className="text-xs font-bold text-[#181343] uppercase tracking-wider">
+              <Users className="w-4 h-4 text-[#1765F5]" />
+              <h4 className="text-xs font-bold text-[#0A2558] uppercase tracking-wider">
                 Mitra yang Diundang ({invitations.length})
               </h4>
             </div>
@@ -292,8 +295,8 @@ export function OpportunityDetailModal({
                   onClose();
                   onInvitePartner(opportunity);
                 }}
-                leftIcon={<UserPlus className="w-3.5 h-3.5" />}
-                className="text-xs font-semibold text-[#181343] border-[#E8E8EA] rounded-xl hover:bg-slate-50"
+                leftIcon={<UserPlus className="w-3.5 h-3.5 text-[#1765F5]" />}
+                className="text-xs font-semibold rounded-full"
               >
                 Undang Mitra
               </Button>
@@ -301,34 +304,34 @@ export function OpportunityDetailModal({
           </div>
 
           {isLoadingInvites ? (
-            <div className="p-4 text-center text-xs text-[#787680]">
+            <div className="p-4 text-center text-xs text-slate-600">
               Memuat daftar mitra yang diundang...
             </div>
           ) : invitations.length === 0 ? (
-            <div className="p-4 rounded-xl bg-[#F9F9FB] border border-dashed border-[#E8E8EA] text-center">
-              <p className="text-xs text-slate-600 font-medium">
+            <div className="p-4 rounded-2xl bg-[#F8FBFF] border border-dashed border-[#CBE7FD] text-center">
+              <p className="text-xs text-[#0A2558] font-medium">
                 Belum ada mitra yang diundang langsung untuk inisiatif ini.
               </p>
-              <p className="text-[11px] text-[#787680] mt-0.5">
-                Gunakan tab "Direktori &amp; Seleksi Mitra CSR" untuk menemukan NGO dan mengirim undangan pitch.
+              <p className="text-[11px] text-slate-600 mt-0.5">
+                Gunakan tab "Kurasi Mitra" untuk menemukan NGO dan mengirim undangan kolaborasi.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-[#E8E8EA] border border-[#E8E8EA] rounded-xl overflow-hidden bg-white">
+            <div className="divide-y divide-[#EDF6FF] border border-[#DBEAFE] rounded-2xl overflow-hidden bg-white">
               {invitations.map((inv) => (
                 <div
                   key={inv.id}
                   className="p-3.5 flex items-center justify-between gap-3 text-xs"
                 >
                   <div className="space-y-0.5 min-w-0">
-                    <span className="font-bold text-[#181343] block truncate">
+                    <span className="font-bold text-[#0A2558] block truncate">
                       {inv.partner?.name || "Mitra"}
                     </span>
-                    <span className="text-[11px] text-[#787680] block">
+                    <span className="text-[11px] text-slate-600 block">
                       {inv.partner?.city} • Diundang pada {formatDate(inv.createdAt)}
                     </span>
                     {inv.message && (
-                      <p className="text-[11px] text-slate-600 mt-1 bg-[#F9F9FB] p-2.5 rounded-lg border border-[#E8E8EA] whitespace-pre-line leading-relaxed">
+                      <p className="text-[11px] text-slate-700 mt-1.5 bg-[#F8FBFF] p-2.5 rounded-xl border border-[#DBEAFE] whitespace-pre-line leading-relaxed">
                         {inv.message}
                       </p>
                     )}
@@ -359,7 +362,7 @@ export function OpportunityDetailModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-[#E8E8EA]">
+        <div className="flex items-center justify-between pt-4 border-t border-[#EDF6FF]">
           {!isManagement && onEdit ? (
             <Button
               variant="outline"
@@ -369,7 +372,7 @@ export function OpportunityDetailModal({
                 onEdit(opportunity);
               }}
               leftIcon={<Edit className="w-3.5 h-3.5" />}
-              className="rounded-xl border-[#E8E8EA] text-slate-700 text-xs font-semibold"
+              className="rounded-full text-xs font-semibold"
             >
               Edit Peluang
             </Button>
@@ -381,7 +384,7 @@ export function OpportunityDetailModal({
             variant="primary"
             size="md"
             onClick={onClose}
-            className="bg-[#181343] hover:bg-[#25205c] text-white text-xs font-bold rounded-xl px-5"
+            className="text-xs font-bold rounded-full px-6"
           >
             Tutup
           </Button>
