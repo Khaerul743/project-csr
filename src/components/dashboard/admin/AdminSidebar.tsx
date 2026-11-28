@@ -172,14 +172,14 @@ export function AdminSidebar({
                     key={item.id}
                     type="button"
                     onClick={() => handleItemClick(item.id)}
-                    className={`w-full min-h-[40px] flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${isActive
-                      ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20 font-bold"
-                      : "text-[#0A2558] hover:bg-[#EDF6FF] hover:text-[#1765F5]"
+                    className={`w-full h-8 sm:h-[34px] flex items-center justify-between px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 cursor-pointer group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#10519B] ${isActive
+                      ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-2xs font-semibold"
+                      : "text-[#0A2558] hover:bg-[#EDF6FF] hover:text-[#10519B]"
                       }`}
                   >
-                    <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Icon
-                        className={`w-4 h-4 shrink-0 transition-colors ${isActive ? "text-white" : "text-slate-500 group-hover:text-[#1765F5]"
+                        className={`w-3.5 h-3.5 shrink-0 transition-colors ${isActive ? "text-white" : "text-slate-500 group-hover:text-[#10519B]"
                           }`}
                         aria-hidden="true"
                       />
@@ -189,7 +189,7 @@ export function AdminSidebar({
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {item.count !== undefined && item.count > 0 && (
                         <span
-                          className={`min-w-[18px] h-[18px] px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${isActive
+                          className={`min-w-[17px] h-[17px] px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold leading-none shrink-0 transition-colors ${isActive
                             ? "bg-white/20 text-white"
                             : "bg-[#EDF6FF] text-[#0A2558] border border-[#CBE7FD]"
                             }`}

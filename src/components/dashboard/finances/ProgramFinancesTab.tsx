@@ -139,29 +139,33 @@ export function ProgramFinancesTab({
       {/* Financial Summary Metric Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Pagu Anggaran */}
-        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-slate-500">
+        <div className="p-4 rounded-2xl bg-[#F0F5FC] border border-[#D0E2F7] border-b-[3px] border-b-[#2563EB] shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+          <div className="flex items-center justify-between text-slate-600">
             <span className="text-xs font-semibold">Pagu Disepakati</span>
-            <Coins className="w-4 h-4 text-slate-500" />
+            <div className="w-8 h-8 rounded-full bg-blue-100/80 text-[#2563EB] flex items-center justify-center shrink-0">
+              <Coins className="w-4 h-4 text-[#2563EB]" />
+            </div>
           </div>
-          <div className="text-lg font-black text-slate-900 truncate">
+          <div className="text-lg font-black text-[#0A2558] truncate">
             {formatRupiah(summary.agreedBudget)}
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">
+          <p className="text-[11px] text-slate-500 font-medium">
             Total komitmen CSR final
           </p>
         </div>
 
         {/* Card 2: Dana Telah Masuk Kas Mitra */}
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-slate-700">
+        <div className="p-4 rounded-2xl bg-[#F0F8F5] border border-[#CCE9DD] border-b-[3px] border-b-[#10B981] shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+          <div className="flex items-center justify-between text-slate-600">
             <span className="text-xs font-semibold">Diterima Kas Mitra</span>
-            <Wallet className="w-4 h-4 text-slate-600" />
+            <div className="w-8 h-8 rounded-full bg-emerald-100/80 text-[#10B981] flex items-center justify-center shrink-0">
+              <Wallet className="w-4 h-4 text-[#10B981]" />
+            </div>
           </div>
-          <div className="text-lg font-black text-[#181343] truncate">
+          <div className="text-lg font-black text-[#065F46] truncate">
             {formatRupiah(summary.totalConfirmedReceived)}
           </div>
-          <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium">
+          <div className="flex items-center justify-between text-[11px] text-[#047857] font-medium">
             <span>{disbursementPercent}% terealisasi</span>
             {summary.totalPendingConfirmation > 0 && (
               <span className="text-amber-700 font-bold">
@@ -172,43 +176,47 @@ export function ProgramFinancesTab({
         </div>
 
         {/* Card 3: Serapan Pengeluaran & Nota */}
-        <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-emerald-700">
+        <div className="p-4 rounded-2xl bg-white border border-[#E2E8F0] border-b-[3px] border-b-[#2563EB] shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+          <div className="flex items-center justify-between text-slate-600">
             <span className="text-xs font-semibold">Serapan Biaya</span>
-            <ReceiptText className="w-4 h-4 text-emerald-600" />
+            <div className="w-8 h-8 rounded-full bg-blue-100/70 text-[#2563EB] flex items-center justify-center shrink-0">
+              <ReceiptText className="w-4 h-4 text-[#2563EB]" />
+            </div>
           </div>
-          <div className="text-lg font-black text-emerald-900 truncate">
+          <div className="text-lg font-black text-[#0A2558] truncate">
             {formatRupiah(summary.totalExpensesReported)}
           </div>
-          <p className="text-[11px] text-emerald-700 font-medium">
+          <p className="text-[11px] text-[#059669] font-medium">
             {summary.absorptionRate}% terserap dari pagu
           </p>
         </div>
 
         {/* Card 4: Sisa Kas di Tangan Mitra */}
-        <div className="p-4 rounded-2xl bg-[#181343] text-white shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-slate-200">
+        <div className="p-4 rounded-2xl bg-white border border-[#E2E8F0] border-b-[3px] border-b-[#10B981] shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+          <div className="flex items-center justify-between text-slate-600">
             <span className="text-xs font-semibold">Sisa Saldo Kas</span>
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <div className="w-8 h-8 rounded-full bg-emerald-100/70 text-[#10B981] flex items-center justify-center shrink-0">
+              <TrendingUp className="w-4 h-4 text-[#10B981]" />
+            </div>
           </div>
-          <div className="text-lg font-black text-white truncate">
+          <div className="text-lg font-black text-[#059669] truncate">
             {formatRupiah(summary.remainingPartnerBalance)}
           </div>
-          <p className="text-[11px] text-slate-300 font-medium">
+          <p className="text-[11px] text-slate-500 font-medium">
             Kas aktif dipegang mitra
           </p>
         </div>
       </div>
 
       {/* Progress Bars Deck */}
-      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+      <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-          <span className="font-bold text-slate-700">
+          <span className="font-bold text-[#0A2558]">
             Akuntabilitas Siklus Dana CSR:
           </span>
           <div className="flex items-center gap-4 text-[11px] text-slate-500 font-semibold">
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
               Penyaluran Kas: {disbursementPercent}%
             </span>
             <span className="flex items-center gap-1.5">
@@ -218,9 +226,9 @@ export function ProgramFinancesTab({
           </div>
         </div>
 
-        <div className="w-full h-3 rounded-full bg-slate-200 overflow-hidden flex">
+        <div className="w-full h-2.5 rounded-full bg-slate-100 overflow-hidden flex">
           <div
-            className="h-full bg-teal-500 transition-all duration-500"
+            className="h-full bg-gradient-to-r from-[#1D4ED8] to-[#38BDF8] transition-all duration-500 rounded-full"
             style={{ width: `${Math.min(disbursementPercent, 100)}%` }}
             title={`Penyaluran Dana: ${disbursementPercent}%`}
           />
@@ -233,9 +241,9 @@ export function ProgramFinancesTab({
           <button
             type="button"
             onClick={() => setSubSection("disbursements")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               subSection === "disbursements"
-                ? "bg-teal-600 text-white shadow-sm"
+                ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-sm"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
             }`}
           >
@@ -246,14 +254,14 @@ export function ProgramFinancesTab({
           <button
             type="button"
             onClick={() => setSubSection("expenses")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               subSection === "expenses"
-                ? "bg-teal-600 text-white shadow-sm"
+                ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-sm"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
             }`}
           >
             <ReceiptText className="w-3.5 h-3.5" />
-            Pengeluaran & Nota ({expenses.length})
+            Pengeluaran &amp; Nota ({expenses.length})
           </button>
         </div>
 

@@ -642,7 +642,7 @@ export function ChatbotView({
                 <div
                   className={`p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed rounded-2xl ${
                     msg.role === "user"
-                      ? "bg-gradient-to-br from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white rounded-br-xs shadow-xs font-normal"
+                      ? "bg-gradient-to-br from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white rounded-br-xs shadow-xs font-normal"
                       : msg.isError
                       ? "bg-rose-50 text-rose-900 border border-rose-200 rounded-tl-xs shadow-xs font-normal"
                       : "bg-white text-slate-800 border border-[#DBEAFE] rounded-tl-xs shadow-xs font-normal"
@@ -812,7 +812,7 @@ export function ChatbotView({
                             <div key={cIdx} className="space-y-2.5 mt-2">
                               <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#EDF6FF] via-[#F4F9FF] to-[#DBEAFE]/55 border border-[#CBE7FD]">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1D6CE0] to-[#1748D5] text-white flex items-center justify-center shrink-0">
+                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1A60B0] to-[#073E8A] text-white flex items-center justify-center shrink-0">
                                     <MapPin className="w-4 h-4" />
                                   </div>
                                   <div>
@@ -896,7 +896,7 @@ export function ChatbotView({
                                               sdgs: sdgNums,
                                             });
                                           }}
-                                          className="px-3.5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:opacity-95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
+                                          className="px-3.5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] hover:opacity-95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
                                         >
                                           <Plus className="w-3.5 h-3.5" />
                                           <span>Buat Peluang di Sini</span>
@@ -916,7 +916,7 @@ export function ChatbotView({
                             <div key={cIdx} className="space-y-3 mt-3">
                               <div className="flex items-center justify-between gap-2 p-3 rounded-2xl bg-gradient-to-r from-[#EDF6FF] via-[#F4F9FF] to-[#DBEAFE]/55 border border-[#CBE7FD]">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1D6CE0] to-[#1748D5] text-white flex items-center justify-center shrink-0">
+                                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1A60B0] to-[#073E8A] text-white flex items-center justify-center shrink-0">
                                     <FileUp className="w-4 h-4" />
                                   </div>
                                   <div>
@@ -998,7 +998,7 @@ export function ChatbotView({
                                               sdgs: sdgNums,
                                             });
                                           }}
-                                          className="px-3.5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:opacity-95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
+                                          className="px-3.5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] hover:opacity-95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer shrink-0"
                                         >
                                           <Plus className="w-3.5 h-3.5" />
                                           <span>Buat Peluang CSR Berdasarkan Rekomendasi Ini</span>
@@ -1173,7 +1173,7 @@ export function ChatbotView({
               type="button"
               onClick={() => handleSendMessage()}
               disabled={(!inputText.trim() && !attachedFile) || isLoading || !aiEnabled}
-              className="px-5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:opacity-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
+              className="px-5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] hover:opacity-95 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs disabled:opacity-40 disabled:cursor-not-allowed transition cursor-pointer"
             >
               <span>Kirim</span>
               <Send className="w-3.5 h-3.5" />

@@ -297,7 +297,7 @@ export function AiNeedPrioritizationPanel({
                   type="button"
                   onClick={handleAnalyze}
                   disabled={isAnalyzing || !currentLocationReady}
-                  className="min-h-[38px] px-4 py-1.5 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shrink-0 transition-all cursor-pointer shadow-sm shadow-[#1765F5]/20"
+                  className="min-h-[38px] px-4 py-1.5 rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold inline-flex items-center justify-center gap-2 shrink-0 transition-all cursor-pointer shadow-sm shadow-[#10519B]/20"
                 >
                   {isAnalyzing ? (
                     <>
@@ -579,7 +579,7 @@ export function AiNeedPrioritizationPanel({
                             className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-semibold inline-flex items-center justify-center gap-1.5 shrink-0 transition-all cursor-pointer ${
                               isApplied
                                 ? "bg-[#0A2558] text-white shadow-xs"
-                                : "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 text-white shadow-sm shadow-[#1765F5]/20"
+                                : "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] hover:brightness-105 text-white shadow-sm shadow-[#10519B]/20"
                             }`}
                           >
                             <Check className="w-3.5 h-3.5" aria-hidden="true" />
@@ -644,7 +644,7 @@ export function AiNeedPrioritizationPanel({
                         feedbackMessage: `Fokus (${FOCUS_AREA_CONFIG[result.formSuggestions.recommendedFocusArea]?.label}), SDGs rekomendasi, dan draf deskripsi berhasil diterapkan.`,
                       })
                     }
-                    className="min-h-[38px] px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 text-white shadow-sm shadow-[#1765F5]/20"
+                    className="min-h-[38px] px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] hover:brightness-105 text-white shadow-sm shadow-[#10519B]/20"
                   >
                     {appliedActionId === "apply-all"
                       ? "✓ Semua Rekomendasi Diterapkan"

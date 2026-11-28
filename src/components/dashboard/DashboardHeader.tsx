@@ -293,9 +293,9 @@ export function DashboardHeader({
                 setIsNotificationOpen((prev) => !prev);
                 setIsHelpOpen(false);
               }}
-              className={`relative min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
+              className={`relative min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10519B] ${
                 isNotificationOpen
-                  ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-xs"
+                  ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-xs"
                   : "text-slate-600 hover:text-[#0A2558] hover:bg-[#EDF6FF]"
               }`}
               title="Notifikasi & Tugas"
@@ -429,9 +429,9 @@ export function DashboardHeader({
                 setIsHelpOpen((prev) => !prev);
                 setIsNotificationOpen(false);
               }}
-              className={`min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
+              className={`min-w-[40px] min-h-[40px] flex items-center justify-center rounded-xl transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10519B] ${
                 isHelpOpen
-                  ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-xs"
+                  ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-xs"
                   : "text-slate-600 hover:text-[#0A2558] hover:bg-[#EDF6FF]"
               }`}
               title="Pusat Bantuan & Panduan"
@@ -446,7 +446,7 @@ export function DashboardHeader({
                 {/* Header Dropdown */}
                 <div className="p-4 border-b border-[#DBEAFE]/80 bg-[#F8FBFF]">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1D6CE0] to-[#1748D5] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1A60B0] to-[#073E8A] text-white flex items-center justify-center font-bold text-xs shadow-xs">
                       ?
                     </div>
                     <div>
@@ -867,7 +867,7 @@ export function DashboardHeader({
               <button
                 type="button"
                 onClick={() => setIsHelpModalOpen(false)}
-                className="min-h-[40px] px-5 py-2 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white font-bold text-xs hover:brightness-105 transition-all cursor-pointer shadow-sm shadow-[#1765F5]/20"
+                className="min-h-[40px] px-5 py-2 rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white font-bold text-xs hover:brightness-105 transition-all cursor-pointer shadow-sm shadow-[#10519B]/20"
               >
                 Tutup Panduan
               </button>

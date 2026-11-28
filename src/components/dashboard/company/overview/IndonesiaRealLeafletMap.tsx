@@ -230,37 +230,42 @@ export default function IndonesiaRealLeafletMap({
 
         const isCurrentSelected = selectedProvince === provName;
 
-        // Custom HTML Marker Pin (Enterprise Grade - Crisp & Readable)
+        // Custom HTML Marker Pin (Enterprise Precision GIS Teardrop Pin)
         const markerHtml = `
-          <div class="relative group cursor-pointer select-none">
+          <div class="group relative flex flex-col items-center justify-end select-none cursor-pointer" style="width: 120px; height: 60px;">
             ${
               isCurrentSelected
-                ? `<div class="absolute -inset-1.5 rounded-xl animate-ping opacity-30" style="background-color: ${primaryColor};"></div>`
+                ? `<div class="absolute bottom-1 w-8 h-8 rounded-full animate-ping opacity-35 pointer-events-none" style="background-color: ${primaryColor};"></div>`
                 : ""
             }
-            <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-white shadow-md border transition-all duration-150 transform group-hover:-translate-y-0.5 group-hover:shadow-lg ${
-              isCurrentSelected ? "ring-2 ring-white/80" : ""
-            }"
-                 style="background-color: #0A2558; border-color: ${primaryColor};">
-              <span class="w-2 h-2 rounded-full shrink-0" style="background-color: ${primaryColor};"></span>
-              <span class="tracking-tight text-white font-semibold text-xs whitespace-nowrap">${provName}</span>
-              <span class="px-1.5 py-0.5 rounded-md text-[10px] font-extrabold text-white tabular-nums leading-none" style="background-color: ${primaryColor};">
-                ${badgeCount}
-              </span>
+            <div class="px-2 py-0.5 rounded-full bg-white/95 text-slate-800 text-[10px] font-bold shadow-xs border border-slate-200/90 whitespace-nowrap mb-1 transition-all duration-150 group-hover:scale-105 group-hover:border-blue-400 group-hover:text-blue-600 group-hover:shadow-md pointer-events-none">
+              ${provName}
+            </div>
+            <div class="relative flex items-center justify-center transition-transform duration-150 transform group-hover:-translate-y-1 group-hover:scale-110">
+              <svg width="28" height="34" viewBox="0 0 32 38" fill="none" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.22));">
+                <path d="M16 1C7.71573 1 1 7.71573 1 16C1 26.2 14.2 35.8 15.4 36.6C15.8 36.9 16.2 36.9 16.6 36.6C17.8 35.8 31 26.2 31 16C31 7.71573 24.2843 1 16 1Z" 
+                      fill="${primaryColor}" 
+                      stroke="white" 
+                      stroke-width="2"/>
+                <circle cx="16" cy="15" r="9" fill="white" opacity="0.18"/>
+                <text x="16" y="19" text-anchor="middle" fill="white" font-size="11" font-weight="900" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">${badgeCount}</text>
+              </svg>
             </div>
           </div>
         `;
 
         const customIcon = L.divIcon({
           html: markerHtml,
-          className: "custom-leaflet-marker",
-          iconSize: [140, 32],
-          iconAnchor: [70, 16],
+          className: "!bg-transparent !border-0 custom-leaflet-marker",
+          iconSize: [120, 60],
+          iconAnchor: [60, 60],
+          popupAnchor: [0, -60],
         });
 
         const marker = L.marker([data.coord.lat, data.coord.lng], {
           icon: customIcon,
           zIndexOffset: isCurrentSelected ? 1000 : 100,
+          riseOnHover: true,
         });
 
         // Popup Content
@@ -346,7 +351,7 @@ export default function IndonesiaRealLeafletMap({
           ${popupPartnersHtml}
           <div class="pt-2">
             <button id="btn-select-prov-${provName.replace(/\s+/g, "-")}"
-                    class="w-full py-2 px-3 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm">
+                    class="w-full py-2 px-3 rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-sm">
               <span>Buka Rincian Wilayah</span>
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -400,11 +405,11 @@ export default function IndonesiaRealLeafletMap({
             ? "Belum Ada Peluang"
             : "Belum Ada Mitra";
 
-        // B. Unreached Province: Subtle clickable dot
+        // B. Unreached Province: Subtle clickable dot with refined tooltip
         const unreachedHtml = `
           <div class="group relative cursor-pointer flex items-center justify-center">
-            <div class="w-2.5 h-2.5 rounded-full bg-slate-300 border-2 border-white shadow-2xs hover:bg-slate-600 hover:scale-125 transition-all"></div>
-            <div class="absolute bottom-4 hidden group-hover:block bg-[#0A2558] text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-md whitespace-nowrap z-50">
+            <div class="w-2.5 h-2.5 rounded-full bg-slate-300 border-2 border-white shadow-2xs group-hover:bg-[#2563EB] group-hover:scale-125 transition-all"></div>
+            <div class="absolute bottom-4 hidden group-hover:block bg-slate-900/90 text-white text-[10px] font-semibold px-2 py-0.5 rounded-md shadow-md border border-slate-700/50 whitespace-nowrap z-50 pointer-events-none">
               ${provName} (${unreachedLabel})
             </div>
           </div>
@@ -412,14 +417,16 @@ export default function IndonesiaRealLeafletMap({
 
         const unreachedIcon = L.divIcon({
           html: unreachedHtml,
-          className: "custom-unreached-marker",
+          className: "!bg-transparent !border-0 custom-unreached-marker",
           iconSize: [14, 14],
           iconAnchor: [7, 7],
+          popupAnchor: [0, -10],
         });
 
         const unreachedMarker = L.marker([data.coord.lat, data.coord.lng], {
           icon: unreachedIcon,
           zIndexOffset: 10,
+          riseOnHover: true,
         });
 
         // Unreached Popup with Clean Call to Action (Anti-Slop, No Emojis)
@@ -457,7 +464,7 @@ export default function IndonesiaRealLeafletMap({
             onOpenCreateOpportunity
               ? `
             <button id="btn-create-opp-${provName.replace(/\s+/g, "-")}"
-                    class="w-full py-2 px-3 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs">
+                    class="w-full py-2 px-3 rounded-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white font-semibold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition shadow-2xs">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
               </svg>
@@ -583,7 +590,7 @@ export default function IndonesiaRealLeafletMap({
             onClick={() => handleSelectLayer("PROGRAM")}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeLayer === "PROGRAM"
-                ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20"
+                ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-sm shadow-[#10519B]/20"
                 : "bg-white text-[#0A2558] hover:bg-[#F4F9FF] border border-[#DBEAFE]"
             }`}
           >
@@ -597,7 +604,7 @@ export default function IndonesiaRealLeafletMap({
             onClick={() => handleSelectLayer("OPPORTUNITY")}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeLayer === "OPPORTUNITY"
-                ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20"
+                ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-sm shadow-[#10519B]/20"
                 : "bg-white text-[#0A2558] hover:bg-[#F4F9FF] border border-[#DBEAFE]"
             }`}
           >
@@ -611,7 +618,7 @@ export default function IndonesiaRealLeafletMap({
             onClick={() => handleSelectLayer("PARTNER")}
             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
               activeLayer === "PARTNER"
-                ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-sm shadow-[#1765F5]/20"
+                ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-sm shadow-[#10519B]/20"
                 : "bg-white text-[#0A2558] hover:bg-[#F4F9FF] border border-[#DBEAFE]"
             }`}
           >

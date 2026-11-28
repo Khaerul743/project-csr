@@ -23,7 +23,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CompanyNavMenu } from "../../Sidebar";
-import { DashboardPageHeader } from "../../common/DashboardPageHeader";
 import {
   CompanyProfile,
   OpportunityItem,
@@ -262,8 +261,8 @@ export function ExecutiveOverviewView({
       allocated > 0
         ? allocated
         : selectedYear === "ALL" && selectedStatus === "ALL" && selectedFocusArea === "ALL" && !selectedProvince && selectedMonth === null
-        ? metrics.totalProgramBudget || metrics.totalAgreedBudget || 0
-        : allocated;
+          ? metrics.totalProgramBudget || metrics.totalAgreedBudget || 0
+          : allocated;
 
     // Total Realized / Spent Budget
     const spent = filteredPrograms.reduce(
@@ -274,8 +273,8 @@ export function ExecutiveOverviewView({
       spent > 0
         ? spent
         : selectedYear === "ALL" && selectedStatus === "ALL" && selectedFocusArea === "ALL" && !selectedProvince && selectedMonth === null
-        ? metrics.totalSpentBudget || 0
-        : spent;
+          ? metrics.totalSpentBudget || 0
+          : spent;
 
     // Absorption Rate: Uses exact same denominator with 1 decimal place (e.g. 22.2%)
     const rate =
@@ -426,6 +425,31 @@ export function ExecutiveOverviewView({
     return { months, maxVal, totalYearAllocated, totalYearSpent };
   }, [programs, monthlyYear, selectedMonth]);
 
+  // 4C. Skala Y-Axis Dinamis dengan Gridline Horizontal & Satuan Rupiah Proporsional
+  const chartYScale = useMemo(() => {
+    const activeMax = budgetTrendMode === "annual" ? annualTrendData.maxVal : monthlyTrendData.maxVal;
+    let max = Math.max(activeMax, 10_000_000);
+    const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
+    const fraction = max / magnitude;
+    let multiplier = 1;
+    if (fraction <= 1.25) multiplier = 1.25;
+    else if (fraction <= 2) multiplier = 2;
+    else if (fraction <= 2.5) multiplier = 2.5;
+    else if (fraction <= 5) multiplier = 5;
+    else multiplier = 10;
+
+    const cleanMax = multiplier * magnitude;
+    const ticks = [
+      cleanMax,
+      cleanMax * 0.75,
+      cleanMax * 0.5,
+      cleanMax * 0.25,
+      0,
+    ];
+
+    return { max: cleanMax, ticks };
+  }, [budgetTrendMode, annualTrendData.maxVal, monthlyTrendData.maxVal]);
+
   // 5. Program Status Distribution (Modern Donut & Harmonious Legenda - Baseline from scopePrograms!)
   const statusDistribution = useMemo(() => {
     const total = scopePrograms.length;
@@ -443,8 +467,8 @@ export function ExecutiveOverviewView({
         label: "Sedang Berjalan",
         count: inProgress,
         percentage: inProgressPct,
-        color: "#047857",
-        dotColor: "bg-[#047857]",
+        color: "#10B981",
+        dotColor: "bg-[#10B981]",
         lightBg: "bg-[#ECFDF5]",
         borderColor: "border-emerald-200",
         textColor: "text-[#065F46]",
@@ -454,22 +478,22 @@ export function ExecutiveOverviewView({
         label: "Persiapan",
         count: planned,
         percentage: plannedPct,
-        color: "#1765F5",
-        dotColor: "bg-[#1765F5]",
-        lightBg: "bg-[#EDF6FF]",
-        borderColor: "border-[#BFDBFE]",
-        textColor: "text-[#1D4ED8]",
+        color: "#F59E0B",
+        dotColor: "bg-[#F59E0B]",
+        lightBg: "bg-[#FFFBEB]",
+        borderColor: "border-amber-200",
+        textColor: "text-[#B45309]",
       },
       {
         key: "COMPLETED",
         label: "Selesai",
         count: completed,
         percentage: completedPct,
-        color: "#0A2558",
-        dotColor: "bg-[#0A2558]",
-        lightBg: "bg-[#0A2558]/5",
-        borderColor: "border-[#DBEAFE]",
-        textColor: "text-[#0A2558]",
+        color: "#2563EB",
+        dotColor: "bg-[#2563EB]",
+        lightBg: "bg-[#EFF6FF]",
+        borderColor: "border-blue-200",
+        textColor: "text-[#1D4ED8]",
       },
     ];
   }, [scopePrograms]);
@@ -482,12 +506,13 @@ export function ExecutiveOverviewView({
       description: string;
       count: number;
       badgeLabel: string;
+      urgency: "amber" | "red";
       icon: React.ComponentType<{ className?: string }>;
       onClick: () => void;
     }> = [];
     const now = new Date();
 
-    // 1. Laporan Menunggu Verifikasi
+    // 1. Laporan Menunggu Verifikasi (Urgensi Sedang: Amber)
     let pendingReportsTotal = 0;
     programs.forEach((p) => {
       if (typeof p.pendingVerificationCount === "number" && p.pendingVerificationCount > 0) {
@@ -508,12 +533,13 @@ export function ExecutiveOverviewView({
           : `${pendingReportsTotal} laporan kegiatan mitra perlu peninjauan`,
         count: pendingReportsTotal,
         badgeLabel: `${pendingReportsTotal} Laporan`,
+        urgency: "amber",
         icon: Clock,
         onClick: () => onNavigateMenu("programs"),
       });
     }
 
-    // 2. Aktivitas Melewati Jadwal
+    // 2. Aktivitas Melewati Jadwal (Urgensi Tinggi: Merah)
     const overduePrograms = programs.filter((p) => {
       if (p.status !== "IN_PROGRESS" && p.status !== "PLANNED") return false;
       if (!p.nextActivityDate) return false;
@@ -530,12 +556,13 @@ export function ExecutiveOverviewView({
         description: `${overduePrograms.length} program melewati target tanggal rencana`,
         count: overduePrograms.length,
         badgeLabel: `${overduePrograms.length} Tertunda`,
+        urgency: "red",
         icon: AlertTriangle,
         onClick: () => onNavigateMenu("programs"),
       });
     }
 
-    // 3. Program Mendekati Tenggat Waktu (dalam 30 hari ke depan & belum 100% selesai)
+    // 3. Program Mendekati Tenggat Waktu (Urgensi Sedang: Amber)
     const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
     const nearDeadlinePrograms = programs.filter((p) => {
       if (p.status !== "IN_PROGRESS") return false;
@@ -554,13 +581,14 @@ export function ExecutiveOverviewView({
         description: `${nearDeadlinePrograms.length} program mendekati tanggal akhir penyelesaian`,
         count: nearDeadlinePrograms.length,
         badgeLabel: `${nearDeadlinePrograms.length} Program`,
+        urgency: "amber",
         icon: AlertCircle,
         onClick: () => onNavigateMenu("programs"),
       });
     }
 
     return items.slice(0, 3);
-  }, [programs, onNavigateMenu]);
+  }, [programs, isManagement, onNavigateMenu]);
 
   // Handler for selecting status (zero-count status cannot be selected)
   const handleSelectStatus = (statusKey: string) => {
@@ -688,222 +716,310 @@ export function ExecutiveOverviewView({
     setSelectedProvince(null);
   };
 
+  const currentDateString = useMemo(() => {
+    return new Intl.DateTimeFormat("id-ID", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(new Date());
+  }, []);
+
   return (
     <div className="space-y-6 w-full animate-in fade-in duration-300">
-      {/* 1. Open Canvas Page Header + Filter Strip Terpisah */}
-      <div className="space-y-4">
-        <DashboardPageHeader
-          title={isManagement ? "Ringkasan Eksekutif Portofolio" : "Ringkasan Manajemen Inisiatif CSR"}
-          description="Alokasi anggaran, progres pelaksanaan program, dan persebaran dampak CSR perusahaan."
-          iconSrc="/images/overview/overview-header-icon.png"
-          actions={
-            !isManagement && onOpenCreateOpportunity ? (
-              <button
-                type="button"
-                onClick={() => onOpenCreateOpportunity()}
-                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-5 py-2.5 rounded-full bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] hover:brightness-105 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold shadow-sm shadow-[#1765F5]/20 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] focus-visible:ring-offset-2"
-              >
-                <Plus aria-hidden="true" className="w-4 h-4" />
-                <span>Buat Peluang CSR</span>
-              </button>
-            ) : undefined
-          }
-        />
-
-        {/* Toolbar Filter Segaris */}
-        <div className="bg-white/95 rounded-2xl border border-[#DBEAFE] px-4 py-3 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <select
-              aria-label="Filter tahun pelaporan"
-              value={selectedYear}
-              onChange={(e) => {
-                setSelectedYear(e.target.value);
-                setSelectedMonth(null);
-              }}
-              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-[#DBEAFE] text-xs font-semibold text-[#0A2558] bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5]"
-            >
-              <option value="ALL">Semua Tahun</option>
-              {availableYears.map((yr) => (
-                <option key={yr} value={yr}>
-                  Tahun {yr}
-                </option>
-              ))}
-            </select>
-
-            <select
-              aria-label="Filter status program"
-              value={selectedStatus}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val === "ALL") {
-                  setSelectedStatus("ALL");
-                } else {
-                  const item = statusDistribution.find((s) => s.key === val);
-                  if (item && item.count > 0) {
-                    setSelectedStatus(val);
-                  }
-                }
-              }}
-              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-[#DBEAFE] text-xs font-semibold text-[#0A2558] bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5]"
-            >
-              <option value="ALL">Semua Status</option>
-              {statusDistribution.map((st) => (
-                <option key={st.key} value={st.key} disabled={st.count === 0}>
-                  {st.label} ({st.count})
-                </option>
-              ))}
-            </select>
-
-            <select
-              aria-label="Filter bidang fokus CSR"
-              value={selectedFocusArea}
-              onChange={(e) => setSelectedFocusArea(e.target.value)}
-              className="min-h-[38px] px-3 py-1.5 rounded-xl border border-[#DBEAFE] text-xs font-semibold text-[#0A2558] bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5]"
-            >
-              <option value="ALL">Semua Bidang</option>
-              <option value="LINGKUNGAN">Lingkungan Hidup</option>
-              <option value="PENDIDIKAN">Pendidikan</option>
-              <option value="KESEHATAN">Kesehatan</option>
-              <option value="PEMBERDAYAAN_EKONOMI">Pemberdayaan Ekonomi</option>
-              <option value="INFRASTRUKTUR_SOSIAL">Infrastruktur Sosial</option>
-              <option value="TANGGAP_BENCANA">Tanggap Bencana</option>
-              <option value="LAINNYA">Lainnya</option>
-            </select>
-
-            {hasActiveFilters && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleResetFilters}
-                leftIcon={<RotateCcw className="w-3.5 h-3.5 text-rose-600" />}
-                className="text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 cursor-pointer"
-              >
-                Reset
-              </Button>
-            )}
+      {/* 0. Executive Breakout Hero Banner Container (Wrapper Utama position: relative & overflow: visible) */}
+      <div className="relative pt-10 sm:pt-12 lg:pt-14 overflow-visible w-full mt-1 sm:mt-2">
+        {/* Layer 1: Kotak Background Banner (overflow: hidden agar gedung & dekorasi mengikuti rounded corners) */}
+        <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-r from-[#1067A9] via-[#0E60A1] to-[#0D5B99] text-white border border-[#2B7CBD]/40 shadow-sm overflow-hidden min-h-[175px] sm:min-h-[185px] lg:min-h-[195px] flex items-center">
+          {/* Latar Belakang Gedung Perusahaan & Pepohonan di Sisi Kanan Banner */}
+          <div className="absolute right-0 top-0 bottom-0 w-full sm:w-[55%] md:w-[48%] pointer-events-none select-none overflow-hidden opacity-30 sm:opacity-35 mix-blend-luminosity">
+            <Image
+              src="/images/overview/executive-banner-building.jpg"
+              alt=""
+              fill
+              priority
+              className="object-cover object-right"
+              sizes="(max-width: 1024px) 50vw, 480px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1067A9] via-[#0E60A1]/85 to-transparent" />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-            {hasActiveFilters && <span className="font-semibold text-[#0A2558]">Filter aktif:</span>}
-            {selectedYear !== "ALL" && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
-                Tahun {selectedYear}
+          {/* Gelombang Dekoratif & Efek Ambient Glow Halus */}
+          <div
+            aria-hidden="true"
+            className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-[#38BDF8]/15 blur-3xl pointer-events-none"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-white/5 blur-3xl pointer-events-none"
+          />
+
+          {/* Konten Teks & Tombol di Sisi Kiri */}
+          <div className="relative z-10 px-6 py-6 sm:px-8 sm:py-7 lg:py-8 max-w-[66%] sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl space-y-2.5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-xl sm:text-2xl lg:text-[26px] font-bold text-white tracking-tight leading-tight">
+                Halo,{" "}
+                <span className="font-extrabold text-white">
+                  {user.name || "Manajemen"}
+                </span>{" "}
+                <span className="inline-block" role="img" aria-label="Melambai">
+                  👋
+                </span>
+              </h1>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/15 text-white/95 border border-white/20 backdrop-blur-xs">
+                {currentDateString}
               </span>
-            )}
-            {selectedMonth !== null && (
+            </div>
+            <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed font-normal">
+              {isManagement
+                ? "Semoga hari Anda produktif! Pantau alokasi pagu, efektivitas serapan anggaran, dan akuntabilitas dampak program CSR perusahaan Anda hari ini."
+                : "Semoga hari Anda produktif! Kelola inisiatif CSR, tinjau pengajuan proposal, dan pantau kemitraan program berkelanjutan lembaga Anda."}
+            </p>
+            <div className="pt-1 flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={() => setSelectedMonth(null)}
-                className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px] hover:border-rose-300 hover:text-rose-700 cursor-pointer"
+                onClick={() => onNavigateMenu("programs")}
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-xl bg-white hover:bg-blue-50 active:scale-[0.99] text-[#0E60A1] text-xs font-bold shadow-xs transition-all cursor-pointer group"
               >
-                Bulan: {MONTH_NAMES.find((m) => m.num === selectedMonth)?.name || selectedMonth} ×
+                <span>Lihat Detail Portofolio Program</span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#0E60A1] transition-transform group-hover:translate-x-0.5" />
               </button>
-            )}
-            {selectedStatus !== "ALL" && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#ECFDF5] border border-emerald-200 font-semibold text-[#065F46] text-[11px]">
-                {selectedStatus === "IN_PROGRESS"
-                  ? "Sedang Berjalan"
-                  : selectedStatus === "PLANNED"
-                  ? "Persiapan"
-                  : "Selesai"}
-              </span>
-            )}
-            {selectedFocusArea !== "ALL" && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
-                {FOCUS_AREA_CONFIG[selectedFocusArea as keyof typeof FOCUS_AREA_CONFIG]?.label || selectedFocusArea}
-              </span>
-            )}
-            {selectedProvince && (
-              <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
-                {selectedProvince}
-              </span>
-            )}
-            <span className="text-[11px] font-semibold text-slate-600 tabular-nums lg:ml-2">
-              {filteredPrograms.length} dari {programs.length} program
-            </span>
+              {!isManagement && onOpenCreateOpportunity && (
+                <button
+                  type="button"
+                  onClick={() => onOpenCreateOpportunity()}
+                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-white/15 hover:bg-white/25 text-white border border-white/20 text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                >
+                  <Plus aria-hidden="true" className="w-3.5 h-3.5 text-white" />
+                  <span>Buat Peluang CSR</span>
+                </button>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Layer 2: Ilustrasi Karakter Breakout / Overflowing (Lapisan Paling Depan di Kanan, menempel di dasar banner) */}
+        <div
+          aria-hidden="true"
+          className="absolute bottom-0 right-3 sm:right-6 lg:right-8 z-20 pointer-events-none select-none leading-none"
+        >
+          <Image
+            src="/images/overview/executive-management-breakout.png"
+            alt="Ilustrasi Manajemen Perusahaan"
+            width={737}
+            height={751}
+            priority
+            className="w-[165px] sm:w-[185px] md:w-[205px] lg:w-[225px] xl:w-[240px] h-auto block align-bottom"
+            style={{ display: "block", verticalAlign: "bottom" }}
+          />
         </div>
       </div>
 
-      {/* 2. Ringkasan 4 KPI Utama */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 w-full">
-        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all space-y-3">
+      {/* 1. Ringkasan 4 KPI Utama (Left Accent Border 3.5px & Soft Tinted Background Seragam) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-5 w-full">
+        {/* KPI 1: Total Pagu CSR (Left Accent Border Biru #2563EB) */}
+        <div className="p-5 rounded-2xl bg-[#F8FAFD] border border-[#D9E8F9] border-l-[3.5px] border-l-[#2563EB] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full min-h-[142px] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Total Pagu CSR</span>
-            <div className="w-10 h-10 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-full bg-blue-50/90 border border-blue-200/60 text-[#2563EB] flex items-center justify-center shrink-0 shadow-2xs">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-extrabold text-[#0A2558] tabular-nums">
-            {formatCompact(kpiData.totalAllocated)}
-          </div>
-          <p className="text-xs text-slate-600">
-            Alokasi resmi dari {kpiData.totalPrograms} program
-          </p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-emerald-300 shadow-xs transition-all space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-slate-600">Realisasi Anggaran</span>
-            <div className="w-10 h-10 rounded-2xl bg-[#ECFDF5] border border-emerald-200 text-[#047857] flex items-center justify-center shrink-0">
-              <Activity className="w-4 h-4" />
+          <div className="space-y-1">
+            <div className="text-2xl sm:text-[28px] font-black text-[#0A2558] tabular-nums tracking-tight leading-none">
+              {formatCompact(kpiData.totalAllocated)}
             </div>
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-[#047857] tabular-nums">
-              {formatCompact(kpiData.totalSpent)}
-            </span>
-            <span className="text-xs font-bold text-[#065F46] bg-[#ECFDF5] border border-emerald-200 px-2 py-0.5 rounded-full tabular-nums">
-              {kpiData.absorptionRate}%
-            </span>
-          </div>
-          <div className="space-y-1.5">
-            <div className="w-full h-1.5 rounded-full bg-emerald-100/80 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-[#047857] to-[#10B981] transition-all duration-500"
-                style={{ width: `${Math.min(100, Math.max(0, kpiData.absorptionRate))}%` }}
-              />
-            </div>
-            <p className="text-xs text-slate-600">
-              Serapan terverifikasi terhadap pagu
+            <p className="text-xs text-slate-500 pt-1 truncate">
+              Alokasi resmi dari {kpiData.totalPrograms} program
             </p>
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all space-y-3">
+        {/* KPI 2: Realisasi Anggaran (Left Accent Border Hijau #059669) */}
+        <div className="p-5 rounded-2xl bg-[#F8FDFB] border border-[#D1F4E4] border-l-[3.5px] border-l-[#059669] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full min-h-[142px] space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold text-slate-600">Realisasi Anggaran</span>
+            <div className="w-9 h-9 rounded-full bg-emerald-50/90 border border-emerald-200/60 text-[#059669] flex items-center justify-center shrink-0 shadow-2xs">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-2xl sm:text-[28px] font-black text-[#065F46] tabular-nums tracking-tight truncate leading-none">
+                {formatCompact(kpiData.totalSpent)}
+              </span>
+              <span className="text-xs font-bold text-[#065F46] bg-emerald-100/90 border border-emerald-200/80 px-2 py-0.5 rounded-full tabular-nums shrink-0">
+                {kpiData.absorptionRate}%
+              </span>
+            </div>
+            <div className="space-y-1 pt-0.5">
+              <div className="w-full h-1.5 rounded-full bg-emerald-100 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#059669] to-[#10B981] transition-all duration-500"
+                  style={{ width: `${Math.min(100, Math.max(0, kpiData.absorptionRate))}%` }}
+                />
+              </div>
+              <p className="text-xs text-slate-500 truncate">
+                Serapan terverifikasi terhadap pagu
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* KPI 3: Program Berjalan (Left Accent Border Biru #2563EB) */}
+        <div className="p-5 rounded-2xl bg-[#F8FAFD] border border-[#D9E8F9] border-l-[3.5px] border-l-[#2563EB] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full min-h-[142px] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Program Berjalan</span>
-            <div className="w-10 h-10 rounded-2xl bg-[#EDF6FF] border border-[#CBE7FD] text-[#1765F5] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-full bg-blue-50/90 border border-blue-200/60 text-[#2563EB] flex items-center justify-center shrink-0 shadow-2xs">
               <Target className="w-4 h-4" />
             </div>
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-extrabold text-[#0A2558] tabular-nums">
-              {kpiData.runningCount}
-            </span>
-            <span className="text-xs font-semibold text-slate-600 tabular-nums">
-              / {kpiData.totalPrograms} program
-            </span>
+          <div className="space-y-1">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-3xl sm:text-[34px] font-black text-[#0A2558] tabular-nums tracking-tight leading-none">
+                {kpiData.runningCount}
+              </span>
+              <span className="text-xs font-semibold text-slate-400 tabular-nums">
+                / {kpiData.totalPrograms} program
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 pt-1 truncate">
+              {kpiData.completedCount} program telah selesai
+            </p>
           </div>
-          <p className="text-xs text-slate-600">
-            {kpiData.completedCount} program telah selesai
-          </p>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white border border-[#DBEAFE] hover:border-[#93C5FD] shadow-xs transition-all space-y-3">
+        {/* KPI 4: Mitra Berkontrak (Left Accent Border Hijau #059669) */}
+        <div className="p-5 rounded-2xl bg-[#F8FDFB] border border-[#D1F4E4] border-l-[3.5px] border-l-[#059669] shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full min-h-[142px] space-y-3">
           <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-semibold text-slate-600">Mitra Berkontrak</span>
-            <div className="w-10 h-10 rounded-2xl bg-[#F4F9FF] border border-[#DBEAFE] text-[#0A2558] flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-full bg-emerald-50/90 border border-emerald-200/60 text-[#059669] flex items-center justify-center shrink-0 shadow-2xs">
               <HeartHandshake className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-3xl font-extrabold text-[#0A2558] tabular-nums">
-            {kpiData.uniquePartnersCount}
+          <div className="space-y-1">
+            <div className="text-3xl sm:text-[34px] font-black text-[#065F46] tabular-nums tracking-tight leading-none">
+              {kpiData.uniquePartnersCount}
+            </div>
+            <p className="text-xs text-slate-500 pt-1 truncate">
+              Lembaga pelaksana program aktif
+            </p>
           </div>
-          <p className="text-xs text-slate-600">
-            Lembaga pelaksana program aktif
-          </p>
+        </div>
+      </div>
+
+      {/* Toolbar Filter Segaris */}
+      <div className="bg-white rounded-xl border border-[#DBEAFE] px-4 py-2.5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            aria-label="Filter tahun pelaporan"
+            value={selectedYear}
+            onChange={(e) => {
+              setSelectedYear(e.target.value);
+              setSelectedMonth(null);
+            }}
+            className="h-9 px-3 py-1.5 rounded-lg border border-[#DBEAFE] hover:border-[#93C5FD] text-xs font-medium text-[#0A2558] bg-white hover:bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1765F5] focus:border-[#1765F5] transition-colors"
+          >
+            <option value="ALL">Semua Tahun</option>
+            {availableYears.map((yr) => (
+              <option key={yr} value={yr}>
+                Tahun {yr}
+              </option>
+            ))}
+          </select>
+
+          <select
+            aria-label="Filter status program"
+            value={selectedStatus}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "ALL") {
+                setSelectedStatus("ALL");
+              } else {
+                const item = statusDistribution.find((s) => s.key === val);
+                if (item && item.count > 0) {
+                  setSelectedStatus(val);
+                }
+              }
+            }}
+            className="h-9 px-3 py-1.5 rounded-lg border border-[#DBEAFE] hover:border-[#93C5FD] text-xs font-medium text-[#0A2558] bg-white hover:bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1765F5] focus:border-[#1765F5] transition-colors"
+          >
+            <option value="ALL">Semua Status</option>
+            {statusDistribution.map((st) => (
+              <option key={st.key} value={st.key} disabled={st.count === 0}>
+                {st.label} ({st.count})
+              </option>
+            ))}
+          </select>
+
+          <select
+            aria-label="Filter bidang fokus CSR"
+            value={selectedFocusArea}
+            onChange={(e) => setSelectedFocusArea(e.target.value)}
+            className="h-9 px-3 py-1.5 rounded-lg border border-[#DBEAFE] hover:border-[#93C5FD] text-xs font-medium text-[#0A2558] bg-white hover:bg-[#F8FBFF] cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#1765F5] focus:border-[#1765F5] transition-colors"
+          >
+            <option value="ALL">Semua Bidang</option>
+            <option value="LINGKUNGAN">Lingkungan Hidup</option>
+            <option value="PENDIDIKAN">Pendidikan</option>
+            <option value="KESEHATAN">Kesehatan</option>
+            <option value="PEMBERDAYAAN_EKONOMI">Pemberdayaan Ekonomi</option>
+            <option value="INFRASTRUKTUR_SOSIAL">Infrastruktur Sosial</option>
+            <option value="TANGGAP_BENCANA">Tanggap Bencana</option>
+            <option value="LAINNYA">Lainnya</option>
+          </select>
+
+          {hasActiveFilters && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleResetFilters}
+              leftIcon={<RotateCcw className="w-3.5 h-3.5 text-rose-600" />}
+              className="h-9 text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 cursor-pointer rounded-lg px-3"
+            >
+              Reset
+            </Button>
+          )}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+          {hasActiveFilters && <span className="font-semibold text-[#0A2558]">Filter aktif:</span>}
+          {selectedYear !== "ALL" && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
+              Tahun {selectedYear}
+            </span>
+          )}
+          {selectedMonth !== null && (
+            <button
+              type="button"
+              onClick={() => setSelectedMonth(null)}
+              className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px] hover:border-rose-300 hover:text-rose-700 cursor-pointer"
+            >
+              Bulan: {MONTH_NAMES.find((m) => m.num === selectedMonth)?.name || selectedMonth} ×
+            </button>
+          )}
+          {selectedStatus !== "ALL" && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[#ECFDF5] border border-emerald-200 font-semibold text-[#065F46] text-[11px]">
+              {selectedStatus === "IN_PROGRESS"
+                ? "Sedang Berjalan"
+                : selectedStatus === "PLANNED"
+                  ? "Persiapan"
+                  : "Selesai"}
+            </span>
+          )}
+          {selectedFocusArea !== "ALL" && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
+              {FOCUS_AREA_CONFIG[selectedFocusArea as keyof typeof FOCUS_AREA_CONFIG]?.label || selectedFocusArea}
+            </span>
+          )}
+          {selectedProvince && (
+            <span className="px-2.5 py-0.5 rounded-full bg-[#EDF6FF] border border-[#CBE7FD] font-semibold text-[#0A2558] text-[11px]">
+              {selectedProvince}
+            </span>
+          )}
+          <span className="text-[11px] font-semibold text-slate-600 tabular-nums lg:ml-2">
+            {filteredPrograms.length} dari {programs.length} program
+          </span>
         </div>
       </div>
 
@@ -935,7 +1051,7 @@ export function ExecutiveOverviewView({
                       setMonthlyYear(e.target.value);
                       setSelectedMonth(null);
                     }}
-                    className="text-xs font-semibold bg-[#F8FBFF] border border-[#DBEAFE] rounded-xl px-2.5 py-1.5 text-[#0A2558] focus:outline-none focus:ring-2 focus:ring-[#1765F5]/20 focus:border-[#1765F5] cursor-pointer"
+                    className="h-9 text-xs font-medium bg-white hover:bg-[#F8FBFF] border border-[#DBEAFE] hover:border-[#93C5FD] rounded-lg px-3 py-1.5 text-[#0A2558] focus:outline-none focus:ring-1 focus:ring-[#1765F5] focus:border-[#1765F5] cursor-pointer transition-colors"
                   >
                     {availableYears.map((yr) => (
                       <option key={yr} value={yr}>
@@ -952,22 +1068,20 @@ export function ExecutiveOverviewView({
                       setBudgetTrendMode("annual");
                       setSelectedMonth(null);
                     }}
-                    className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${
-                      budgetTrendMode === "annual"
-                        ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-xs"
-                        : "text-slate-600 hover:text-[#0A2558]"
-                    }`}
+                    className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${budgetTrendMode === "annual"
+                      ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-xs"
+                      : "text-slate-600 hover:text-[#0A2558]"
+                      }`}
                   >
                     Tahunan
                   </button>
                   <button
                     type="button"
                     onClick={() => setBudgetTrendMode("monthly")}
-                    className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${
-                      budgetTrendMode === "monthly"
-                        ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white shadow-xs"
-                        : "text-slate-600 hover:text-[#0A2558]"
-                    }`}
+                    className={`px-3.5 py-1 text-xs font-semibold rounded-full transition-all cursor-pointer ${budgetTrendMode === "monthly"
+                      ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-xs"
+                      : "text-slate-600 hover:text-[#0A2558]"
+                      }`}
                   >
                     Bulanan
                   </button>
@@ -979,11 +1093,11 @@ export function ExecutiveOverviewView({
             <div className="flex items-center justify-between pb-3 text-xs border-b border-[#EDF6FF]">
               <div className="flex items-center gap-5">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#0A2558]" />
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#2563EB]" />
                   <span className="text-slate-700 font-medium">Alokasi</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-[#047857]" />
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#10B981]" />
                   <span className="text-slate-700 font-medium">Realisasi</span>
                 </div>
               </div>
@@ -999,187 +1113,323 @@ export function ExecutiveOverviewView({
               )}
             </div>
 
-            {/* VISUALISASI MODE TAHUNAN */}
-            {budgetTrendMode === "annual" && (
-              <div className="pt-5">
-                {annualTrendData.data.length === 0 ? (
-                  <div className="py-16 text-center text-xs text-slate-600">
-                    Belum ada data anggaran tahunan untuk ditampilkan.
+            {/* VISUALISASI GRAFIK MODERN DENGAN SUMBU Y & GRIDLINE */}
+            <div className="pt-4">
+              <div className="flex items-stretch gap-2 sm:gap-3">
+                {/* Sumbu Y: Skala Nominal Rupiah */}
+                <div className="w-14 sm:w-16 shrink-0 flex flex-col justify-between items-end pb-7 pr-1 text-[11px] font-semibold text-slate-500 select-none tabular-nums h-56">
+                  {chartYScale.ticks.map((tick, i) => (
+                    <span key={i} className="leading-none text-right">
+                      {formatCompact(tick)}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Area Plot Batang & Gridline Horizontal */}
+                <div className="relative flex-1 min-w-0 h-56">
+                  {/* Gridline Horizontal Halus */}
+                  <div className="absolute inset-0 pb-7 flex flex-col justify-between pointer-events-none">
+                    {chartYScale.ticks.map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-full border-b ${
+                          i === chartYScale.ticks.length - 1
+                            ? "border-slate-200"
+                            : "border-slate-100/80"
+                        }`}
+                      />
+                    ))}
                   </div>
-                ) : (
-                  <div>
-                    <div className="h-56 flex items-end justify-around gap-6 sm:gap-10 px-4 border-b border-[#DBEAFE]">
-                      {annualTrendData.data.map((item) => {
-                        const allocatedHeight =
-                          annualTrendData.maxVal > 0
-                            ? Math.max(12, Math.round((item.allocated / annualTrendData.maxVal) * 100))
-                            : 8;
-                        const spentHeight =
-                          annualTrendData.maxVal > 0
-                            ? Math.max(12, Math.round((item.spent / annualTrendData.maxVal) * 100))
-                            : 8;
 
-                        const isHovered = hoveredYear === item.year;
-                        const isSelected = selectedYear === item.year;
-
-                        return (
+                  {/* Mode Tahunan */}
+                  {budgetTrendMode === "annual" && (
+                    <div className="relative z-10 h-full flex flex-col justify-between">
+                      {annualTrendData.data.length === 0 ? (
+                        <div className="h-full flex items-center justify-center text-xs text-slate-600">
+                          Belum ada data anggaran tahunan untuk ditampilkan.
+                        </div>
+                      ) : (
+                        <>
                           <div
-                            key={item.year}
-                            className={`flex flex-col items-center flex-1 max-w-[140px] group cursor-pointer transition-all ${
-                              selectedYear !== "ALL" && !isSelected ? "opacity-40" : "opacity-100"
-                            }`}
-                            onMouseEnter={() => setHoveredYear(item.year)}
-                            onMouseLeave={() => setHoveredYear(null)}
-                            onClick={() => {
-                              setSelectedYear(selectedYear === item.year ? "ALL" : item.year);
-                            }}
+                            className={`h-48 flex items-end ${
+                              annualTrendData.data.length === 1
+                                ? "justify-center"
+                                : "justify-around gap-4 sm:gap-8"
+                            } px-2 sm:px-4`}
                           >
                             <div
-                              className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#0A2558] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center ${
-                                isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 hidden sm:block"
+                              className={`flex items-end ${
+                                annualTrendData.data.length === 1
+                                  ? "justify-center max-w-[220px] w-full"
+                                  : "justify-around w-full"
                               }`}
                             >
-                              <div className="font-bold">Tahun {item.year}</div>
-                              <div className="text-sky-200">
-                                Alokasi: {formatRupiah(item.allocated)}
-                              </div>
-                              <div className="text-emerald-300">
-                                Realisasi: {formatRupiah(item.spent)} ({item.absorption}%)
-                              </div>
-                            </div>
+                              {annualTrendData.data.map((item) => {
+                                const allocatedHeight =
+                                  chartYScale.max > 0 && item.allocated > 0
+                                    ? Math.min(
+                                        100,
+                                        Math.max(
+                                          6,
+                                          Math.round((item.allocated / chartYScale.max) * 100)
+                                        )
+                                      )
+                                    : 0;
+                                const spentHeight =
+                                  chartYScale.max > 0 && item.spent > 0
+                                    ? Math.min(
+                                        100,
+                                        Math.max(
+                                          6,
+                                          Math.round((item.spent / chartYScale.max) * 100)
+                                        )
+                                      )
+                                    : 0;
 
-                            <div className="w-full flex items-end justify-center gap-2 h-44">
-                              <div
-                                className="w-1/2 max-w-[30px] bg-[#0A2558] rounded-t-md transition-all duration-300 group-hover:brightness-125"
-                                style={{ height: `${allocatedHeight}%` }}
-                                title={`Alokasi ${item.year}: ${formatRupiah(item.allocated)}`}
-                              />
-                              <div
-                                className="w-1/2 max-w-[30px] bg-[#047857] rounded-t-md transition-all duration-300 group-hover:brightness-110"
-                                style={{ height: `${spentHeight}%` }}
-                                title={`Realisasi ${item.year}: ${formatRupiah(item.spent)}`}
-                              />
-                            </div>
+                                const isHovered = hoveredYear === item.year;
+                                const isSelected = selectedYear === item.year;
 
-                            <div className="pt-2.5 text-center">
-                              <span
-                                className={`text-xs font-bold tabular-nums transition-colors ${
-                                  isSelected
-                                    ? "text-[#047857] underline"
-                                    : "text-[#0A2558] group-hover:text-[#1765F5]"
-                                }`}
-                              >
-                                {item.year}
-                              </span>
+                                return (
+                                  <div
+                                    key={item.year}
+                                    className={`relative flex flex-col items-center group cursor-pointer transition-all ${
+                                      annualTrendData.data.length === 1
+                                        ? "w-full"
+                                        : "flex-1 max-w-[130px]"
+                                    } ${
+                                      selectedYear !== "ALL" && !isSelected
+                                        ? "opacity-35"
+                                        : "opacity-100"
+                                    }`}
+                                    onMouseEnter={() => setHoveredYear(item.year)}
+                                    onMouseLeave={() => setHoveredYear(null)}
+                                    onClick={() => {
+                                      setSelectedYear(
+                                        selectedYear === item.year ? "ALL" : item.year
+                                      );
+                                    }}
+                                  >
+                                    {/* Tooltip Interaktif Saat Hover */}
+                                    {isHovered && (
+                                      <div className="absolute -top-24 left-1/2 -translate-x-1/2 z-30 pointer-events-none bg-[#0A2558]/95 backdrop-blur-xs text-white text-xs px-3.5 py-2.5 rounded-xl shadow-xl border border-white/10 whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
+                                        <div className="font-bold text-white border-b border-white/10 pb-1 mb-1.5 flex items-center justify-between gap-3">
+                                          <span>Tahun {item.year}</span>
+                                          <span className="text-[10px] font-normal text-slate-300">
+                                            {item.count} program
+                                          </span>
+                                        </div>
+                                        <div className="space-y-1 text-[11px]">
+                                          <div className="flex items-center justify-between gap-4">
+                                            <span className="flex items-center gap-1.5 text-sky-200">
+                                              <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                                              Alokasi
+                                            </span>
+                                            <span className="font-semibold tabular-nums">
+                                              {formatRupiah(item.allocated)}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center justify-between gap-4">
+                                            <span className="flex items-center gap-1.5 text-emerald-200">
+                                              <span className="w-2 h-2 rounded-full bg-[#34D399]" />
+                                              Realisasi
+                                            </span>
+                                            <span className="font-semibold tabular-nums">
+                                              {formatRupiah(item.spent)}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center justify-between gap-4 pt-1 border-t border-white/10 text-[10px] text-slate-300">
+                                            <span>Tingkat Serapan</span>
+                                            <span className="font-bold text-emerald-300 tabular-nums">
+                                              {item.absorption}%
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Pasangan Batang Alokasi & Realisasi */}
+                                    <div className="w-full flex items-end justify-center gap-2 sm:gap-3 h-44">
+                                      <div
+                                        className="w-10 sm:w-12 max-w-[44px] bg-gradient-to-t from-[#1D4ED8] to-[#38BDF8] rounded-t-lg transition-all duration-300 group-hover:brightness-110 shadow-2xs"
+                                        style={{ height: `${allocatedHeight}%` }}
+                                        title={`Alokasi ${item.year}: ${formatRupiah(item.allocated)}`}
+                                      />
+                                      <div
+                                        className="w-10 sm:w-12 max-w-[44px] bg-gradient-to-t from-[#059669] to-[#34D399] rounded-t-lg transition-all duration-300 group-hover:brightness-110 shadow-2xs"
+                                        style={{ height: `${spentHeight}%` }}
+                                        title={`Realisasi ${item.year}: ${formatRupiah(item.spent)}`}
+                                      />
+                                    </div>
+
+                                    {/* Label Tahun */}
+                                    <div className="h-7 pt-2 text-center">
+                                      <span
+                                        className={`text-xs font-bold tabular-nums transition-colors ${
+                                          isSelected
+                                            ? "text-[#059669] underline font-extrabold"
+                                            : "text-[#0A2558] group-hover:text-[#2563EB]"
+                                        }`}
+                                      >
+                                        {item.year}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
-                        );
-                      })}
+                        </>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
 
-            {/* VISUALISASI MODE BULANAN */}
-            {budgetTrendMode === "monthly" && (
-              <div className="pt-5">
-                <div className="h-56 flex items-end justify-between gap-1 sm:gap-2 px-1 border-b border-[#DBEAFE] overflow-x-auto">
-                  {monthlyTrendData.months.map((m) => {
-                    const allocatedHeight =
-                      monthlyTrendData.maxVal > 0 && m.allocated > 0
-                        ? Math.max(12, Math.round((m.allocated / monthlyTrendData.maxVal) * 100))
-                        : 0;
-                    const spentHeight =
-                      monthlyTrendData.maxVal > 0 && m.spent > 0
-                        ? Math.max(12, Math.round((m.spent / monthlyTrendData.maxVal) * 100))
-                        : 0;
+                  {/* Mode Bulanan */}
+                  {budgetTrendMode === "monthly" && (
+                    <div className="relative z-10 h-full flex flex-col justify-between">
+                      <div className="h-48 flex items-end justify-between gap-1 sm:gap-1.5 px-0.5">
+                        {monthlyTrendData.months.map((m) => {
+                          const allocatedHeight =
+                            chartYScale.max > 0 && m.allocated > 0
+                              ? Math.min(
+                                  100,
+                                  Math.max(
+                                    6,
+                                    Math.round((m.allocated / chartYScale.max) * 100)
+                                  )
+                                )
+                              : 0;
+                          const spentHeight =
+                            chartYScale.max > 0 && m.spent > 0
+                              ? Math.min(
+                                  100,
+                                  Math.max(
+                                    6,
+                                    Math.round((m.spent / chartYScale.max) * 100)
+                                  )
+                                )
+                              : 0;
 
-                    const isHovered = hoveredMonth === m.num;
-                    const isSelected = selectedMonth === m.num;
+                          const isHovered = hoveredMonth === m.num;
+                          const isSelected = selectedMonth === m.num;
 
-                    return (
-                      <div
-                        key={m.num}
-                        className={`flex flex-col items-center flex-1 min-w-[28px] max-w-[50px] group cursor-pointer transition-all ${
-                          selectedMonth !== null && !isSelected ? "opacity-35" : "opacity-100"
-                        }`}
-                        onMouseEnter={() => setHoveredMonth(m.num)}
-                        onMouseLeave={() => setHoveredMonth(null)}
-                        onClick={() => {
-                          setSelectedMonth(selectedMonth === m.num ? null : m.num);
-                        }}
-                      >
-                        <div
-                          className={`mb-2 px-2.5 py-1.5 rounded-xl bg-[#0A2558] text-white text-[11px] shadow-md transition-all duration-150 pointer-events-none text-center whitespace-nowrap z-20 ${
-                            isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 hidden sm:block"
-                          }`}
-                        >
-                          <div className="font-bold">{m.name} {monthlyYear}</div>
-                          {m.hasData ? (
-                            <>
-                              <div className="text-sky-200">
-                                Alokasi: {formatRupiah(m.allocated)}
+                          return (
+                            <div
+                              key={m.num}
+                              className={`relative flex flex-col items-center flex-1 min-w-[20px] max-w-[44px] group cursor-pointer transition-all ${
+                                selectedMonth !== null && !isSelected
+                                  ? "opacity-35"
+                                  : "opacity-100"
+                              }`}
+                              onMouseEnter={() => setHoveredMonth(m.num)}
+                              onMouseLeave={() => setHoveredMonth(null)}
+                              onClick={() => {
+                                setSelectedMonth(
+                                  selectedMonth === m.num ? null : m.num
+                                );
+                              }}
+                            >
+                              {/* Tooltip Interaktif Mode Bulanan */}
+                              {isHovered && (
+                                <div className="absolute -top-24 left-1/2 -translate-x-1/2 z-30 pointer-events-none bg-[#0A2558]/95 backdrop-blur-xs text-white text-xs px-3.5 py-2.5 rounded-xl shadow-xl border border-white/10 whitespace-nowrap animate-in fade-in zoom-in-95 duration-150">
+                                  <div className="font-bold text-white border-b border-white/10 pb-1 mb-1.5">
+                                    {m.name} {monthlyYear}
+                                  </div>
+                                  {m.hasData ? (
+                                    <div className="space-y-1 text-[11px]">
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="flex items-center gap-1.5 text-sky-200">
+                                          <span className="w-2 h-2 rounded-full bg-[#38BDF8]" />
+                                          Alokasi
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                          {formatRupiah(m.allocated)}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between gap-4">
+                                        <span className="flex items-center gap-1.5 text-emerald-200">
+                                          <span className="w-2 h-2 rounded-full bg-[#34D399]" />
+                                          Realisasi
+                                        </span>
+                                        <span className="font-semibold tabular-nums">
+                                          {formatRupiah(m.spent)}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center justify-between gap-4 pt-1 border-t border-white/10 text-[10px] text-slate-300">
+                                        <span>Tingkat Serapan</span>
+                                        <span className="font-bold text-emerald-300 tabular-nums">
+                                          {m.absorption}%
+                                        </span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="text-slate-300 text-[10px]">
+                                      Belum ada realisasi pada bulan ini
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Batang Alokasi & Realisasi Bulanan */}
+                              <div className="w-full flex items-end justify-center gap-1 h-44">
+                                {m.hasData ? (
+                                  <>
+                                    <div
+                                      className="w-1/2 max-w-[14px] bg-gradient-to-t from-[#1D4ED8] to-[#38BDF8] rounded-t-md transition-all duration-300 group-hover:brightness-110 shadow-2xs"
+                                      style={{ height: `${allocatedHeight}%` }}
+                                      title={`${m.name}: Alokasi ${formatRupiah(m.allocated)}`}
+                                    />
+                                    <div
+                                      className="w-1/2 max-w-[14px] bg-gradient-to-t from-[#059669] to-[#34D399] rounded-t-md transition-all duration-300 group-hover:brightness-110 shadow-2xs"
+                                      style={{ height: `${spentHeight}%` }}
+                                      title={`${m.name}: Realisasi ${formatRupiah(m.spent)}`}
+                                    />
+                                  </>
+                                ) : (
+                                  <div className="w-full h-1 bg-slate-100 rounded-full group-hover:bg-[#DBEAFE] transition-colors" />
+                                )}
                               </div>
-                              <div className="text-emerald-300">
-                                Realisasi: {formatRupiah(m.spent)} ({m.absorption}%)
+
+                              {/* Label Singkatan Bulan */}
+                              <div className="h-7 pt-2 text-center">
+                                <span
+                                  className={`text-[11px] font-semibold transition-colors ${
+                                    isSelected
+                                      ? "text-[#059669] underline font-bold"
+                                      : "text-slate-600 group-hover:text-[#2563EB]"
+                                  }`}
+                                >
+                                  {m.short}
+                                </span>
                               </div>
-                            </>
-                          ) : (
-                            <div className="text-slate-300 text-[10px]">
-                              Belum ada realisasi
                             </div>
-                          )}
-                        </div>
-
-                        <div className="w-full flex items-end justify-center gap-1 h-44">
-                          {m.hasData ? (
-                            <>
-                              <div
-                                className="w-1/2 max-w-[14px] bg-[#0A2558] rounded-t-sm transition-all duration-300 group-hover:brightness-125"
-                                style={{ height: `${allocatedHeight}%` }}
-                                title={`${m.name}: Alokasi ${formatRupiah(m.allocated)}`}
-                              />
-                              <div
-                                className="w-1/2 max-w-[14px] bg-[#047857] rounded-t-sm transition-all duration-300 group-hover:brightness-110"
-                                style={{ height: `${spentHeight}%` }}
-                                title={`${m.name}: Realisasi ${formatRupiah(m.spent)}`}
-                              />
-                            </>
-                          ) : (
-                            <div className="w-full h-1 bg-[#EDF6FF] rounded-full group-hover:bg-[#DBEAFE] transition-colors" />
-                          )}
-                        </div>
-
-                        <div className="pt-2.5 text-center">
-                          <span
-                            className={`text-[11px] font-semibold transition-colors ${
-                              isSelected
-                                ? "text-[#047857] underline font-bold"
-                                : "text-slate-600 group-hover:text-[#0A2558]"
-                            }`}
-                          >
-                            {m.short}
-                          </span>
-                        </div>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-
-                <div className="pt-3 flex items-center justify-between text-xs text-slate-600">
-                  <span>Klik bulan untuk memfilter rincian</span>
-                  <span className="font-medium text-[#0A2558] tabular-nums">
-                    Total {monthlyYear}: <strong className="text-[#047857]">{formatCompact(monthlyTrendData.totalYearSpent)}</strong>
-                  </span>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
+
+              {/* Keterangan Footer Grafik */}
+              <div className="pt-3 flex items-center justify-between text-xs text-slate-600">
+                <span>
+                  {budgetTrendMode === "monthly"
+                    ? "Klik bulan untuk memfilter rincian program"
+                    : "Klik tahun untuk memfilter rincian portofolio"}
+                </span>
+                <span className="font-medium text-[#0A2558] tabular-nums">
+                  Total Realisasi {monthlyYear}:{" "}
+                  <strong className="text-[#047857]">
+                    {formatCompact(monthlyTrendData.totalYearSpent)}
+                  </strong>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Right Column (5 cols): Distribusi Status & Perhatian */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-[#DBEAFE] shadow-xs flex flex-col justify-between gap-5">
+        {/* Right Column (5 cols): Distribusi Status & Perhatian Eksekutif */}
+        <div className="lg:col-span-5 bg-white p-6 rounded-2xl sm:rounded-3xl border border-[#DBEAFE] shadow-2xs flex flex-col justify-between gap-5">
           <div className="space-y-5">
             <div className="space-y-0.5">
               <h2 className="text-base font-bold text-[#0A2558]">
@@ -1233,7 +1483,7 @@ export function ExecutiveOverviewView({
                 </div>
               </div>
 
-              {/* Clean Status Filter Rows */}
+              {/* Status Indicators List (Biru: Selesai, Amber: Persiapan, Hijau: Berjalan) */}
               <div className="flex-1 w-full divide-y divide-[#EDF6FF]">
                 {statusDistribution.map((st) => {
                   const isSelected = selectedStatus === st.key;
@@ -1249,8 +1499,8 @@ export function ExecutiveOverviewView({
                         isZero
                           ? "opacity-45 cursor-not-allowed"
                           : isSelected
-                          ? `${st.lightBg} ${st.textColor} cursor-pointer`
-                          : "hover:bg-[#F4F9FF] cursor-pointer"
+                            ? `${st.lightBg} ${st.textColor} cursor-pointer font-bold`
+                            : "hover:bg-[#F4F9FF] cursor-pointer"
                       }`}
                     >
                       <span className="flex items-center gap-2.5">
@@ -1268,36 +1518,58 @@ export function ExecutiveOverviewView({
             </div>
           </div>
 
-          {/* Compact Attention Strip (Only if items exist) */}
+          {/* Perhatian Eksekutif (Pengawasan Portofolio: Amber/Red Berdasarkan Urgensi) */}
           {followUpPriorities.length > 0 && (
             <div className="pt-4 border-t border-[#EDF6FF] space-y-2.5">
               <span className="text-xs font-bold text-[#0A2558] block">
                 {isManagement ? "Perhatian Eksekutif" : "Prioritas Tindak Lanjut"}
               </span>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {followUpPriorities.map((item) => {
                   const IconComponent = item.icon;
+                  const isRed = item.urgency === "red";
+
                   return (
                     <button
                       type="button"
                       key={item.id}
                       onClick={item.onClick}
-                      className="w-full p-2.5 rounded-2xl bg-[#FFFBEB]/60 border border-amber-200/70 hover:bg-amber-50 transition-colors flex items-center justify-between gap-3 text-left cursor-pointer group"
+                      className={`w-full p-3 rounded-2xl border transition-colors flex items-start justify-between gap-3 text-left cursor-pointer group ${
+                        isRed
+                          ? "bg-[#FFF5F5] border-rose-200/70 hover:bg-rose-50"
+                          : "bg-[#FFFDF5] border-amber-200/70 hover:bg-amber-50"
+                      }`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-xl bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
+                      <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                        <div
+                          className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                            isRed
+                              ? "bg-rose-100/90 text-rose-700"
+                              : "bg-amber-100/90 text-amber-700"
+                          }`}
+                        >
                           <IconComponent className="w-4 h-4" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-[#0A2558] truncate">
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`text-xs font-bold ${
+                              isRed ? "text-rose-950" : "text-[#0A2558]"
+                            }`}
+                          >
                             {item.title}
                           </p>
-                          <p className="text-[11px] text-slate-600 truncate">
+                          <p className="text-[11px] text-slate-600 leading-snug mt-0.5">
                             {item.description}
                           </p>
                         </div>
                       </div>
-                      <span className="text-[11px] font-bold text-amber-900 bg-white border border-amber-200 px-2.5 py-0.5 rounded-full shrink-0 tabular-nums">
+                      <span
+                        className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full shrink-0 tabular-nums self-center border ${
+                          isRed
+                            ? "text-rose-900 bg-white border-rose-200"
+                            : "text-amber-900 bg-white border-amber-200"
+                        }`}
+                      >
                         {item.badgeLabel}
                       </span>
                     </button>
@@ -1332,17 +1604,15 @@ export function ExecutiveOverviewView({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setDetailTab(tab.id)}
-                  className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap min-h-[44px] px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1765F5] ${
-                    isSelected
-                      ? "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white border-transparent shadow-sm shadow-[#1765F5]/20 font-bold"
-                      : "bg-white text-[#0A2558] border-[#DBEAFE] hover:bg-[#F4F9FF]"
-                  }`}
+                  className={`inline-flex items-center gap-2 shrink-0 whitespace-nowrap h-9 px-4 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#10519B] ${isSelected
+                    ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white border-transparent shadow-xs font-semibold"
+                    : "bg-white text-[#0A2558] border-[#DBEAFE] hover:bg-[#F8FBFF]"
+                    }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${
-                      isSelected ? "bg-white/20 text-white" : "bg-[#EDF6FF] text-[#0A2558]"
-                    }`}
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold tabular-nums ${isSelected ? "bg-white/20 text-white" : "bg-[#EDF6FF] text-[#0A2558]"
+                      }`}
                   >
                     {tab.count}
                   </span>
@@ -1359,13 +1629,13 @@ export function ExecutiveOverviewView({
               onNavigateMenu(detailTab === "opportunities" ? "opportunities" : "programs")
             }
             rightIcon={<ArrowRight className="w-3.5 h-3.5 text-[#1765F5]" />}
-            className="text-xs font-semibold rounded-full min-h-[40px] px-4 cursor-pointer self-start sm:self-auto"
+            className="text-xs font-semibold rounded-lg h-9 px-3.5 cursor-pointer self-start sm:self-auto"
           >
             {detailTab === "opportunities"
               ? "Lihat Semua Peluang"
               : isManagement
-              ? "Buka Pengawasan Program"
-              : "Lihat Semua Program"}
+                ? "Buka Pengawasan Program"
+                : "Lihat Semua Program"}
           </Button>
         </div>
 
@@ -1408,7 +1678,7 @@ export function ExecutiveOverviewView({
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse min-w-[760px]">
                     <thead>
-                      <tr className="border-b border-[#DBEAFE] text-[#0A2558] font-bold bg-[#F8FBFF]">
+                      <tr className="border-b border-[#073E8A]/30 text-white font-semibold bg-[#10519B]">
                         <th className="py-3.5 px-5 w-[34%]">Program CSR</th>
                         <th className="py-3.5 px-4 w-[24%]">Mitra Pelaksana</th>
                         <th className="py-3.5 px-4 w-[14%]">Status</th>
@@ -1428,13 +1698,13 @@ export function ExecutiveOverviewView({
                           prog.status === "IN_PROGRESS"
                             ? { label: "Sedang Berjalan", variant: "emerald" as const }
                             : prog.status === "PLANNED"
-                            ? { label: "Persiapan", variant: "blue" as const }
-                            : prog.status === "COMPLETED"
-                            ? { label: "Selesai", variant: "navy" as const }
-                            : STATUS_CONFIG[prog.status as keyof typeof STATUS_CONFIG] || {
-                                label: prog.status,
-                                variant: "emerald" as const,
-                              };
+                              ? { label: "Persiapan", variant: "blue" as const }
+                              : prog.status === "COMPLETED"
+                                ? { label: "Selesai", variant: "navy" as const }
+                                : STATUS_CONFIG[prog.status as keyof typeof STATUS_CONFIG] || {
+                                  label: prog.status,
+                                  variant: "emerald" as const,
+                                };
 
                         const alloc = parseFloat(prog.budget) || 0;
                         const spent = parseFloat(prog.spentBudget || "0") || 0;
@@ -1457,9 +1727,8 @@ export function ExecutiveOverviewView({
                         return (
                           <React.Fragment key={prog.id}>
                             <tr
-                              className={`hover:bg-[#F4F9FF]/70 transition-colors cursor-pointer ${
-                                isExpanded ? "bg-[#EDF6FF]/50" : ""
-                              }`}
+                              className={`hover:bg-[#F4F9FF]/70 transition-colors cursor-pointer ${isExpanded ? "bg-[#EDF6FF]/50" : ""
+                                }`}
                               onClick={() =>
                                 setExpandedProgramId(isExpanded ? null : prog.id)
                               }
@@ -1658,11 +1927,10 @@ export function ExecutiveOverviewView({
                         onClick={() =>
                           setSelectedFocusArea(selectedFocusArea === item.key ? "ALL" : item.key)
                         }
-                        className={`p-3 rounded-2xl text-left transition-all space-y-2 cursor-pointer border ${
-                          isSelected
-                            ? "bg-[#EDF6FF] border-[#1765F5] ring-1 ring-[#1765F5]/20"
-                            : "bg-transparent border-transparent hover:bg-[#F4F9FF] hover:border-[#CBE7FD]"
-                        }`}
+                        className={`p-3 rounded-2xl text-left transition-all space-y-2 cursor-pointer border ${isSelected
+                          ? "bg-[#EDF6FF] border-[#1765F5] ring-1 ring-[#1765F5]/20"
+                          : "bg-transparent border-transparent hover:bg-[#F4F9FF] hover:border-[#CBE7FD]"
+                          }`}
                       >
                         <div className="flex items-center justify-between text-xs">
                           <span className="flex items-center gap-2 font-bold text-[#0A2558]">
@@ -1759,9 +2027,9 @@ export function ExecutiveOverviewView({
                   const statusCfg = isDraft
                     ? { label: "Draf Internal", variant: "slate" as const }
                     : STATUS_CONFIG[opp.status] || {
-                        label: opp.status,
-                        variant: "emerald" as const,
-                      };
+                      label: opp.status,
+                      variant: "emerald" as const,
+                    };
 
                   return (
                     <div

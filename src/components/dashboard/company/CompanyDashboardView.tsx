@@ -2263,7 +2263,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/80 w-full">
                   <div className="space-y-1">
                     <h1
-                      className="text-2xl sm:text-3xl font-extrabold text-[#181343] tracking-tight"
+                      className="text-2xl sm:text-3xl font-extrabold text-[#0A2558] tracking-tight"
                       style={{ fontFamily: "var(--font-display)" }}
                     >
                       {isManagement ? "Pengawasan Program" : "Pelaksanaan Program"}
@@ -2306,11 +2306,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                   return (
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                       {/* Kartu 1: Program Berjalan */}
-                      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                        <span className="text-xs font-semibold text-slate-600 block">
-                          Program Berjalan
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      <div className="bg-[#F0F5FC] rounded-2xl border border-[#D0E2F7] border-b-[3px] border-b-[#2563EB] p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-600 block">
+                            Program Berjalan
+                          </span>
+                          <div className="w-8 h-8 rounded-full bg-blue-100/80 text-[#2563EB] flex items-center justify-center shrink-0">
+                            <Activity className="w-4 h-4 text-[#2563EB]" />
+                          </div>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-extrabold text-[#0A2558] tracking-tight tabular-nums">
                           {opStats.inProgress}
                         </div>
                         <span className="text-[11px] text-slate-500 block">
@@ -2319,11 +2324,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                       </div>
 
                       {/* Kartu 2: Aktivitas Tersisa */}
-                      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                        <span className="text-xs font-semibold text-slate-600 block">
-                          Aktivitas Tersisa
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-[#181343] tracking-tight tabular-nums">
+                      <div className="bg-[#F0F8F5] rounded-2xl border border-[#CCE9DD] border-b-[3px] border-b-[#10B981] p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-600 block">
+                            Aktivitas Tersisa
+                          </span>
+                          <div className="w-8 h-8 rounded-full bg-emerald-100/80 text-[#10B981] flex items-center justify-center shrink-0">
+                            <CheckCircle2 className="w-4 h-4 text-[#10B981]" />
+                          </div>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-extrabold text-[#065F46] tracking-tight tabular-nums">
                           {opStats.pendingActivities}
                         </div>
                         <span className="text-[11px] text-slate-500 block">
@@ -2332,11 +2342,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                       </div>
 
                       {/* Kartu 3: Menunggu Verifikasi */}
-                      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                        <span className="text-xs font-semibold text-slate-600 block">
-                          Menunggu Verifikasi
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-amber-700 tracking-tight tabular-nums">
+                      <div className="bg-[#FFFDF5] rounded-2xl border border-[#FDE68A] border-b-[3px] border-b-[#F59E0B] p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-600 block">
+                            Menunggu Verifikasi
+                          </span>
+                          <div className="w-8 h-8 rounded-full bg-amber-100/80 text-[#D97706] flex items-center justify-center shrink-0">
+                            <Clock className="w-4 h-4 text-[#D97706]" />
+                          </div>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-extrabold text-amber-700 tracking-tight tabular-nums">
                           {opStats.pendingVerification}
                         </div>
                         <span className="text-[11px] text-slate-500 block">
@@ -2345,11 +2360,16 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                       </div>
 
                       {/* Kartu 4: Program Selesai */}
-                      <div className="bg-white rounded-2xl border border-[#E5E7EB] p-4 sm:p-5 shadow-xs space-y-1">
-                        <span className="text-xs font-semibold text-slate-600 block">
-                          Program Selesai
-                        </span>
-                        <div className="text-xl sm:text-2xl font-extrabold text-[#009E75] tracking-tight tabular-nums">
+                      <div className="bg-white rounded-2xl border border-[#E2E8F0] border-b-[3px] border-b-[#10B981] p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-600 block">
+                            Program Selesai
+                          </span>
+                          <div className="w-8 h-8 rounded-full bg-emerald-100/70 text-[#10B981] flex items-center justify-center shrink-0">
+                            <FileCheck2 className="w-4 h-4 text-[#10B981]" />
+                          </div>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-extrabold text-[#059669] tracking-tight tabular-nums">
                           {opStats.completed}
                         </div>
                         <span className="text-[11px] text-slate-500 block">
@@ -2361,7 +2381,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                 })()}
 
                 {/* 2. Filter & Pencarian yang Rapi dalam Bahasa Indonesia */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
+                <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] space-y-3">
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="relative flex-1 w-full">
                       <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -2373,7 +2393,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                           setProgramSearch(e.target.value);
                           setProgramPage(1);
                         }}
-                        className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                        className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                       />
                     </div>
 
@@ -2384,7 +2404,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                           setProgramFocusFilter(e.target.value);
                           setProgramPage(1);
                         }}
-                        className="w-full sm:w-auto text-xs py-2.5 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 cursor-pointer"
+                        className="w-full sm:w-auto text-xs py-2.5 px-3.5 rounded-xl border border-slate-200 bg-white font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer"
                       >
                         <option value="ALL">Semua Bidang CSR</option>
                         {csrFocusAreaEnum.map((fa: CsrFocusArea) => (
@@ -2396,7 +2416,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                     </div>
                   </div>
 
-                  {/* Status Filter Chips - Bahasa Indonesia, tanpa kode teknis internal */}
+                  {/* Status Filter Chips - Selaras dengan gradasi tema Ringkasan */}
                   <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
                     <span className="text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1">
                       <Filter className="w-3.5 h-3.5" /> Status Program:
@@ -2418,10 +2438,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                             setProgramStatusFilter(chip.id);
                             setProgramPage(1);
                           }}
-                          className={`text-xs px-3.5 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${isSelected
-                            ? "bg-[#181343] text-white shadow-2xs font-semibold"
-                            : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
-                            }`}
+                          className={`text-xs px-3.5 py-1.5 rounded-xl font-medium transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-sm font-semibold"
+                              : "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200/80"
+                          }`}
                         >
                           {chip.label}
                         </button>
@@ -2474,7 +2495,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                           <div
                             key={prog.id}
                             onClick={() => setSelectedProgramForDetail(prog)}
-                            className="group relative bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs hover:border-slate-300 hover:shadow-sm transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer"
+                            className="group relative bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:border-[#93C5FD] hover:shadow-[0_4px_16px_rgba(37,99,235,0.08)] transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 cursor-pointer"
                           >
                             {/* Sisi Kiri: Thumbnail Kategori & Info Utama */}
                             <div className="flex items-center gap-4 min-w-0 flex-1 lg:pr-8 xl:pr-10">
@@ -2501,7 +2522,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                   )}
                                 </div>
 
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-900 leading-snug group-hover:text-[#181343] transition-colors line-clamp-2 max-w-full lg:max-w-[360px] xl:max-w-[430px]">
+                                <h3 className="text-sm sm:text-base font-bold text-[#0A2558] leading-snug group-hover:text-[#2563EB] transition-colors line-clamp-2 max-w-full lg:max-w-[360px] xl:max-w-[430px]">
                                   {prog.title}
                                 </h3>
 
@@ -2523,12 +2544,13 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                 </div>
                                 <div className="w-24 sm:w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden">
                                   <div
-                                    className={`h-full rounded-full transition-all duration-500 ${activityProgress >= 100
-                                      ? "bg-emerald-600"
-                                      : activityProgress > 0
-                                        ? "bg-[#181343]"
+                                    className={`h-full rounded-full transition-all duration-500 ${
+                                      activityProgress >= 100
+                                        ? "bg-gradient-to-r from-[#059669] to-[#34D399]"
+                                        : activityProgress > 0
+                                        ? "bg-gradient-to-r from-[#1D4ED8] to-[#38BDF8]"
                                         : "bg-slate-200"
-                                      }`}
+                                    }`}
                                     style={{ width: `${Math.min(activityProgress, 100)}%` }}
                                   />
                                 </div>
@@ -2555,11 +2577,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                               {/* Anggaran & Serapan */}
                               <div className="text-left sm:text-right space-y-0.5">
-                                <div className="text-xs sm:text-sm font-bold text-slate-900 tabular-nums">
+                                <div className="text-xs sm:text-sm font-bold text-[#0A2558] tabular-nums">
                                   <span>{formatRupiah(prog.budget)}</span>
                                 </div>
-                                <span className="text-[11px] text-slate-500 font-normal block">
-                                  Serapan: {formatRupiah(prog.spentBudget || "0")}
+                                <span className="text-[11px] text-[#059669] font-semibold block">
+                                  Realisasi: {formatRupiah(prog.spentBudget || "0")}
                                   {budgetNum > 0 ? ` (${spentPercent}%)` : ""}
                                 </span>
                               </div>
@@ -2567,7 +2589,7 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
 
                             {/* Ujung Kanan: Tombol Navigasi Panah */}
                             <div className="hidden lg:flex items-center justify-center pl-1">
-                              <div className="w-9 h-9 rounded-xl border border-slate-200/90 bg-slate-50 text-slate-400 group-hover:bg-[#181343] group-hover:text-white group-hover:border-[#181343] group-hover:translate-x-0.5 transition-all flex items-center justify-center shrink-0">
+                              <div className="w-9 h-9 rounded-xl border border-slate-200/90 bg-slate-50 text-slate-400 group-hover:bg-gradient-to-r group-hover:from-[#1A60B0] group-hover:via-[#10519B] group-hover:to-[#073E8A] group-hover:text-white group-hover:border-transparent group-hover:translate-x-0.5 group-hover:shadow-xs transition-all flex items-center justify-center shrink-0">
                                 <ChevronRight className="w-4 h-4" />
                               </div>
                             </div>
@@ -2581,15 +2603,15 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 text-xs text-slate-600">
                         <div>
                           Menampilkan{" "}
-                          <span className="font-bold text-[#181343]">
+                          <span className="font-bold text-[#0A2558]">
                             {Math.min((programPage - 1) * PROGRAM_ITEMS_PER_PAGE + 1, filteredPrograms.length)}
                           </span>
                           -
-                          <span className="font-bold text-[#181343]">
+                          <span className="font-bold text-[#0A2558]">
                             {Math.min(programPage * PROGRAM_ITEMS_PER_PAGE, filteredPrograms.length)}
                           </span>{" "}
                           dari{" "}
-                          <span className="font-bold text-[#181343]">
+                          <span className="font-bold text-[#0A2558]">
                             {filteredPrograms.length}
                           </span>{" "}
                           program
@@ -2612,10 +2634,11 @@ export function CompanyDashboardView({ user, onLogout, onProfileUpdated }: Compa
                                 key={pNum}
                                 type="button"
                                 onClick={() => setProgramPage(pNum)}
-                                className={`w-8 h-8 rounded-xl font-bold text-xs transition cursor-pointer ${programPage === pNum
-                                  ? "bg-[#181343] text-white shadow-2xs"
-                                  : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
-                                  }`}
+                                className={`w-8 h-8 rounded-xl font-bold text-xs transition cursor-pointer ${
+                                  programPage === pNum
+                                    ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-2xs"
+                                    : "border border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                                }`}
                               >
                                 {pNum}
                               </button>

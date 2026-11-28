@@ -197,7 +197,7 @@ function SearchableSelect({
                     }}
                     className={`w-full text-left px-3.5 py-2.5 transition flex items-center justify-between cursor-pointer ${
                       isSelected
-                        ? "bg-gradient-to-r from-[#1D6CE0] to-[#1765F5] text-white font-semibold"
+                        ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white font-semibold"
                         : "hover:bg-[#EDF6FF] text-[#0A2558]"
                     }`}
                   >
@@ -984,9 +984,9 @@ export function OpportunityFormPageView({
                 <div
                   className={`w-7 h-7 rounded-xl text-xs font-bold flex items-center justify-center shrink-0 transition-colors ${
                     isCurrent
-                      ? "bg-gradient-to-br from-[#1D6CE0] to-[#1748D5] text-white shadow-2xs"
+                      ? "bg-gradient-to-br from-[#1A60B0] to-[#073E8A] text-white shadow-2xs"
                       : isCompleted
-                      ? "bg-[#1765F5] text-white"
+                      ? "bg-[#10519B] text-white"
                       : "bg-[#F4F9FF] text-[#0A2558] border border-[#DBEAFE]"
                   }`}
                 >
@@ -1021,7 +1021,7 @@ export function OpportunityFormPageView({
           </div>
           <div className="w-full h-2 rounded-full bg-[#EDF6FF] overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-[#1D6CE0] to-[#1765F5] rounded-full transition-all duration-300"
+              className="h-full bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / 5) * 100}%` }}
             />
           </div>
@@ -1046,7 +1046,7 @@ export function OpportunityFormPageView({
       {/* Banner Informasi Draf Otomatis AI Advisor */}
       {!isEdit && initialDraft && (
         <div className="p-4 rounded-2xl bg-[#F4F9FF] border border-[#CBE7FD] text-xs text-slate-800 flex items-start gap-3 animate-in fade-in duration-200 shadow-2xs">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1D6CE0] to-[#1765F5] text-white flex items-center justify-center shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#1A60B0] to-[#073E8A] text-white flex items-center justify-center shrink-0 mt-0.5">
             <FileText className="w-4 h-4" />
           </div>
           <div className="flex-1 min-w-0">

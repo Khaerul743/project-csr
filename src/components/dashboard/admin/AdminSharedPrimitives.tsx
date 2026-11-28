@@ -224,6 +224,7 @@ export interface AdminKpiCardProps {
   icon: React.ComponentType<{ className?: string }>;
   iconColor?: "emerald" | "blue" | "indigo" | "amber" | "rose" | "slate" | "purple" | "teal";
   valueColor?: string;
+  accentColor?: "blue" | "emerald" | "amber" | "teal" | "indigo" | "rose" | "purple";
 }
 
 export function AdminKpiCard({

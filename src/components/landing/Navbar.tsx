@@ -117,8 +117,8 @@ export function LandingNavbar() {
                 key={item.href}
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className={`px-4 py-2 rounded-full text-xs xl:text-sm font-semibold whitespace-nowrap transition-all duration-200 ${isActive
-                  ? "bg-white text-[#1765F5] shadow-xs font-bold"
+                className={`px-3.5 py-1.5 rounded-full text-xs xl:text-sm font-semibold whitespace-nowrap transition-all duration-200 ${isActive
+                  ? "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white shadow-2xs font-semibold"
                   : "text-slate-600 hover:text-[#102B58] hover:bg-white/60"
                   }`}
               >

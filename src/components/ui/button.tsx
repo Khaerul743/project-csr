@@ -43,7 +43,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       "inline-flex flex-row items-center justify-center font-medium transition-all duration-150 outline-hidden focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none cursor-pointer whitespace-nowrap active:scale-[0.97]";
 
     // Standardized SIPENA Design System v2 Button System:
-    // 1. Primary: Vibrant Landing Page Blue Gradient (#1D6CE0 -> #1765F5 -> #1748D5) with white text
+    // 1. Primary: Unified Cobalt Blue Gradient (#1A60B0 -> #10519B -> #073E8A) with white text
     // 2. Secondary/Outline: White surface, Deep Navy text (#0A2558), Border #CBE7FD, hover #EDF6FF
     // 3. Filter: White background, Border #DBEAFE, text #0A2558. Active: #EDF6FF with #1765F5/40 border
     // 4. Destructive: White/transparent, Red text (#D9385F), Border #FECDD3, hover #FFF1F2
@@ -51,9 +51,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     // 6. Ghost: Transparent background, Deep Navy text (#0A2558), hover #EDF6FF
     const variantStyles: Record<string, string> = {
       primary:
-        "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white hover:brightness-105 border border-transparent shadow-sm shadow-[#1765F5]/20 focus:ring-[#1765F5]/40 font-semibold",
+        "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white hover:brightness-105 border border-transparent shadow-sm shadow-[#10519B]/20 focus:ring-[#10519B]/40 font-semibold",
       accent:
-        "bg-gradient-to-r from-[#1D6CE0] via-[#1765F5] to-[#1748D5] text-white hover:brightness-105 border border-transparent shadow-sm shadow-[#1765F5]/20 focus:ring-[#1765F5]/40 font-semibold",
+        "bg-gradient-to-r from-[#1A60B0] via-[#10519B] to-[#073E8A] text-white hover:brightness-105 border border-transparent shadow-sm shadow-[#10519B]/20 focus:ring-[#10519B]/40 font-semibold",
       secondary:
         "bg-white text-[#0A2558] border border-[#CBE7FD] hover:bg-[#EDF6FF] hover:border-[#93C5FD] active:bg-[#DBEAFE] shadow-2xs focus:ring-[#1765F5]/25 font-semibold",
       outline:
